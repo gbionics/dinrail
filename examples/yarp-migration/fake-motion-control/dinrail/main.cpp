@@ -5,6 +5,8 @@
 #include <dinrail/IEncoders.h>
 #include <dinrail/IControlMode.h>
 
+#include <CLI/CLI.hpp>
+
 #include <iostream>
 #include <vector>
 #include <iomanip>
@@ -19,11 +21,32 @@ static void printVec(const std::vector<double>& v, int prec = 2)
     std::cout << "]";
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    CLI::App app{"Dinrail fake motion control example"};
+    
+    bool onlyUseYarpDevice = false;
+    app.add_flag("--only-use-yarp-device", onlyUseYarpDevice,
+                 "Force loading the YARP device instead of trying dinrail device first");
+    
+    CLI11_PARSE(app, argc, argv);
+
     // Configure fakeMotionControl
     dinrail::Property opts;
     opts.put("device", "fakeMotionControl");
+
+    // By default given a device name, dinrail first tries to load a dinrail device if it can finds it,
+    // otherwise it falls back to YARP device. By passing --only-use-yarp-device it is possible to force dinrail
+    // to load the fakeMotionControl YARP device directly.
+    if (onlyUseYarpDevice)
+    {
+        opts.put("dinrail_device_type", "yarp");
+    } 
+    else 
+    {
+        // This is the default
+        opts.put("dinrail_device_type", "dinrail");
+    }
 
     dinrail::Property& grp = opts.addGroup("GENERAL");
     grp.put("Joints", 6);

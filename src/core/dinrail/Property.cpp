@@ -65,6 +65,43 @@ bool Property::check(const std::string& key) const
     return m_data.find(key) != m_data.end() || m_groups.find(key) != m_groups.end();
 }
 
+std::string Property::get(const std::string& key) const
+{
+    auto it = m_data.find(key);
+    if (it != m_data.end())
+    {
+        // Try to get as string
+        if (std::holds_alternative<std::string>(it->second))
+        {
+            return std::get<std::string>(it->second);
+        }
+    }
+    return "";
+}
+
+int Property::getInt(const std::string& key) const
+{
+    auto it = m_data.find(key);
+    if (it != m_data.end())
+    {
+        if (std::holds_alternative<int>(it->second))
+        {
+            return std::get<int>(it->second);
+        }
+    }
+    return 0;
+}
+
+const Property* Property::findGroup(const std::string& key) const
+{
+    auto it = m_groups.find(key);
+    if (it != m_groups.end())
+    {
+        return it->second.get();
+    }
+    return nullptr;
+}
+
 void Property::clear()
 {
     m_data.clear();

@@ -6,7 +6,9 @@
 #define DINRAIL_DEVICE_H
 
 #include <dinrail/Property.h>
+#include <dinrail/IDevice.h>
 
+#include <memory>
 #include <string>
 
 namespace dinrail
@@ -27,9 +29,9 @@ public:
     Device();
 
     /**
-     * @brief Virtual destructor.
+     * @brief Destructor (required for pimpl).
      */
-    virtual ~Device();
+    ~Device();
 
     // Disable copy
     Device(const Device&) = delete;
@@ -40,17 +42,18 @@ public:
     Device& operator=(Device&&) = default;
 
     /**
-     * Open the Device.
+     * Open the Device by loading the device driver plugin.
+     * The device name is extracted from the "device" property in config.
      * @param config is a list of parameters for the device.
      * @return true/false upon success/failure
      */
-    virtual bool open(const Property& config);
+    bool open(const Property& config);
 
     /**
      * Close the Device.
      * @return true/false on success/failure.
      */
-    virtual bool close();
+    bool close();
 
     /**
      * Check if device is valid.
@@ -85,15 +88,22 @@ public:
     }
 
     /**
-     * Some drivers are bureaucrats, pointing at others. Such drivers override
-     * this method.
+     * Get the underlying device driver implementation.
      *
-     * @return "real" device driver
+     * @return pointer to device driver
      */
-    virtual Device* getImplementation();
+    IDevice* getImplementation();
+
+    /**
+     * Get the name of the loaded device.
+     *
+     * @return device name, or "null" if no device is loaded
+     */
+    std::string getDeviceName() const;
 
 private:
-    bool m_isValid{false};
+    struct Impl;
+    std::unique_ptr<Impl> m_pimpl;
 };
 
 } // namespace dinrail

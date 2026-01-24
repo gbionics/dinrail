@@ -94,6 +94,27 @@ public:
     bool check(const std::string& key) const;
 
     /**
+     * @brief Get a string value from the property.
+     * @param key The property key.
+     * @return the string value, or empty string if not found
+     */
+    std::string get(const std::string& key) const;
+
+    /**
+     * @brief Get an integer value from the property.
+     * @param key The property key.
+     * @return the integer value, or 0 if not found or not an integer
+     */
+    int getInt(const std::string& key) const;
+
+    /**
+     * @brief Find a nested group.
+     * @param key The group name.
+     * @return pointer to the nested Property, or nullptr if not found
+     */
+    const Property* findGroup(const std::string& key) const;
+
+    /**
      * @brief Remove all associations.
      */
     void clear();

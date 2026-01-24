@@ -5,10 +5,16 @@ set(LIBRARY_NAME dinrail)
 
 # Create the library
 add_library(${LIBRARY_NAME}
+    # Base functionality
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Device.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Device.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.cpp
+    # Interfaces 
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IControlMode.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IEncoders.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IPositionDirect.h
 )
 
 add_library(${PROJECT_NAME}::${LIBRARY_NAME} ALIAS ${LIBRARY_NAME})
