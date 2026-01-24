@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2026 dinrail contributors
+# SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
 cmake_minimum_required(VERSION 3.16)
@@ -46,6 +46,9 @@ if(BUILD_TESTING)
     enable_testing()
 endif()
 
+# Build examples?
+option(DINRAIL_BUILD_EXAMPLES "Build examples" OFF)
+
 # Optional YARP support
 option(DINRAIL_USES_YARP "Enable drop-in support for YARP device drivers" OFF)
 
@@ -84,7 +87,7 @@ install_basic_package_files(${PROJECT_NAME}
 # Add the uninstall target
 include(AddUninstallTarget)
 
-# Add integration tests
-if(BUILD_TESTING)
-    add_subdirectory(test)
+# Add examples
+if(DINRAIL_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()

@@ -19,3 +19,9 @@ For how the optional integration of YARP functionality is structured, the inspir
 
 For the actual functionality of dinrail devices, the main inspiration is the "device" part of YARP:
 * https://github.com/robotology/yarp
+
+For the implementation of dinrail::Property, the main inspiration is the yarp::os::Property class of yarp and the ParametersHandler class in bipedal-locomotion-framework:
+* https://github.com/robotology/yarp/blob/yarp-3.12/src/libYARP_os/src/yarp/os/Property.h
+* https://github.com/robotology/yarp/blob/yarp-3.12/src/libYARP_os/src/yarp/os/Property.cpp
+* https://github.com/gbionics/bipedal-locomotion-framework/tree/master/src/ParametersHandler
+

@@ -7,6 +7,8 @@ set(LIBRARY_NAME dinrail)
 add_library(${LIBRARY_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Device.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Device.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.cpp
 )
 
 add_library(${PROJECT_NAME}::${LIBRARY_NAME} ALIAS ${LIBRARY_NAME})
@@ -36,3 +38,8 @@ install(TARGETS ${LIBRARY_NAME}
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dinrail
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
+
+# Add tests
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()
