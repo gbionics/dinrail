@@ -2,4 +2,4 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # Add device plugins
-add_subdirectory(fake)
+add_subdirectory(fake/fakeMotionControl)

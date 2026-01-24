@@ -5,24 +5,33 @@
 #ifndef DINRAIL_ICONTROLMODE_H
 #define DINRAIL_ICONTROLMODE_H
 
+#include <dinrail/Vocab.h>
+
 namespace dinrail {
 
-// Control mode vocabulary values
-constexpr int VOCAB_CM_IDLE            = 0;
-constexpr int VOCAB_CM_TORQUE          = 1;
-constexpr int VOCAB_CM_POSITION        = 2;
-constexpr int VOCAB_CM_POSITION_DIRECT = 3;
-constexpr int VOCAB_CM_VELOCITY        = 4;
-constexpr int VOCAB_CM_CURRENT         = 5;
-constexpr int VOCAB_CM_PWM             = 6;
-constexpr int VOCAB_CM_MIXED           = 7;
-constexpr int VOCAB_CM_FORCE_IDLE      = 8;
-constexpr int VOCAB_CM_HW_FAULT        = 9;
-constexpr int VOCAB_CM_CALIBRATING     = 10;
-constexpr int VOCAB_CM_CALIB_DONE      = 11;
-constexpr int VOCAB_CM_NOT_CONFIGURED  = 12;
-constexpr int VOCAB_CM_CONFIGURED      = 13;
-constexpr int VOCAB_CM_UNKNOWN         = 14;
+// Control mode vocabulary values - compatible with YARP
+// Values - Read / Write
+constexpr vocab32_t VOCAB_CM_IDLE            = createVocab32('i','d','l');
+constexpr vocab32_t VOCAB_CM_TORQUE          = createVocab32('t','o','r','q');
+constexpr vocab32_t VOCAB_CM_POSITION        = createVocab32('p','o','s');
+constexpr vocab32_t VOCAB_CM_POSITION_DIRECT = createVocab32('p','o','s','d');
+constexpr vocab32_t VOCAB_CM_VELOCITY        = createVocab32('v','e','l');
+constexpr vocab32_t VOCAB_CM_CURRENT         = createVocab32('i','c','u','r');
+constexpr vocab32_t VOCAB_CM_PWM             = createVocab32('i','p','w','m');
+constexpr vocab32_t VOCAB_CM_MIXED           = createVocab32('m','i','x');
+
+// Write only (only from high level toward the joint)
+constexpr vocab32_t VOCAB_CM_FORCE_IDLE      = createVocab32('f','i','d','l');
+
+// Read only (imposed by the board on special events)
+constexpr vocab32_t VOCAB_CM_HW_FAULT        = createVocab32('h','w','f','a');
+constexpr vocab32_t VOCAB_CM_CALIBRATING     = createVocab32('c','a','l');     // the joint is calibrating
+constexpr vocab32_t VOCAB_CM_CALIB_DONE      = createVocab32('c','a','l','d'); // calibration successfully completed
+constexpr vocab32_t VOCAB_CM_NOT_CONFIGURED  = createVocab32('c','f','g','n'); // missing initial configuration (default value at start-up)
+constexpr vocab32_t VOCAB_CM_CONFIGURED      = createVocab32('c','f','g','y'); // initial configuration completed, if any
+
+// Read only (cannot be set from user)
+constexpr vocab32_t VOCAB_CM_UNKNOWN         = createVocab32('u','n','k','w');
 
 /**
  * @ingroup dev_iface_motor

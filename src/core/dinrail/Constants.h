@@ -38,6 +38,35 @@ inline std::string getSharedlibppFactoryNameFromDeviceName(const std::string& de
     return factoryName;
 }
 
+/**
+ * Get the library name from the compatibility layer name
+ * @param compatName the name of the compatibility layer (e.g., "yarp")
+ * @return the library name (e.g., "dinrail-compat-yarp")
+ */
+inline std::string getSharedlibppLibraryNameFromCompatName(const std::string& compatName)
+{
+    return "dinrail-compat-" + compatName;
+}
+
+/**
+ * Get the factory name from the compatibility layer name
+ * @param compatName the name of the compatibility layer (e.g., "yarp")
+ * @return the factory name (e.g., "dinrail_compat_yarp")
+ */
+inline std::string getSharedlibppFactoryNameFromCompatName(const std::string& compatName)
+{
+    // Replace hyphens with underscores for the factory name
+    std::string factoryName = "dinrail_compat_" + compatName;
+    for (char& c : factoryName)
+    {
+        if (c == '-')
+        {
+            c = '_';
+        }
+    }
+    return factoryName;
+}
+
 } // namespace dinrail
 
 #endif // DINRAIL_CONSTANTS_H

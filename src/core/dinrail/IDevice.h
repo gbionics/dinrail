@@ -11,7 +11,7 @@ namespace dinrail
 {
 
 /**
- * @brief Interface implemented by all dinrail .
+ * @brief Interface implemented by all dinrail devices.
  *
  * This is the interface for any class that is a dinrail device.
  */

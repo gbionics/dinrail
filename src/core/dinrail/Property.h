@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <variant>
+#include <vector>
 
 namespace dinrail
 {
@@ -108,11 +109,37 @@ public:
     int getInt(const std::string& key) const;
 
     /**
+     * @brief Get a double value from the property.
+     * @param key The property key.
+     * @return the double value, or 0.0 if not found or not a double
+     */
+    double getDouble(const std::string& key) const;
+
+    /**
      * @brief Find a nested group.
      * @param key The group name.
      * @return pointer to the nested Property, or nullptr if not found
      */
     const Property* findGroup(const std::string& key) const;
+
+    /**
+     * @brief Get all data keys (non-group keys).
+     * @return vector of all data keys
+     */
+    std::vector<std::string> getDataKeys() const;
+
+    /**
+     * @brief Get all group keys.
+     * @return vector of all group keys
+     */
+    std::vector<std::string> getGroupKeys() const;
+
+    /**
+     * @brief Get the value for a key (returns Value variant).
+     * @param key The property key.
+     * @return pointer to the value, or nullptr if not found
+     */
+    const Value* getValue(const std::string& key) const;
 
     /**
      * @brief Remove all associations.

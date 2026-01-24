@@ -7,9 +7,11 @@
 
 #include <dinrail/Property.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/AdapterRegistry.h>
 
 #include <memory>
 #include <string>
+#include <typeinfo>
 
 namespace dinrail
 {
@@ -75,9 +77,23 @@ public:
     {
         x = nullptr;
 
-        // This requires RTTI to be compiled in.
-        T* v = dynamic_cast<T*>(getImplementation());
+        IDevice* impl = getImplementation();
+        if (!impl)
+        {
+            return false;
+        }
 
+        // First try adapter registry (for composition-based devices from compat layers)
+        void* ptr = AdapterRegistry::queryAdapter(impl, typeid(T));
+        if (ptr != nullptr)
+        {
+            x = static_cast<T*>(ptr);
+            return true;
+        }
+
+        // Fallback to dynamic_cast for devices using inheritance
+        T* v = dynamic_cast<T*>(impl);
+        
         if (v != nullptr)
         {
             x = v;

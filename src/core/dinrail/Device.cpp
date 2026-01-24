@@ -4,6 +4,7 @@
 
 #include <dinrail/Device.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/ICompatibilityLayer.h>
 #include <dinrail/Constants.h>
 
 #include <sharedlibpp/SharedLibraryClassFactory.h>
@@ -11,6 +12,7 @@
 
 #include <optional>
 #include <filesystem>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -68,10 +70,55 @@ struct Device::Impl
     std::unique_ptr<dinrail::IDevice> driver;
     std::unique_ptr<sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>> driverFactory;
 
+    // List of available compatibility layers to try
+    std::vector<std::string> compatibilityLayers{"yarp"};
+
     Impl()
         : isValid{false}
         , driver{nullptr}
     {
+    }
+
+    // Helper function to try loading a compatibility layer
+    std::unique_ptr<dinrail::IDevice> tryCompatibilityLayer(const std::string& compatName,
+                                                              const Property& config,
+                                                              const std::optional<std::string>& searchPath)
+    {
+        std::string libraryName = getSharedlibppLibraryNameFromCompatName(compatName);
+        std::string factoryName = getSharedlibppFactoryNameFromCompatName(compatName);
+
+        auto compatFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<dinrail::ICompatibilityLayer>>(
+            SHLIBPP_DEFAULT_START_CHECK,
+            SHLIBPP_DEFAULT_END_CHECK,
+            SHLIBPP_DEFAULT_SYSTEM_VERSION,
+            factoryName.c_str());
+
+        if (searchPath.has_value())
+        {
+            compatFactory->extendSearchPath(searchPath.value());
+        }
+
+        bool ok = compatFactory->open(libraryName.c_str(), factoryName.c_str());
+        ok = ok && compatFactory->isValid();
+
+        if (!ok)
+        {
+            return nullptr;
+        }
+
+        sharedlibpp::SharedLibraryClass<dinrail::ICompatibilityLayer> compatLayer(*compatFactory);
+        std::unique_ptr<dinrail::ICompatibilityLayer> layerInstance(compatLayer.getContent().allocateInstance());
+
+        if (!layerInstance)
+        {
+            return nullptr;
+        }
+
+        // Register interface adapters for this compatibility layer
+        layerInstance->registerInterfaceAdapters();
+
+        // Try to create device through compatibility layer
+        return layerInstance->createDevice(config);
     }
 };
 
@@ -106,44 +153,83 @@ bool Device::open(const Property& config)
         return false;
     }
 
+    // Check for device type preference
+    std::string deviceType = "auto"; // default: try dinrail first, then fallback to compatibility layers
+    if (config.check("dinrail_device_type"))
+    {
+        deviceType = config.get("dinrail_device_type");
+    }
+
     // Get the expected library name and factory name given the device name
     std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
     std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
 
-    m_pimpl->driverFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(
-        SHLIBPP_DEFAULT_START_CHECK,
-        SHLIBPP_DEFAULT_END_CHECK,
-        SHLIBPP_DEFAULT_SYSTEM_VERSION,
-        factoryName.c_str());
-
-    // Extend the search path of the plugins to include the install prefix of the library
     std::optional<std::string> pathOfDinrailSharedLib = getPathOfDinrailSharedLibrary();
-    if (pathOfDinrailSharedLib.has_value())
+
+    // If deviceType is "yarp", skip trying to load dinrail device
+    bool tryDinrailDevice = (deviceType != "yarp");
+    bool tryCompatibilityLayers = (deviceType != "dinrail");
+
+    if (tryDinrailDevice)
     {
-        m_pimpl->driverFactory->extendSearchPath(pathOfDinrailSharedLib.value());
+        m_pimpl->driverFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(
+            SHLIBPP_DEFAULT_START_CHECK,
+            SHLIBPP_DEFAULT_END_CHECK,
+            SHLIBPP_DEFAULT_SYSTEM_VERSION,
+            factoryName.c_str());
+
+        // Extend the search path of the plugins to include the install prefix of the library
+        if (pathOfDinrailSharedLib.has_value())
+        {
+            m_pimpl->driverFactory->extendSearchPath(pathOfDinrailSharedLib.value());
+        }
+
+        bool ok = m_pimpl->driverFactory->open(libraryName.c_str(), factoryName.c_str());
+        ok = ok && m_pimpl->driverFactory->isValid();
+
+        if (ok)
+        {
+            sharedlibpp::SharedLibraryClass<dinrail::IDevice> driver(*(m_pimpl->driverFactory));
+            m_pimpl->driver.reset(driver.getContent().allocateInstance());
+
+            // Open the device driver with the provided config
+            if (m_pimpl->driver->open(config))
+            {
+                m_pimpl->isValid = true;
+                return true;
+            }
+            
+            // Failed to open dinrail device
+            m_pimpl->driver.reset();
+        }
+        
+        // If deviceType is explicitly "dinrail", don't try compatibility layers
+        if (!tryCompatibilityLayers)
+        {
+            return false;
+        }
     }
 
-    bool ok = m_pimpl->driverFactory->open(libraryName.c_str(), factoryName.c_str());
-    ok = ok && m_pimpl->driverFactory->isValid();
-
-    if (!ok)
+    // Device plugin not found or failed to open, try compatibility layers
+    if (tryCompatibilityLayers)
     {
-        // TODO: Add proper error logging
-        return false;
+        for (const auto& compatName : m_pimpl->compatibilityLayers)
+        {
+            std::unique_ptr<dinrail::IDevice> compatDevice = 
+                m_pimpl->tryCompatibilityLayer(compatName, config, pathOfDinrailSharedLib);
+            
+            if (compatDevice)
+            {
+                // Successfully created device through compatibility layer
+                m_pimpl->driver = std::move(compatDevice);
+                m_pimpl->isValid = true;
+                return true;
+            }
+        }
     }
-
-    sharedlibpp::SharedLibraryClass<dinrail::IDevice> driver(*(m_pimpl->driverFactory));
-    m_pimpl->driver.reset(driver.getContent().allocateInstance());
-
-    // Open the device driver with the provided config
-    if (!m_pimpl->driver->open(config))
-    {
-        m_pimpl->driver.reset();
-        return false;
-    }
-
-    m_pimpl->isValid = true;
-    return true;
+    
+    // No device plugin or compatibility layer worked
+    return false;
 }
 
 bool Device::close()

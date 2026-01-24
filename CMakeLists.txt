@@ -71,6 +71,11 @@ endif()
 # Find sharedlibpp for plugin system
 find_package(sharedlibpp REQUIRED)
 
+# Find YARP if compatibility layer is enabled
+if(DINRAIL_USES_YARP)
+    find_package(YARP REQUIRED COMPONENTS os dev)
+endif()
+
 ### Compile- and install-related commands.
 add_subdirectory(src)
 

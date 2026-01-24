@@ -92,12 +92,57 @@ int Property::getInt(const std::string& key) const
     return 0;
 }
 
+double Property::getDouble(const std::string& key) const
+{
+    auto it = m_data.find(key);
+    if (it != m_data.end())
+    {
+        if (std::holds_alternative<double>(it->second))
+        {
+            return std::get<double>(it->second);
+        }
+    }
+    return 0.0;
+}
+
 const Property* Property::findGroup(const std::string& key) const
 {
     auto it = m_groups.find(key);
     if (it != m_groups.end())
     {
         return it->second.get();
+    }
+    return nullptr;
+}
+
+std::vector<std::string> Property::getDataKeys() const
+{
+    std::vector<std::string> keys;
+    keys.reserve(m_data.size());
+    for (const auto& [key, value] : m_data)
+    {
+        keys.push_back(key);
+    }
+    return keys;
+}
+
+std::vector<std::string> Property::getGroupKeys() const
+{
+    std::vector<std::string> keys;
+    keys.reserve(m_groups.size());
+    for (const auto& [key, group] : m_groups)
+    {
+        keys.push_back(key);
+    }
+    return keys;
+}
+
+const Property::Value* Property::getValue(const std::string& key) const
+{
+    auto it = m_data.find(key);
+    if (it != m_data.end())
+    {
+        return &it->second;
     }
     return nullptr;
 }
