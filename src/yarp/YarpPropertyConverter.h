@@ -4,7 +4,7 @@
 #ifndef DINRAIL_YARPPROPERTYCONVERTER_H
 #define DINRAIL_YARPPROPERTYCONVERTER_H
 
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 
 namespace yarp::os { class Property; }
 
@@ -12,31 +12,31 @@ namespace dinrail
 {
 
 /**
- * @brief Utility class for converting dinrail::Property to yarp::os::Property.
+ * @brief Utility class for converting dinrail::Parameters to yarp::os::Property.
  */
 class YarpPropertyConverter
 {
 public:
     /**
-     * @brief Convert a dinrail::Property to a yarp::os::Property.
-     * 
+     * @brief Convert a dinrail::Parameters to a yarp::os::Property.
+     *
      * This method performs a deep conversion, recursively handling all
      * nested groups with arbitrary depth.
-     * 
-     * @param dinrailProp The dinrail property to convert
+     *
+     * @param dinrailParams The dinrail parameters to convert
      * @return The converted YARP property
      */
-    static yarp::os::Property toYarpProperty(const Property& dinrailProp);
+    static yarp::os::Property toYarpProperty(const Parameters& dinrailParams);
 
 private:
     YarpPropertyConverter() = delete;
     
     /**
-     * @brief Recursively convert a dinrail::Property to a yarp::os::Property.
-     * @param dinrailProp The source property
+     * @brief Recursively convert a dinrail::Parameters to a yarp::os::Property.
+     * @param dinrailParams The source parameters
      * @param yarpProp The destination property (modified in-place)
      */
-    static void convertRecursive(const Property& dinrailProp, yarp::os::Property& yarpProp);
+    static void convertRecursive(const Parameters& dinrailParams, yarp::os::Property& yarpProp);
 };
 
 } // namespace dinrail

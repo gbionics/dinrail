@@ -1,4 +1,4 @@
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 
 #include <dinrail/Device.h>
 #include <dinrail/IPositionDirect.h>
@@ -32,7 +32,7 @@ int main(int argc, char** argv)
     CLI11_PARSE(app, argc, argv);
 
     // Configure fakeMotionControl
-    dinrail::Property opts;
+    dinrail::Parameters opts;
     opts.put("device", "fakeMotionControl");
 
     // By default given a device name, dinrail first tries to load a dinrail device if it can finds it,
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
         opts.put("dinrail_device_type", "dinrail");
     }
 
-    dinrail::Property& grp = opts.addGroup("GENERAL");
+    dinrail::Parameters& grp = opts.addGroup("GENERAL");
     grp.put("Joints", 6);
 
     dinrail::Device drv;

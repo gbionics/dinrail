@@ -5,7 +5,7 @@
 #define DINRAIL_YARPCOMPATIBILITYLAYER_H
 
 #include <dinrail/ICompatibilityLayer.h>
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 #include <dinrail/IDevice.h>
 
 #include <memory>
@@ -30,7 +30,7 @@ public:
      * @param config Configuration for the device
      * @return A unique pointer to the created device, or nullptr on failure
      */
-    std::unique_ptr<dinrail::IDevice> createDevice(const Property& config) override;
+    std::unique_ptr<dinrail::IDevice> createDevice(const Parameters& config) override;
 
     /**
      * @brief Allocate a new instance of this compatibility layer.

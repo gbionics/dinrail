@@ -4,7 +4,6 @@
 # Tests for YARP compatibility layer
 
 find_package(Catch2 3 REQUIRED)
-include(Catch)
 
 # YarpPropertyConverter tests
 add_executable(YarpPropertyConverterTest PropertyConverterTest.cpp)
@@ -25,7 +24,7 @@ target_include_directories(YarpPropertyConverterTest PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
-catch_discover_tests(YarpPropertyConverterTest)
+add_test(NAME YarpPropertyConverterTest COMMAND YarpPropertyConverterTest)
 
 # Vocab compatibility tests
 add_executable(VocabCompatibilityTest VocabCompatibilityTest.cpp)
@@ -37,4 +36,4 @@ target_link_libraries(VocabCompatibilityTest
         Catch2::Catch2WithMain
 )
 
-catch_discover_tests(VocabCompatibilityTest)
+add_test(NAME VocabCompatibilityTest COMMAND VocabCompatibilityTest)

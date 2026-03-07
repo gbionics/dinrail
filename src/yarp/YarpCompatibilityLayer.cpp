@@ -44,9 +44,9 @@ namespace
 YarpCompatibilityLayer::YarpCompatibilityLayer() = default;
 YarpCompatibilityLayer::~YarpCompatibilityLayer() = default;
 
-std::unique_ptr<dinrail::IDevice> YarpCompatibilityLayer::createDevice(const Property& config)
+std::unique_ptr<dinrail::IDevice> YarpCompatibilityLayer::createDevice(const Parameters& config)
 {
-    // Convert dinrail::Property to yarp::os::Property
+    // Convert dinrail::Parameters to yarp::os::Property
     yarp::os::Property yarpConfig = YarpPropertyConverter::toYarpProperty(config);
     
     // Create YARP PolyDriver

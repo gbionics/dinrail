@@ -10,8 +10,8 @@ add_library(${LIBRARY_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Device.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/ICompatibilityLayer.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Property.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/AdapterRegistry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/AdapterRegistry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Vocab.h

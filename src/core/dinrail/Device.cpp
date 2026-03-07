@@ -81,8 +81,8 @@ struct Device::Impl
 
     // Helper function to try loading a compatibility layer
     std::unique_ptr<dinrail::IDevice> tryCompatibilityLayer(const std::string& compatName,
-                                                              const Property& config,
-                                                              const std::optional<std::string>& searchPath)
+                                                            const Parameters& config,
+                                                            const std::optional<std::string>& searchPath)
     {
         std::string libraryName = getSharedlibppLibraryNameFromCompatName(compatName);
         std::string factoryName = getSharedlibppFactoryNameFromCompatName(compatName);
@@ -134,30 +134,27 @@ Device::~Device()
     m_pimpl->driverFactory.reset();
 }
 
-bool Device::open(const Property& config)
+bool Device::open(const Parameters& config)
 {
     // Ensure that the driver is deallocated before the factory
     m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
     // Extract device name from config
-    if (!config.check("device"))
+    if (!config.check<std::string>("device"))
     {
         // TODO: Add proper error logging
         return false;
     }
 
-    std::string deviceName = config.get("device");
-    if (deviceName.empty())
-    {
-        return false;
-    }
+    const std::string deviceName = config.getString("device").value();
 
     // Check for device type preference
     std::string deviceType = "auto"; // default: try dinrail first, then fallback to compatibility layers
-    if (config.check("dinrail_device_type"))
+    if (config.check<std::string>("dinrail_device_type"))
     {
-        deviceType = config.get("dinrail_device_type");
+        const std::string configuredType = config.getString("dinrail_device_type").value();
+        deviceType = configuredType;
     }
 
     // Get the expected library name and factory name given the device name

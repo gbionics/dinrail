@@ -5,7 +5,7 @@
 #ifndef DINRAIL_DEVICE_H
 #define DINRAIL_DEVICE_H
 
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/AdapterRegistry.h>
 
@@ -43,13 +43,13 @@ public:
     Device(Device&&) = default;
     Device& operator=(Device&&) = default;
 
-    /**
-     * Open the Device by loading the device driver plugin.
-     * The device name is extracted from the "device" property in config.
-     * @param config is a list of parameters for the device.
-     * @return true/false upon success/failure
-     */
-    bool open(const Property& config);
+     /**
+      * Open the Device by loading the device driver plugin.
+      * The device name is extracted from the "device" parameter in config.
+      * @param config is a list of parameters for the device.
+      * @return true/false upon success/failure
+      */
+    bool open(const Parameters& config);
 
     /**
      * Close the Device.

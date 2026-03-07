@@ -41,7 +41,7 @@ public:
     ~FakeMotionControl() override = default;
 
     // IDevice interface
-    bool open(const Property& config) override;
+    bool open(const Parameters& config) override;
     bool close() override;
     IDevice* allocateInstance() const override;
 

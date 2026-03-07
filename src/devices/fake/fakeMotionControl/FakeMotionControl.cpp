@@ -17,7 +17,7 @@ SHLIBPP_DEFINE_SHARED_SUBCLASS(dinrail_device_fakeMotionControl,
                                dinrail::FakeMotionControl,
                                dinrail::IDevice);
 
-bool FakeMotionControl::open(const Property& config)
+bool FakeMotionControl::open(const Parameters& config)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
 
@@ -25,11 +25,12 @@ bool FakeMotionControl::open(const Property& config)
     m_njoints = 1;
     
     // Check if GENERAL group exists and read Joints parameter
-    if (const Property* general = config.findGroup("GENERAL"))
+    if (const auto general = config.findGroup("GENERAL"))
     {
-        if (general->check("Joints"))
+        const std::optional<std::int64_t> configuredJoints = general->get().getInt64("Joints");
+        if (configuredJoints.has_value())
         {
-            m_njoints = general->getInt("Joints");
+            m_njoints = static_cast<int>(configuredJoints.value());
         }
     }
 

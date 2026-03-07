@@ -4,7 +4,7 @@
 #ifndef DINRAIL_ICOMPATIBILITYLAYER_H
 #define DINRAIL_ICOMPATIBILITYLAYER_H
 
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 #include <dinrail/IDevice.h>
 
 #include <memory>
@@ -29,7 +29,7 @@ public:
      * @param config Configuration for the device
      * @return A unique pointer to the created device, or nullptr on failure
      */
-    virtual std::unique_ptr<dinrail::IDevice> createDevice(const Property& config) = 0;
+    virtual std::unique_ptr<dinrail::IDevice> createDevice(const Parameters& config) = 0;
 
     /**
      * @brief Allocate a new instance of this compatibility layer.

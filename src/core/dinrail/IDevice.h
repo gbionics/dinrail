@@ -5,7 +5,7 @@
 #ifndef DINRAIL_IDEVICE_H
 #define DINRAIL_IDEVICE_H
 
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 
 namespace dinrail
 {
@@ -28,7 +28,7 @@ public:
      * @param config is a list of parameters for the device.
      * @return true/false upon success/failure
      */
-    virtual bool open(const Property& config) = 0;
+    virtual bool open(const Parameters& config) = 0;
 
     /**
      * Close the DeviceDriver.

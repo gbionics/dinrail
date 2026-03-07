@@ -29,10 +29,11 @@ YarpDeviceWrapper::YarpDeviceWrapper(std::unique_ptr<yarp::dev::PolyDriver> yarp
 
 YarpDeviceWrapper::~YarpDeviceWrapper() = default;
 
-bool YarpDeviceWrapper::open(const Property& config)
+bool YarpDeviceWrapper::open(const Parameters& config)
 {
     // The YARP device is already opened in the compatibility layer
     // This method is called after the device is created
+    static_cast<void>(config);
     return m_yarpDevice && m_yarpDevice->isValid();
 }
 

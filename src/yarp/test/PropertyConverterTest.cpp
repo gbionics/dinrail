@@ -3,14 +3,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <dinrail/Property.h>
+#include <dinrail/Parameters.h>
 #include "../YarpPropertyConverter.h"
 
 #include <yarp/os/Property.h>
 
 TEST_CASE("YarpPropertyConverter converts device name", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "fakeMotionControl");
 
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
@@ -21,7 +21,7 @@ TEST_CASE("YarpPropertyConverter converts device name", "[YarpPropertyConverter]
 
 TEST_CASE("YarpPropertyConverter handles missing device name", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     // No device property set
 
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
@@ -31,10 +31,10 @@ TEST_CASE("YarpPropertyConverter handles missing device name", "[YarpPropertyCon
 
 TEST_CASE("YarpPropertyConverter converts GENERAL group with Joints parameter", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "fakeMotionControl");
     
-    dinrail::Property& general = dinrailProp.addGroup("GENERAL");
+    dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     general.put("Joints", 6);
 
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
@@ -55,7 +55,7 @@ TEST_CASE("YarpPropertyConverter converts GENERAL group with Joints parameter", 
 
 TEST_CASE("YarpPropertyConverter handles missing GENERAL group", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "testDevice");
     // No GENERAL group
 
@@ -67,10 +67,10 @@ TEST_CASE("YarpPropertyConverter handles missing GENERAL group", "[YarpPropertyC
 
 TEST_CASE("YarpPropertyConverter handles GENERAL group without Joints", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "testDevice");
     
-    dinrail::Property& general = dinrailProp.addGroup("GENERAL");
+    dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     // GENERAL group exists but no Joints parameter
 
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
@@ -102,10 +102,10 @@ TEST_CASE("YarpPropertyConverter handles GENERAL group without Joints", "[YarpPr
 TEST_CASE("YarpPropertyConverter full configuration example", "[YarpPropertyConverter]")
 {
     // Create a typical device configuration
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "fakeMotionControl");
     
-    dinrail::Property& general = dinrailProp.addGroup("GENERAL");
+    dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     general.put("Joints", 4);
 
     // Convert to YARP property
@@ -136,7 +136,7 @@ TEST_CASE("YarpPropertyConverter full configuration example", "[YarpPropertyConv
 
 TEST_CASE("YarpPropertyConverter converts all data types", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("stringParam", "testString");
     dinrailProp.put("intParam", 42);
     dinrailProp.put("doubleParam", 3.14159);
@@ -155,14 +155,14 @@ TEST_CASE("YarpPropertyConverter converts all data types", "[YarpPropertyConvert
 
 TEST_CASE("YarpPropertyConverter converts multiple groups", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "testDevice");
     
-    dinrail::Property& group1 = dinrailProp.addGroup("GROUP1");
+    dinrail::Parameters& group1 = dinrailProp.addGroup("GROUP1");
     group1.put("param1", 10);
     group1.put("param2", "value2");
     
-    dinrail::Property& group2 = dinrailProp.addGroup("GROUP2");
+    dinrail::Parameters& group2 = dinrailProp.addGroup("GROUP2");
     group2.put("param3", 20.5);
     group2.put("param4", "value4");
 
@@ -242,17 +242,17 @@ TEST_CASE("YarpPropertyConverter converts multiple groups", "[YarpPropertyConver
 
 TEST_CASE("YarpPropertyConverter handles deeply nested groups", "[YarpPropertyConverter]")
 {
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("rootParam", "rootValue");
     
     // Create nested structure: root -> level1 -> level2 -> level3
-    dinrail::Property& level1 = dinrailProp.addGroup("level1");
+    dinrail::Parameters& level1 = dinrailProp.addGroup("level1");
     level1.put("level1Param", 1);
     
-    dinrail::Property& level2 = level1.addGroup("level2");
+    dinrail::Parameters& level2 = level1.addGroup("level2");
     level2.put("level2Param", 2);
     
-    dinrail::Property& level3 = level2.addGroup("level3");
+    dinrail::Parameters& level3 = level2.addGroup("level3");
     level3.put("level3Param", 3);
     level3.put("deepValue", "veryDeep");
 
@@ -368,20 +368,20 @@ TEST_CASE("YarpPropertyConverter handles deeply nested groups", "[YarpPropertyCo
 TEST_CASE("YarpPropertyConverter handles complex mixed configuration", "[YarpPropertyConverter]")
 {
     // Create a complex configuration with mixed data types and nested groups
-    dinrail::Property dinrailProp;
+    dinrail::Parameters dinrailProp;
     dinrailProp.put("device", "complexDevice");
     dinrailProp.put("rate", 100.5);
     dinrailProp.put("enabled", 1);
     
-    dinrail::Property& general = dinrailProp.addGroup("GENERAL");
+    dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     general.put("Joints", 6);
     general.put("Name", "TestRobot");
     
-    dinrail::Property& limits = general.addGroup("LIMITS");
+    dinrail::Parameters& limits = general.addGroup("LIMITS");
     limits.put("min", -180.0);
     limits.put("max", 180.0);
     
-    dinrail::Property& network = dinrailProp.addGroup("NETWORK");
+    dinrail::Parameters& network = dinrailProp.addGroup("NETWORK");
     network.put("port", 10000);
     network.put("host", "localhost");
 
