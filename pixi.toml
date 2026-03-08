@@ -16,7 +16,7 @@ configure = { cmd = [
     "-DCMAKE_BUILD_TYPE=Release",
     "-DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX",
     "-DDINRAIL_BUILD_EXAMPLES:BOOL=OFF",
-    "-DDINRAIL_USES_YARP:BOOL=OFF",
+    "-DDINRAIL_USES_YARP:BOOL=ON",
     "-DBUILD_TESTING:BOOL=ON",
     # Use the cross-platform Ninja generator
     "-G",
@@ -45,7 +45,6 @@ ycm-cmake-modules = "*"
 libsharedlibpp = "*"
 clang-format = "*"
 libyarp = "*"
-libbipedal-locomotion-framework = "*"
 catch2 = "*"
 cli11 = "*"
 eigen = "*"
