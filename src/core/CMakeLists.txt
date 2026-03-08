@@ -12,6 +12,9 @@ add_library(${LIBRARY_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/ICompatibilityLayer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Value.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Value.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/GenericVector.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/AdapterRegistry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/AdapterRegistry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Vocab.h
@@ -36,6 +39,8 @@ target_link_libraries(${LIBRARY_NAME}
     PUBLIC
         sharedlibpp::sharedlibpp
 )
+
+target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_20)
 
 # Install the library
 install(TARGETS ${LIBRARY_NAME}

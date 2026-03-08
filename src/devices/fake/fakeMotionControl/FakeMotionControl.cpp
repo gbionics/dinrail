@@ -25,12 +25,12 @@ bool FakeMotionControl::open(const Parameters& config)
     m_njoints = 1;
     
     // Check if GENERAL group exists and read Joints parameter
-    if (const auto general = config.findGroup("GENERAL"))
+    const Parameters& general = config.findGroup("GENERAL");
+    if (!general.isNull())
     {
-        const std::optional<std::int64_t> configuredJoints = general->get().getInt64("Joints");
-        if (configuredJoints.has_value())
+        if (general.find("Joints").isInt())
         {
-            m_njoints = static_cast<int>(configuredJoints.value());
+            m_njoints = general.find("Joints").as<int>();
         }
     }
 

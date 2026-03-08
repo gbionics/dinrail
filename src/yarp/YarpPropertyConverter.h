@@ -28,6 +28,17 @@ public:
      */
     static yarp::os::Property toYarpProperty(const Parameters& dinrailParams);
 
+    /**
+     * @brief Convert a yarp::os::Property to dinrail::Parameters.
+     *
+     * This method performs a deep conversion, recursively handling nested
+     * groups and scalar/vector values encoded in the property.
+     *
+     * @param yarpProp The YARP property to convert
+     * @return The converted dinrail parameters
+     */
+    static Parameters toDinrailParameters(const yarp::os::Property& yarpProp);
+
 private:
     YarpPropertyConverter() = delete;
     

@@ -401,3 +401,22 @@ TEST_CASE("YarpPropertyConverter handles complex mixed configuration", "[YarpPro
     // Verify NETWORK group exists
     REQUIRE(yarpProp.check("NETWORK"));
 }
+
+TEST_CASE("dinrail::Value matches YARP int-to-double compatibility", "[YarpPropertyConverter][ValueCompatibility]")
+{
+    yarp::os::Property yarpProperty;
+    yarpProperty.put("intParam", 42);
+
+    dinrail::Parameters dinrailParameters;
+    dinrailParameters.put("intParam", 42);
+
+    const yarp::os::Value& yarpValue = yarpProperty.find("intParam");
+    const dinrail::Value& dinrailValue = dinrailParameters.find("intParam");
+
+    // YARP uses isFloat64()/asFloat64() while dinrail uses isDouble()/asDouble().
+    REQUIRE(yarpValue.isFloat64() == dinrailValue.isDouble());
+    REQUIRE(yarpValue.asFloat64() == dinrailValue.asDouble());
+
+    // Missing keys should still be searchable and yield null-like values.
+    REQUIRE(yarpProperty.find("missing").isNull() == dinrailParameters.find("missing").isNull());
+}

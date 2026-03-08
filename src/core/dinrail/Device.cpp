@@ -147,13 +147,13 @@ bool Device::open(const Parameters& config)
         return false;
     }
 
-    const std::string deviceName = config.getString("device").value();
+    const std::string deviceName = config.find("device").as<std::string>();
 
     // Check for device type preference
     std::string deviceType = "auto"; // default: try dinrail first, then fallback to compatibility layers
     if (config.check<std::string>("dinrail_device_type"))
     {
-        const std::string configuredType = config.getString("dinrail_device_type").value();
+        const std::string configuredType = config.find("dinrail_device_type").as<std::string>();
         deviceType = configuredType;
     }
 

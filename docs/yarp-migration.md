@@ -75,6 +75,10 @@ int main()
 
 ## Notes
 
-- Parameter values are typed. Use `getString`, `getInt`, `getDouble`, and `getBool` when reading configuration in device code.
+- Parameter values are typed. For scalar values in YARP-style code, use `find(key)` followed by `isInt()/isDouble()/isString()` and `as<T>()`.
+- `dinrail::Value` intentionally exposes only `is<T>()` and `as<T>()` for basic compatibility usage.
+- `Parameters::find(key)` returns a `const dinrail::Value&` (YARP-style). If the key does not exist, the returned value is null and `isNull()` is true.
+- `dinrail::Value` provides YARP-like scalar predicates `isInt()`, `isDouble()`, and `isString()`.
+- `dinrail::Value` does not provide `isDict/asDict` or `isList/asList` helpers. For vectors/lists use `getParameter(...)`, and for dictionaries/groups use `findGroup(...)`.
 - Groups are hierarchical and can be nested via repeated calls to `addGroup(...)`.
 - Existing YARP-based plugins can still be loaded through dinrail compatibility layers.
