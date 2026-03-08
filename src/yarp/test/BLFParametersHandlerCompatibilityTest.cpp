@@ -12,9 +12,11 @@
 #include "../YarpPropertyConverter.h"
 
 #include <filesystem>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>
+#include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
@@ -330,13 +332,18 @@ bool isGroupEntry(const yarp::os::Bottle& entry)
 template <typename T>
 void requireSameScalar(const BipedalLocomotion::ParametersHandler::IParametersHandler& lhs,
                        const BipedalLocomotion::ParametersHandler::IParametersHandler& rhs,
-                       const std::string& key)
+                       const std::string& key,
+                       const std::string& path)
 {
     T lhsValue{};
     T rhsValue{};
 
     const bool lhsOk = lhs.getParameter(key, lhsValue);
     const bool rhsOk = rhs.getParameter(key, rhsValue);
+
+    std::cout << "[BLFCompatibility] Scalar parameter tested: " << path
+              << " (type=" << typeid(T).name() << ")" << std::endl;
+    INFO("Scalar key path: " << path);
 
     REQUIRE(lhsOk == rhsOk);
     if (lhsOk)
@@ -348,7 +355,8 @@ void requireSameScalar(const BipedalLocomotion::ParametersHandler::IParametersHa
 template <typename T>
 void requireSameVector(const BipedalLocomotion::ParametersHandler::IParametersHandler& lhs,
                        const BipedalLocomotion::ParametersHandler::IParametersHandler& rhs,
-                       const std::string& key)
+                       const std::string& key,
+                       const std::string& path)
 {
     std::vector<T> lhsValues;
     std::vector<T> rhsValues;
@@ -359,7 +367,9 @@ void requireSameVector(const BipedalLocomotion::ParametersHandler::IParametersHa
     const bool lhsOk = lhs.getParameter(key, lhsRef);
     const bool rhsOk = rhs.getParameter(key, rhsRef);
 
-    INFO("Vector key: " << key);
+    std::cout << "[BLFCompatibility] Vector parameter tested: " << path
+              << " (type=" << typeid(T).name() << ")" << std::endl;
+    INFO("Vector key path: " << path);
     REQUIRE(lhsOk == rhsOk);
     if (lhsOk)
     {
@@ -369,7 +379,8 @@ void requireSameVector(const BipedalLocomotion::ParametersHandler::IParametersHa
 
 void compareEntry(const yarp::os::Bottle& entry,
                   const BipedalLocomotion::ParametersHandler::IParametersHandler& yarpHandler,
-                  const BipedalLocomotion::ParametersHandler::IParametersHandler& dinrailHandler)
+                  const BipedalLocomotion::ParametersHandler::IParametersHandler& dinrailHandler,
+                  const std::string& parentPath = "")
 {
     if (entry.size() < 2 || !entry.get(0).isString())
     {
@@ -377,8 +388,13 @@ void compareEntry(const yarp::os::Bottle& entry,
     }
 
     const std::string key = entry.get(0).asString();
+    const std::string keyPath = parentPath.empty() ? key : parentPath + "/" + key;
+
     if (isGroupEntry(entry))
     {
+        std::cout << "[BLFCompatibility] Group tested: " << keyPath << std::endl;
+        INFO("Group key path: " << keyPath);
+
         const auto yarpGroup = yarpHandler.getGroup(key).lock();
         const auto dinrailGroup = dinrailHandler.getGroup(key).lock();
 
@@ -392,7 +408,7 @@ void compareEntry(const yarp::os::Bottle& entry,
             {
                 continue;
             }
-            compareEntry(*child, *yarpGroup, *dinrailGroup);
+            compareEntry(*child, *yarpGroup, *dinrailGroup, keyPath);
         }
 
         return;
@@ -401,25 +417,25 @@ void compareEntry(const yarp::os::Bottle& entry,
     const yarp::os::Value& value = entry.get(1);
     if (value.isBool())
     {
-        requireSameScalar<bool>(yarpHandler, dinrailHandler, key);
+        requireSameScalar<bool>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
     if (value.isInt32() || value.isInt64())
     {
-        requireSameScalar<int>(yarpHandler, dinrailHandler, key);
+        requireSameScalar<int>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
     if (value.isFloat64())
     {
-        requireSameScalar<double>(yarpHandler, dinrailHandler, key);
+        requireSameScalar<double>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
     if (value.isString())
     {
-        requireSameScalar<std::string>(yarpHandler, dinrailHandler, key);
+        requireSameScalar<std::string>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
@@ -450,6 +466,10 @@ void compareEntry(const yarp::os::Bottle& entry,
         std::vector<bool> lhsValues;
         std::vector<bool> rhsValues;
 
+        std::cout << "[BLFCompatibility] Vector parameter tested: " << keyPath
+                  << " (type=bool)" << std::endl;
+        INFO("Vector key path: " << keyPath);
+
         const bool lhsOk = yarpHandler.getParameter(key, lhsValues);
         const bool rhsOk = dinrailHandler.getParameter(key, rhsValues);
         REQUIRE(lhsOk == rhsOk);
@@ -462,19 +482,19 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     if (allInt)
     {
-        requireSameVector<int>(yarpHandler, dinrailHandler, key);
+        requireSameVector<int>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
     if (allFloat)
     {
-        requireSameVector<double>(yarpHandler, dinrailHandler, key);
+        requireSameVector<double>(yarpHandler, dinrailHandler, key, keyPath);
         return;
     }
 
     if (allString)
     {
-        requireSameVector<std::string>(yarpHandler, dinrailHandler, key);
+        requireSameVector<std::string>(yarpHandler, dinrailHandler, key, keyPath);
     }
 }
 
