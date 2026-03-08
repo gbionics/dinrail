@@ -92,9 +92,6 @@ yarp::os::Property loadPropertyFromFile(const std::filesystem::path& file)
         REQUIRE_FALSE(devices.empty());
 
         const auto& dev = devices.front();
-        std::cout << "[BLFCompatibility] XML parsed device: name='" << dev.name()
-                  << "' type='" << dev.type() << "'" << std::endl;
-
         yarpProperty = toProperty(dev);
         return yarpProperty;
     }
@@ -417,10 +414,6 @@ void requireSameScalar(const BipedalLocomotion::ParametersHandler::IParametersHa
     const bool lhsOk = lhs.getParameter(key, lhsValue);
     const bool rhsOk = rhs.getParameter(key, rhsValue);
 
-    std::cout << "[BLFCompatibility] Scalar parameter tested: " << path
-              << " (type=" << typeid(T).name() << ")" << std::endl;
-    INFO("Scalar key path: " << path);
-
     REQUIRE(lhsOk == rhsOk);
     if (lhsOk)
     {
@@ -443,9 +436,6 @@ void requireSameVector(const BipedalLocomotion::ParametersHandler::IParametersHa
     const bool lhsOk = lhs.getParameter(key, lhsRef);
     const bool rhsOk = rhs.getParameter(key, rhsRef);
 
-    std::cout << "[BLFCompatibility] Vector parameter tested: " << path
-              << " (type=" << typeid(T).name() << ")" << std::endl;
-    INFO("Vector key path: " << path);
     REQUIRE(lhsOk == rhsOk);
     if (lhsOk)
     {
@@ -468,8 +458,6 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     if (isGroupEntry(entry))
     {
-        std::cout << "[BLFCompatibility] Group tested: " << keyPath << std::endl;
-        INFO("Group key path: " << keyPath);
 
         const auto yarpGroup = yarpHandler.getGroup(key).lock();
         const auto dinrailGroup = dinrailHandler.getGroup(key).lock();
@@ -525,9 +513,6 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     if (list->size() == 0)
     {
-        std::cout << "[BLFCompatibility] Empty-list parameter tested (type-ambiguous): "
-                  << keyPath << std::endl;
-        INFO("Empty list key path: " << keyPath);
         return;
     }
 
@@ -550,9 +535,6 @@ void compareEntry(const yarp::os::Bottle& entry,
         std::vector<bool> lhsValues;
         std::vector<bool> rhsValues;
 
-        std::cout << "[BLFCompatibility] Vector parameter tested: " << keyPath
-                  << " (type=bool)" << std::endl;
-        INFO("Vector key path: " << keyPath);
 
         const bool lhsOk = yarpHandler.getParameter(key, lhsValues);
         const bool rhsOk = dinrailHandler.getParameter(key, rhsValues);

@@ -73,7 +73,7 @@ find_package(sharedlibpp REQUIRED)
 
 # Find YARP if compatibility layer is enabled
 if(DINRAIL_USES_YARP)
-    find_package(YARP REQUIRED COMPONENTS os dev)
+    find_package(YARP REQUIRED COMPONENTS os dev robotinterface)
 endif()
 
 ### Compile- and install-related commands.
