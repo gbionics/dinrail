@@ -152,13 +152,14 @@ TEST_CASE("Parameters supports BLF-style generic vector set and get", "[Paramete
     std::vector<double> sourceDouble{1.2, 2.3, 3.4};
     std::vector<std::string> sourceString{"a", "b", "c"};
     std::vector<std::chrono::nanoseconds> sourceDuration{std::chrono::nanoseconds(1),
-                                                          std::chrono::nanoseconds(2)};
+                                                         std::chrono::nanoseconds(2)};
 
     params.setParameter("ints", dinrail::GenericVector<const int>::Ref(sourceInt));
     params.setParameter("doubles", dinrail::GenericVector<const double>::Ref(sourceDouble));
     params.setParameter("strings", dinrail::GenericVector<const std::string>::Ref(sourceString));
     params.setParameter("durations",
-                        dinrail::GenericVector<const std::chrono::nanoseconds>::Ref(sourceDuration));
+                        dinrail::GenericVector<const std::chrono::nanoseconds>::Ref(
+                            sourceDuration));
 
     std::vector<int> outInt;
     std::vector<double> outDouble;
@@ -168,8 +169,9 @@ TEST_CASE("Parameters supports BLF-style generic vector set and get", "[Paramete
     REQUIRE(params.getParameter("ints", dinrail::GenericVector<int>::Ref(outInt)));
     REQUIRE(params.getParameter("doubles", dinrail::GenericVector<double>::Ref(outDouble)));
     REQUIRE(params.getParameter("strings", dinrail::GenericVector<std::string>::Ref(outString)));
-    REQUIRE(params.getParameter("durations",
-                                dinrail::GenericVector<std::chrono::nanoseconds>::Ref(outDuration)));
+    REQUIRE(
+        params.getParameter("durations",
+                            dinrail::GenericVector<std::chrono::nanoseconds>::Ref(outDuration)));
 
     REQUIRE(outInt == sourceInt);
     REQUIRE(outDouble == sourceDouble);

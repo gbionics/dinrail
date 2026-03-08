@@ -5,8 +5,8 @@
 #define DINRAIL_YARPENCODERSADAPTER_H
 
 #include <dinrail/IEncoders.h>
-#include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/IEncoders.h>
+#include <yarp/dev/PolyDriver.h>
 
 namespace dinrail
 {
@@ -18,18 +18,18 @@ class YarpEncodersAdapter : public IEncoders
 {
 public:
     explicit YarpEncodersAdapter(yarp::dev::PolyDriver* yarpDevice);
-    
-    bool getAxes(int *ax) override;
+
+    bool getAxes(int* ax) override;
     bool resetEncoder(int j) override;
     bool resetEncoders() override;
     bool setEncoder(int j, double val) override;
-    bool setEncoders(const double *vals) override;
-    bool getEncoder(int j, double *v) override;
-    bool getEncoders(double *encs) override;
-    bool getEncoderSpeed(int j, double *sp) override;
-    bool getEncoderSpeeds(double *spds) override;
-    bool getEncoderAcceleration(int j, double *spds) override;
-    bool getEncoderAccelerations(double *accs) override;
+    bool setEncoders(const double* vals) override;
+    bool getEncoder(int j, double* v) override;
+    bool getEncoders(double* encs) override;
+    bool getEncoderSpeed(int j, double* sp) override;
+    bool getEncoderSpeeds(double* spds) override;
+    bool getEncoderAcceleration(int j, double* spds) override;
+    bool getEncoderAccelerations(double* accs) override;
 
 private:
     yarp::dev::IEncoders* m_yarpInterface{nullptr};

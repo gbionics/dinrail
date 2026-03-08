@@ -85,8 +85,7 @@ public:
      * @tparam T Type to probe in the underlying variant.
      * @return True if the stored value currently holds `T`.
      */
-    template <typename T>
-    bool is() const
+    template <typename T> bool is() const
     {
         return std::holds_alternative<T>(m_value);
     }
@@ -97,8 +96,7 @@ public:
      * @return Const reference to the stored value.
      * @throws std::bad_variant_access If the stored type is not `T`.
      */
-    template <typename T>
-    const T& as() const
+    template <typename T> const T& as() const
     {
         return std::get<T>(m_value);
     }
@@ -109,8 +107,7 @@ public:
      * @return Mutable reference to the stored value.
      * @throws std::bad_variant_access If the stored type is not `T`.
      */
-    template <typename T>
-    T& as()
+    template <typename T> T& as()
     {
         return std::get<T>(m_value);
     }

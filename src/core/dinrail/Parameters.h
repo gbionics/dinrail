@@ -71,9 +71,8 @@ public:
      * @param comment Optional compatibility comment (currently ignored).
      * @return Stored value if present, otherwise @p fallback.
      */
-    Value check(const std::string& key,
-                const Value& fallback,
-                const std::string& comment = "") const;
+    Value
+    check(const std::string& key, const Value& fallback, const std::string& comment = "") const;
 
     /**
      * @brief Check if a key exists and stores the requested type.
@@ -81,8 +80,7 @@ public:
      * @param key Parameter name.
      * @return True if key exists and contains `T`.
      */
-    template <typename T>
-    bool check(const std::string& key) const
+    template <typename T> bool check(const std::string& key) const
     {
         auto it = m_values.find(key);
         return it != m_values.end() && it->second.is<T>();
@@ -142,7 +140,8 @@ public:
     /** @brief BLF-style setter for double vectors. */
     void setParameter(const std::string& key, const GenericVector<const double>::Ref parameter);
     /** @brief BLF-style setter for string vectors. */
-    void setParameter(const std::string& key, const GenericVector<const std::string>::Ref parameter);
+    void
+    setParameter(const std::string& key, const GenericVector<const std::string>::Ref parameter);
     /** @brief BLF-style setter for duration vectors. */
     void setParameter(const std::string& key,
                       const GenericVector<const std::chrono::nanoseconds>::Ref parameter);

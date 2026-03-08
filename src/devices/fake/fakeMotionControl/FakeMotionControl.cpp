@@ -12,7 +12,8 @@ namespace dinrail
 {
 
 // Register this device with the plugin system
-// The factory name must match what's returned by getSharedlibppFactoryNameFromDeviceName("fakeMotionControl")
+// The factory name must match what's returned by
+// getSharedlibppFactoryNameFromDeviceName("fakeMotionControl")
 SHLIBPP_DEFINE_SHARED_SUBCLASS(dinrail_device_fakeMotionControl,
                                dinrail::FakeMotionControl,
                                dinrail::IDevice);
@@ -23,7 +24,7 @@ bool FakeMotionControl::open(const Parameters& config)
 
     // Get number of joints from config (default to 1)
     m_njoints = 1;
-    
+
     // Check if GENERAL group exists and read Joints parameter
     const Parameters& general = config.findGroup("GENERAL");
     if (!general.isNull())

@@ -14,7 +14,7 @@ YarpPositionDirectAdapter::YarpPositionDirectAdapter(yarp::dev::PolyDriver* yarp
     }
 }
 
-bool YarpPositionDirectAdapter::getAxes(int *ax)
+bool YarpPositionDirectAdapter::getAxes(int* ax)
 {
     if (!m_yarpInterface)
     {
@@ -32,7 +32,9 @@ bool YarpPositionDirectAdapter::setPosition(int j, double ref)
     return m_yarpInterface->setPosition(j, ref);
 }
 
-bool YarpPositionDirectAdapter::setPositions(const int n_joint, const int *joints, const double *refs)
+bool YarpPositionDirectAdapter::setPositions(const int n_joint,
+                                             const int* joints,
+                                             const double* refs)
 {
     if (!m_yarpInterface)
     {
@@ -41,7 +43,7 @@ bool YarpPositionDirectAdapter::setPositions(const int n_joint, const int *joint
     return m_yarpInterface->setPositions(n_joint, joints, refs);
 }
 
-bool YarpPositionDirectAdapter::setPositions(const double *refs)
+bool YarpPositionDirectAdapter::setPositions(const double* refs)
 {
     if (!m_yarpInterface)
     {
@@ -50,7 +52,7 @@ bool YarpPositionDirectAdapter::setPositions(const double *refs)
     return m_yarpInterface->setPositions(refs);
 }
 
-bool YarpPositionDirectAdapter::getRefPosition(const int joint, double *ref)
+bool YarpPositionDirectAdapter::getRefPosition(const int joint, double* ref)
 {
     if (!m_yarpInterface)
     {
@@ -59,7 +61,7 @@ bool YarpPositionDirectAdapter::getRefPosition(const int joint, double *ref)
     return m_yarpInterface->getRefPosition(joint, ref);
 }
 
-bool YarpPositionDirectAdapter::getRefPositions(double *refs)
+bool YarpPositionDirectAdapter::getRefPositions(double* refs)
 {
     if (!m_yarpInterface)
     {
@@ -68,7 +70,7 @@ bool YarpPositionDirectAdapter::getRefPositions(double *refs)
     return m_yarpInterface->getRefPositions(refs);
 }
 
-bool YarpPositionDirectAdapter::getRefPositions(const int n_joint, const int *joints, double *refs)
+bool YarpPositionDirectAdapter::getRefPositions(const int n_joint, const int* joints, double* refs)
 {
     if (!m_yarpInterface)
     {

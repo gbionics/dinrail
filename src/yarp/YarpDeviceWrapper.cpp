@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "YarpDeviceWrapper.h"
-#include "YarpPositionDirectAdapter.h"
-#include "YarpEncodersAdapter.h"
 #include "YarpControlModeAdapter.h"
+#include "YarpEncodersAdapter.h"
+#include "YarpPositionDirectAdapter.h"
 
-#include <dinrail/IPositionDirect.h>
-#include <dinrail/IEncoders.h>
 #include <dinrail/IControlMode.h>
+#include <dinrail/IEncoders.h>
+#include <dinrail/IPositionDirect.h>
 
 #include <typeinfo>
 
@@ -54,13 +54,16 @@ IDevice* YarpDeviceWrapper::allocateInstance() const
 
 void* YarpDeviceWrapper::getAdapter(const std::type_info& interfaceType)
 {
-    if (interfaceType == typeid(IPositionDirect)) {
+    if (interfaceType == typeid(IPositionDirect))
+    {
         return m_positionDirectAdapter.get();
     }
-    if (interfaceType == typeid(IEncoders)) {
+    if (interfaceType == typeid(IEncoders))
+    {
         return m_encodersAdapter.get();
     }
-    if (interfaceType == typeid(IControlMode)) {
+    if (interfaceType == typeid(IControlMode))
+    {
         return m_controlModeAdapter.get();
     }
     return nullptr;

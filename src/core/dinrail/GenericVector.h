@@ -15,8 +15,7 @@
 namespace dinrail
 {
 
-template <typename T>
-class GenericVector
+template <typename T> class GenericVector
 {
 public:
     using vector_element_type = T;
@@ -60,8 +59,7 @@ public:
         if constexpr (std::is_const_v<T>)
         {
             return false;
-        }
-        else
+        } else
         {
             if (size() != other.size() && !resizeVector(other.size()))
             {
@@ -81,8 +79,7 @@ public:
         if constexpr (std::is_const_v<T>)
         {
             return false;
-        }
-        else
+        } else
         {
             if (size() != other.size() && !resizeVector(other.size()))
             {
@@ -206,8 +203,7 @@ public:
     }
 };
 
-template <typename T>
-class GenericVector<T>::Ref : public GenericVector<T>
+template <typename T> class GenericVector<T>::Ref : public GenericVector<T>
 {
 private:
     using Base = GenericVector<T>;
@@ -240,8 +236,8 @@ public:
     }
 
     template <typename Container>
-    requires (!std::is_const_v<T>)
-             && requires(Container& c) { std::span<typename Base::value_type>(c); }
+        requires(!std::is_const_v<T>)
+                && requires(Container& c) { std::span<typename Base::value_type>(c); }
     explicit Ref(Container& input)
     {
         this->m_span = std::span<T>(input);
@@ -253,8 +249,7 @@ public:
                 inputPtr->resize(newSize);
                 return std::span<T>(*inputPtr);
             };
-        }
-        else
+        } else
         {
             const std::span<T> copiedSpan = this->m_span;
             this->m_resizeLambda = [copiedSpan](typename Base::index_type) { return copiedSpan; };
@@ -262,8 +257,8 @@ public:
     }
 
     template <typename Container>
-    requires std::is_const_v<T>
-             && requires(const Container& c) { std::span<const typename Base::value_type>(c); }
+        requires std::is_const_v<T>
+                 && requires(const Container& c) { std::span<const typename Base::value_type>(c); }
     explicit Ref(const Container& input)
     {
         this->m_span = std::span<const typename Base::value_type>(input);

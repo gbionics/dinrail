@@ -2,16 +2,16 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include <dinrail/Device.h>
-#include <dinrail/IDevice.h>
-#include <dinrail/ICompatibilityLayer.h>
 #include <dinrail/Constants.h>
+#include <dinrail/Device.h>
+#include <dinrail/ICompatibilityLayer.h>
+#include <dinrail/IDevice.h>
 
-#include <sharedlibpp/SharedLibraryClassFactory.h>
 #include <sharedlibpp/SharedLibraryClass.h>
+#include <sharedlibpp/SharedLibraryClassFactory.h>
 
-#include <optional>
 #include <filesystem>
+#include <optional>
 #include <vector>
 
 #ifdef _WIN32
@@ -36,8 +36,7 @@ static std::optional<std::string> getPathOfDinrailSharedLibrary()
     if (address_info.dli_fname && res_val > 0)
     {
         library_location = address_info.dli_fname;
-    }
-    else
+    } else
     {
         return {};
     }
@@ -45,10 +44,11 @@ static std::optional<std::string> getPathOfDinrailSharedLibrary()
     char module_path[MAX_PATH];
     HMODULE hm = NULL;
 
-    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
-                              GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+    if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+                              | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                           (LPCSTR)&getPathOfDinrailSharedLibrary,
-                          &hm) == 0)
+                          &hm)
+        == 0)
     {
         return {};
     }
@@ -80,18 +80,19 @@ struct Device::Impl
     }
 
     // Helper function to try loading a compatibility layer
-    std::unique_ptr<dinrail::IDevice> tryCompatibilityLayer(const std::string& compatName,
-                                                            const Parameters& config,
-                                                            const std::optional<std::string>& searchPath)
+    std::unique_ptr<dinrail::IDevice>
+    tryCompatibilityLayer(const std::string& compatName,
+                          const Parameters& config,
+                          const std::optional<std::string>& searchPath)
     {
         std::string libraryName = getSharedlibppLibraryNameFromCompatName(compatName);
         std::string factoryName = getSharedlibppFactoryNameFromCompatName(compatName);
 
-        auto compatFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<dinrail::ICompatibilityLayer>>(
-            SHLIBPP_DEFAULT_START_CHECK,
-            SHLIBPP_DEFAULT_END_CHECK,
-            SHLIBPP_DEFAULT_SYSTEM_VERSION,
-            factoryName.c_str());
+        auto compatFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<
+            dinrail::ICompatibilityLayer>>(SHLIBPP_DEFAULT_START_CHECK,
+                                           SHLIBPP_DEFAULT_END_CHECK,
+                                           SHLIBPP_DEFAULT_SYSTEM_VERSION,
+                                           factoryName.c_str());
 
         if (searchPath.has_value())
         {
@@ -107,7 +108,8 @@ struct Device::Impl
         }
 
         sharedlibpp::SharedLibraryClass<dinrail::ICompatibilityLayer> compatLayer(*compatFactory);
-        std::unique_ptr<dinrail::ICompatibilityLayer> layerInstance(compatLayer.getContent().allocateInstance());
+        std::unique_ptr<dinrail::ICompatibilityLayer> layerInstance(
+            compatLayer.getContent().allocateInstance());
 
         if (!layerInstance)
         {
@@ -150,7 +152,8 @@ bool Device::open(const Parameters& config)
     const std::string deviceName = config.find("device").as<std::string>();
 
     // Check for device type preference
-    std::string deviceType = "auto"; // default: try dinrail first, then fallback to compatibility layers
+    std::string deviceType = "auto"; // default: try dinrail first, then fallback to compatibility
+                                     // layers
     if (config.check<std::string>("dinrail_device_type"))
     {
         const std::string configuredType = config.find("dinrail_device_type").as<std::string>();
@@ -169,11 +172,11 @@ bool Device::open(const Parameters& config)
 
     if (tryDinrailDevice)
     {
-        m_pimpl->driverFactory = std::make_unique<sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(
-            SHLIBPP_DEFAULT_START_CHECK,
-            SHLIBPP_DEFAULT_END_CHECK,
-            SHLIBPP_DEFAULT_SYSTEM_VERSION,
-            factoryName.c_str());
+        m_pimpl->driverFactory = std::make_unique<
+            sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(SHLIBPP_DEFAULT_START_CHECK,
+                                                                      SHLIBPP_DEFAULT_END_CHECK,
+                                                                      SHLIBPP_DEFAULT_SYSTEM_VERSION,
+                                                                      factoryName.c_str());
 
         // Extend the search path of the plugins to include the install prefix of the library
         if (pathOfDinrailSharedLib.has_value())
@@ -195,11 +198,11 @@ bool Device::open(const Parameters& config)
                 m_pimpl->isValid = true;
                 return true;
             }
-            
+
             // Failed to open dinrail device
             m_pimpl->driver.reset();
         }
-        
+
         // If deviceType is explicitly "dinrail", don't try compatibility layers
         if (!tryCompatibilityLayers)
         {
@@ -212,9 +215,9 @@ bool Device::open(const Parameters& config)
     {
         for (const auto& compatName : m_pimpl->compatibilityLayers)
         {
-            std::unique_ptr<dinrail::IDevice> compatDevice = 
-                m_pimpl->tryCompatibilityLayer(compatName, config, pathOfDinrailSharedLib);
-            
+            std::unique_ptr<dinrail::IDevice> compatDevice
+                = m_pimpl->tryCompatibilityLayer(compatName, config, pathOfDinrailSharedLib);
+
             if (compatDevice)
             {
                 // Successfully created device through compatibility layer
@@ -224,7 +227,7 @@ bool Device::open(const Parameters& config)
             }
         }
     }
-    
+
     // No device plugin or compatibility layer worked
     return false;
 }

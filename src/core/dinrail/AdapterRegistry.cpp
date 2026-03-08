@@ -20,12 +20,12 @@ void* AdapterRegistry::queryAdapter(IDevice* device, const std::type_info& inter
 
     auto& registry = getRegistry();
     auto it = registry.find(std::cref(interfaceType));
-    
+
     if (it != registry.end())
     {
         return it->second(device);
     }
-    
+
     return nullptr;
 }
 

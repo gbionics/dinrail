@@ -5,8 +5,8 @@
 #define DINRAIL_YARPCONTROLMODEADAPTER_H
 
 #include <dinrail/IControlMode.h>
-#include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/IControlMode.h>
+#include <yarp/dev/PolyDriver.h>
 
 namespace dinrail
 {
@@ -18,13 +18,13 @@ class YarpControlModeAdapter : public IControlMode
 {
 public:
     explicit YarpControlModeAdapter(yarp::dev::PolyDriver* yarpDevice);
-    
-    bool getControlMode(int j, int *mode) override;
-    bool getControlModes(int *modes) override;
-    bool getControlModes(const int n_joint, const int *joints, int *modes) override;
+
+    bool getControlMode(int j, int* mode) override;
+    bool getControlModes(int* modes) override;
+    bool getControlModes(const int n_joint, const int* joints, int* modes) override;
     bool setControlMode(const int j, const int mode) override;
-    bool setControlModes(const int n_joint, const int *joints, int *modes) override;
-    bool setControlModes(int *modes) override;
+    bool setControlModes(const int n_joint, const int* joints, int* modes) override;
+    bool setControlModes(int* modes) override;
 
 private:
     yarp::dev::IControlMode* m_yarpInterface{nullptr};

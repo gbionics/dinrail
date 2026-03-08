@@ -5,9 +5,9 @@
 #ifndef DINRAIL_DEVICE_H
 #define DINRAIL_DEVICE_H
 
-#include <dinrail/Parameters.h>
-#include <dinrail/IDevice.h>
 #include <dinrail/AdapterRegistry.h>
+#include <dinrail/IDevice.h>
+#include <dinrail/Parameters.h>
 
 #include <memory>
 #include <string>
@@ -43,12 +43,12 @@ public:
     Device(Device&&) = default;
     Device& operator=(Device&&) = default;
 
-     /**
-      * Open the Device by loading the device driver plugin.
-      * The device name is extracted from the "device" parameter in config.
-      * @param config is a list of parameters for the device.
-      * @return true/false upon success/failure
-      */
+    /**
+     * Open the Device by loading the device driver plugin.
+     * The device name is extracted from the "device" parameter in config.
+     * @param config is a list of parameters for the device.
+     * @return true/false upon success/failure
+     */
     bool open(const Parameters& config);
 
     /**
@@ -72,8 +72,7 @@ public:
      * @return true iff the desired interface is implemented by
      * the device driver.
      */
-    template <class T>
-    bool view(T*& x)
+    template <class T> bool view(T*& x)
     {
         x = nullptr;
 
@@ -93,7 +92,7 @@ public:
 
         // Fallback to dynamic_cast for devices using inheritance
         T* v = dynamic_cast<T*>(impl);
-        
+
         if (v != nullptr)
         {
             x = v;

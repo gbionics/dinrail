@@ -66,8 +66,9 @@ public:
         return m_parameters.getParameter(parameterName, parameter);
     }
 
-    bool getParameter(const std::string& parameterName,
-                      BipedalLocomotion::GenericContainer::Vector<int>::Ref parameter) const override
+    bool
+    getParameter(const std::string& parameterName,
+                 BipedalLocomotion::GenericContainer::Vector<int>::Ref parameter) const override
     {
         std::vector<int> values;
         if (!m_parameters.getParameter(parameterName, dinrail::GenericVector<int>::Ref(values)))
@@ -88,8 +89,9 @@ public:
         return true;
     }
 
-    bool getParameter(const std::string& parameterName,
-                      BipedalLocomotion::GenericContainer::Vector<double>::Ref parameter) const override
+    bool
+    getParameter(const std::string& parameterName,
+                 BipedalLocomotion::GenericContainer::Vector<double>::Ref parameter) const override
     {
         std::vector<double> values;
         if (!m_parameters.getParameter(parameterName, dinrail::GenericVector<double>::Ref(values)))
@@ -110,11 +112,13 @@ public:
         return true;
     }
 
-    bool getParameter(const std::string& parameterName,
-                      BipedalLocomotion::GenericContainer::Vector<std::string>::Ref parameter) const override
+    bool getParameter(
+        const std::string& parameterName,
+        BipedalLocomotion::GenericContainer::Vector<std::string>::Ref parameter) const override
     {
         std::vector<std::string> values;
-        if (!m_parameters.getParameter(parameterName, dinrail::GenericVector<std::string>::Ref(values)))
+        if (!m_parameters.getParameter(parameterName,
+                                       dinrail::GenericVector<std::string>::Ref(values)))
         {
             return false;
         }
@@ -133,11 +137,13 @@ public:
     }
 
     bool getParameter(const std::string& parameterName,
-                      BipedalLocomotion::GenericContainer::Vector<std::chrono::nanoseconds>::Ref parameter) const override
+                      BipedalLocomotion::GenericContainer::Vector<std::chrono::nanoseconds>::Ref
+                          parameter) const override
     {
         std::vector<std::chrono::nanoseconds> values;
         if (!m_parameters.getParameter(parameterName,
-                                       dinrail::GenericVector<std::chrono::nanoseconds>::Ref(values)))
+                                       dinrail::GenericVector<std::chrono::nanoseconds>::Ref(
+                                           values)))
         {
             return false;
         }
@@ -191,8 +197,9 @@ public:
         m_parameters.setParameter(parameterName, parameter);
     }
 
-    void setParameter(const std::string& parameterName,
-                      const BipedalLocomotion::GenericContainer::Vector<const int>::Ref parameter) override
+    void setParameter(
+        const std::string& parameterName,
+        const BipedalLocomotion::GenericContainer::Vector<const int>::Ref parameter) override
     {
         std::vector<int> values(parameter.size());
         for (std::size_t i = 0; i < values.size(); ++i)
@@ -202,8 +209,9 @@ public:
         m_parameters.put(parameterName, values);
     }
 
-    void setParameter(const std::string& parameterName,
-                      const BipedalLocomotion::GenericContainer::Vector<const double>::Ref parameter) override
+    void setParameter(
+        const std::string& parameterName,
+        const BipedalLocomotion::GenericContainer::Vector<const double>::Ref parameter) override
     {
         std::vector<double> values(parameter.size());
         for (std::size_t i = 0; i < values.size(); ++i)
@@ -214,7 +222,8 @@ public:
     }
 
     void setParameter(const std::string& parameterName,
-                      const BipedalLocomotion::GenericContainer::Vector<const std::string>::Ref parameter) override
+                      const BipedalLocomotion::GenericContainer::Vector<const std::string>::Ref
+                          parameter) override
     {
         std::vector<std::string> values(parameter.size());
         for (std::size_t i = 0; i < values.size(); ++i)
@@ -226,7 +235,8 @@ public:
 
     void setParameter(
         const std::string& parameterName,
-        const BipedalLocomotion::GenericContainer::Vector<const std::chrono::nanoseconds>::Ref parameter) override
+        const BipedalLocomotion::GenericContainer::Vector<const std::chrono::nanoseconds>::Ref
+            parameter) override
     {
         std::vector<std::chrono::nanoseconds> values(parameter.size());
         for (std::size_t i = 0; i < values.size(); ++i)
@@ -247,9 +257,8 @@ public:
         auto it = m_groupsCache.find(name);
         if (it == m_groupsCache.end())
         {
-            auto inserted = m_groupsCache.emplace(
-                name,
-                std::make_shared<DinrailImplementation>(group));
+            auto inserted
+                = m_groupsCache.emplace(name, std::make_shared<DinrailImplementation>(group));
             it = inserted.first;
         }
 
@@ -469,9 +478,10 @@ void compareEntry(const yarp::os::Bottle& entry,
     }
 }
 
-void comparePropertyHandlers(const yarp::os::Property& yarpProp,
-                             const BipedalLocomotion::ParametersHandler::IParametersHandler& yarpHandler,
-                             const BipedalLocomotion::ParametersHandler::IParametersHandler& dinrailHandler)
+void comparePropertyHandlers(
+    const yarp::os::Property& yarpProp,
+    const BipedalLocomotion::ParametersHandler::IParametersHandler& yarpHandler,
+    const BipedalLocomotion::ParametersHandler::IParametersHandler& dinrailHandler)
 {
     yarp::os::Bottle root;
     root.fromString(yarpProp.toString());
@@ -509,7 +519,8 @@ TEST_CASE("BLF YarpImplementation and DinrailImplementation are compatible on sa
 
         BipedalLocomotion::ParametersHandler::YarpImplementation yarpHandler(yarpProperty);
 
-        dinrail::Parameters params = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProperty);
+        dinrail::Parameters params
+            = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProperty);
         DinrailImplementation dinrailHandler(params);
 
         comparePropertyHandlers(yarpProperty, yarpHandler, dinrailHandler);

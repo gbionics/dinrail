@@ -14,7 +14,7 @@ YarpEncodersAdapter::YarpEncodersAdapter(yarp::dev::PolyDriver* yarpDevice)
     }
 }
 
-bool YarpEncodersAdapter::getAxes(int *ax)
+bool YarpEncodersAdapter::getAxes(int* ax)
 {
     if (!m_yarpInterface)
     {
@@ -50,7 +50,7 @@ bool YarpEncodersAdapter::setEncoder(int j, double val)
     return m_yarpInterface->setEncoder(j, val);
 }
 
-bool YarpEncodersAdapter::setEncoders(const double *vals)
+bool YarpEncodersAdapter::setEncoders(const double* vals)
 {
     if (!m_yarpInterface)
     {
@@ -59,7 +59,7 @@ bool YarpEncodersAdapter::setEncoders(const double *vals)
     return m_yarpInterface->setEncoders(vals);
 }
 
-bool YarpEncodersAdapter::getEncoder(int j, double *v)
+bool YarpEncodersAdapter::getEncoder(int j, double* v)
 {
     if (!m_yarpInterface)
     {
@@ -68,7 +68,7 @@ bool YarpEncodersAdapter::getEncoder(int j, double *v)
     return m_yarpInterface->getEncoder(j, v);
 }
 
-bool YarpEncodersAdapter::getEncoders(double *encs)
+bool YarpEncodersAdapter::getEncoders(double* encs)
 {
     if (!m_yarpInterface)
     {
@@ -77,7 +77,7 @@ bool YarpEncodersAdapter::getEncoders(double *encs)
     return m_yarpInterface->getEncoders(encs);
 }
 
-bool YarpEncodersAdapter::getEncoderSpeed(int j, double *sp)
+bool YarpEncodersAdapter::getEncoderSpeed(int j, double* sp)
 {
     if (!m_yarpInterface)
     {
@@ -86,7 +86,7 @@ bool YarpEncodersAdapter::getEncoderSpeed(int j, double *sp)
     return m_yarpInterface->getEncoderSpeed(j, sp);
 }
 
-bool YarpEncodersAdapter::getEncoderSpeeds(double *spds)
+bool YarpEncodersAdapter::getEncoderSpeeds(double* spds)
 {
     if (!m_yarpInterface)
     {
@@ -95,7 +95,7 @@ bool YarpEncodersAdapter::getEncoderSpeeds(double *spds)
     return m_yarpInterface->getEncoderSpeeds(spds);
 }
 
-bool YarpEncodersAdapter::getEncoderAcceleration(int j, double *spds)
+bool YarpEncodersAdapter::getEncoderAcceleration(int j, double* spds)
 {
     if (!m_yarpInterface)
     {
@@ -104,7 +104,7 @@ bool YarpEncodersAdapter::getEncoderAcceleration(int j, double *spds)
     return m_yarpInterface->getEncoderAcceleration(j, spds);
 }
 
-bool YarpEncodersAdapter::getEncoderAccelerations(double *accs)
+bool YarpEncodersAdapter::getEncoderAccelerations(double* accs)
 {
     if (!m_yarpInterface)
     {

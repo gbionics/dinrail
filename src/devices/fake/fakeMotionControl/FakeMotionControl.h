@@ -5,13 +5,13 @@
 #ifndef DINRAIL_FAKEMOTIONCONTROL_H
 #define DINRAIL_FAKEMOTIONCONTROL_H
 
-#include <dinrail/IDevice.h>
-#include <dinrail/IPositionDirect.h>
-#include <dinrail/IEncoders.h>
 #include <dinrail/IControlMode.h>
+#include <dinrail/IDevice.h>
+#include <dinrail/IEncoders.h>
+#include <dinrail/IPositionDirect.h>
 
-#include <vector>
 #include <mutex>
+#include <vector>
 
 namespace dinrail
 {

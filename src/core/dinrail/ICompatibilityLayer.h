@@ -4,8 +4,8 @@
 #ifndef DINRAIL_ICOMPATIBILITYLAYER_H
 #define DINRAIL_ICOMPATIBILITYLAYER_H
 
-#include <dinrail/Parameters.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/Parameters.h>
 
 #include <memory>
 
@@ -40,7 +40,7 @@ public:
 
     /**
      * @brief Register interface adapters with the global adapter registry.
-     * 
+     *
      * This method is called once when the compatibility layer is first loaded.
      * Implementations should register all their adapter factories here.
      */

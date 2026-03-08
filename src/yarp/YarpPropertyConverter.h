@@ -6,7 +6,10 @@
 
 #include <dinrail/Parameters.h>
 
-namespace yarp::os { class Property; }
+namespace yarp::os
+{
+class Property;
+}
 
 namespace dinrail
 {
@@ -41,7 +44,7 @@ public:
 
 private:
     YarpPropertyConverter() = delete;
-    
+
     /**
      * @brief Recursively convert a dinrail::Parameters to a yarp::os::Property.
      * @param dinrailParams The source parameters

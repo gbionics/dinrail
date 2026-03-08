@@ -253,7 +253,8 @@ bool Parameters::getParameter(const std::string& key, GenericVector<double>::Ref
     return copyVectorToGenericVector(*value, parameter);
 }
 
-bool Parameters::getParameter(const std::string& key, GenericVector<std::string>::Ref parameter) const
+bool Parameters::getParameter(const std::string& key,
+                              GenericVector<std::string>::Ref parameter) const
 {
     const std::vector<std::string>* value = getTyped<std::vector<std::string>>(m_values, key);
     if (value == nullptr)
@@ -267,8 +268,8 @@ bool Parameters::getParameter(const std::string& key, GenericVector<std::string>
 bool Parameters::getParameter(const std::string& key,
                               GenericVector<std::chrono::nanoseconds>::Ref parameter) const
 {
-    const std::vector<std::chrono::nanoseconds>* value =
-        getTyped<std::vector<std::chrono::nanoseconds>>(m_values, key);
+    const std::vector<std::chrono::nanoseconds>* value
+        = getTyped<std::vector<std::chrono::nanoseconds>>(m_values, key);
     if (value == nullptr)
     {
         return false;

@@ -4,10 +4,10 @@
 #ifndef DINRAIL_ADAPTERREGISTRY_H
 #define DINRAIL_ADAPTERREGISTRY_H
 
-#include <typeinfo>
 #include <functional>
-#include <unordered_map>
 #include <memory>
+#include <typeinfo>
+#include <unordered_map>
 
 namespace dinrail
 {
@@ -16,7 +16,7 @@ class IDevice;
 
 /**
  * @brief Registry for interface adapters.
- * 
+ *
  * Compatibility layers can register adapter factories that convert
  * devices from one system (e.g., YARP) to dinrail interfaces.
  * This allows multiple compat plugins to independently provide adapters
@@ -27,7 +27,7 @@ class AdapterRegistry
 public:
     /**
      * @brief Adapter factory function type.
-     * 
+     *
      * Takes an IDevice pointer and returns an interface pointer if the
      * device supports the interface through adaptation, or nullptr otherwise.
      */
@@ -35,7 +35,7 @@ public:
 
     /**
      * @brief Register an adapter factory for a specific interface type.
-     * 
+     *
      * @param interfaceType The type_info of the target interface
      * @param factory Function that creates adapters for devices
      */
@@ -43,7 +43,7 @@ public:
 
     /**
      * @brief Query for an adapter for a specific interface type.
-     * 
+     *
      * @param device The device to adapt
      * @param interfaceType The type_info of the target interface
      * @return Pointer to the adapted interface, or nullptr if no adapter available
@@ -68,12 +68,10 @@ private:
         }
     };
 
-    using RegistryMap = std::unordered_map<
-        std::reference_wrapper<const std::type_info>,
-        AdapterFactory,
-        TypeInfoHash,
-        TypeInfoEqual
-    >;
+    using RegistryMap = std::unordered_map<std::reference_wrapper<const std::type_info>,
+                                           AdapterFactory,
+                                           TypeInfoHash,
+                                           TypeInfoEqual>;
 
     static RegistryMap& getRegistry();
 };

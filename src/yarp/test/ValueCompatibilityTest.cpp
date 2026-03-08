@@ -36,7 +36,9 @@ TEST_CASE("yarp::os::Value and dinrail::Value scalar compatibility", "[ValueComp
         ValuePair{makeYarpBool(true), dinrail::Value(true), "bool"},
         ValuePair{yarp::os::Value(static_cast<std::int32_t>(42)), dinrail::Value(42), "int"},
         ValuePair{yarp::os::Value(3.5), dinrail::Value(3.5), "double"},
-        ValuePair{yarp::os::Value(std::string("hello")), dinrail::Value(std::string("hello")), "string"},
+        ValuePair{yarp::os::Value(std::string("hello")),
+                  dinrail::Value(std::string("hello")),
+                  "string"},
     };
 
     for (const auto& valuePair : values)

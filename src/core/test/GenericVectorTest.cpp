@@ -30,12 +30,15 @@ TEST_CASE("GenericVector")
     SECTION("Constructible")
     {
         REQUIRE((std::is_constructible_v<GenericVector<double>::Ref, std::vector<double>&>));
-        REQUIRE((std::is_constructible_v<GenericVector<const double>::Ref, const std::vector<double>&>));
+        REQUIRE((
+            std::is_constructible_v<GenericVector<const double>::Ref, const std::vector<double>&>));
         REQUIRE((std::is_constructible_v<GenericVector<int>::Ref, std::vector<int>&>));
         REQUIRE((std::is_constructible_v<GenericVector<const int>::Ref, const std::vector<int>&>));
-        REQUIRE((std::is_constructible_v<GenericVector<std::string>::Ref, std::vector<std::string>&>));
+        REQUIRE(
+            (std::is_constructible_v<GenericVector<std::string>::Ref, std::vector<std::string>&>));
         REQUIRE((std::is_constructible_v<GenericVector<double>::Ref, std::array<double, 5>&>));
-        REQUIRE((std::is_constructible_v<GenericVector<const double>::Ref, const std::array<double, 5>&>));
+        REQUIRE((std::is_constructible_v<GenericVector<const double>::Ref,
+                                         const std::array<double, 5>&>));
         REQUIRE((std::is_constructible_v<GenericVector<char>::Ref, std::string&>));
         REQUIRE_FALSE((std::is_constructible_v<GenericVector<bool>::Ref, std::vector<bool>&>));
         REQUIRE_FALSE((std::is_constructible_v<GenericVector<double>::Ref, double&>));
@@ -137,14 +140,13 @@ TEST_CASE("GenericVector")
         using index_type = GenericVector<double>::index_type;
 
         GenericVector<double>* inputPtr = &container;
-        resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> std::span<double>
-        {
+        resize_function resizeLambda = [inputPtr](index_type newSize) -> std::span<double> {
             inputPtr->resizeVector(newSize);
             return std::span<double>(inputPtr->data(), inputPtr->size());
         };
 
-        GenericVector<double> inception(std::span<double>(container.data(), container.size()), resizeLambda);
+        GenericVector<double> inception(std::span<double>(container.data(), container.size()),
+                                        resizeLambda);
         REQUIRE(inception.resizeVector(6));
         REQUIRE(vector.size() == 6);
     }
@@ -179,15 +181,15 @@ TEST_CASE("GenericVector")
         using index_type = GenericVector<double>::index_type;
 
         GenericVector<double>* inputPtr = &container;
-        resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> std::span<double>
-        {
+        resize_function resizeLambda = [inputPtr](index_type newSize) -> std::span<double> {
             inputPtr->resizeVector(newSize);
             return std::span<double>(inputPtr->data(), inputPtr->size());
         };
 
-        auto mappedContainerPtr = std::make_shared<GenericVector<double>>(
-            std::span<double>(container.data(), container.size()), resizeLambda);
+        auto mappedContainerPtr
+            = std::make_shared<GenericVector<double>>(std::span<double>(container.data(),
+                                                                        container.size()),
+                                                      resizeLambda);
         REQUIRE(mappedContainerPtr->resizeVector(6));
         REQUIRE(vector.size() == 6);
     }
@@ -407,7 +409,8 @@ TEST_CASE("GenericVector")
             it = first;
             ok = (it == first);
             REQUIRE(ok);
-            while (it != s.end()) {
+            while (it != s.end())
+            {
                 *it = 5;
                 ++it;
             }
@@ -417,7 +420,8 @@ TEST_CASE("GenericVector")
             ok = (it - beyond == 0);
             REQUIRE(ok);
 
-            for (const auto& n : s) {
+            for (const auto& n : s)
+            {
                 ok = (n == 5);
                 REQUIRE(ok);
             }
@@ -477,7 +481,8 @@ TEST_CASE("GenericVector")
             it = first;
             ok = (it == first);
             REQUIRE(ok);
-            while (it != s.end()) {
+            while (it != s.end())
+            {
                 ok = (*it == last + 1);
                 REQUIRE(ok);
 
@@ -530,7 +535,8 @@ TEST_CASE("GenericVector")
         it = first;
         ok = (it == first);
         REQUIRE(ok);
-        while (it != s.rend()) {
+        while (it != s.rend())
+        {
             *it = 5;
             ++it;
         }
@@ -540,7 +546,8 @@ TEST_CASE("GenericVector")
         ok = (it - beyond == 0);
         REQUIRE(ok);
 
-        for (const auto& n : s) {
+        for (const auto& n : s)
+        {
             ok = (n == 5);
             REQUIRE(ok);
         }
@@ -581,7 +588,8 @@ TEST_CASE("GenericVector")
         ok = (it == first);
         REQUIRE(ok);
         int last = 5;
-        while (it != s.rend()) {
+        while (it != s.rend())
+        {
             ok = (*it == last - 1);
             REQUIRE(ok);
             last = *it;
@@ -614,12 +622,14 @@ TEST_CASE("GenericVector")
         Eigen::VectorXd eigenVec(3);
         eigenVec << 1.0, 2.0, 3.0;
 
-        auto resizeLambda = [&eigenVec](GenericVector<double>::index_type newSize) -> std::span<double> {
+        auto resizeLambda
+            = [&eigenVec](GenericVector<double>::index_type newSize) -> std::span<double> {
             eigenVec.conservativeResize(static_cast<Eigen::Index>(newSize));
             return std::span<double>(eigenVec.data(), static_cast<std::size_t>(eigenVec.size()));
         };
 
-        GenericVector<double> mapped(std::span<double>(eigenVec.data(), static_cast<std::size_t>(eigenVec.size())),
+        GenericVector<double> mapped(std::span<double>(eigenVec.data(),
+                                                       static_cast<std::size_t>(eigenVec.size())),
                                      resizeLambda);
 
         REQUIRE(mapped.size() == 3);
@@ -639,7 +649,8 @@ TEST_CASE("GenericVector")
         Eigen::Vector3d fixedVec;
         fixedVec << 4.0, 5.0, 6.0;
 
-        GenericVector<double> mapped(std::span<double>(fixedVec.data(), static_cast<std::size_t>(fixedVec.size())));
+        GenericVector<double> mapped(
+            std::span<double>(fixedVec.data(), static_cast<std::size_t>(fixedVec.size())));
 
         REQUIRE(mapped.size() == 3);
         mapped[0] = 9.0;

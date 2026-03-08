@@ -40,9 +40,7 @@ bool isGroupEntry(const yarp::os::Bottle& entry)
     return true;
 }
 
-void convertEntryValue(const std::string& key,
-                       const yarp::os::Value& value,
-                       Parameters& output)
+void convertEntryValue(const std::string& key, const yarp::os::Value& value, Parameters& output)
 {
     if (value.isBool())
     {
@@ -140,8 +138,7 @@ void convertEntryValue(const std::string& key,
                 }
 
                 converted.push_back(static_cast<int>(yarpValue));
-            }
-            else
+            } else
             {
                 converted.push_back(list->get(i).asInt32());
             }
@@ -245,7 +242,8 @@ Parameters YarpPropertyConverter::toDinrailParameters(const yarp::os::Property& 
     return output;
 }
 
-void YarpPropertyConverter::convertRecursive(const Parameters& dinrailParams, yarp::os::Property& yarpProp)
+void YarpPropertyConverter::convertRecursive(const Parameters& dinrailParams,
+                                             yarp::os::Property& yarpProp)
 {
     // First, copy all data (non-group) keys
     std::vector<std::string> dataKeys = dinrailParams.getValueKeys();
@@ -274,7 +272,7 @@ void YarpPropertyConverter::convertRecursive(const Parameters& dinrailParams, ya
             yarpProp.put(key, dinrailParams.find(key).as<std::string>());
         }
     }
-    
+
     // Then, recursively convert all nested groups
     std::vector<std::string> groupKeys = dinrailParams.getGroupKeys();
     for (const auto& key : groupKeys)

@@ -34,11 +34,13 @@ TEST_CASE("YARP Vocab Compatibility", "[yarp][vocab]")
     SECTION("createVocab32 produces same values as YARP")
     {
         // Test a few examples
-        CHECK(dinrail::createVocab32('s','e','t') == yarp::os::createVocab32('s','e','t'));
-        CHECK(dinrail::createVocab32('p','o','s') == yarp::os::createVocab32('p','o','s'));
-        CHECK(dinrail::createVocab32('i','d','l') == yarp::os::createVocab32('i','d','l'));
-        CHECK(dinrail::createVocab32('p','o','s','d') == yarp::os::createVocab32('p','o','s','d'));
-        CHECK(dinrail::createVocab32('t','o','r','q') == yarp::os::createVocab32('t','o','r','q'));
+        CHECK(dinrail::createVocab32('s', 'e', 't') == yarp::os::createVocab32('s', 'e', 't'));
+        CHECK(dinrail::createVocab32('p', 'o', 's') == yarp::os::createVocab32('p', 'o', 's'));
+        CHECK(dinrail::createVocab32('i', 'd', 'l') == yarp::os::createVocab32('i', 'd', 'l'));
+        CHECK(dinrail::createVocab32('p', 'o', 's', 'd')
+              == yarp::os::createVocab32('p', 'o', 's', 'd'));
+        CHECK(dinrail::createVocab32('t', 'o', 'r', 'q')
+              == yarp::os::createVocab32('t', 'o', 'r', 'q'));
     }
 
     SECTION("Vocab decode produces human-readable strings")
@@ -54,10 +56,10 @@ TEST_CASE("YARP Vocab Compatibility", "[yarp][vocab]")
     {
         std::string test1 = "set";
         CHECK(dinrail::Vocab32::decode(dinrail::Vocab32::encode(test1)) == test1);
-        
+
         std::string test2 = "pos";
         CHECK(dinrail::Vocab32::decode(dinrail::Vocab32::encode(test2)) == test2);
-        
+
         std::string test3 = "posd";
         CHECK(dinrail::Vocab32::decode(dinrail::Vocab32::encode(test3)) == test3);
     }

@@ -5,8 +5,8 @@
 #define DINRAIL_YARPCOMPATIBILITYLAYER_H
 
 #include <dinrail/ICompatibilityLayer.h>
-#include <dinrail/Parameters.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/Parameters.h>
 
 #include <memory>
 
@@ -40,7 +40,7 @@ public:
 
     /**
      * @brief Register YARP interface adapters.
-     * 
+     *
      * Registers adapter factories for all supported YARP interfaces:
      * - IPositionDirect
      * - IEncoders

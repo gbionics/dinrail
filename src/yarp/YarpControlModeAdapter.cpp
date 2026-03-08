@@ -14,7 +14,7 @@ YarpControlModeAdapter::YarpControlModeAdapter(yarp::dev::PolyDriver* yarpDevice
     }
 }
 
-bool YarpControlModeAdapter::getControlMode(int j, int *mode)
+bool YarpControlModeAdapter::getControlMode(int j, int* mode)
 {
     if (!m_yarpInterface)
     {
@@ -23,7 +23,7 @@ bool YarpControlModeAdapter::getControlMode(int j, int *mode)
     return m_yarpInterface->getControlMode(j, mode);
 }
 
-bool YarpControlModeAdapter::getControlModes(int *modes)
+bool YarpControlModeAdapter::getControlModes(int* modes)
 {
     if (!m_yarpInterface)
     {
@@ -32,7 +32,7 @@ bool YarpControlModeAdapter::getControlModes(int *modes)
     return m_yarpInterface->getControlModes(modes);
 }
 
-bool YarpControlModeAdapter::getControlModes(const int n_joint, const int *joints, int *modes)
+bool YarpControlModeAdapter::getControlModes(const int n_joint, const int* joints, int* modes)
 {
     if (!m_yarpInterface)
     {
@@ -50,7 +50,7 @@ bool YarpControlModeAdapter::setControlMode(const int j, const int mode)
     return m_yarpInterface->setControlMode(j, mode);
 }
 
-bool YarpControlModeAdapter::setControlModes(const int n_joint, const int *joints, int *modes)
+bool YarpControlModeAdapter::setControlModes(const int n_joint, const int* joints, int* modes)
 {
     if (!m_yarpInterface)
     {
@@ -59,7 +59,7 @@ bool YarpControlModeAdapter::setControlModes(const int n_joint, const int *joint
     return m_yarpInterface->setControlModes(n_joint, joints, modes);
 }
 
-bool YarpControlModeAdapter::setControlModes(int *modes)
+bool YarpControlModeAdapter::setControlModes(int* modes)
 {
     if (!m_yarpInterface)
     {

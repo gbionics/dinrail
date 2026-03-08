@@ -5,7 +5,8 @@
 #ifndef DINRAIL_IPOSITIONDIRECT_H
 #define DINRAIL_IPOSITIONDIRECT_H
 
-namespace dinrail {
+namespace dinrail
+{
 
 /**
  * @ingroup dev_iface_motor
@@ -20,7 +21,9 @@ public:
     /**
      * Destructor.
      */
-    virtual ~IPositionDirect() {}
+    virtual ~IPositionDirect()
+    {
+    }
 
     /**
      * Get the number of controlled axes. This command asks the number of controlled
@@ -28,7 +31,7 @@ public:
      * @param ax pointer to storage for the return value
      * @return true/false on success/failure
      */
-    virtual bool getAxes(int *ax) = 0;
+    virtual bool getAxes(int* ax) = 0;
 
     /** Set new position for a single axis.
      * @param j joint number
@@ -48,13 +51,13 @@ public:
      *          refs    10 30 40
      * @return true/false on success/failure
      */
-    virtual bool setPositions(const int n_joint, const int *joints, const double *refs) = 0;
+    virtual bool setPositions(const int n_joint, const int* joints, const double* refs) = 0;
 
     /** Set new position for a set of axis.
      * @param refs specifies the new reference points
      * @return true/false on success/failure
      */
-    virtual bool setPositions(const double *refs) = 0;
+    virtual bool setPositions(const double* refs) = 0;
 
     /** Get the last position reference for the specified axis.
      *  This is the dual of setPositions and shall return only values sent using
@@ -66,7 +69,7 @@ public:
      * @param ref last reference sent using setPosition(s) functions
      * @return true/false on success/failure
      */
-    virtual bool getRefPosition(const int joint, double *ref) = 0;
+    virtual bool getRefPosition(const int joint, double* ref) = 0;
 
     /** Get the last position reference for all axes.
      *  This is the dual of setPositions and shall return only values sent using
@@ -77,7 +80,7 @@ public:
      * @param refs array containing last reference sent using setPosition(s) functions
      * @return true/false on success/failure
      */
-    virtual bool getRefPositions(double *refs) = 0;
+    virtual bool getRefPositions(double* refs) = 0;
 
     /** Get the last position reference for the specified group of axes.
      *  This is the dual of setPositions and shall return only values sent using
@@ -90,7 +93,7 @@ public:
      * @param refs array containing last reference sent using setPosition(s) functions
      * @return true/false on success/failure
      */
-    virtual bool getRefPositions(const int n_joint, const int *joints, double *refs) = 0;
+    virtual bool getRefPositions(const int n_joint, const int* joints, double* refs) = 0;
 };
 
 } // namespace dinrail
