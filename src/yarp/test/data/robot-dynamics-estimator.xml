@@ -1,9 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.1//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.1.dtd">
 <!-- Copyright (C) 2019 Istituto Italiano di Tecnologia (IIT). All rights reserved.
 This software may be modified and distributed under the terms of the
 BSD-3-Clause license. -->
-
-<?xml version="1.0" encoding="UTF-8" ?>
-<device  xmlns:xi="http://www.w3.org/2001/XInclude" name="robot-dynamics-estimator" type="RobotDynamicsEstimatorDevice">
+<robot name="robot-dynamics-estimator"
+    build="0"
+    portprefix="/robot-dynamics-estimator"
+    prefix="robot-dynamics-estimator">
+<devices>
+<device xmlns:xi="http://www.w3.org/2001/XInclude" name="robot-dynamics-estimator" type="RobotDynamicsEstimatorDevice">
     <group name="GENERAL">
         <param name="sampling_time">0.01</param>
         <param name="port_prefix">/robot-dynamics-estimator</param>
@@ -167,3 +172,5 @@ BSD-3-Clause license. -->
     <!-- FINISH ATTACH-->
 
 </device>
+</devices>
+</robot>

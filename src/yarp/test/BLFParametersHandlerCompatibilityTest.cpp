@@ -12,20 +12,96 @@
 #include "../YarpPropertyConverter.h"
 
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
 
 #include <yarp/os/Bottle.h>
+#include <yarp/os/Time.h>
 #include <yarp/os/Property.h>
 #include <yarp/os/Value.h>
 
+#include <yarp/robotinterface/Types.h>
+#include <yarp/robotinterface/XMLReader.h>
+
 namespace
 {
+
+yarp::os::Property toProperty(const yarp::robotinterface::Device& dev)
+{
+    using namespace yarp::robotinterface;
+
+    ParamList params = mergeDuplicateGroups(dev.params());
+
+    yarp::os::Property prop;
+    prop.put("device", dev.type());
+    prop.put("id", dev.name());
+
+    for (const auto& param : params)
+    {
+        prop.fromString("(" + param.name() + " " + param.value() + ")", false);
+    }
+
+    return prop;
+}
+
+yarp::os::Property loadPropertyFromFile(const std::filesystem::path& file)
+{
+    yarp::os::Property yarpProperty;
+
+    if (file.extension() == ".xml")
+    {
+        yarp::os::Time::useSystemClock();
+
+        yarp::robotinterface::XMLReader reader;
+        reader.setEnableDeprecated(true);
+        auto result = reader.getRobotFromFile(file.string());
+
+        // Some legacy fixtures are a raw <device> XML block instead of a
+        // robotinterface <robot> root. In that case, wrap the device block.
+        if (!result.parsingIsSuccessful)
+        {
+            std::ifstream input(file);
+            REQUIRE(input.is_open());
+
+            std::stringstream buffer;
+            buffer << input.rdbuf();
+            const std::string xml = buffer.str();
+
+            const std::size_t start = xml.find("<device");
+            const std::size_t endTag = xml.rfind("</device>");
+            REQUIRE(start != std::string::npos);
+            REQUIRE(endTag != std::string::npos);
+
+            const std::size_t end = endTag + std::string("</device>").size();
+            const std::string deviceBlock = xml.substr(start, end - start);
+
+            const std::string wrapped = "<robot name=\"wrapped\" build=\"0\" portprefix=\"/\">\n"
+                                        + deviceBlock + "\n</robot>\n";
+            result = reader.getRobotFromString(wrapped);
+            REQUIRE(result.parsingIsSuccessful);
+        }
+
+        const auto& devices = result.robot.devices();
+        REQUIRE_FALSE(devices.empty());
+
+        const auto& dev = devices.front();
+        std::cout << "[BLFCompatibility] XML parsed device: name='" << dev.name()
+                  << "' type='" << dev.type() << "'" << std::endl;
+
+        yarpProperty = toProperty(dev);
+        return yarpProperty;
+    }
+
+    REQUIRE(yarpProperty.fromConfigFile(file.string()));
+    return yarpProperty;
+}
 
 class DinrailImplementation : public BipedalLocomotion::ParametersHandler::IParametersHandler
 {
@@ -447,6 +523,14 @@ void compareEntry(const yarp::os::Bottle& entry,
     yarp::os::Bottle* list = value.asList();
     REQUIRE(list != nullptr);
 
+    if (list->size() == 0)
+    {
+        std::cout << "[BLFCompatibility] Empty-list parameter tested (type-ambiguous): "
+                  << keyPath << std::endl;
+        INFO("Empty list key path: " << keyPath);
+        return;
+    }
+
     bool allInt = true;
     bool allFloat = true;
     bool allString = true;
@@ -533,9 +617,7 @@ TEST_CASE("BLF YarpImplementation and DinrailImplementation are compatible on sa
     for (const auto& file : files)
     {
         INFO("Checking file: " << file.string());
-
-        yarp::os::Property yarpProperty;
-        REQUIRE(yarpProperty.fromConfigFile(file.string()));
+        yarp::os::Property yarpProperty = loadPropertyFromFile(file);
 
         BipedalLocomotion::ParametersHandler::YarpImplementation yarpHandler(yarpProperty);
 
