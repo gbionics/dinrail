@@ -6,8 +6,8 @@ set(LIBRARY_NAME dinrail)
 # Create the library
 add_library(${LIBRARY_NAME}
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IDevice.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.cpp
+    #${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.h
+    #${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Parameters.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Value.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/Value.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/GenericVector.h

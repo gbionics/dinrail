@@ -5,7 +5,10 @@
 
 #include <array>
 #include <chrono>
+#include <span>
 #include <vector>
+
+#include <Eigen/Core>
 
 #include <dinrail/Parameters.h>
 
@@ -180,4 +183,49 @@ TEST_CASE("Parameters supports BLF-style generic vector set and get", "[Paramete
 
     std::array<int, 2> fixedInt{0, 0};
     REQUIRE_FALSE(params.getParameter("ints", dinrail::GenericVector<int>::Ref(fixedInt)));
+}
+
+TEST_CASE("Parameters supports writing vector values from Eigen::VectorXd", "[Parameters]")
+{
+    dinrail::Parameters params;
+
+    Eigen::VectorXd source(4);
+    source << 10.0, 20.0, 30.0, 40.0;
+
+    params.setParameter("gains", source);
+
+    std::vector<double> out;
+    REQUIRE(params.getParameter("gains", out));
+    REQUIRE(out.size() == static_cast<std::size_t>(source.size()));
+
+    for (std::size_t i = 0; i < out.size(); ++i)
+    {
+        REQUIRE(out[i] == source[static_cast<Eigen::Index>(i)]);
+    }
+}
+
+TEST_CASE("Parameters supports reading vector values into Eigen::VectorXd", "[Parameters]")
+{
+    dinrail::Parameters params;
+    const std::vector<double> source{1.0, 2.0, 3.0, 4.0, 5.0};
+    params.put("gains", dinrail::GenericVector<const double>::Ref(source));
+
+    Eigen::VectorXd out;
+    auto resizeLambda = [&out](dinrail::GenericVector<double>::index_type newSize)
+        -> std::span<double> {
+        out.conservativeResize(static_cast<Eigen::Index>(newSize));
+        return std::span<double>(out.data(), static_cast<std::size_t>(out.size()));
+    };
+
+    dinrail::GenericVector<double> outView(
+        std::span<double>(out.data(), static_cast<std::size_t>(out.size())),
+        resizeLambda);
+
+    REQUIRE(params.getParameter("gains", dinrail::GenericVector<double>::Ref(outView)));
+    REQUIRE(out.size() == 5);
+    REQUIRE(out[0] == 1.0);
+    REQUIRE(out[1] == 2.0);
+    REQUIRE(out[2] == 3.0);
+    REQUIRE(out[3] == 4.0);
+    REQUIRE(out[4] == 5.0);
 }

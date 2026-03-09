@@ -92,7 +92,8 @@ void convertEntryValue(const std::string& key, const yarp::os::Value& value, Par
 
     if (list->size() == 0)
     {
-        output.put(key, std::vector<std::string>{});
+        const std::vector<std::string> emptyVector;
+        output.put(key, dinrail::GenericVector<const std::string>::Ref(emptyVector));
         return;
     }
 
@@ -143,7 +144,7 @@ void convertEntryValue(const std::string& key, const yarp::os::Value& value, Par
                 converted.push_back(list->get(i).asInt32());
             }
         }
-        output.put(key, converted);
+        output.put(key, dinrail::GenericVector<const int>::Ref(converted));
         return;
     }
 
@@ -155,7 +156,7 @@ void convertEntryValue(const std::string& key, const yarp::os::Value& value, Par
         {
             converted.push_back(list->get(i).asFloat64());
         }
-        output.put(key, converted);
+        output.put(key, dinrail::GenericVector<const double>::Ref(converted));
         return;
     }
 
@@ -167,7 +168,7 @@ void convertEntryValue(const std::string& key, const yarp::os::Value& value, Par
         {
             converted.push_back(list->get(i).asString());
         }
-        output.put(key, converted);
+        output.put(key, dinrail::GenericVector<const std::string>::Ref(converted));
         return;
     }
 

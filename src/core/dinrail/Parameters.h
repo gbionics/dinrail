@@ -5,6 +5,8 @@
 #define DINRAIL_PARAMETERS_H
 
 #include <chrono>
+#include <concepts>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -49,13 +51,14 @@ public:
     /** @brief Insert or replace a boolean vector value. */
     void put(const std::string& key, const std::vector<bool>& value);
     /** @brief Insert or replace an integer vector value. */
-    void put(const std::string& key, const std::vector<int>& value);
+    void put(const std::string& key, const GenericVector<const int>::Ref value);
     /** @brief Insert or replace a floating-point vector value. */
-    void put(const std::string& key, const std::vector<double>& value);
+    void put(const std::string& key, const GenericVector<const double>::Ref value);
     /** @brief Insert or replace a string vector value. */
-    void put(const std::string& key, const std::vector<std::string>& value);
+    void put(const std::string& key, const GenericVector<const std::string>::Ref value);
     /** @brief Insert or replace a duration vector value. */
-    void put(const std::string& key, const std::vector<std::chrono::nanoseconds>& value);
+    void put(const std::string& key,
+             const GenericVector<const std::chrono::nanoseconds>::Ref value);
 
     /**
      * @brief Check if a key exists either as value or as group.
@@ -111,6 +114,15 @@ public:
     bool getParameter(const std::string& key, std::chrono::nanoseconds& parameter) const;
     /** @brief BLF-style getter for boolean vector values. */
     bool getParameter(const std::string& key, std::vector<bool>& parameter) const;
+    /** @brief Convenience getter for integer vectors into std::vector. */
+    bool getParameter(const std::string& key, std::vector<int>& parameter) const;
+    /** @brief Convenience getter for double vectors into std::vector. */
+    bool getParameter(const std::string& key, std::vector<double>& parameter) const;
+    /** @brief Convenience getter for string vectors into std::vector. */
+    bool getParameter(const std::string& key, std::vector<std::string>& parameter) const;
+    /** @brief Convenience getter for duration vectors into std::vector. */
+    bool getParameter(const std::string& key,
+                      std::vector<std::chrono::nanoseconds>& parameter) const;
     /** @brief BLF-style getter for integer vectors. */
     bool getParameter(const std::string& key, GenericVector<int>::Ref parameter) const;
     /** @brief BLF-style getter for double vectors. */
@@ -139,6 +151,24 @@ public:
     void setParameter(const std::string& key, const GenericVector<const int>::Ref parameter);
     /** @brief BLF-style setter for double vectors. */
     void setParameter(const std::string& key, const GenericVector<const double>::Ref parameter);
+
+    /**
+     * @brief Convenience setter for contiguous double vectors (e.g. Eigen::VectorXd).
+     *
+     * This overload preserves the GenericVector-based core API while offering a
+     * direct entry point for common contiguous containers with `data()`/`size()`.
+     */
+    template <typename VectorLike>
+        requires requires(const VectorLike& v) {
+            { v.data() } -> std::convertible_to<const double*>;
+            { v.size() } -> std::convertible_to<std::size_t>;
+        }
+    void setParameter(const std::string& key, const VectorLike& parameter)
+    {
+        GenericVector<const double> view(
+            std::span<const double>(parameter.data(), static_cast<std::size_t>(parameter.size())));
+        setParameter(key, GenericVector<const double>::Ref(view));
+    }
     /** @brief BLF-style setter for string vectors. */
     void
     setParameter(const std::string& key, const GenericVector<const std::string>::Ref parameter);

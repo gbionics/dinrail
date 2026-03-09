@@ -41,15 +41,24 @@ uninstall = { cmd = ["cmake", "--build", ".build", "--target", "uninstall"] }
 format = { cmd = "clang-format -i $(git ls-files '*.cpp' '*.h' '*.cxx' '*.hpp')" }
 
 [dependencies]
+
+# Dev dependencies
 cmake = "*"
 cxx-compiler = "*"
 ninja = "*"
 pkg-config = "*"
 ycm-cmake-modules = "*"
-libsharedlibpp = "*"
 clang-format = "*"
+
+# Core dependencies
+libsharedlibpp = "*"
+
+# YARP component (optional) dependency
 libyarp = "*"
+
+# Test-only dependency
+libidyntree = "*"
 libbipedal-locomotion-framework = "*"
 catch2 = "*"
-cli11 = "*"
 eigen = "*"
+

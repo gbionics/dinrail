@@ -92,24 +92,25 @@ void Parameters::put(const std::string& key, const std::vector<bool>& value)
     m_values.insert_or_assign(key, Value(value));
 }
 
-void Parameters::put(const std::string& key, const std::vector<int>& value)
+void Parameters::put(const std::string& key, const GenericVector<const int>::Ref value)
 {
-    m_values.insert_or_assign(key, Value(value));
+    m_values.insert_or_assign(key, Value(copyFromGenericVector<int>(value)));
 }
 
-void Parameters::put(const std::string& key, const std::vector<double>& value)
+void Parameters::put(const std::string& key, const GenericVector<const double>::Ref value)
 {
-    m_values.insert_or_assign(key, Value(value));
+    m_values.insert_or_assign(key, Value(copyFromGenericVector<double>(value)));
 }
 
-void Parameters::put(const std::string& key, const std::vector<std::string>& value)
+void Parameters::put(const std::string& key, const GenericVector<const std::string>::Ref value)
 {
-    m_values.insert_or_assign(key, Value(value));
+    m_values.insert_or_assign(key, Value(copyFromGenericVector<std::string>(value)));
 }
 
-void Parameters::put(const std::string& key, const std::vector<std::chrono::nanoseconds>& value)
+void Parameters::put(const std::string& key,
+                     const GenericVector<const std::chrono::nanoseconds>::Ref value)
 {
-    m_values.insert_or_assign(key, Value(value));
+    m_values.insert_or_assign(key, Value(copyFromGenericVector<std::chrono::nanoseconds>(value)));
 }
 
 bool Parameters::check(const std::string& key) const
@@ -221,6 +222,27 @@ bool Parameters::getParameter(const std::string& key, std::vector<bool>& paramet
     return true;
 }
 
+bool Parameters::getParameter(const std::string& key, std::vector<int>& parameter) const
+{
+    return getParameter(key, GenericVector<int>::Ref(parameter));
+}
+
+bool Parameters::getParameter(const std::string& key, std::vector<double>& parameter) const
+{
+    return getParameter(key, GenericVector<double>::Ref(parameter));
+}
+
+bool Parameters::getParameter(const std::string& key, std::vector<std::string>& parameter) const
+{
+    return getParameter(key, GenericVector<std::string>::Ref(parameter));
+}
+
+bool Parameters::getParameter(const std::string& key,
+                              std::vector<std::chrono::nanoseconds>& parameter) const
+{
+    return getParameter(key, GenericVector<std::chrono::nanoseconds>::Ref(parameter));
+}
+
 bool Parameters::getParameter(const std::string& key, GenericVector<int>::Ref parameter) const
 {
     const std::vector<int>* value = getTyped<std::vector<int>>(m_values, key);
@@ -315,31 +337,25 @@ void Parameters::setParameter(const std::string& key, const std::vector<bool>& p
 
 void Parameters::setParameter(const std::string& key, const GenericVector<const int>::Ref parameter)
 {
-    std::vector<int> converted(parameter.size());
-    for (std::size_t i = 0; i < parameter.size(); ++i)
-    {
-        converted[i] = parameter[i];
-    }
-
-    put(key, converted);
+    put(key, parameter);
 }
 
 void Parameters::setParameter(const std::string& key,
                               const GenericVector<const double>::Ref parameter)
 {
-    put(key, copyFromGenericVector<double>(parameter));
+    put(key, parameter);
 }
 
 void Parameters::setParameter(const std::string& key,
                               const GenericVector<const std::string>::Ref parameter)
 {
-    put(key, copyFromGenericVector<std::string>(parameter));
+    put(key, parameter);
 }
 
 void Parameters::setParameter(const std::string& key,
                               const GenericVector<const std::chrono::nanoseconds>::Ref parameter)
 {
-    put(key, copyFromGenericVector<std::chrono::nanoseconds>(parameter));
+    put(key, parameter);
 }
 
 Parameters& Parameters::addGroup(const std::string& key)
