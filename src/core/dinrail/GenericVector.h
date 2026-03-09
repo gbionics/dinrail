@@ -28,13 +28,13 @@ namespace dinrail {
  * Forward declaration of Vector class. T is the type of vector (double, float, int, string,...)
  */
 template <typename T>
-class Vector;
+class GenericVector;
 
 /**
  * Utility alias to a std::shared_ptr of a Vector.
  */
 template <typename T>
-using Vector_ptr = std::shared_ptr<Vector<T>>;
+using GenericVector_ptr = std::shared_ptr<GenericVector<T>>;
 
 }
 
@@ -50,7 +50,7 @@ using Vector_ptr = std::shared_ptr<Vector<T>>;
  * This would invalidate the pointer inside it.
  */
 template <typename T>
-class dinrail::Vector
+class dinrail::GenericVector
 {
 public:
 
@@ -105,7 +105,7 @@ protected:
      * The default constructor is private. In fact, once the Vector is built, it is assumed to point to an existing container.
      * To be used only if m_span and m_resizeLamba are set manually.
      */
-    Vector() = default;
+    GenericVector() = default;
 
 public:
 
@@ -114,7 +114,7 @@ public:
      * @param span Span of the existing container
      * @param resizeLambda User defined lambda to resize the original container
      */
-    Vector(iDynTree::Span<T> span, resize_function_type resizeLambda)
+    GenericVector(iDynTree::Span<T> span, resize_function_type resizeLambda)
     {
         m_span = span;
         m_resizeLambda = resizeLambda;
@@ -126,7 +126,7 @@ public:
      *
      * Since no resizeLambda is provided, it is assumed that the original container cannot be resized.
      */
-    Vector(iDynTree::Span<T> span)
+    GenericVector(iDynTree::Span<T> span)
     {
         m_span = span;
         m_resizeLambda = [span](index_type size){unused(size); return span;};
@@ -135,14 +135,14 @@ public:
     /**
      * @brief Destructor
      */
-    ~Vector() = default;
+    ~GenericVector() = default;
 
     /**
      * @brief Copy constructor
      *
      * @warning It has been deleted since it would not be clear if the pointer or the pointed data would be copied.
      */
-    Vector(const Vector<T>& other) = delete;
+    GenericVector(const GenericVector<T>& other) = delete;
 
     /**
      * @brief Move constructor
@@ -150,7 +150,7 @@ public:
      *
      * @warning Here the pointers are copied, the content is not duplicated.
      */
-    Vector(Vector<T>&& other)
+    GenericVector(GenericVector<T>&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -163,7 +163,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    bool clone(const Vector<T>& other)
+    bool clone(const GenericVector<T>& other)
     {
         if (size() != other.size())
         {
@@ -217,7 +217,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    Vector<T>& operator=(const Vector<T>& other)
+    GenericVector<T>& operator=(const GenericVector<T>& other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -234,7 +234,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    Vector<T>& operator=(iDynTree::Span<T> other)
+    GenericVector<T>& operator=(iDynTree::Span<T> other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -251,7 +251,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    Vector<T>& operator=(Vector<T>&& other)
+    GenericVector<T>& operator=(GenericVector<T>&& other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -555,7 +555,7 @@ struct is_vector : std::false_type
  * is_vector is a utility metafunction used to check if T is a dinrail::Vector.
  */
 template <typename T>
-struct is_vector<Vector<T>> : std::true_type
+struct is_vector<GenericVector<T>> : std::true_type
 {
 };
 
@@ -642,7 +642,7 @@ enum class VectorResizeMode
  * In fact, the output lambda contains a pointer to input.
  */
 template<typename Class>
-typename Vector<typename container_data<Class>::type>::resize_function_type DefaultVectorResizer(Class& input)
+typename GenericVector<typename container_data<Class>::type>::resize_function_type DefaultVectorResizer(Class& input)
 {
     static_assert (is_resizable<Class>::value, "Class type is not resizable.");
     static_assert (is_span_constructible<Class>::value || (is_data_available<Class>::value && is_size_available<Class>::value),
@@ -652,8 +652,8 @@ typename Vector<typename container_data<Class>::type>::resize_function_type Defa
 
     if constexpr (is_span_constructible<Class>::value)
     {
-        using index_type = typename Vector<value_type>::index_type;
-        using resize_function = typename Vector<value_type>::resize_function_type;
+        using index_type = typename GenericVector<value_type>::index_type;
+        using resize_function = typename GenericVector<value_type>::resize_function_type;
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
@@ -668,7 +668,7 @@ typename Vector<typename container_data<Class>::type>::resize_function_type Defa
     else
     {
         using index_type = decltype(std::declval<Class>().size());
-        using resize_function = typename Vector<value_type>::resize_function_type;
+        using resize_function = typename GenericVector<value_type>::resize_function_type;
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
@@ -692,7 +692,7 @@ typename Vector<typename container_data<Class>::type>::resize_function_type Defa
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-Vector<typename container_data<Class>::type>
+GenericVector<typename container_data<Class>::type>
 make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
     static_assert (!std::is_same<typename container_data<Class>::type, bool>::value,
@@ -717,11 +717,11 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
     {
         if (mode == VectorResizeMode::Resizable)
         {
-            return Vector(span, DefaultVectorResizer(input));
+            return GenericVector(span, DefaultVectorResizer(input));
         }
         else
         {
-            return Vector(span);
+            return GenericVector(span);
         }
     }
     else
@@ -732,7 +732,7 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
                       << " is not resizable. Returning a non-resizable container." << std::endl;
         }
 
-        return Vector(span);
+        return GenericVector(span);
     }
 }
 
@@ -749,7 +749,7 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template <typename Class>
-Vector<const typename container_data<Class>::type>
+GenericVector<const typename container_data<Class>::type>
 make_vector(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
     static_assert (!std::is_same<typename container_data<Class>::type, bool>::value,
@@ -775,30 +775,30 @@ make_vector(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
         std::cerr << "[dinrail::Vector] The input type is const. Returning a non-resizable container." << std::endl;
     }
 
-    return Vector(span);
+    return GenericVector(span);
 }
 
 /**
- * @brief Utility function to create a dinrail::Vector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
  * @param input The refence to an existing vector.
  * @param mode The resize mode. By default the output Vector is <code>Fixed<\code>.
- * @returns A dinrail::Vector_ptr.
+ * @returns A dinrail::GenericVector_ptr.
  *
  * @warning The input object from which the underlying dinrail::Vector has been initialized should not be deallocated before it.
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-Vector_ptr<typename container_data<Class>::type>
+GenericVector_ptr<typename container_data<Class>::type>
 make_vector_ptr(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
-    return std::make_shared<Vector<typename container_data<Class>::type>>(make_vector(input,mode));
+    return std::make_shared<GenericVector<typename container_data<Class>::type>>(make_vector(input,mode));
 }
 
 /**
- * @brief Utility function to create a dinrail::Vector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
  * @param input The refence to an existing vector.
  * @param mode The resize mode. By default the output Vector is <code>Fixed<\code>.
- * @returns A dinrail::Vector_ptr.
+ * @returns A dinrail::GenericVector_ptr.
  *
  * @warning This version is called if the input type is const. Hence, it cannot be resized.
  * It throws a warning if the selected mode is <code>VectorResizeMode::Resizable<\code>.
@@ -807,16 +807,16 @@ make_vector_ptr(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-Vector_ptr<const typename container_data<Class>::type>
+GenericVector_ptr<const typename container_data<Class>::type>
 make_vector_ptr(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
-    return std::make_shared<Vector<const typename container_data<Class>::type>>(make_vector(input,mode));
+    return std::make_shared<GenericVector<const typename container_data<Class>::type>>(make_vector(input,mode));
 }
 
 /**
- * @brief Utility function to create a dinrail::Vector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
  * @param span Span of the existing container
- * @returns A dinrail::Vector_ptr.
+ * @returns A dinrail::GenericVector_ptr.
  *
  * Since no resizeLambda is provided, it is assumed that the original container cannot be resized.
  *
@@ -824,14 +824,14 @@ make_vector_ptr(const Class& input, VectorResizeMode mode = VectorResizeMode::Fi
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename T>
-Vector_ptr<T>
+GenericVector_ptr<T>
 make_vector_ptr(iDynTree::Span<T> span)
 {
-    return std::make_shared<Vector<T>>(span);
+    return std::make_shared<GenericVector<T>>(span);
 }
 
 /**
- * @brief Utility function to create a dinrail::Vector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
  * @param span Span of the existing container
  * @param resizeLambda User defined lambda to resize the original container
  *
@@ -839,10 +839,10 @@ make_vector_ptr(iDynTree::Span<T> span)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename T>
-Vector_ptr<T>
-make_vector_ptr(iDynTree::Span<T> span, typename Vector<T>::resize_function_type resizeLambda)
+GenericVector_ptr<T>
+make_vector_ptr(iDynTree::Span<T> span, typename GenericVector<T>::resize_function_type resizeLambda)
 {
-    return std::make_shared<Vector<T>>(span, resizeLambda);
+    return std::make_shared<GenericVector<T>>(span, resizeLambda);
 }
 
 /**
@@ -854,7 +854,7 @@ make_vector_ptr(iDynTree::Span<T> span, typename Vector<T>::resize_function_type
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-typename Vector<typename container_data<Class>::type>::eigen_map_type to_eigen(Class& input)
+typename GenericVector<typename container_data<Class>::type>::eigen_map_type to_eigen(Class& input)
 {
     static_assert (is_vector_constructible<Class>::value,
                   "Cannot create a Vector from the input class. Cannot know how to convert to Eigen." );
@@ -878,7 +878,7 @@ typename Vector<typename container_data<Class>::type>::eigen_map_type to_eigen(C
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-typename Vector<const typename container_data<Class>::type>::eigen_map_const_type to_eigen(const Class& input)
+typename GenericVector<const typename container_data<Class>::type>::eigen_map_const_type to_eigen(const Class& input)
 {
     static_assert (is_vector_constructible<Class>::value,
                   "Cannot create a Vector from the input class. Cannot know how to convert to Eigen." );
@@ -900,10 +900,10 @@ typename Vector<const typename container_data<Class>::type>::eigen_map_const_typ
  * is that custom vectors (all those supported by dinrail::Vector) can be implicitly casted to Ref.
  * Ref does not allocate any memory in construction, hence can be used as a parameter to be passed by copy.
  * The = operator clones the content.
- * Ref inherits Vector<T>, hence it can be used as it was a Vector<T>.
+ * Ref inherits GenericVector<T>, hence it can be used as it was a GenericVector<T>.
  */
 template <typename T>
-class dinrail::Vector<T>::Ref : public dinrail::Vector<T>
+class dinrail::GenericVector<T>::Ref : public dinrail::GenericVector<T>
 {
 public:
 
@@ -916,7 +916,7 @@ public:
      * @brief Copy constructor
      * @param other The ref from which to copy the context.
      */
-    Ref(dinrail::Vector<T>::Ref& other)
+    Ref(dinrail::GenericVector<T>::Ref& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -926,31 +926,31 @@ public:
      * @brief Move constructor
      * @param other The ref from which to get the context.
      */
-    Ref(dinrail::Vector<T>::Ref&& other)
+    Ref(dinrail::GenericVector<T>::Ref&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
     }
 
     /**
-     * @brief Constructor from a dinrail::Vector<T>&
+     * @brief Constructor from a dinrail::GenericVector<T>&
      * @param other The input vector from which the context is copied
      */
-    Ref(dinrail::Vector<T>& other)
+    Ref(dinrail::GenericVector<T>& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
     }
 
     /**
-     * @brief Constructor from a dinrail::Vector<T>&
+     * @brief Constructor from a dinrail::GenericVector<T>&
      * @param other The input vector from which the context is taken
-     * In principle, Ref should be the reference of a Vector<T> which should remain alive while
-     * Ref is alive. On the other hand, Vector<T> is only a pointer to some data which does not own.
-     * Hence, Ref can remain alive even if the Vector<T> is deleted, provided that the original container
+     * In principle, Ref should be the reference of a GenericVector<T> which should remain alive while
+     * Ref is alive. On the other hand, GenericVector<T> is only a pointer to some data which does not own.
+     * Hence, Ref can remain alive even if the GenericVector<T> is deleted, provided that the original container
      * stays alive.
      */
-    Ref(dinrail::Vector<T>&& other)
+    Ref(dinrail::GenericVector<T>&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -961,7 +961,7 @@ public:
      * This is used if:
      * - the input container is not a dinrail::Vector, to avoid ambiguities with other constructors
      * - the input container is not a string. This allows using Ref and string with overloaded methods.
-     * - a dinrail::Vector<T>::Ref can be constructed from the Container
+     * - a dinrail::GenericVector<T>::Ref can be constructed from the Container
      * - T is not const
      * - the input container is not const.
      */
@@ -997,7 +997,7 @@ public:
      * This is used if:
      * - the input container is not a dinrail::Vector, to avoid ambiguities with other constructors
      * - the input container is not a string. This allows using Ref and string with overloaded methods.
-     * - a dinrail::Vector<T>::Ref can be constructed from the Container
+     * - a dinrail::GenericVector<T>::Ref can be constructed from the Container
      * - T is const.
      */
     template <class Vector, typename = typename std::enable_if<!dinrail::is_vector<Vector>::value &&
@@ -1031,7 +1031,7 @@ public:
     */
    Ref operator=(const Ref& other)
    {
-       return static_cast<dinrail::Vector<T>&>(*this) = other;
+       return static_cast<dinrail::GenericVector<T>&>(*this) = other;
    }
 
    /**
@@ -1041,7 +1041,7 @@ public:
     */
    Ref operator=(Ref&& other)
    {
-       return static_cast<dinrail::Vector<T>&>(*this) = other;
+       return static_cast<dinrail::GenericVector<T>&>(*this) = other;
    }
 
 };
