@@ -18,6 +18,7 @@
 #include <Eigen/Core>
 
 #include <dinrail/GenericVector.h>
+#include <dinrail/EigenHelpers.h>
 
 
 void foo(dinrail::GenericVector<double>::Ref test)

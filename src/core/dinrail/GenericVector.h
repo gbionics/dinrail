@@ -86,13 +86,6 @@ public:
      */
     using resize_function_type = std::function<std::span<T>(index_type)>;
 
-    /**
-     * Alias to determine the output type of toEigen()
-     */
-    using eigen_map_type = typename Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, 1>>;
-    using eigen_map_const_type = typename Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, 1>>;
-
-
 protected:
     /**
      * @brief Span of the pointed vector. This allows to point to an existing container without owning it.
@@ -521,22 +514,6 @@ public:
     }
 
     /**
-     * @brief Get an Eigen map corresponding to the current generic vector (see https://eigen.tuxfamily.org/dox/classEigen_1_1Map.html).
-     */
-    eigen_map_type toEigen()
-    {
-        return eigen_map_type(data(), size());
-    }
-
-    /**
-     * @brief Get an Eigen const map corresponding to the current generic vector (see https://eigen.tuxfamily.org/dox/classEigen_1_1Map.html).
-     */
-    eigen_map_const_type toEigen() const
-    {
-        return eigen_map_const_type(data(), size());
-    }
-
-    /**
      * Forward declaration of Ref, which is used as a reference to the Vector (as &).
      */
     class Ref;
@@ -588,15 +565,14 @@ struct is_vector_constructible : std::false_type
 
 /**
  * is_vector_constructible is a utility metafunction to check if dinrail::Vector is constructible given a type T.
- * This specialization first checks if T is an array, or if it is possible to deduce the type of vector,
- * and that it is not an Eigen matrix (Eigen defines the size() method also for matrices).
+ * This specialization first checks if T is an array, or if it is possible to deduce the type of vector.
  * If not, this specialization is not used (SFINAE). Otherwise, given the vector type, it checks if a iDynTree::Span is construbile
  * or if the methods <code>data()<\code> and <code>size()<\code> are available. In addition, the type has not to be <code>bool<\code>.
  * If all the above checks are true, <code>is_vector_constructible<T>::value = true<\code>.
  */
 template <typename T>
     struct is_vector_constructible<T,
-                               typename std::enable_if<(std::is_array<T>::value || has_type_member<T>::value || is_data_available<T>::value) && !is_eigen_matrix<T>::value>::type,
+                               typename std::enable_if<(std::is_array<T>::value || has_type_member<T>::value || is_data_available<T>::value)>::type,
     typename std::enable_if<(is_span_constructible<T>::value ||(is_data_available<T>::value && is_size_available<T>::value)) &&
                              !std::is_same<typename container_data<T>::type, bool>::value>::type> : std::true_type
 {
@@ -845,54 +821,6 @@ GenericVector_ptr<T>
 make_vector_ptr(std::span<T> span, typename GenericVector<T>::resize_function_type resizeLambda)
 {
     return std::make_shared<GenericVector<T>>(span, resizeLambda);
-}
-
-/**
- * @brief Utility function to create an Eigen map from a reference to another vector.
- * @param input The refence to an existing vector.
- * @returns The coresponding eigen map.
- *
- * @warning The input object from which dinrail::Vector has been initialized should not be deallocated before it.
- * This would invalidate the pointer inside dinrail::Vector.
- */
-template<typename Class>
-typename GenericVector<typename container_data<Class>::type>::eigen_map_type to_eigen(Class& input)
-{
-    static_assert (is_vector_constructible<Class>::value,
-                  "Cannot create a Vector from the input class. Cannot know how to convert to Eigen." );
-
-    if constexpr (is_vector<Class>::value)
-    {
-        return input.toEigen();
-    }
-    else
-    {
-        return make_vector(input).toEigen();
-    }
-}
-
-/**
- * @brief Utility function to create an Eigen map from a reference to another vector.
- * @param input The refence to an existing vector.
- * @returns The coresponding eigen map.
- *
- * @warning The input object from which dinrail::Vector has been initialized should not be deallocated before it.
- * This would invalidate the pointer inside dinrail::Vector.
- */
-template<typename Class>
-typename GenericVector<const typename container_data<Class>::type>::eigen_map_const_type to_eigen(const Class& input)
-{
-    static_assert (is_vector_constructible<Class>::value,
-                  "Cannot create a Vector from the input class. Cannot know how to convert to Eigen." );
-
-    if constexpr (is_vector<Class>::value)
-    {
-        return input.toEigen();
-    }
-    else
-    {
-        return make_vector(input).toEigen();
-    }
 }
 
 }
