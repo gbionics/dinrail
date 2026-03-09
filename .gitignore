@@ -39,3 +39,11 @@
 
 # debug information files
 *.dwo
+
+# Build folders
+.build
+build
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
