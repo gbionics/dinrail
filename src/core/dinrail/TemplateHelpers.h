@@ -4,9 +4,11 @@
  * @copyright 2019 Istituto Italiano di Tecnologia (IIT). This software may be modified and
  * distributed under the terms of the BSD-3-Clause license.
  */
+// SPDX-FileCopyrightText: Generative Bionics S.R.L.
+// SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef BIPEDAL_LOCOMOTION_TEMPLATEHELPERS_H
-#define BIPEDAL_LOCOMOTION_TEMPLATEHELPERS_H
+#ifndef DINRAIL_TEMPLATEHELPERS_H
+#define DINRAIL_TEMPLATEHELPERS_H
 
 #include <type_traits>
 #include <string_view>
@@ -14,7 +16,7 @@
 //Eigen (for toEigen() methods)
 #include <Eigen/Core>
 
-namespace BipedalLocomotion {
+namespace dinrail {
 
 /**
  * Implementation of the c++17 <code>void_t<\code> metafunction to avoid some static analyzer warnings.
@@ -227,15 +229,15 @@ type_name()
     std::string_view name, prefix, suffix;
 #ifdef __clang__
     name = __PRETTY_FUNCTION__;
-    prefix = "std::string_view BipedalLocomotion::type_name() [T = ";
+    prefix = "std::string_view dinrail::type_name() [T = ";
     suffix = "]";
 #elif defined(__GNUC__)
     name = __PRETTY_FUNCTION__;
-    prefix = "constexpr std::string_view BipedalLocomotion::type_name() [with T = ";
+    prefix = "constexpr std::string_view dinrail::type_name() [with T = ";
     suffix = "; std::string_view = std::basic_string_view<char>]";
 #elif defined(_MSC_VER)
     name = __FUNCSIG__;
-    prefix = "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl BipedalLocomotion::type_name<";
+    prefix = "class std::basic_string_view<char,struct std::char_traits<char> > __cdecl dinrail::type_name<";
     suffix = ">(void)";
 #endif
     name.remove_prefix(prefix.size());
@@ -356,6 +358,6 @@ template <template <typename...> class base, typename derived> struct is_base_of
 template <template <typename...> class base, typename derived>
 using is_base_of_template = typename is_base_of_template_impl<base, derived>::type;
 
-} // namespace BipedalLocomotion
+} // namespace dinrail
 
-#endif // BIPEDAL_LOCOMOTION_TEMPLATEHELPERS_H
+#endif // DINRAIL_TEMPLATEHELPERS_H

@@ -16,56 +16,55 @@
 #include <string>
 #include <Eigen/Core>
 
-#include <BipedalLocomotion/GenericContainer/Vector.h>
+#include <dinrail/GenericVector.h>
 
-using namespace BipedalLocomotion;
 
-void foo(GenericContainer::Vector<double>::Ref test)
+void foo(dinrail::Vector<double>::Ref test)
 {
     test.data();
     return;
 }
 
-void fooConst(const GenericContainer::Vector<const double>::Ref test)
+void fooConst(const dinrail::Vector<const double>::Ref test)
 {
     test.data();
     return;
 }
 
-TEST_CASE("GenericContainer::Vector")
+TEST_CASE("dinrail::Vector")
 {
     SECTION("Constructible")
     {
-        REQUIRE(GenericContainer::is_vector_constructible<iDynTree::VectorDynSize>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<iDynTree::VectorFixSize<3>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<const iDynTree::VectorDynSize>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<const iDynTree::VectorFixSize<3>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<std::vector<double>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<std::vector<iDynTree::Transform>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<const std::vector<double>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<std::vector<int>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<const std::vector<int>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<std::vector<std::string>>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<double[5]>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<const double[5]>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<std::string>::value);
-        REQUIRE(GenericContainer::is_vector_constructible<Eigen::VectorXd>::value);
-        REQUIRE_FALSE(GenericContainer::is_vector_constructible<std::vector<bool>>::value);
-        REQUIRE_FALSE(GenericContainer::is_vector_constructible<double>::value);
-        REQUIRE_FALSE(GenericContainer::is_vector_constructible<int>::value);
-        REQUIRE_FALSE(GenericContainer::is_vector_constructible<char>::value);
-        REQUIRE_FALSE(GenericContainer::is_vector_constructible<void>::value);
+        REQUIRE(dinrail::is_vector_constructible<iDynTree::VectorDynSize>::value);
+        REQUIRE(dinrail::is_vector_constructible<iDynTree::VectorFixSize<3>>::value);
+        REQUIRE(dinrail::is_vector_constructible<const iDynTree::VectorDynSize>::value);
+        REQUIRE(dinrail::is_vector_constructible<const iDynTree::VectorFixSize<3>>::value);
+        REQUIRE(dinrail::is_vector_constructible<std::vector<double>>::value);
+        REQUIRE(dinrail::is_vector_constructible<std::vector<iDynTree::Transform>>::value);
+        REQUIRE(dinrail::is_vector_constructible<const std::vector<double>>::value);
+        REQUIRE(dinrail::is_vector_constructible<std::vector<int>>::value);
+        REQUIRE(dinrail::is_vector_constructible<const std::vector<int>>::value);
+        REQUIRE(dinrail::is_vector_constructible<std::vector<std::string>>::value);
+        REQUIRE(dinrail::is_vector_constructible<double[5]>::value);
+        REQUIRE(dinrail::is_vector_constructible<const double[5]>::value);
+        REQUIRE(dinrail::is_vector_constructible<std::string>::value);
+        REQUIRE(dinrail::is_vector_constructible<Eigen::VectorXd>::value);
+        REQUIRE_FALSE(dinrail::is_vector_constructible<std::vector<bool>>::value);
+        REQUIRE_FALSE(dinrail::is_vector_constructible<double>::value);
+        REQUIRE_FALSE(dinrail::is_vector_constructible<int>::value);
+        REQUIRE_FALSE(dinrail::is_vector_constructible<char>::value);
+        REQUIRE_FALSE(dinrail::is_vector_constructible<void>::value);
     }
 
     SECTION("Copy")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector container(iDynTree::make_span(vector));
+        dinrail::Vector container(iDynTree::make_span(vector));
 
         std::vector<double> copiedIn;
         copiedIn.resize(5);
-        GenericContainer::Vector<double> containerToBeCopied(copiedIn); // copied in is automatically casted to a span
+        dinrail::Vector<double> containerToBeCopied(copiedIn); // copied in is automatically casted to a span
 
         containerToBeCopied = container;
 
@@ -85,11 +84,11 @@ TEST_CASE("GenericContainer::Vector")
     SECTION("Impossible to resize")
     {
         iDynTree::VectorDynSize vector(5);
-        GenericContainer::Vector container = GenericContainer::make_vector(vector);
+        dinrail::Vector container = dinrail::make_vector(vector);
         REQUIRE_FALSE(container.resizeVector(2));
 
         iDynTree::VectorFixSize<3> fixedVector;
-        GenericContainer::Vector container2 = GenericContainer::make_vector(fixedVector, GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container2 = dinrail::make_vector(fixedVector, dinrail::VectorResizeMode::Resizable);
         REQUIRE_FALSE(container.resizeVector(2));
     }
 
@@ -97,7 +96,7 @@ TEST_CASE("GenericContainer::Vector")
     {
         iDynTree::VectorDynSize vector;
 
-        GenericContainer::Vector container = GenericContainer::make_vector(vector, GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(vector, dinrail::VectorResizeMode::Resizable);
         REQUIRE(container.resizeVector(5));
         REQUIRE(vector.size() == 5);
 
@@ -107,12 +106,12 @@ TEST_CASE("GenericContainer::Vector")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector container(iDynTree::make_span(vector));
+        dinrail::Vector container(iDynTree::make_span(vector));
 
         std::vector<double> copiedIn;
 
-        GenericContainer::Vector containerToBeCopied = GenericContainer::make_vector(copiedIn,
-                                                                                     GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector containerToBeCopied = dinrail::make_vector(copiedIn,
+                                                                                     dinrail::VectorResizeMode::Resizable);
 
         containerToBeCopied = container;
 
@@ -126,7 +125,7 @@ TEST_CASE("GenericContainer::Vector")
     {
         iDynTree::VectorDynSize vector(1);
         vector[0] = 0.0;
-        GenericContainer::Vector container = GenericContainer::make_vector(vector);
+        dinrail::Vector container = dinrail::make_vector(vector);
         container[0] = 1.0;
 
         REQUIRE(vector[0] == 1.0);
@@ -139,31 +138,31 @@ TEST_CASE("GenericContainer::Vector")
         iDynTree::getRandomVector(vector);
 
         const iDynTree::VectorDynSize constVector = vector;
-        GenericContainer::Vector container = GenericContainer::make_vector(constVector,
-                                                                           GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(constVector,
+                                                                           dinrail::VectorResizeMode::Resizable);
     }
 
     SECTION("Create from self")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector container = GenericContainer::make_vector(vector,
-                                                                           GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(vector,
+                                                                           dinrail::VectorResizeMode::Resizable);
 
-        GenericContainer::Vector inception = GenericContainer::make_vector(container, GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector inception = dinrail::make_vector(container, dinrail::VectorResizeMode::Resizable);
     }
 
     SECTION("Create from self custom resize")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector container = GenericContainer::make_vector(vector,
-                                                                           GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(vector,
+                                                                           dinrail::VectorResizeMode::Resizable);
 
-        using resize_function = GenericContainer::Vector<double>::resize_function_type;
-        using index_type = GenericContainer::Vector<double>::index_type;
+        using resize_function = dinrail::Vector<double>::resize_function_type;
+        using index_type = dinrail::Vector<double>::index_type;
 
-        GenericContainer::Vector<double>* inputPtr = &container;
+        dinrail::Vector<double>* inputPtr = &container;
         resize_function resizeLambda =
             [inputPtr](index_type newSize) -> iDynTree::Span<double>
         {
@@ -172,7 +171,7 @@ TEST_CASE("GenericContainer::Vector")
             return iDynTree::make_span(*inputPtr);
         };
 
-        GenericContainer::Vector inception(iDynTree::make_span(container), resizeLambda);
+        dinrail::Vector inception(iDynTree::make_span(container), resizeLambda);
         REQUIRE(inception.resizeVector(6));
         REQUIRE(vector.size() == 6);
     }
@@ -180,7 +179,7 @@ TEST_CASE("GenericContainer::Vector")
     SECTION("String")
     {
         std::string test = "Test";
-        GenericContainer::Vector container = GenericContainer::make_vector(test, GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(test, dinrail::VectorResizeMode::Resizable);
 
         container.resize(3);
 
@@ -191,27 +190,27 @@ TEST_CASE("GenericContainer::Vector")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector_ptr<double> container_ptr = GenericContainer::make_vector_ptr(vector,
-                                                                                       GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector_ptr<double> container_ptr = dinrail::make_vector_ptr(vector,
+                                                                                       dinrail::VectorResizeMode::Resizable);
         REQUIRE(container_ptr);
 
         const iDynTree::VectorDynSize constVector = vector;
-        GenericContainer::Vector_ptr<const double> const_container_ptr = GenericContainer::make_vector_ptr(constVector);
+        dinrail::Vector_ptr<const double> const_container_ptr = dinrail::make_vector_ptr(constVector);
         REQUIRE(const_container_ptr);
 
         std::vector<double> copiedIn;
         copiedIn.resize(5);
-        container_ptr = GenericContainer::make_vector_ptr(iDynTree::make_span(copiedIn));
+        container_ptr = dinrail::make_vector_ptr(iDynTree::make_span(copiedIn));
         REQUIRE(container_ptr);
 
 
-        GenericContainer::Vector container = GenericContainer::make_vector(vector,
-                                                                           GenericContainer::VectorResizeMode::Resizable);
+        dinrail::Vector container = dinrail::make_vector(vector,
+                                                                           dinrail::VectorResizeMode::Resizable);
 
-        using resize_function = GenericContainer::Vector<double>::resize_function_type;
-        using index_type = GenericContainer::Vector<double>::index_type;
+        using resize_function = dinrail::Vector<double>::resize_function_type;
+        using index_type = dinrail::Vector<double>::index_type;
 
-        GenericContainer::Vector<double>* inputPtr = &container;
+        dinrail::Vector<double>* inputPtr = &container;
         resize_function resizeLambda =
             [inputPtr](index_type newSize) -> iDynTree::Span<double>
         {
@@ -220,7 +219,7 @@ TEST_CASE("GenericContainer::Vector")
             return iDynTree::make_span(*inputPtr);
         };
 
-        container_ptr = GenericContainer::make_vector_ptr(iDynTree::make_span(container), resizeLambda);
+        container_ptr = dinrail::make_vector_ptr(iDynTree::make_span(container), resizeLambda);
         REQUIRE(container_ptr->resizeVector(6));
         REQUIRE(vector.size() == 6);
 
@@ -232,13 +231,13 @@ TEST_CASE("GenericContainer::Vector")
         int arr[4] = {1, 2, 3, 4};
 
         {
-            GenericContainer::Vector s = GenericContainer::make_vector(arr);
+            dinrail::Vector s = dinrail::make_vector(arr);
             REQUIRE(s.at(0) == 1);
         }
 
         {
             int arr2d[2] = {1, 6};
-            GenericContainer::Vector s = GenericContainer::make_vector(arr2d);
+            dinrail::Vector s = dinrail::make_vector(arr2d);
             REQUIRE(s.at(0) == 1);
             REQUIRE(s.at(1) == 6);
         }
@@ -249,13 +248,13 @@ TEST_CASE("GenericContainer::Vector")
         int arr[4] = {1, 2, 3, 4};
 
         {
-            GenericContainer::Vector s = GenericContainer::make_vector(arr);
+            dinrail::Vector s = dinrail::make_vector(arr);
             REQUIRE(s(0) == 1);
         }
 
         {
             int arr2d[2] = {1, 6};
-            GenericContainer::Vector s = GenericContainer::make_vector(arr2d);
+            dinrail::Vector s = dinrail::make_vector(arr2d);
             REQUIRE(s(0) == 1);
             REQUIRE(s(1) == 6);
         }
@@ -263,16 +262,16 @@ TEST_CASE("GenericContainer::Vector")
 
     SECTION("iterator_default_init")
     {
-        GenericContainer::Vector<int>::iterator it1;
-        GenericContainer::Vector<int>::iterator it2;
+        dinrail::Vector<int>::iterator it1;
+        dinrail::Vector<int>::iterator it2;
         bool ok = (it1 == it2);
         REQUIRE(ok);
     }
 
     SECTION("const_iterator_default_init")
     {
-        GenericContainer::Vector<int>::const_iterator it1;
-        GenericContainer::Vector<int>::const_iterator it2;
+        dinrail::Vector<int>::const_iterator it1;
+        dinrail::Vector<int>::const_iterator it2;
         bool ok = (it1 == it2);
         REQUIRE(ok);
     }
@@ -281,13 +280,13 @@ TEST_CASE("GenericContainer::Vector")
     {
         bool ok;
 
-        GenericContainer::Vector<int>::iterator badIt;
-        GenericContainer::Vector<int>::const_iterator badConstIt;
+        dinrail::Vector<int>::iterator badIt;
+        dinrail::Vector<int>::const_iterator badConstIt;
         ok = (badIt == badConstIt);
         REQUIRE(ok);
 
         int a[] = {1, 2, 3, 4};
-        GenericContainer::Vector s = GenericContainer::make_vector(a);
+        dinrail::Vector s = dinrail::make_vector(a);
 
         auto it = s.begin();
         auto cit = s.cbegin();
@@ -297,11 +296,11 @@ TEST_CASE("GenericContainer::Vector")
         ok = (cit == it);
         REQUIRE(ok);
 
-        GenericContainer::Vector<int>::const_iterator cit2 = it;
+        dinrail::Vector<int>::const_iterator cit2 = it;
         ok = (cit2 == cit);
         REQUIRE(ok);
 
-        GenericContainer::Vector<int>::const_iterator cit3 = it + 4;
+        dinrail::Vector<int>::const_iterator cit3 = it + 4;
         ok = (cit3 == s.cend());
         REQUIRE(ok);
     }
@@ -310,10 +309,10 @@ TEST_CASE("GenericContainer::Vector")
     {
         int a[] = {1, 2, 3, 4};
         {
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
-            GenericContainer::Vector<int>::iterator it = s.begin();
+            dinrail::Vector s = dinrail::make_vector(a);
+            dinrail::Vector<int>::iterator it = s.begin();
             auto it2 = it + 1;
-            GenericContainer::Vector<int>::const_iterator cit = s.cbegin();
+            dinrail::Vector<int>::const_iterator cit = s.cbegin();
             bool ok;
 
             ok = (it == cit);
@@ -390,10 +389,10 @@ TEST_CASE("GenericContainer::Vector")
     {
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
-            GenericContainer::Vector<int>::iterator it = s.begin();
-            GenericContainer::Vector<int>::iterator it2 = std::begin(s);
+            dinrail::Vector<int>::iterator it = s.begin();
+            dinrail::Vector<int>::iterator it2 = std::begin(s);
             bool ok;
             ok = (it == it2);
             REQUIRE(ok);
@@ -406,7 +405,7 @@ TEST_CASE("GenericContainer::Vector")
 
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
             auto it = s.begin();
             auto first = it;
@@ -463,10 +462,10 @@ TEST_CASE("GenericContainer::Vector")
     {
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
-            GenericContainer::Vector<int>::const_iterator cit = s.cbegin();
-            GenericContainer::Vector<int>::const_iterator cit2 = std::cbegin(s);
+            dinrail::Vector<int>::const_iterator cit = s.cbegin();
+            dinrail::Vector<int>::const_iterator cit2 = std::cbegin(s);
             bool ok;
             ok = (cit == cit2);
             REQUIRE(ok);
@@ -479,7 +478,7 @@ TEST_CASE("GenericContainer::Vector")
 
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
             auto it = s.cbegin();
             auto first = it;
@@ -531,7 +530,7 @@ TEST_CASE("GenericContainer::Vector")
     {
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
             auto it = s.rbegin();
             auto first = it;
@@ -587,7 +586,7 @@ TEST_CASE("GenericContainer::Vector")
     {
         {
             int a[] = {1, 2, 3, 4};
-            GenericContainer::Vector s = GenericContainer::make_vector(a);
+            dinrail::Vector s = dinrail::make_vector(a);
 
             auto it = s.crbegin();
             auto first = it;
@@ -644,25 +643,25 @@ TEST_CASE("GenericContainer::Vector")
         b(3) = 8;
         std::vector<double> c{6, 8, 10, 12};
 
-        Eigen::VectorXd d = GenericContainer::to_eigen(a) + GenericContainer::to_eigen(b);
+        Eigen::VectorXd d = dinrail::to_eigen(a) + dinrail::to_eigen(b);
 
-        REQUIRE(d.isApprox(GenericContainer::to_eigen(c)));
+        REQUIRE(d.isApprox(dinrail::to_eigen(c)));
     }
 
     SECTION("Refs")
     {
         std::vector<int> vec(5);
-        GenericContainer::Vector<int>::Ref stdRef(vec);
+        dinrail::Vector<int>::Ref stdRef(vec);
         const std::vector<int>& cvec = vec;
-        GenericContainer::Vector<const int>::Ref stdConstRef(cvec);
+        dinrail::Vector<const int>::Ref stdConstRef(cvec);
         Eigen::Vector2d eigenVec;
-        GenericContainer::Vector<double>::Ref eigenRef(eigenVec);
+        dinrail::Vector<double>::Ref eigenRef(eigenVec);
         iDynTree::VectorFixSize<3> idynFixVec;
-        GenericContainer::Vector<double>::Ref idynFix(idynFixVec);
+        dinrail::Vector<double>::Ref idynFix(idynFixVec);
         iDynTree::VectorDynSize idynVec;
-        GenericContainer::Vector<double>::Ref idyn(idynVec);
+        dinrail::Vector<double>::Ref idyn(idynVec);
         const iDynTree::VectorDynSize& idynConstVec = idynVec;
-        GenericContainer::Vector<const double>::Ref idynConst(idynConstVec);
+        dinrail::Vector<const double>::Ref idynConst(idynConstVec);
     }
 
     SECTION("Generic input to function")
@@ -678,18 +677,18 @@ TEST_CASE("GenericContainer::Vector")
         iDynTree::VectorDynSize idynVec;
         foo(idynVec);
         fooConst(idynVec);
-        foo(GenericContainer::make_vector(idynVec, GenericContainer::VectorResizeMode::Fixed));
+        foo(dinrail::make_vector(idynVec, dinrail::VectorResizeMode::Fixed));
     }
 
     SECTION("Copy of Refs")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        GenericContainer::Vector<double>::Ref container(vector);
+        dinrail::Vector<double>::Ref container(vector);
 
         std::vector<double> copiedIn;
         copiedIn.resize(5);
-        GenericContainer::Vector<double> containerToBeCopied(copiedIn); // copied in is automatically casted to a span
+        dinrail::Vector<double> containerToBeCopied(copiedIn); // copied in is automatically casted to a span
 
         containerToBeCopied = container; //Ref = Vector
 
@@ -699,7 +698,7 @@ TEST_CASE("GenericContainer::Vector")
         }
 
         Eigen::VectorXd otherCopiedIn;
-        GenericContainer::Vector<double>::Ref otherContainerToBeCopied(otherCopiedIn);
+        dinrail::Vector<double>::Ref otherContainerToBeCopied(otherCopiedIn);
 
         otherContainerToBeCopied = container;
 
