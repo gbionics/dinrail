@@ -12,6 +12,7 @@
 #include <iDynTree/TestUtils.h>
 #include <iDynTree/Transform.h>
 #include <memory>
+#include <span>
 #include <vector>
 #include <string>
 #include <Eigen/Core>
@@ -60,7 +61,7 @@ TEST_CASE("dinrail::GenericVector")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        dinrail::GenericVector container(iDynTree::make_span(vector));
+        dinrail::GenericVector container{std::span<double>(vector.data(), vector.size())};
 
         std::vector<double> copiedIn;
         copiedIn.resize(5);
@@ -106,7 +107,7 @@ TEST_CASE("dinrail::GenericVector")
     {
         iDynTree::VectorDynSize vector(5);
         iDynTree::getRandomVector(vector);
-        dinrail::GenericVector container(iDynTree::make_span(vector));
+        dinrail::GenericVector container{std::span<double>(vector.data(), vector.size())};
 
         std::vector<double> copiedIn;
 
@@ -164,14 +165,14 @@ TEST_CASE("dinrail::GenericVector")
 
         dinrail::GenericVector<double>* inputPtr = &container;
         resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> iDynTree::Span<double>
+            [inputPtr](index_type newSize) -> std::span<double>
         {
             inputPtr->resizeVector(newSize);
             std::cerr << "I am resizing!" << std::endl;
-            return iDynTree::make_span(*inputPtr);
+            return std::span(inputPtr->data(), inputPtr->size());
         };
 
-        dinrail::GenericVector inception(iDynTree::make_span(container), resizeLambda);
+        dinrail::GenericVector inception(std::span(container.data(), container.size()), resizeLambda);
         REQUIRE(inception.resizeVector(6));
         REQUIRE(vector.size() == 6);
     }
@@ -200,7 +201,7 @@ TEST_CASE("dinrail::GenericVector")
 
         std::vector<double> copiedIn;
         copiedIn.resize(5);
-        container_ptr = dinrail::make_vector_ptr(iDynTree::make_span(copiedIn));
+        container_ptr = dinrail::make_vector_ptr(std::span(copiedIn));
         REQUIRE(container_ptr);
 
 
@@ -212,14 +213,14 @@ TEST_CASE("dinrail::GenericVector")
 
         dinrail::GenericVector<double>* inputPtr = &container;
         resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> iDynTree::Span<double>
+            [inputPtr](index_type newSize) -> std::span<double>
         {
             inputPtr->resizeVector(newSize);
             std::cerr << "I am resizing again!" << std::endl;
-            return iDynTree::make_span(*inputPtr);
+            return std::span(inputPtr->data(), inputPtr->size());
         };
 
-        container_ptr = dinrail::make_vector_ptr(iDynTree::make_span(container), resizeLambda);
+        container_ptr = dinrail::make_vector_ptr(std::span(container.data(), container.size()), resizeLambda);
         REQUIRE(container_ptr->resizeVector(6));
         REQUIRE(vector.size() == 6);
 

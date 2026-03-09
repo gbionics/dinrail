@@ -10,8 +10,8 @@
 #ifndef DINRAIL_GENERIC_VECTOR_H
 #define DINRAIL_GENERIC_VECTOR_H
 
-// iDynTree
-#include <iDynTree/Span.h>
+// std
+#include <span>
 
 // Template helpers
 #include <dinrail/TemplateHelpers.h>
@@ -19,6 +19,8 @@
 //std
 #include <functional>
 #include <cassert>
+#include <cstddef>
+#include <iterator>
 #include <iostream>
 #include <memory>
 
@@ -61,28 +63,28 @@ public:
      * - vector_element_type has a different name than the corresponding one in iDynTree::Span to avoid some compilation issues.
      * - value_type is the same as vector_element_type, but without an eventual const attribute
      */
-    using vector_element_type = typename iDynTree::Span<T>::element_type;
-    using value_type = typename iDynTree::Span<T>::value_type;
-    using index_type = typename iDynTree::Span<T>::index_type;
-    using pointer = typename iDynTree::Span<T>::pointer;
-    using reference = typename iDynTree::Span<T>::reference;
+    using vector_element_type = typename std::span<T>::element_type;
+    using value_type = typename std::span<T>::value_type;
+    using index_type = std::ptrdiff_t;
+    using pointer = typename std::span<T>::pointer;
+    using reference = typename std::span<T>::reference;
     using const_reference = const value_type&;
-    using size_type = typename iDynTree::Span<T>::size_type;
+    using size_type = typename std::span<T>::size_type;
 
 
     /**
      * Utility aliases to define iterators
      */
-    using iterator = typename iDynTree::Span<T>::iterator;
-    using const_iterator = typename iDynTree::Span<T>::const_iterator;
-    using reverse_iterator = typename iDynTree::Span<T>::reverse_iterator;
-    using const_reverse_iterator = typename iDynTree::Span<T>::const_reverse_iterator;
+    using iterator = typename std::span<T>::iterator;
+    using const_iterator = iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = reverse_iterator;
 
     /**
      * Alias for the type of lambda used to resize the original vector.
      * In particular, it takes as input the new size (of type index size)
      */
-    using resize_function_type = std::function<iDynTree::Span<T>(index_type)>;
+    using resize_function_type = std::function<std::span<T>(index_type)>;
 
     /**
      * Alias to determine the output type of toEigen()
@@ -95,7 +97,7 @@ protected:
     /**
      * @brief Span of the pointed vector. This allows to point to an existing container without owning it.
      */
-    iDynTree::Span<T> m_span;
+    std::span<T> m_span;
     /**
      * @brief User specified lambda to resize the existing container.
      */
@@ -114,7 +116,7 @@ public:
      * @param span Span of the existing container
      * @param resizeLambda User defined lambda to resize the original container
      */
-    GenericVector(iDynTree::Span<T> span, resize_function_type resizeLambda)
+    GenericVector(std::span<T> span, resize_function_type resizeLambda)
     {
         m_span = span;
         m_resizeLambda = resizeLambda;
@@ -126,7 +128,7 @@ public:
      *
      * Since no resizeLambda is provided, it is assumed that the original container cannot be resized.
      */
-    GenericVector(iDynTree::Span<T> span)
+    GenericVector(std::span<T> span)
     {
         m_span = span;
         m_resizeLambda = [span](index_type size){unused(size); return span;};
@@ -189,7 +191,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    bool clone(iDynTree::Span<T> other)
+    bool clone(std::span<T> other)
     {
         if (size() != other.size())
         {
@@ -234,7 +236,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    GenericVector<T>& operator=(iDynTree::Span<T> other)
+    GenericVector<T>& operator=(std::span<T> other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -404,7 +406,7 @@ public:
      */
     iterator begin()
     {
-        return m_span.begin();
+        return std::begin(m_span);
     }
 
     /**
@@ -414,7 +416,7 @@ public:
      */
     iterator end()
     {
-        return m_span.end();
+        return std::end(m_span);
     }
 
     /**
@@ -423,7 +425,7 @@ public:
      */
     const_iterator begin() const
     {
-        return m_span.cbegin();
+        return std::begin(m_span);
     }
 
     /**
@@ -433,7 +435,7 @@ public:
      */
     const_iterator end() const
     {
-        return m_span.cend();
+        return std::end(m_span);
     }
 
     /**
@@ -442,7 +444,7 @@ public:
      */
     const_iterator cbegin() const
     {
-        return m_span.cbegin();
+        return std::begin(m_span);
     }
 
     /**
@@ -452,7 +454,7 @@ public:
      */
     const_iterator cend() const
     {
-        return m_span.cend();
+        return std::end(m_span);
     }
 
     /**
@@ -462,7 +464,7 @@ public:
      */
     reverse_iterator rbegin()
     {
-        return m_span.rbegin();
+        return std::rbegin(m_span);
     }
 
     /**
@@ -473,7 +475,7 @@ public:
      */
     reverse_iterator rend()
     {
-        return m_span.rend();
+        return std::rend(m_span);
     }
 
     /**
@@ -483,7 +485,7 @@ public:
      */
     const_reverse_iterator rbegin() const
     {
-        return m_span.crbegin();
+        return std::rbegin(m_span);
     }
 
     /**
@@ -494,7 +496,7 @@ public:
      */
     const_reverse_iterator rend() const
     {
-        return m_span.crend();
+        return std::rend(m_span);
     }
 
     /**
@@ -504,7 +506,7 @@ public:
      */
     const_reverse_iterator crbegin() const
     {
-        return m_span.crbegin();
+        return std::rbegin(m_span);
     }
 
     /**
@@ -515,7 +517,7 @@ public:
      */
     const_reverse_iterator crend() const
     {
-        return m_span.crend();
+        return std::rend(m_span);
     }
 
     /**
@@ -572,7 +574,7 @@ struct is_span_constructible : std::false_type
 template <typename Class>
 struct is_span_constructible<Class,
                              typename std::enable_if<
-                                 std::is_constructible<iDynTree::Span<typename container_data<Class>::type>, Class&>::value>::type>
+                                 std::is_constructible<std::span<typename container_data<Class>::type>, Class&>::value>::type>
     : std::true_type
 {};
 
@@ -657,10 +659,10 @@ typename GenericVector<typename container_data<Class>::type>::resize_function_ty
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> iDynTree::Span<value_type>
+            [inputPtr](index_type newSize) -> std::span<value_type>
         {
             inputPtr->resize(newSize);
-            return iDynTree::make_span(*inputPtr);
+            return std::span(*inputPtr);
         };
 
         return resizeLambda;
@@ -672,10 +674,10 @@ typename GenericVector<typename container_data<Class>::type>::resize_function_ty
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
-            [inputPtr](index_type newSize) -> iDynTree::Span<value_type>
+            [inputPtr](index_type newSize) -> std::span<value_type>
         {
             inputPtr->resize(newSize);
-            return iDynTree::make_span(inputPtr->data(), inputPtr->size());
+            return std::span(inputPtr->data(), inputPtr->size());
         };
 
         return resizeLambda;
@@ -702,15 +704,15 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 
     using value_type = typename container_data<Class>::type;
 
-    iDynTree::Span<value_type> span;
+    std::span<value_type> span;
 
     if constexpr (is_span_constructible<Class>::value)
     {
-        span = iDynTree::make_span(input);
+        span = std::span(input);
     }
     else
     {
-        span = iDynTree::make_span(input.data(), input.size());
+        span = std::span(input.data(), input.size());
     }
 
     if constexpr (is_resizable<Class>::value)
@@ -760,14 +762,14 @@ make_vector(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 
     using value_type = typename container_data<decltype(input)>::type;
 
-    iDynTree::Span<value_type> span;
+    std::span<value_type> span;
 
     if constexpr (is_span_constructible<Class>::value)
     {
-        span = iDynTree::make_span(input);
+        span = std::span(input);
     } else
     {
-        span = iDynTree::make_span(input.data(), input.size());
+        span = std::span(input.data(), input.size());
     }
 
     if (mode == VectorResizeMode::Resizable)
@@ -825,7 +827,7 @@ make_vector_ptr(const Class& input, VectorResizeMode mode = VectorResizeMode::Fi
  */
 template<typename T>
 GenericVector_ptr<T>
-make_vector_ptr(iDynTree::Span<T> span)
+make_vector_ptr(std::span<T> span)
 {
     return std::make_shared<GenericVector<T>>(span);
 }
@@ -840,7 +842,7 @@ make_vector_ptr(iDynTree::Span<T> span)
  */
 template<typename T>
 GenericVector_ptr<T>
-make_vector_ptr(iDynTree::Span<T> span, typename GenericVector<T>::resize_function_type resizeLambda)
+make_vector_ptr(std::span<T> span, typename GenericVector<T>::resize_function_type resizeLambda)
 {
     return std::make_shared<GenericVector<T>>(span, resizeLambda);
 }
@@ -974,10 +976,10 @@ public:
     {
         if constexpr (is_span_constructible<Vector>::value)
         {
-            m_span = iDynTree::make_span(input);
+            m_span = std::span(input);
         } else
         {
-            m_span = iDynTree::make_span(input.data(), input.size());
+            m_span = std::span(input.data(), input.size());
         }
 
         if constexpr (dinrail::is_resizable<Vector>::value)
@@ -986,7 +988,7 @@ public:
         }
         else
         {
-            iDynTree::Span<T> copiedSpan = m_span;
+            std::span<T> copiedSpan = m_span;
             m_resizeLambda = [copiedSpan](index_type size){unused(size); return copiedSpan;};
         }
 
@@ -1008,13 +1010,13 @@ public:
     {
         if constexpr (is_span_constructible<Vector>::value)
         {
-            m_span = iDynTree::make_span(input);
+            m_span = std::span(input);
         } else
         {
-            m_span = iDynTree::make_span(input.data(), input.size());
+            m_span = std::span(input.data(), input.size());
         }
 
-        iDynTree::Span<T> copiedSpan = m_span;
+        std::span<T> copiedSpan = m_span;
         m_resizeLambda = [copiedSpan](index_type size){unused(size); return copiedSpan;};
 
     }
