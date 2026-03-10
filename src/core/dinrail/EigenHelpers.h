@@ -1,9 +1,4 @@
-/**
- * @file EigenHelpers.h
- * @authors Stefano Dafarra
- * @copyright 2019 Istituto Italiano di Tecnologia (IIT). This software may be modified and
- * distributed under the terms of the BSD-3-Clause license.
- */
+// SPDX-FileCopyrightText: Istituto Italiano di Tecnologia (IIT)
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
