@@ -9,7 +9,7 @@
 
 #include <Eigen/Core>
 
-#include <dinrail/GenericVector.h>
+#include <dinrail/VectorProxy.h>
 
 namespace dinrail {
 

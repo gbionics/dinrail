@@ -2,8 +2,8 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef DINRAIL_GENERIC_VECTOR_H
-#define DINRAIL_GENERIC_VECTOR_H
+#ifndef DINRAIL_VECTOR_PROXY_H
+#define DINRAIL_VECTOR_PROXY_H
 
 // std
 #include <span>
@@ -25,13 +25,13 @@ namespace dinrail {
  * Forward declaration of Vector class. T is the type of vector (double, float, int, string,...)
  */
 template <typename T>
-class GenericVector;
+class VectorProxy;
 
 /**
  * Utility alias to a std::shared_ptr of a Vector.
  */
 template <typename T>
-using GenericVector_ptr = std::shared_ptr<GenericVector<T>>;
+using VectorProxy_ptr = std::shared_ptr<VectorProxy<T>>;
 
 }
 
@@ -47,7 +47,7 @@ using GenericVector_ptr = std::shared_ptr<GenericVector<T>>;
  * This would invalidate the pointer inside it.
  */
 template <typename T>
-class dinrail::GenericVector
+class dinrail::VectorProxy
 {
 public:
 
@@ -95,7 +95,7 @@ protected:
      * The default constructor is private. In fact, once the Vector is built, it is assumed to point to an existing container.
      * To be used only if m_span and m_resizeLamba are set manually.
      */
-    GenericVector() = default;
+    VectorProxy() = default;
 
 public:
 
@@ -104,7 +104,7 @@ public:
      * @param span Span of the existing container
      * @param resizeLambda User defined lambda to resize the original container
      */
-    GenericVector(std::span<T> span, resize_function_type resizeLambda)
+    VectorProxy(std::span<T> span, resize_function_type resizeLambda)
     {
         m_span = span;
         m_resizeLambda = resizeLambda;
@@ -116,7 +116,7 @@ public:
      *
      * Since no resizeLambda is provided, it is assumed that the original container cannot be resized.
      */
-    GenericVector(std::span<T> span)
+    VectorProxy(std::span<T> span)
     {
         m_span = span;
         m_resizeLambda = [span](index_type size){unused(size); return span;};
@@ -125,14 +125,14 @@ public:
     /**
      * @brief Destructor
      */
-    ~GenericVector() = default;
+    ~VectorProxy() = default;
 
     /**
      * @brief Copy constructor
      *
      * @warning It has been deleted since it would not be clear if the pointer or the pointed data would be copied.
      */
-    GenericVector(const GenericVector<T>& other) = delete;
+    VectorProxy(const VectorProxy<T>& other) = delete;
 
     /**
      * @brief Move constructor
@@ -140,7 +140,7 @@ public:
      *
      * @warning Here the pointers are copied, the content is not duplicated.
      */
-    GenericVector(GenericVector<T>&& other)
+    VectorProxy(VectorProxy<T>&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -153,7 +153,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    bool clone(const GenericVector<T>& other)
+    bool clone(const VectorProxy<T>& other)
     {
         if (size() != other.size())
         {
@@ -207,7 +207,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    GenericVector<T>& operator=(const GenericVector<T>& other)
+    VectorProxy<T>& operator=(const VectorProxy<T>& other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -224,7 +224,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    GenericVector<T>& operator=(std::span<T> other)
+    VectorProxy<T>& operator=(std::span<T> other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -241,7 +241,7 @@ public:
      *
      * @warning It performs memory allocation if this is resizable and the sizes are different.
      */
-    GenericVector<T>& operator=(GenericVector<T>&& other)
+    VectorProxy<T>& operator=(VectorProxy<T>&& other)
     {
         bool ok = clone(other);
         assert(ok);
@@ -529,7 +529,7 @@ struct is_vector : std::false_type
  * is_vector is a utility metafunction used to check if T is a dinrail::Vector.
  */
 template <typename T>
-struct is_vector<GenericVector<T>> : std::true_type
+struct is_vector<VectorProxy<T>> : std::true_type
 {
 };
 
@@ -615,7 +615,7 @@ enum class VectorResizeMode
  * In fact, the output lambda contains a pointer to input.
  */
 template<typename Class>
-typename GenericVector<typename container_data<Class>::type>::resize_function_type DefaultVectorResizer(Class& input)
+typename VectorProxy<typename container_data<Class>::type>::resize_function_type DefaultVectorResizer(Class& input)
 {
     static_assert (is_resizable<Class>::value, "Class type is not resizable.");
     static_assert (is_span_constructible<Class>::value || (is_data_available<Class>::value && is_size_available<Class>::value),
@@ -625,8 +625,8 @@ typename GenericVector<typename container_data<Class>::type>::resize_function_ty
 
     if constexpr (is_span_constructible<Class>::value)
     {
-        using index_type = typename GenericVector<value_type>::index_type;
-        using resize_function = typename GenericVector<value_type>::resize_function_type;
+        using index_type = typename VectorProxy<value_type>::index_type;
+        using resize_function = typename VectorProxy<value_type>::resize_function_type;
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
@@ -641,7 +641,7 @@ typename GenericVector<typename container_data<Class>::type>::resize_function_ty
     else
     {
         using index_type = decltype(std::declval<Class>().size());
-        using resize_function = typename GenericVector<value_type>::resize_function_type;
+        using resize_function = typename VectorProxy<value_type>::resize_function_type;
 
         Class* inputPtr = &input;
         resize_function resizeLambda =
@@ -665,7 +665,7 @@ typename GenericVector<typename container_data<Class>::type>::resize_function_ty
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-GenericVector<typename container_data<Class>::type>
+VectorProxy<typename container_data<Class>::type>
 make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
     static_assert (!std::is_same<typename container_data<Class>::type, bool>::value,
@@ -690,11 +690,11 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
     {
         if (mode == VectorResizeMode::Resizable)
         {
-            return GenericVector(span, DefaultVectorResizer(input));
+            return VectorProxy(span, DefaultVectorResizer(input));
         }
         else
         {
-            return GenericVector(span);
+            return VectorProxy(span);
         }
     }
     else
@@ -705,7 +705,7 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
                       << " is not resizable. Returning a non-resizable container." << std::endl;
         }
 
-        return GenericVector(span);
+        return VectorProxy(span);
     }
 }
 
@@ -722,7 +722,7 @@ make_vector(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template <typename Class>
-GenericVector<const typename container_data<Class>::type>
+VectorProxy<const typename container_data<Class>::type>
 make_vector(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
     static_assert (!std::is_same<typename container_data<Class>::type, bool>::value,
@@ -748,30 +748,30 @@ make_vector(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
         std::cerr << "[dinrail::Vector] The input type is const. Returning a non-resizable container." << std::endl;
     }
 
-    return GenericVector(span);
+    return VectorProxy(span);
 }
 
 /**
- * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::VectorProxy_ptr from a reference to another vector.
  * @param input The refence to an existing vector.
  * @param mode The resize mode. By default the output Vector is <code>Fixed<\code>.
- * @returns A dinrail::GenericVector_ptr.
+ * @returns A dinrail::VectorProxy_ptr.
  *
  * @warning The input object from which the underlying dinrail::Vector has been initialized should not be deallocated before it.
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-GenericVector_ptr<typename container_data<Class>::type>
+VectorProxy_ptr<typename container_data<Class>::type>
 make_vector_ptr(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
-    return std::make_shared<GenericVector<typename container_data<Class>::type>>(make_vector(input,mode));
+    return std::make_shared<VectorProxy<typename container_data<Class>::type>>(make_vector(input,mode));
 }
 
 /**
- * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::VectorProxy_ptr from a reference to another vector.
  * @param input The refence to an existing vector.
  * @param mode The resize mode. By default the output Vector is <code>Fixed<\code>.
- * @returns A dinrail::GenericVector_ptr.
+ * @returns A dinrail::VectorProxy_ptr.
  *
  * @warning This version is called if the input type is const. Hence, it cannot be resized.
  * It throws a warning if the selected mode is <code>VectorResizeMode::Resizable<\code>.
@@ -780,16 +780,16 @@ make_vector_ptr(Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename Class>
-GenericVector_ptr<const typename container_data<Class>::type>
+VectorProxy_ptr<const typename container_data<Class>::type>
 make_vector_ptr(const Class& input, VectorResizeMode mode = VectorResizeMode::Fixed)
 {
-    return std::make_shared<GenericVector<const typename container_data<Class>::type>>(make_vector(input,mode));
+    return std::make_shared<VectorProxy<const typename container_data<Class>::type>>(make_vector(input,mode));
 }
 
 /**
- * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::VectorProxy_ptr from a reference to another vector.
  * @param span Span of the existing container
- * @returns A dinrail::GenericVector_ptr.
+ * @returns A dinrail::VectorProxy_ptr.
  *
  * Since no resizeLambda is provided, it is assumed that the original container cannot be resized.
  *
@@ -797,14 +797,14 @@ make_vector_ptr(const Class& input, VectorResizeMode mode = VectorResizeMode::Fi
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename T>
-GenericVector_ptr<T>
+VectorProxy_ptr<T>
 make_vector_ptr(std::span<T> span)
 {
-    return std::make_shared<GenericVector<T>>(span);
+    return std::make_shared<VectorProxy<T>>(span);
 }
 
 /**
- * @brief Utility function to create a dinrail::GenericVector_ptr from a reference to another vector.
+ * @brief Utility function to create a dinrail::VectorProxy_ptr from a reference to another vector.
  * @param span Span of the existing container
  * @param resizeLambda User defined lambda to resize the original container
  *
@@ -812,10 +812,10 @@ make_vector_ptr(std::span<T> span)
  * This would invalidate the pointer inside dinrail::Vector.
  */
 template<typename T>
-GenericVector_ptr<T>
-make_vector_ptr(std::span<T> span, typename GenericVector<T>::resize_function_type resizeLambda)
+VectorProxy_ptr<T>
+make_vector_ptr(std::span<T> span, typename VectorProxy<T>::resize_function_type resizeLambda)
 {
-    return std::make_shared<GenericVector<T>>(span, resizeLambda);
+    return std::make_shared<VectorProxy<T>>(span, resizeLambda);
 }
 
 }
@@ -825,10 +825,10 @@ make_vector_ptr(std::span<T> span, typename GenericVector<T>::resize_function_ty
  * is that custom vectors (all those supported by dinrail::Vector) can be implicitly casted to Ref.
  * Ref does not allocate any memory in construction, hence can be used as a parameter to be passed by copy.
  * The = operator clones the content.
- * Ref inherits GenericVector<T>, hence it can be used as it was a GenericVector<T>.
+ * Ref inherits VectorProxy<T>, hence it can be used as it was a VectorProxy<T>.
  */
 template <typename T>
-class dinrail::GenericVector<T>::Ref : public dinrail::GenericVector<T>
+class dinrail::VectorProxy<T>::Ref : public dinrail::VectorProxy<T>
 {
 public:
 
@@ -841,7 +841,7 @@ public:
      * @brief Copy constructor
      * @param other The ref from which to copy the context.
      */
-    Ref(dinrail::GenericVector<T>::Ref& other)
+    Ref(dinrail::VectorProxy<T>::Ref& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -851,31 +851,31 @@ public:
      * @brief Move constructor
      * @param other The ref from which to get the context.
      */
-    Ref(dinrail::GenericVector<T>::Ref&& other)
+    Ref(dinrail::VectorProxy<T>::Ref&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
     }
 
     /**
-     * @brief Constructor from a dinrail::GenericVector<T>&
+     * @brief Constructor from a dinrail::VectorProxy<T>&
      * @param other The input vector from which the context is copied
      */
-    Ref(dinrail::GenericVector<T>& other)
+    Ref(dinrail::VectorProxy<T>& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
     }
 
     /**
-     * @brief Constructor from a dinrail::GenericVector<T>&
+     * @brief Constructor from a dinrail::VectorProxy<T>&
      * @param other The input vector from which the context is taken
-     * In principle, Ref should be the reference of a GenericVector<T> which should remain alive while
-     * Ref is alive. On the other hand, GenericVector<T> is only a pointer to some data which does not own.
-     * Hence, Ref can remain alive even if the GenericVector<T> is deleted, provided that the original container
+     * In principle, Ref should be the reference of a VectorProxy<T> which should remain alive while
+     * Ref is alive. On the other hand, VectorProxy<T> is only a pointer to some data which does not own.
+     * Hence, Ref can remain alive even if the VectorProxy<T> is deleted, provided that the original container
      * stays alive.
      */
-    Ref(dinrail::GenericVector<T>&& other)
+    Ref(dinrail::VectorProxy<T>&& other)
     {
         m_span = other.m_span;
         m_resizeLambda = other.m_resizeLambda;
@@ -886,7 +886,7 @@ public:
      * This is used if:
      * - the input container is not a dinrail::Vector, to avoid ambiguities with other constructors
      * - the input container is not a string. This allows using Ref and string with overloaded methods.
-     * - a dinrail::GenericVector<T>::Ref can be constructed from the Container
+     * - a dinrail::VectorProxy<T>::Ref can be constructed from the Container
      * - T is not const
      * - the input container is not const.
      */
@@ -922,7 +922,7 @@ public:
      * This is used if:
      * - the input container is not a dinrail::Vector, to avoid ambiguities with other constructors
      * - the input container is not a string. This allows using Ref and string with overloaded methods.
-     * - a dinrail::GenericVector<T>::Ref can be constructed from the Container
+     * - a dinrail::VectorProxy<T>::Ref can be constructed from the Container
      * - T is const.
      */
     template <class Vector, typename = typename std::enable_if<!dinrail::is_vector<Vector>::value &&
@@ -956,7 +956,7 @@ public:
     */
    Ref operator=(const Ref& other)
    {
-       return static_cast<dinrail::GenericVector<T>&>(*this) = other;
+       return static_cast<dinrail::VectorProxy<T>&>(*this) = other;
    }
 
    /**
@@ -966,10 +966,10 @@ public:
     */
    Ref operator=(Ref&& other)
    {
-       return static_cast<dinrail::GenericVector<T>&>(*this) = other;
+       return static_cast<dinrail::VectorProxy<T>&>(*this) = other;
    }
 
 };
 
 
-#endif // DINRAIL_GENERIC_VECTOR_H
+#endif // DINRAIL_VECTOR_PROXY_H
