@@ -88,7 +88,7 @@ TEST_CASE("dinrail::GenericVector")
 
         iDynTree::VectorFixSize<3> fixedVector;
         dinrail::GenericVector container2 = dinrail::make_vector(fixedVector, dinrail::VectorResizeMode::Resizable);
-        REQUIRE_FALSE(container.resizeVector(2));
+        REQUIRE_FALSE(container2.resizeVector(2));
     }
 
     SECTION("Resize")
