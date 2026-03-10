@@ -1,0 +1,62 @@
+[workspace]
+name = "dinrail"
+description = "A lightweight library for robot device abstractions"
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "win-64", "osx-arm64"]
+
+[target.win.activation.env]
+CMAKE_INSTALL_PREFIX = "%CONDA_PREFIX%\\Library"
+
+[target.unix.activation.env]
+CMAKE_INSTALL_PREFIX = "$CONDA_PREFIX"
+
+[tasks]
+configure = { cmd = [
+    "cmake",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX",
+    "-DDINRAIL_BUILD_EXAMPLES:BOOL=OFF",
+    "-DDINRAIL_USES_YARP:BOOL=ON",
+    "-DBUILD_TESTING:BOOL=ON",
+    # Workaround for slow PCL find in BLF
+    "-DCMAKE_DISABLE_FIND_PACKAGE_VTK:BOOL=ON",
+    # Use the cross-platform Ninja generator
+    "-G",
+    "Ninja",
+    # The source is in the root directory
+    "-S",
+    ".",
+    # We wanna build in the .build directory
+    "-B",
+    ".build",
+]}
+
+build = { cmd = "cmake --build .build --config Release", depends-on = ["configure"] }
+install = { cmd = ["cmake", "--install", ".build", "--config", "Release"], depends-on = ["build"] }
+test = { cmd = "ctest --test-dir .build --build-config Release", depends-on = ["install"] }
+uninstall = { cmd = ["cmake", "--build", ".build", "--target", "uninstall"] }
+
+format = { cmd = "clang-format -i $(git ls-files '*.cpp' '*.h' '*.cxx' '*.hpp')" }
+
+[dependencies]
+
+# Dev tools
+cmake = "*"
+cxx-compiler = "*"
+ninja = "*"
+pkg-config = "*"
+ycm-cmake-modules = "*"
+clang-format = "*"
+
+# Actual deps
+libsharedlibpp = "*"
+
+# Optional deps
+libyarp = "*"
+
+# Test deps
+libbipedal-locomotion-framework = "*"
+libidyntree = "*"
+catch2 = "*"
+cli11 = "*"
+eigen = "*"
