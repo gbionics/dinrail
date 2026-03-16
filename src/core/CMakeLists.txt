@@ -8,6 +8,8 @@ add_library(${LIBRARY_NAME})
 
 target_sources(${LIBRARY_NAME}
     PRIVATE
+    dinrail/Parameters.cpp
+    dinrail/Value.cpp
         dinrail/Placeholder.cpp
 )
 
