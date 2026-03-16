@@ -14,33 +14,35 @@
 namespace dinrail {
 
 /**
- * Utility function to create a mutable Eigen map from a reference to another vector-like container.
+ * Utility function to create a mutable Eigen map from a reference to another
+ * vector-like container.
  */
-template<typename Class>
-auto to_eigen(Class& input)
-{
-    static_assert(is_vector_constructible<Class>::value,
-                  "Cannot create a Vector from the input class. Cannot know how to convert to Eigen.");
+template <typename Class> auto to_eigen(Class &input) {
+  static_assert(is_vector_constructible<Class>::value,
+                "Cannot create a Vector from the input class. Cannot know how "
+                "to convert to Eigen.");
 
-    using value_type = typename container_data<Class>::type;
-    auto genericVector = make_vector(input);
-    return Eigen::Map<Eigen::Matrix<value_type, Eigen::Dynamic, 1>>(genericVector.data(), genericVector.size());
+  using value_type = typename container_data<Class>::type;
+  auto genericVector = make_vector(input);
+  return Eigen::Map<Eigen::Matrix<value_type, Eigen::Dynamic, 1>>(
+      genericVector.data(), genericVector.size());
 }
 
 /**
- * Utility function to create a const Eigen map from a reference to another vector-like container.
+ * Utility function to create a const Eigen map from a reference to another
+ * vector-like container.
  */
-template<typename Class>
-auto to_eigen(const Class& input)
-{
-    static_assert(is_vector_constructible<Class>::value,
-                  "Cannot create a Vector from the input class. Cannot know how to convert to Eigen.");
+template <typename Class> auto to_eigen(const Class &input) {
+  static_assert(is_vector_constructible<Class>::value,
+                "Cannot create a Vector from the input class. Cannot know how "
+                "to convert to Eigen.");
 
-    using value_type = std::remove_const_t<typename container_data<Class>::type>;
-    auto genericVector = make_vector(input);
-    return Eigen::Map<const Eigen::Matrix<value_type, Eigen::Dynamic, 1>>(genericVector.data(), genericVector.size());
+  using value_type = std::remove_const_t<typename container_data<Class>::type>;
+  auto genericVector = make_vector(input);
+  return Eigen::Map<const Eigen::Matrix<value_type, Eigen::Dynamic, 1>>(
+      genericVector.data(), genericVector.size());
 }
 
-}
+} // namespace dinrail
 
 #endif // DINRAIL_EIGEN_HELPER_H

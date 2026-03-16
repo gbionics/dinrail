@@ -4,19 +4,17 @@
 #ifndef DINRAIL_PLACEHOLDER_H
 #define DINRAIL_PLACEHOLDER_H
 
-namespace dinrail
-{
+namespace dinrail {
 
 /**
  * @brief Minimal placeholder class used to keep the core library non-empty.
  */
-class Placeholder
-{
+class Placeholder {
 public:
-    Placeholder() = default;
-    ~Placeholder() = default;
+  Placeholder() = default;
+  ~Placeholder() = default;
 
-    bool isPlaceholder() const;
+  bool isPlaceholder() const;
 };
 
 } // namespace dinrail

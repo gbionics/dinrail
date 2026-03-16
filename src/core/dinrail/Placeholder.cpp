@@ -3,12 +3,8 @@
 
 #include <dinrail/Placeholder.h>
 
-namespace dinrail
-{
+namespace dinrail {
 
-bool Placeholder::isPlaceholder() const
-{
-	return true;
-}
+bool Placeholder::isPlaceholder() const { return true; }
 
 } // namespace dinrail
