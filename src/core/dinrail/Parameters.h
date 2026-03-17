@@ -18,11 +18,32 @@ namespace dinrail
 /**
  * @brief Hierarchical parameter container for dinrail device configuration.
  *
- * Parameters stores typed key-value pairs and named nested groups.
+ * The dinrail::Parameters is a key-value storage that can store values of the following types:
+ * * bool (`bool`)
+ * * int (`int`)
+ * * double (`double`)
+ * * string (`std::string`)
+ * * duration (`std::chrono::nanoseconds`)
+ * * vector of bool
+ * * vector of int
+ * * vector of double
+ * * vector of string
+ * * vector of duration
  *
- * Missing scalar keys can be queried with @ref find, which returns a null
- * @ref dinrail::Value. Missing groups are represented by a null sentinel
- * @ref dinrail::Parameters object, detectable via @ref isNull.
+ * Furthermore, the dinrail::Parameters can also contain also other dinrail::Parameters instances nested,
+ * that can be accessed with `addGroup` and `findGroup` methods.
+ * 
+ * In general, the `dinrail::Paramters` is designed as a way to share settings (such as encoder offset)
+ * and should not to be used to share hot data like joint state, also as all values are copied, and in 
+ * some cases dynamic memory is allocated (for example if a resize of a vector is called in a getParameter call).
+ *
+ * For this reason no multithread syncronization is implemented inside the dinrail::Parameters class,
+ * so if you really have a use case for reading and writing from the same `dinrail::Parameters` instance 
+ * in different threads, make sure that the read and write are protected by a mutual exclusive access mechanism
+ * such as a C++'s std::mutex .
+ * 
+ * For more details on the dinrail::Parameters class, check the
+ * docs/parameters.md
  */
 class Parameters
 {
@@ -168,7 +189,7 @@ public:
     const Parameters& findGroup(const std::string& key) const;
 
     /**
-     * @brief List all scalar-value keys at this level.
+     * @brief List all value keys at this level.
      * @return Vector of key names.
      */
     std::vector<std::string> getValueKeys() const;
