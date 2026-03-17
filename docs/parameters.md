@@ -60,7 +60,7 @@ int main()
 
 `dinrail::Parameters` supports two ways of retrieving parameters, that are:
 * The `find` method, that returns a reference `dinrail::Value` object. This method is **only supported for scalar parameters**. This method is inspired on the similar API of the [`yarp::os::Property`](https://www.yarp.it/latest/classyarp_1_1os_1_1Property.html) class.
-* The `getParameter` methods, that take in input a reference to the method to fill. This method is **supported for all parameters type**, and is the only supported one to get vector values. These methods are inspired from the [`BipedalLocomotion::ParametersHandler::IParametersHandler`](https://gbionics.github.io/bipedal-locomotion-framework/classBipedalLocomotion_1_1ParametersHandler_1_1IParametersHandler.html) interface.
+* The `getParameter` methods, that take in input a reference to the parameter to fill. This method is **supported for all parameters type**, and is the only supported one to get vector values. These methods are inspired from the [`BipedalLocomotion::ParametersHandler::IParametersHandler`](https://gbionics.github.io/bipedal-locomotion-framework/classBipedalLocomotion_1_1ParametersHandler_1_1IParametersHandler.html) interface.
 
 ## Read or write a vector to a `dinrail::Parameters`
 
