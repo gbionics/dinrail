@@ -1,5 +1,8 @@
 # dinrail
 
+<img alt="Image" src="https://github.com/user-attachments/assets/062cdb97-7b0c-4955-b2de-55a16ff5ec2a" />
+
+
 Almost drop-in replacement for "devices" part of YARP, used to run robots in Generative Robotics.
 
 The main goal is to implement an almost drop-in replacement for the "devices" part of YARP, with additional planner properties and features:
