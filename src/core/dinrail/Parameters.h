@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -56,34 +57,35 @@ public:
     Parameters& operator=(Parameters&&) noexcept = default;
 
     /** @brief Insert or replace a boolean value. */
-    void put(const std::string& key, bool value);
+    void put(std::string_view key, bool value);
     /** @brief Insert or replace an integer value. */
-    void put(const std::string& key, int value);
+    void put(std::string_view key, int value);
     /** @brief Insert or replace a floating-point value. */
-    void put(const std::string& key, double value);
+    void put(std::string_view key, double value);
     /** @brief Insert or replace a C-string value. */
-    void put(const std::string& key, const char* value);
+    void put(std::string_view key, const char* value);
     /** @brief Insert or replace a string value. */
-    void put(const std::string& key, const std::string& value);
+    void put(std::string_view key, const std::string& value);
     /** @brief Insert or replace a duration value. */
-    void put(const std::string& key, std::chrono::nanoseconds value);
+    void put(std::string_view key, std::chrono::nanoseconds value);
     /** @brief Insert or replace a boolean vector value. */
-    void put(const std::string& key, const std::vector<bool>& value);
+    void put(std::string_view key, const std::vector<bool>& value);
     /** @brief Insert or replace an integer vector value. */
-    void put(const std::string& key, const std::vector<int>& value);
+    void put(std::string_view key, const VectorProxy<const int>::Ref value);
     /** @brief Insert or replace a floating-point vector value. */
-    void put(const std::string& key, const std::vector<double>& value);
+    void put(std::string_view key, const VectorProxy<const double>::Ref value);
     /** @brief Insert or replace a string vector value. */
-    void put(const std::string& key, const std::vector<std::string>& value);
+    void put(std::string_view key, const VectorProxy<const std::string>::Ref value);
     /** @brief Insert or replace a duration vector value. */
-    void put(const std::string& key, const std::vector<std::chrono::nanoseconds>& value);
+    void put(std::string_view key,
+             const VectorProxy<const std::chrono::nanoseconds>::Ref value);
 
     /**
      * @brief Check if a key exists either as value or as group.
      * @param key Parameter/group name.
      * @return True if found.
      */
-    bool check(const std::string& key) const;
+    bool check(std::string_view key) const;
 
     /**
      * @brief Return value associated to key, or fallback if missing.
@@ -93,7 +95,7 @@ public:
      * @return Stored value if present, otherwise @p fallback.
      */
     Value
-    check(const std::string& key, const Value& fallback, const std::string& comment = "") const;
+    check(std::string_view key, const Value& fallback, const std::string& comment = "") const;
 
     /**
      * @brief Check if a key exists and stores the requested type.
@@ -101,9 +103,9 @@ public:
      * @param key Parameter name.
      * @return True if key exists and contains `T`.
      */
-    template <typename T> bool check(const std::string& key) const
+    template <typename T> bool check(std::string_view key) const
     {
-        auto it = m_values.find(key);
+        auto it = m_values.find(std::string(key));
         return it != m_values.end() && it->second.is<T>();
     }
 
@@ -112,7 +114,7 @@ public:
      * @param key Parameter name.
      * @return Const reference to the stored value, or a null value if missing.
      */
-    const Value& find(const std::string& key) const;
+    const Value& find(std::string_view key) const;
 
     /**
      * @brief Check whether this instance is the null sentinel.
@@ -121,50 +123,50 @@ public:
     bool isNull() const;
 
     /** @brief BLF-style getter for integer values. */
-    bool getParameter(const std::string& key, int& parameter) const;
+    bool getParameter(std::string_view key, int& parameter) const;
     /** @brief BLF-style getter for double values. */
-    bool getParameter(const std::string& key, double& parameter) const;
+    bool getParameter(std::string_view key, double& parameter) const;
     /** @brief BLF-style getter for string values. */
-    bool getParameter(const std::string& key, std::string& parameter) const;
+    bool getParameter(std::string_view key, std::string& parameter) const;
     /** @brief BLF-style getter for boolean values. */
-    bool getParameter(const std::string& key, bool& parameter) const;
+    bool getParameter(std::string_view key, bool& parameter) const;
     /** @brief BLF-style getter for duration values. */
-    bool getParameter(const std::string& key, std::chrono::nanoseconds& parameter) const;
+    bool getParameter(std::string_view key, std::chrono::nanoseconds& parameter) const;
     /** @brief BLF-style getter for boolean vector values. */
-    bool getParameter(const std::string& key, std::vector<bool>& parameter) const;
+    bool getParameter(std::string_view key, std::vector<bool>& parameter) const;
     /** @brief BLF-style getter for integer vectors. */
-    bool getParameter(const std::string& key, VectorProxy<int>::Ref parameter) const;
+    bool getParameter(std::string_view key, VectorProxy<int>::Ref parameter) const;
     /** @brief BLF-style getter for double vectors. */
-    bool getParameter(const std::string& key, VectorProxy<double>::Ref parameter) const;
+    bool getParameter(std::string_view key, VectorProxy<double>::Ref parameter) const;
     /** @brief BLF-style getter for string vectors. */
-    bool getParameter(const std::string& key, VectorProxy<std::string>::Ref parameter) const;
+    bool getParameter(std::string_view key, VectorProxy<std::string>::Ref parameter) const;
     /** @brief BLF-style getter for duration vectors. */
-    bool getParameter(const std::string& key,
+    bool getParameter(std::string_view key,
                       VectorProxy<std::chrono::nanoseconds>::Ref parameter) const;
 
     /** @brief BLF-style setter for integer values. */
-    void setParameter(const std::string& key, const int& parameter);
+    void setParameter(std::string_view key, const int& parameter);
     /** @brief BLF-style setter for double values. */
-    void setParameter(const std::string& key, const double& parameter);
+    void setParameter(std::string_view key, const double& parameter);
     /** @brief BLF-style setter for string values. */
-    void setParameter(const std::string& key, const std::string& parameter);
+    void setParameter(std::string_view key, const std::string& parameter);
     /** @brief BLF-style setter for C-string values. */
-    void setParameter(const std::string& key, const char* parameter);
+    void setParameter(std::string_view key, const char* parameter);
     /** @brief BLF-style setter for boolean values. */
-    void setParameter(const std::string& key, const bool& parameter);
+    void setParameter(std::string_view key, const bool& parameter);
     /** @brief BLF-style setter for duration values. */
-    void setParameter(const std::string& key, const std::chrono::nanoseconds& parameter);
+    void setParameter(std::string_view key, const std::chrono::nanoseconds& parameter);
     /** @brief BLF-style setter for boolean vector values. */
-    void setParameter(const std::string& key, const std::vector<bool>& parameter);
+    void setParameter(std::string_view key, const std::vector<bool>& parameter);
     /** @brief BLF-style setter for integer vectors. */
-    void setParameter(const std::string& key, const VectorProxy<const int>::Ref parameter);
+    void setParameter(std::string_view key, const VectorProxy<const int>::Ref parameter);
     /** @brief BLF-style setter for double vectors. */
-    void setParameter(const std::string& key, const VectorProxy<const double>::Ref parameter);
+    void setParameter(std::string_view key, const VectorProxy<const double>::Ref parameter);
     /** @brief BLF-style setter for string vectors. */
     void
-    setParameter(const std::string& key, const VectorProxy<const std::string>::Ref parameter);
+    setParameter(std::string_view key, const VectorProxy<const std::string>::Ref parameter);
     /** @brief BLF-style setter for duration vectors. */
-    void setParameter(const std::string& key,
+    void setParameter(std::string_view key,
                       const VectorProxy<const std::chrono::nanoseconds>::Ref parameter);
 
     /**
@@ -172,21 +174,21 @@ public:
      * @param key Group name.
      * @return Mutable reference to the group.
      */
-    Parameters& addGroup(const std::string& key);
+    Parameters& addGroup(std::string_view key);
 
     /**
      * @brief Find a named group.
      * @param key Group name.
      * @return Mutable group reference, or null sentinel if missing.
      */
-    Parameters& findGroup(const std::string& key);
+    Parameters& findGroup(std::string_view key);
 
     /**
      * @brief Find a named group (const overload).
      * @param key Group name.
      * @return Const group reference, or null sentinel if missing.
      */
-    const Parameters& findGroup(const std::string& key) const;
+    const Parameters& findGroup(std::string_view key) const;
 
     /**
      * @brief List all value keys at this level.
