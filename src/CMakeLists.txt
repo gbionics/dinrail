@@ -6,5 +6,5 @@ add_subdirectory(core)
 
 # Optional YARP Property conversion support.
 if(DINRAIL_USES_YARP)
-	add_subdirectory(yarp)
+    add_subdirectory(yarp)
 endif()

@@ -26,7 +26,7 @@ target_link_libraries(BLFParametersHandlerCompatibilityTest
     PRIVATE
         dinrail::dinrail
         YARP::YARP_os
-    YARP::YARP_robotinterface
+        YARP::YARP_robotinterface
         BipedalLocomotion::ParametersHandler
         BipedalLocomotion::ParametersHandlerYarpImplementation
         Catch2::Catch2WithMain

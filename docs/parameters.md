@@ -56,7 +56,7 @@ int main()
 }
 ```
 
-## `getParameters` vs `find` methods
+## `getParameter` vs `find` methods
 
 `dinrail::Parameters` supports two ways of retrieving parameters, that are:
 * The `find` method, that returns a reference `dinrail::Value` object. This method is **only supported for scalar parameters**. This method is inspired on the similar API of the [`yarp::os::Property`](https://www.yarp.it/latest/classyarp_1_1os_1_1Property.html) class.

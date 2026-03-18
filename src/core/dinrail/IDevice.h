@@ -24,7 +24,7 @@ public:
     virtual ~IDevice() = default;
 
     /**
-     * Open the DeviceDriver.
+     * Open the IDevice.
      * @param config is a list of parameters for the device.
      * @return true/false upon success/failure
      */
