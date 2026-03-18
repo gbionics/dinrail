@@ -31,17 +31,18 @@ namespace dinrail
  * * vector of string
  * * vector of duration
  *
- * Furthermore, the dinrail::Parameters can also contain also other dinrail::Parameters instances nested,
- * that can be accessed with `addGroup` and `findGroup` methods.
+ * Furthermore, dinrail::Parameters can also contain other nested dinrail::Parameters instances,
+ * which can be accessed with the `addGroup` and `findGroup` methods.
  * 
- * In general, the `dinrail::Paramters` is designed as a way to share settings (such as encoder offset)
- * and should not to be used to share hot data like joint state, also as all values are copied, and in 
- * some cases dynamic memory is allocated (for example if a resize of a vector is called in a getParameter call).
+ * In general, `dinrail::Parameters` is designed as a way to share settings (such as encoder offset)
+ * and should not be used to share hot data like joint state, as all values are copied and, in 
+ * some cases, dynamic memory is allocated (for example, if a resize of a vector is triggered by a
+ * getParameter call).
  *
- * For this reason no multithread syncronization is implemented inside the dinrail::Parameters class,
+ * For this reason no multithread synchronization is implemented inside the dinrail::Parameters class,
  * so if you really have a use case for reading and writing from the same `dinrail::Parameters` instance 
- * in different threads, make sure that the read and write are protected by a mutual exclusive access mechanism
- * such as a C++'s std::mutex .
+ * in different threads, make sure that the reads and writes are protected by a mutually exclusive access
+ * mechanism such as the C++ `std::mutex` class.
  * 
  * For more details on the dinrail::Parameters class, check the
  * docs/parameters.md
