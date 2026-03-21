@@ -124,22 +124,22 @@ public:
     bool isString() const;
 
     /**
-     * @brief Convert to bool using YARP-like scalar compatibility.
+     * @brief Convert to bool using scalar compatibility rules.
      * @return Converted boolean value.
      */
     bool asBool() const;
     /**
-     * @brief Convert to int using YARP-like scalar compatibility.
+     * @brief Convert to int using scalar compatibility rules.
      * @return Converted integer value.
      */
     int asInt() const;
     /**
-     * @brief Convert to double using YARP-like scalar compatibility.
+     * @brief Convert to double using scalar compatibility rules.
      * @return Converted floating-point value.
      */
     double asDouble() const;
     /**
-     * @brief Convert to string using YARP-like scalar compatibility.
+     * @brief Convert to string using scalar compatibility rules.
      * @return Converted string value.
      */
     std::string asString() const;
