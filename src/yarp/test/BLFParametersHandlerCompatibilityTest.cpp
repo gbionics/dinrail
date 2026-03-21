@@ -8,8 +8,7 @@
 #include <BipedalLocomotion/ParametersHandler/YarpImplementation.h>
 
 #include <dinrail/Parameters.h>
-
-#include "../YarpPropertyConverter.h"
+#include <dinrail/YarpPropertyConverter.h>
 
 #include <filesystem>
 #include <fstream>
@@ -32,7 +31,6 @@
 
 namespace
 {
-
 yarp::os::Property toProperty(const yarp::robotinterface::Device& dev)
 {
     using namespace yarp::robotinterface;
@@ -464,7 +462,7 @@ void compareEntry(const yarp::os::Bottle& entry,
             yarp::os::Bottle* child = entry.get(i).asList();
             if (child == nullptr)
             {
-                continue;
+                FAIL("Unexpected null sub-bottle in group entry at: " + keyPath);
             }
             compareEntry(*child, *yarpGroup, *dinrailGroup, keyPath);
         }
@@ -499,7 +497,7 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     if (!value.isList())
     {
-        return;
+        FAIL("Unsupported non-list YARP value type at key: " + keyPath);
     }
 
     yarp::os::Bottle* list = value.asList();
@@ -512,14 +510,17 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     bool allInt = true;
     bool allFloat = true;
+    bool allNumeric = true;
     bool allString = true;
     bool allBool = true;
     for (int i = 0; i < list->size(); ++i)
     {
         const yarp::os::Value& element = list->get(i);
         const bool isInt = element.isInt32() || element.isInt64();
+        const bool isNumeric = isInt || element.isFloat64();
         allInt = allInt && isInt;
         allFloat = allFloat && element.isFloat64();
+        allNumeric = allNumeric && isNumeric;
         allString = allString && element.isString();
         allBool = allBool && element.isBool();
     }
@@ -552,10 +553,36 @@ void compareEntry(const yarp::os::Bottle& entry,
         return;
     }
 
+    if (allNumeric)
+    {
+        // This is a workaround as BLF parameters handler as of blf 0.24.0 does 
+        // not support loading "fingersScaling          (1, 2.0, 3.5, 3.5, 3.5)"
+        // as std::vector<double>, while other YARP-using codes supports it
+        // (see https://github.com/gbionics/walking-teleoperation/blob/v1.3.9/modules/Utils/src/Utils.cpp#L134)
+        
+        // so only in this case we do not test against BLF
+        std::vector<double> expectedValues;
+        expectedValues.reserve(static_cast<std::size_t>(list->size()));
+        for (int i = 0; i < list->size(); ++i)
+        {
+            expectedValues.push_back(list->get(i).asFloat64());
+        }
+
+        std::vector<double> actualValues;
+        const bool rhsOk = dinrailHandler.getParameter(key, actualValues);
+        INFO("Vector key path: " << keyPath);
+        REQUIRE(rhsOk);
+        REQUIRE(actualValues == expectedValues);
+        return;
+    }
+
     if (allString)
     {
         requireSameVector<std::string>(yarpHandler, dinrailHandler, key, keyPath);
+        return;
     }
+
+    FAIL("Unsupported list element type mix at key: " + keyPath);
 }
 
 void comparePropertyHandlers(
@@ -570,7 +597,7 @@ void comparePropertyHandlers(
     {
         if (!root.get(i).isList())
         {
-            continue;
+            FAIL("Unexpected non-list element at top-level index " + std::to_string(i));
         }
 
         yarp::os::Bottle* entry = root.get(i).asList();
@@ -603,4 +630,24 @@ TEST_CASE("BLF YarpImplementation and DinrailImplementation are compatible on sa
 
         comparePropertyHandlers(yarpProperty, yarpHandler, dinrailHandler);
     }
+}
+
+TEST_CASE("Mixed numeric fingersScaling list is converted as vector<double>",
+          "[YarpPropertyConverter][BLFCompatibility]")
+{
+    const std::filesystem::path file
+        = std::filesystem::path(DINRAIL_YARP_TEST_DATA_DIR) / "fingers-scaling-only.ini";
+
+    yarp::os::Property yarpProperty = loadPropertyFromFile(file);
+
+    dinrail::Parameters params = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProperty);
+
+    REQUIRE(params.check<std::vector<double>>("fingersScaling"));
+    const auto& values = params.find("fingersScaling").as<std::vector<double>>();
+    REQUIRE(values.size() == 5);
+    REQUIRE(values[0] == 1.0);
+    REQUIRE(values[1] == 2.0);
+    REQUIRE(values[2] == 3.5);
+    REQUIRE(values[3] == 3.5);
+    REQUIRE(values[4] == 3.5);
 }

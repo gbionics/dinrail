@@ -7,7 +7,7 @@ find_package(BipedalLocomotionFramework REQUIRED)
 add_executable(YarpPropertyConverterTest PropertyConverterTest.cpp)
 target_link_libraries(YarpPropertyConverterTest
     PRIVATE
-        dinrail-yarp-converter
+        dinrail::dinrail-yarp-conversions
         Catch2::Catch2WithMain
 )
 add_test(NAME YarpPropertyConverterTest COMMAND YarpPropertyConverterTest)
@@ -25,18 +25,12 @@ add_executable(BLFParametersHandlerCompatibilityTest BLFParametersHandlerCompati
 target_link_libraries(BLFParametersHandlerCompatibilityTest
     PRIVATE
         dinrail::dinrail
+        dinrail::dinrail-yarp-conversions
         YARP::YARP_os
         YARP::YARP_robotinterface
         BipedalLocomotion::ParametersHandler
         BipedalLocomotion::ParametersHandlerYarpImplementation
         Catch2::Catch2WithMain
-)
-target_sources(BLFParametersHandlerCompatibilityTest PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/../YarpPropertyConverter.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/../YarpPropertyConverter.h
-)
-target_include_directories(BLFParametersHandlerCompatibilityTest PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 target_compile_definitions(BLFParametersHandlerCompatibilityTest PRIVATE
     DINRAIL_YARP_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"

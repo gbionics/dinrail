@@ -3,10 +3,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../YarpPropertyConverter.h"
+#include <dinrail/YarpPropertyConverter.h>
 #include <dinrail/Parameters.h>
 
 #include <yarp/os/Property.h>
+
+#include <chrono>
 
 TEST_CASE("YarpPropertyConverter converts device name", "[YarpPropertyConverter]")
 {
@@ -152,6 +154,93 @@ TEST_CASE("YarpPropertyConverter converts all data types", "[YarpPropertyConvert
 
     REQUIRE(yarpProp.check("doubleParam"));
     REQUIRE(yarpProp.find("doubleParam").asFloat64() == 3.14159);
+}
+
+TEST_CASE("YarpPropertyConverter converts vector of doubles", "[YarpPropertyConverter]")
+{
+    dinrail::Parameters dinrailProp;
+    const std::vector<double> expectedValues{0.1, -2.5, 3.75};
+    dinrailProp.put("doubleVector", expectedValues);
+
+    yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
+
+    REQUIRE(yarpProp.check("doubleVector"));
+
+    const yarp::os::Value& convertedValue = yarpProp.find("doubleVector");
+    REQUIRE(convertedValue.isList());
+
+    yarp::os::Bottle* convertedList = convertedValue.asList();
+    REQUIRE(convertedList != nullptr);
+    REQUIRE(convertedList->size() == static_cast<int>(expectedValues.size()));
+
+    for (int i = 0; i < convertedList->size(); ++i)
+    {
+        REQUIRE(convertedList->get(i).isFloat64());
+        REQUIRE(convertedList->get(i).asFloat64() == expectedValues[static_cast<size_t>(i)]);
+    }
+}
+
+TEST_CASE("YarpPropertyConverter converts all supported Parameters types",
+          "[YarpPropertyConverter]")
+{
+    using namespace std::chrono_literals;
+
+    dinrail::Parameters dinrailProp;
+    dinrailProp.put("boolParam", true);
+    dinrailProp.put("intParam", 10);
+    dinrailProp.put("doubleParam", 2.5);
+    dinrailProp.put("stringParam", "value");
+    dinrailProp.put("durationParam", 12s + 345ms);
+
+    dinrailProp.put("boolVector", std::vector<bool>{true, false, true});
+    dinrailProp.put("intVector", std::vector<int>{1, 2, 3});
+    dinrailProp.put("doubleVector", std::vector<double>{1.0, 2.0, 3.0});
+    dinrailProp.put("stringVector", std::vector<std::string>{"a", "b"});
+    dinrailProp.put("durationVector",
+                    std::vector<std::chrono::nanoseconds>{1s + 1ms, 2s + 2ms, 3s + 3ms});
+
+    yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
+
+    REQUIRE(yarpProp.find("boolParam").asInt32() == 1);
+    REQUIRE(yarpProp.find("intParam").asInt32() == 10);
+    REQUIRE(yarpProp.find("doubleParam").asFloat64() == 2.5);
+    REQUIRE(yarpProp.find("stringParam").asString() == "value");
+    REQUIRE(yarpProp.find("durationParam").asString() == "00:00:12:345000");
+
+    yarp::os::Bottle* boolVector = yarpProp.find("boolVector").asList();
+    REQUIRE(boolVector != nullptr);
+    REQUIRE(boolVector->size() == 3);
+    REQUIRE(boolVector->get(0).isBool());
+    REQUIRE(boolVector->get(0).asBool() == true);
+    REQUIRE(boolVector->get(1).asBool() == false);
+    REQUIRE(boolVector->get(2).asBool() == true);
+
+    yarp::os::Bottle* intVector = yarpProp.find("intVector").asList();
+    REQUIRE(intVector != nullptr);
+    REQUIRE(intVector->size() == 3);
+    REQUIRE(intVector->get(0).asInt32() == 1);
+    REQUIRE(intVector->get(1).asInt32() == 2);
+    REQUIRE(intVector->get(2).asInt32() == 3);
+
+    yarp::os::Bottle* doubleVector = yarpProp.find("doubleVector").asList();
+    REQUIRE(doubleVector != nullptr);
+    REQUIRE(doubleVector->size() == 3);
+    REQUIRE(doubleVector->get(0).asFloat64() == 1.0);
+    REQUIRE(doubleVector->get(1).asFloat64() == 2.0);
+    REQUIRE(doubleVector->get(2).asFloat64() == 3.0);
+
+    yarp::os::Bottle* stringVector = yarpProp.find("stringVector").asList();
+    REQUIRE(stringVector != nullptr);
+    REQUIRE(stringVector->size() == 2);
+    REQUIRE(stringVector->get(0).asString() == "a");
+    REQUIRE(stringVector->get(1).asString() == "b");
+
+    yarp::os::Bottle* durationVector = yarpProp.find("durationVector").asList();
+    REQUIRE(durationVector != nullptr);
+    REQUIRE(durationVector->size() == 3);
+    REQUIRE(durationVector->get(0).asString() == "00:00:01:001000");
+    REQUIRE(durationVector->get(1).asString() == "00:00:02:002000");
+    REQUIRE(durationVector->get(2).asString() == "00:00:03:003000");
 }
 
 TEST_CASE("YarpPropertyConverter converts multiple groups", "[YarpPropertyConverter]")
@@ -416,4 +505,35 @@ TEST_CASE("dinrail::Value matches YARP int-to-double compatibility",
 
     // Missing keys should still be searchable and yield null-like values.
     REQUIRE(yarpProperty.find("missing").isNull() == dinrailParameters.find("missing").isNull());
+}
+
+TEST_CASE("YarpPropertyConverter promotes mixed numeric list to vector<double>",
+          "[YarpPropertyConverter]")
+{
+    yarp::os::Property yarpProp;
+    yarp::os::Property& group = yarpProp.addGroup("LEFT_FINGERS_RETARGETING");
+
+    yarp::os::Value* listValue = yarp::os::Value::makeList();
+    yarp::os::Bottle* list = listValue->asList();
+    REQUIRE(list != nullptr);
+    list->addInt32(1);
+    list->addFloat64(2.0);
+    list->addFloat64(3.5);
+    list->addFloat64(3.5);
+    list->addFloat64(3.5);
+    group.put("fingersScaling", listValue);
+
+    dinrail::Parameters dinrailParams = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProp);
+    const dinrail::Parameters& fingersGroup = dinrailParams.findGroup("LEFT_FINGERS_RETARGETING");
+
+    REQUIRE_FALSE(fingersGroup.isNull());
+    REQUIRE(fingersGroup.check<std::vector<double>>("fingersScaling"));
+
+    const auto& values = fingersGroup.find("fingersScaling").as<std::vector<double>>();
+    REQUIRE(values.size() == 5);
+    REQUIRE(values[0] == 1.0);
+    REQUIRE(values[1] == 2.0);
+    REQUIRE(values[2] == 3.5);
+    REQUIRE(values[3] == 3.5);
+    REQUIRE(values[4] == 3.5);
 }
