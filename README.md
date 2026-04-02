@@ -22,6 +22,47 @@ find_package(dinrail REQUIRED)
 target_link_libraries(target PRIVATE dinrail::dinrail)
 ~~~
 
+## Basic API
+
+Configure and open a device a mock device for a series of motors, then query it through an interface:
+
+~~~cpp
+#include <dinrail/Device.h>
+#include <dinrail/IAxisInfo.h>
+#include <dinrail/Parameters.h>
+
+dinrail::Parameters opts;
+opts.put("device", "fakeMotionControl");
+opts.put("number_of_joints", 3);
+opts.put("joint_names", std::vector<std::string>{"shoulder", "elbow", "wrist"});
+opts.put("joint_type", std::vector<std::string>{"revolute", "prismatic", "revolute"});
+
+dinrail::Device device;
+device.open(opts);
+
+dinrail::IAxisInfo* axisInfo = nullptr;
+device.view(axisInfo);
+
+int axes = 0;
+axisInfo->getAxes(&axes); // axes == 3
+
+std::string name;
+axisInfo->getAxisName(0, name); // name == "shoulder"
+
+device.close();
+~~~
+
+## Additional documentation
+
+See the following links for more documentation on the dinrail project:
+* [dinrail::Parameters](docs/parameters.md) — how to use the hierarchical key-value configuration container
+* [Plugin types / internals](docs/internals.md) — description of dinrail device and compatibility-layer plugin types
+* [Migrating from yarp::os::Property to dinrail::Parameters](docs/yarp-migration/from-yarp-os-property-to-dinrail-parameters.md) — migration guide for YARP users
+
+
+## Examples
+
+* [yarp-migration/fake-motion-control](examples/yarp-migration/fake-motion-control) — side-by-side comparison of opening a device via YARP and via dinrail
 
 ## Development
 

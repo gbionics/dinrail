@@ -24,3 +24,11 @@ target_link_libraries(ParametersTest
         Catch2::Catch2WithMain
 )
 add_test(NAME ParametersTest COMMAND ParametersTest)
+
+add_executable(FakeMotionControlAxisInfoTest FakeMotionControlAxisInfoTest.cpp)
+target_link_libraries(FakeMotionControlAxisInfoTest
+    PRIVATE
+        dinrail::dinrail
+        Catch2::Catch2WithMain
+)
+add_test(NAME FakeMotionControlAxisInfoTest COMMAND FakeMotionControlAxisInfoTest)

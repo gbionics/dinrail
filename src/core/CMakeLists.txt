@@ -8,9 +8,16 @@ add_library(${LIBRARY_NAME})
 
 target_sources(${LIBRARY_NAME}
     PRIVATE
-    dinrail/Parameters.cpp
-    dinrail/Value.cpp
+        dinrail/AdapterRegistry.cpp
+        dinrail/AdapterRegistry.h
+        dinrail/Constants.h
+        dinrail/Device.cpp
+        dinrail/Device.h
+        dinrail/IAxisInfo.h
+        dinrail/ICompatibilityLayer.h
+        dinrail/Parameters.cpp
         dinrail/Placeholder.cpp
+        dinrail/Value.cpp
 )
 
 add_library(${PROJECT_NAME}::${LIBRARY_NAME} ALIAS ${LIBRARY_NAME})
@@ -20,6 +27,11 @@ target_include_directories(${LIBRARY_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_link_libraries(${LIBRARY_NAME}
+    PUBLIC
+        sharedlibpp::sharedlibpp
 )
 
 # To use std::span

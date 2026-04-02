@@ -35,6 +35,13 @@ public:
      * @return true/false on success/failure.
      */
     virtual bool close() = 0;
+
+    /**
+     * Allocate a new instance of the device driver.
+     * This is used by the plugin system to create instances.
+     * @return pointer to new instance
+     */
+    virtual IDevice* allocateInstance() const = 0;
 };
 
 } // namespace dinrail
