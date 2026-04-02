@@ -16,3 +16,11 @@ target_link_libraries(VectorProxyTest
         Catch2::Catch2WithMain
 )
 add_test(NAME VectorProxyTest COMMAND VectorProxyTest)
+
+add_executable(ParametersTest ParametersTest.cpp)
+target_link_libraries(ParametersTest
+    PRIVATE
+        dinrail::dinrail
+        Catch2::Catch2WithMain
+)
+add_test(NAME ParametersTest COMMAND ParametersTest)
