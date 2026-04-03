@@ -53,10 +53,7 @@ Device::Device()
 
 Device::~Device()
 {
-    // This ensures that the device is deleted first (as it uses the factory's destroy method), 
-    // before unloading the library in the factory destructor.
-    m_pimpl->device.reset();
-    m_pimpl->deviceFactory.reset();
+    close();
 }
 
 bool Device::open(const Parameters& config)
@@ -110,19 +107,19 @@ bool Device::open(const Parameters& config)
 
 bool Device::close()
 {
+    bool result = true;
     if (m_pimpl->device)
     {
-        bool result = m_pimpl->device->close();
-        m_pimpl->isValid = false;
-        m_pimpl->device.reset();
-        m_pimpl->deviceFactory.reset();
-        return result;
+        result = m_pimpl->device->close();
     }
 
     m_pimpl->isValid = false;
+
+    // This ensures that the device is deleted first (as it uses the factory's destroy method),
+    // before unloading the library in the factory destructor.
     m_pimpl->device.reset();
     m_pimpl->deviceFactory.reset();
-    return true;
+    return result;
 }
 
 bool Device::isValid() const
