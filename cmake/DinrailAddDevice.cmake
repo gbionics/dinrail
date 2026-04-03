@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
+include(GNUInstallDirs)
+
 #.rst:
 # dinrail_add_device
 # ------------------
@@ -10,11 +12,12 @@
 #
 # ::
 #
-#   dinrail_add_device(<target> <source> [<source> ...])
+#   dinrail_add_device(<target> [SHARED|MODULE] <source> [<source> ...])
 #
 # The function is intentionally similar to ``add_library`` positional style:
 # the first argument is the target name, and all remaining arguments are
-# treated as sources.
+# treated as sources, except an optional ``SHARED`` or ``MODULE`` library
+# type as second positional argument.
 #
 # Parameters
 # ^^^^^^^^^^
@@ -26,6 +29,15 @@
 #   The device name is extracted from the target suffix.
 #   For example, target ``dinrail-device-MyDevice`` maps to device name
 #   ``MyDevice`` and factory symbol ``dinrail_device_MyDevice``.
+#
+# ``[SHARED|MODULE]``
+#   Optional library type, matching ``add_library`` semantics.
+#   Defaults to ``SHARED`` when omitted.
+#   While the main target of dinrail devices is to be dlopen-ed, so
+#   MODULE is the most appropriate type, ``SHARED`` is used by default
+#   as of CMake 4.2 install(TARGETS <shared-target>) works out of the box,
+#   differently from install(TARGETS <module-target>). If you switch to use 
+#   MODULE, ensure you modify accordingly your calls to install(TARGETS <..>)
 #
 # ``<source> [<source> ...]``
 #   Source files to compile into the plugin target.
@@ -40,7 +52,8 @@
 # Behavior
 # ^^^^^^^^
 #
-# - Creates ``add_library(<target> MODULE ...)``.
+# - Creates ``add_library(<target> <type> ...)`` with ``<type>`` defaulting
+#   to ``SHARED``.
 # - Generates an internal ``*_dinrail_registration.cpp`` file containing
 #   ``SHLIBPP_DEFINE_SHARED_SUBCLASS(...)``.
 # - Adds the directory of the first passed header as private include directory
@@ -52,11 +65,20 @@ function(dinrail_add_device target)
         message(FATAL_ERROR "dinrail_add_device: target is required")
     endif()
 
-    if(ARGC LESS 2)
-        message(FATAL_ERROR "dinrail_add_device: at least one source is required")
+    set(_dinrail_library_type SHARED)
+    set(_dinrail_sources ${ARGN})
+
+    if(_dinrail_sources)
+        list(GET _dinrail_sources 0 _dinrail_maybe_library_type)
+        if(_dinrail_maybe_library_type STREQUAL "SHARED" OR _dinrail_maybe_library_type STREQUAL "MODULE")
+            set(_dinrail_library_type "${_dinrail_maybe_library_type}")
+            list(REMOVE_AT _dinrail_sources 0)
+        endif()
     endif()
 
-    set(_dinrail_sources ${ARGN})
+    if(NOT _dinrail_sources)
+        message(FATAL_ERROR "dinrail_add_device: at least one source is required")
+    endif()
 
     if(NOT target MATCHES "^dinrail-device-")
         message(FATAL_ERROR "dinrail_add_device: target must start with 'dinrail-device-'")
@@ -105,7 +127,7 @@ function(dinrail_add_device target)
 "using namespace dinrail;\n\n"
 "SHLIBPP_DEFINE_SHARED_SUBCLASS(${_dinrail_factory_symbol}, ${_dinrail_class_name}, dinrail::IDevice)\n")
 
-    add_library(${target} MODULE
+    add_library(${target} ${_dinrail_library_type}
         ${_dinrail_sources}
         "${_dinrail_registration_file}"
     )

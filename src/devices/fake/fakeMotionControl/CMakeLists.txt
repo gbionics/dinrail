@@ -7,6 +7,8 @@ dinrail_add_device(
     FakeMotionControl.cpp
 )
 
+install(TARGETS dinrail-device-fakeMotionControl)
+
 if(BUILD_TESTING)
     add_subdirectory(test)
 endif()

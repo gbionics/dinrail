@@ -9,7 +9,7 @@ add_library(MyInterface::MyInterface ALIAS MyInterface)
 target_include_directories(MyInterface INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/MyInterfaceLib)
 
 
-# 2. The MODULE library dinrail-device-MyDevice, which implements the device plugin.
+# 2. The library dinrail-device-MyDevice, which implements the device plugin.
 dinrail_add_device(
     dinrail-device-MyDevice
     MyDevice.h
@@ -20,7 +20,10 @@ dinrail_add_device(
 target_link_libraries(dinrail-device-MyDevice PRIVATE MyInterface::MyInterface)
 
 # Also, we need to install the device library, so that it can be discovered and loaded at runtime from the install tree.
-install(TARGETS dinrail-device-MyDevice)
+install(TARGETS dinrail-device-MyDevice
+    LIBRARY DESTINATION ${DINRAIL_INSTALL_MODULEDIR}
+    RUNTIME DESTINATION ${DINRAIL_INSTALL_MODULEDIR}
+)
 
 # 2. The example executable - only links dinrail::dinrail; the device library
 #    is discovered and loaded at runtime from the install tree.

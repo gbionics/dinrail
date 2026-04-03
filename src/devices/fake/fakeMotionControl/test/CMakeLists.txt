@@ -14,5 +14,5 @@ add_test(NAME FakeMotionControlAxisInfoTest COMMAND FakeMotionControlAxisInfoTes
 # Tests must find plugins from the build tree even when the project is not installed.
 set_tests_properties(FakeMotionControlAxisInfoTest
     PROPERTIES
-        ENVIRONMENT "DINRAIL_PLUGIN_PATH=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}"
+        ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-fakeMotionControl>"
 )
