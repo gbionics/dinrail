@@ -24,6 +24,6 @@ The logic lives in [src/core/dinrail/PluginUtils.h](../src/core/dinrail/PluginUt
 
 The `dinrail` CLI (`dev --show-search-path` and `dev --list`) uses the same `getPluginSearchPaths()` function, so CLI output and runtime loading behavior are aligned.
 
-This logic should ensure that as long as you install dinrail devices in the same install prefix of `dinrail` itself, all the plugins will be found without setting any additional 
-environmental variable, otherwise if the plugin install prefix is different, you just need to add the install location of plugins to `DINRAIL_PLUGIN_PATH`.
+This logic should ensure that as long as you install dinrail devices in the same install prefix as `dinrail` itself, all the plugins will be found without setting any additional environment
+variable. If the plugin install prefix is different, you just need to add the install location of plugins to `DINRAIL_PLUGIN_PATH`.
 

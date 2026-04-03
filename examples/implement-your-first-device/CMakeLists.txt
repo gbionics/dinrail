@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
-# 1. The INTERFACE header library for the MyInterfece.h header,
+# 1. The INTERFACE header library for the MyInterface.h header,
 #   which is needed by both the device library and the example executable.
 
 add_library(MyInterface INTERFACE)
