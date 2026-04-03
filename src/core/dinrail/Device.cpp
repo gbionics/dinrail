@@ -130,13 +130,4 @@ IDevice* Device::getImplementation()
     return m_pimpl->device.get();
 }
 
-std::string Device::getDeviceName() const
-{
-    if (m_pimpl->device)
-    {
-        return "loaded device";
-    }
-    return "null";
-}
-
 } // namespace dinrail

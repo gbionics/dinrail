@@ -81,12 +81,6 @@ public:
         return false;
     }
 
-    /**
-     * @brief Get the configured device name.
-     * @return Device name string.
-     */
-    std::string getDeviceName() const;
-
 private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;

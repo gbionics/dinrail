@@ -40,7 +40,7 @@ int main()
 
     int axes = 0;
     axisInfo->getAxes(&axes);
-    std::cout << "Opened '" << dev.getDeviceName() << "' with " << axes << " axis(es):\n";
+    std::cout << "Opened MyDevice with " << axes << " axis(es):\n";
 
     // Query and use a custom interface exposed by the same device.
     myexample::MyInterface* custom = nullptr;
