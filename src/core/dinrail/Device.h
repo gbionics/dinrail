@@ -82,12 +82,6 @@ public:
     }
 
     /**
-     * @brief Access the raw device implementation pointer.
-     * @return Pointer to the underlying implementation, or nullptr if not open.
-     */
-    IDevice* getImplementation();
-
-    /**
      * @brief Get the configured device name.
      * @return Device name string.
      */
@@ -96,6 +90,10 @@ public:
 private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
+
+    // Internal method to retrieve the raw device implementation pointer,
+    // used in the view() method for dynamic casting.
+    IDevice* getImplementation();
 };
 
 } // namespace dinrail
