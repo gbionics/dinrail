@@ -39,12 +39,12 @@ std::optional<std::string> getPathOfDinrailSharedLibrary()
 #ifndef _WIN32
     Dl_info addressInfo;
     int resVal = dladdr(reinterpret_cast<void*>(getPathOfDinrailSharedLibrary), &addressInfo);
-    if (addressInfo.dli_fname && resVal > 0)
-    {
-        libraryLocation = addressInfo.dli_fname;
-    } else
+    if (resVal == 0 || !addressInfo.dli_fname)
     {
         return {};
+    } else
+    {
+        libraryLocation = addressInfo.dli_fname;
     }
 #else
     char modulePath[MAX_PATH];
