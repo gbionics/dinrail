@@ -114,10 +114,15 @@ bool Device::close()
     {
         bool result = m_pimpl->device->close();
         m_pimpl->isValid = false;
+        m_pimpl->device.reset();
+        m_pimpl->deviceFactory.reset();
         return result;
     }
+
     m_pimpl->isValid = false;
-    return false;
+    m_pimpl->device.reset();
+    m_pimpl->deviceFactory.reset();
+    return true;
 }
 
 bool Device::isValid() const
