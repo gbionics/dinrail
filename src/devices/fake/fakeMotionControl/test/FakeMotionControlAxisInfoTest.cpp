@@ -11,7 +11,6 @@ TEST_CASE("FakeMotionControl exposes IAxisInfo", "[core][device][axisinfo]")
 {
     dinrail::Parameters opts;
     opts.put("device", "fakeMotionControl");
-    opts.put("dinrail_device_type", "dinrail");
     opts.put("number_of_joints", 3);
     opts.put("joint_names", std::vector<std::string>{"shoulder", "elbow", "wrist"});
     opts.put("joint_type", std::vector<std::string>{"revolute", "prismatic", "revolute"});
