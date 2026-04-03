@@ -22,3 +22,6 @@ jobs:
 
       - name: Run test suite
         run: pixi run test
+
+      - name: Build examples as standalone project
+        run: pixi run --manifest-path examples/pixi.toml build

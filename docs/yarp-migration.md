@@ -64,3 +64,4 @@ If your destination container is resizable, `getParameter(...)` resizes it as ne
 For more details and more examples, see [parameters.md](parameters.md).
 
 Note that while vector values of heterogenous types are supported in `yarp::os::Property`, to keep the complexity low these are not supported in `dinrail::Parameters`.
+

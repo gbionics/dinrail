@@ -22,6 +22,62 @@ find_package(dinrail REQUIRED)
 target_link_libraries(target PRIVATE dinrail::dinrail)
 ~~~
 
+## Basic API
+
+Configure and open a fake device, then query it through a typed interface:
+
+~~~cpp
+#include <dinrail/Device.h>
+#include <dinrail/IAxisInfo.h>
+#include <dinrail/Parameters.h>
+
+dinrail::Parameters opts;
+opts.put("device", "fakeMotionControl");
+opts.put("number_of_joints", 3);
+opts.put("joint_names", std::vector<std::string>{"shoulder", "elbow", "wrist"});
+opts.put("joint_type", std::vector<std::string>{"revolute", "prismatic", "revolute"});
+
+dinrail::Device device;
+device.open(opts);
+
+dinrail::IAxisInfo* axisInfo = nullptr;
+device.view(axisInfo);
+
+int axes = 0;
+axisInfo->getAxes(&axes); // axes == 3
+
+std::string name;
+axisInfo->getAxisName(0, name); // name == "shoulder"
+
+device.close();
+~~~
+
+### Basic CLI
+
+To know which devices are available in your install, just run:
+
+~~~
+dinrail dev --list
+~~~
+
+to see the available devices.
+
+## Additional documentation
+
+See the following links for more documentation on the dinrail project:
+* [dinrail::Parameters](docs/parameters.md) — how to use the hierarchical key-value configuration container
+* [Plugin types / internals](docs/internals.md) — overview of plugin internals
+
+## Examples
+
+Examples documentation (including Pixi commands) is available at:
+
+* [examples/README.md](examples/README.md)
+
+## Built-in device documentation
+
+* [fakeMotionControl README](src/devices/fake/fakeMotionControl/README.md) — parameters accepted by the `fakeMotionControl` plugin
+
 
 ## Development
 
