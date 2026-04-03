@@ -25,6 +25,15 @@ enum class JointType
 
 /**
  * @brief Interface exposing metadata for device axes.
+ *
+ * This interface mimics the signatures of the yarp::dev::IAxisInfo interface.
+ * 
+ * \warning This interface uses raw pointers for output parameters,
+ * that is an error-prone method. This is done to simplify porting code
+ * from the yarp::dev::IAxisInfo interface, but it is not a interface
+ * style recommended for new interfaces, and future iterations of this 
+ * interface will likely replace raw pointers with safer C++ constructs.
+ * 
  */
 class IAxisInfo
 {
