@@ -90,7 +90,7 @@ install_basic_package_files(${PROJECT_NAME}
                             EXPORT ${PROJECT_NAME}
                             VARS_PREFIX ${PROJECT_NAME}
                             NO_CHECK_REQUIRED_COMPONENTS_MACRO
-                            INCLUDE_CONTENT "if(EXISTS \"\${CMAKE_CURRENT_LIST_DIR}/DinrailAddDevice.cmake\")\n  include(\"\${CMAKE_CURRENT_LIST_DIR}/DinrailAddDevice.cmake\")\nendif()"
+                            INCLUDE_CONTENT "include(\"\${CMAKE_CURRENT_LIST_DIR}/DinrailAddDevice.cmake\")\n"
                             DEPENDENCIES sharedlibpp)
 
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DinrailAddDevice.cmake
