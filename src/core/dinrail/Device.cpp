@@ -63,6 +63,9 @@ bool Device::open(const Parameters& config)
 
     if (!config.check<std::string>("device"))
     {
+        // TODO(traversaro): avoid to call std::cerr here, and 
+        // implement a way for users to configure the logging system
+        std::cerr << "dinrail::Device: missing required parameter 'device'" << std::endl;
         return false;
     }
 
@@ -89,20 +92,38 @@ bool Device::open(const Parameters& config)
 
     if (!ok)
     {
+        std::cerr << "dinrail::Device: impossible to find library for " 
+                  << deviceName << " device. Searched library name: " << libraryName 
+                  << ", factory name: " << factoryName
+                  << std::endl;
         return false;
     }
 
     auto device = make_factory_unique(*(m_pimpl->deviceFactory));
 
-    if (device && device->open(config))
+    if (!device)
     {
-        m_pimpl->device = std::move(device);
-        m_pimpl->isValid = true;
-        return true;
+        std::cerr << "dinrail::Device: impossible to create factory for " 
+                  << deviceName << " device. Searched library name: " << libraryName 
+                  << ", factory name: " << factoryName
+                  << std::endl;
+        return false;
     }
 
-    m_pimpl->device.reset();
-    return false;
+    ok = device->open(config);
+
+    if (!ok)
+    {
+        std::cerr << "dinrail::Device: open return false for " 
+                  << deviceName << " device. Searched library name: " << libraryName 
+                  << ", factory name: " << factoryName
+                  << std::endl;
+        return false;
+    }
+
+    m_pimpl->device = std::move(device);
+    m_pimpl->isValid = true;
+    return true;
 }
 
 bool Device::close()
