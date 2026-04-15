@@ -17,7 +17,7 @@ namespace dinrail
 /**
  * @brief Runtime handle for opening and querying dinrail device plugins.
  */
-class Device
+class Device final
 {
 public:
     /**
