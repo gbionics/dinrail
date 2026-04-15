@@ -9,7 +9,7 @@ This example shows how to implement a minimal dinrail device plugin and how to e
 
 - `MyInterface.h`: custom interface definition.
 - `MyDevice.h` / `MyDevice.cpp`: device implementation and plugin registration.
-- `main.cpp`: runtime usage through `dinrail::Device::view<T>()`.
+- `main.cpp`: runtime usage through `dinrail::Device::view(ptr)` calls.
 - `CMakeLists.txt`: plugin and executable targets.
 
 ## 1. Define a Custom Interface
@@ -45,11 +45,12 @@ In `main.cpp`:
 
 1. Build a `dinrail::Parameters` configuration.
 2. Open `MyDevice` through `dinrail::Device`.
-3. Query `dinrail::IAxisInfo` with `view<dinrail::IAxisInfo>()`.
-4. Query the custom interface with `view<myexample::MyInterface>()`.
-5. Call `getGain()` / `setGain()` on the custom interface.
+3. Declare interface pointers first (for example, `dinrail::IAxisInfo* axisInfo = nullptr;` and `myexample::MyInterface* custom = nullptr;`).
+4. Query `dinrail::IAxisInfo` with `dev.view(axisInfo)`.
+5. Query the custom interface with `dev.view(custom)`.
+6. Call `getGain()` / `setGain()` on the custom interface.
 
-Because `MyDevice` directly inherits `myexample::MyInterface`, `view<myexample::MyInterface>()` works without any compatibility layer.
+Because `MyDevice` directly inherits `myexample::MyInterface`, `dev.view(custom)` returns the custom interface pointer directly, without any compatibility layer.
 
 ## Build Notes
 
