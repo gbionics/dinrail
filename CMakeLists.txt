@@ -36,6 +36,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(YCM REQUIRED)
 
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DinrailAddDevice.cmake)
+
 ### Options
 # Shared/Dynamic or Static library?
 option(BUILD_SHARED_LIBS "Build libraries as shared as opposed to static" ON)
@@ -88,12 +90,19 @@ install_basic_package_files(${PROJECT_NAME}
                             EXPORT ${PROJECT_NAME}
                             VARS_PREFIX ${PROJECT_NAME}
                             NO_CHECK_REQUIRED_COMPONENTS_MACRO
+                            INCLUDE_CONTENT "include(\"\${CMAKE_CURRENT_LIST_DIR}/DinrailAddDevice.cmake\")\n"
                             DEPENDENCIES sharedlibpp)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/cmake/DinrailAddDevice.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dinrail)
 
 # Add the uninstall target
 include(AddUninstallTarget)
 
-# Add examples
+# Examples are provided as a standalone project in examples/ and are meant to
+# consume an externally-installed dinrail package.
 if(DINRAIL_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+    message(WARNING
+        "DINRAIL_BUILD_EXAMPLES is deprecated: examples are now standalone. "
+        "Use the examples/pixi.toml workspace to configure and build them.")
 endif()
