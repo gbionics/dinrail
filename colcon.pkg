@@ -1,0 +1,12 @@
+{
+  "name": "dinrail",
+  "type": "cmake",
+  "dependencies": [
+    "sharedlibpp",
+  ],
+  "test-dependencies": [
+    "YARP",
+    "iDynTree",
+    "BipedalLocomotionFramework",
+  ],
+}
