@@ -7,6 +7,6 @@ endif()
 
 add_subdirectory(test-helpers)
 
-add_subdirectory(ControlBoardNWCDinRailYARPPorts)
-add_subdirectory(ControlBoardNWSDinRailYARPPorts)
-add_subdirectory(ControlBoardRemapperDinRail)
+add_subdirectory(dr_controlboard_nwc_yarp)
+add_subdirectory(dr_controlboard_nws_yarp)
+add_subdirectory(dr_controlboard_remapper)
