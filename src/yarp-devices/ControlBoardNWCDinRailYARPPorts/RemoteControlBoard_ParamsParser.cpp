@@ -30,6 +30,7 @@ std::vector<std::string> RemoteControlBoard_ParamsParser::getListOfParams() cons
     std::vector<std::string> params;
     params.push_back("remote");
     params.push_back("local");
+    params.push_back("namesuffix");
     params.push_back("writeStrict");
     params.push_back("carrier");
     params.push_back("timeout");
@@ -57,6 +58,11 @@ bool RemoteControlBoard_ParamsParser::getParamValue(const std::string& paramName
     if (paramName =="local")
     {
         paramValue = m_local;
+        return true;
+    }
+    if (paramName =="namesuffix")
+    {
+        paramValue = m_namesuffix;
         return true;
     }
     if (paramName =="writeStrict")
@@ -185,6 +191,20 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
             return false;
         }
         prop_check.unput("local");
+    }
+
+    //Parser of parameter namesuffix
+    {
+        if (config.check("namesuffix"))
+        {
+            m_namesuffix = config.find("namesuffix").asString();
+            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
+        }
+        else
+        {
+            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+        }
+        prop_check.unput("namesuffix");
     }
 
     //Parser of parameter writeStrict
@@ -423,6 +443,7 @@ std::string      RemoteControlBoard_ParamsParser::getDocumentationOfDeviceParams
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'remote': Prefix of the port to which to connect.\n");
     doc = doc + std::string("'local': Port prefix of the port opened by this device.\n");
+    doc = doc + std::string("'namesuffix': Suffix appended to local and remote prefixes.\n");
     doc = doc + std::string("'writeStrict': It can be 'on' or 'off'\n");
     doc = doc + std::string("'carrier': carrier used for streaming robot state\n");
     doc = doc + std::string("'timeout': timeout for the input port which receives the streamed robot state\n");
@@ -438,7 +459,7 @@ std::string      RemoteControlBoard_ParamsParser::getDocumentationOfDeviceParams
     doc = doc + std::string("'diagnostic': For development purpose only\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device remote_controlboard --remote <mandatory_value> --local <mandatory_value> --writeStrict <optional_value> --carrier udp --timeout 0.5 --local_qos::enable false --local_qos::thread_priority 0 --local_qos::thread_policy 0 --local_qos::packet_priority <optional_value> --remote_qos::enable false --remote_qos::thread_priority 0 --remote_qos::thread_policy 0 --remote_qos::packet_priority <optional_value> --ignoreProtocolCheck false --diagnostic false\n";
+    doc = doc + " yarpdev --device remote_controlboard --remote <mandatory_value> --local <mandatory_value> --namesuffix /dinrail --writeStrict <optional_value> --carrier udp --timeout 0.5 --local_qos::enable false --local_qos::thread_priority 0 --local_qos::thread_policy 0 --local_qos::packet_priority <optional_value> --remote_qos::enable false --remote_qos::thread_priority 0 --remote_qos::thread_policy 0 --remote_qos::packet_priority <optional_value> --ignoreProtocolCheck false --diagnostic false\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device remote_controlboard --remote <mandatory_value> --local <mandatory_value>\n";
     doc = doc + std::string("=============================================\n\n");    return doc;

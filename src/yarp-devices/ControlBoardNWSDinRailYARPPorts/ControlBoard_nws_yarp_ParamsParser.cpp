@@ -30,6 +30,7 @@ std::vector<std::string> ControlBoard_nws_yarp_ParamsParser::getListOfParams() c
     std::vector<std::string> params;
     params.push_back("period");
     params.push_back("name");
+    params.push_back("namesuffix");
     return params;
 }
 
@@ -44,6 +45,11 @@ bool ControlBoard_nws_yarp_ParamsParser::getParamValue(const std::string& paramN
     if (paramName =="name")
     {
         paramValue = m_name;
+        return true;
+    }
+    if (paramName =="namesuffix")
+    {
+        paramValue = m_namesuffix;
         return true;
     }
 
@@ -103,6 +109,20 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
         prop_check.unput("name");
     }
 
+    //Parser of parameter namesuffix
+    {
+        if (config.check("namesuffix"))
+        {
+            m_namesuffix = config.find("namesuffix").asString();
+            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
+        }
+        else
+        {
+            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+        }
+        prop_check.unput("namesuffix");
+    }
+
     /*
     //This code check if the user set some parameter which are not check by the parser
     //If the parser is set in strict mode, this will generate an error
@@ -141,9 +161,10 @@ std::string      ControlBoard_nws_yarp_ParamsParser::getDocumentationOfDevicePar
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'period': period of the main thread\n");
     doc = doc + std::string("'name': Prefix name of the ports opened by the device\n");
+    doc = doc + std::string("'namesuffix': Suffix appended to the base port prefix\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device controlBoard_nws_yarp --period 0.02 --name /robot/part\n";
+    doc = doc + " yarpdev --device controlBoard_nws_yarp --period 0.02 --name /robot/part --namesuffix /dinrail\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device controlBoard_nws_yarp --name /robot/part\n";
     doc = doc + std::string("=============================================\n\n");    return doc;

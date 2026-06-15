@@ -1,5 +1,6 @@
 * |            |  remote           | string  | -     |   -           | Yes          | Prefix of the port to which to connect.        |       |
 * |            |  local            | string  | -     |   -           | Yes          | Port prefix of the port opened by this device. |       |
+* |            |  namesuffix       | string  | -     |   /dinrail    | No           | Suffix appended to local and remote prefixes.  | default keeps DinRail ports separated from stock YARP ports |
 * |            |  writeStrict      | string  | -     |   -           | No           | It can be 'on' or 'off'                        | See implementation |
 * |            |  carrier          | string  | -     |   udp         | No           | carrier used for streaming robot state         |       |
 * |            |  timeout          | float   | -     |   0.5         | No           | timeout for the input port which receives the streamed robot state |       |

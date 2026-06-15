@@ -61,7 +61,7 @@ bool ControlBoard_nws_yarp::open(Searchable& config)
 {
     if (!parseParams(config)) { return false; }
 
-    std::string rootName = m_name;
+    std::string rootName = m_name + m_namesuffix;
 
     // Open ports, then attach the readers or callbacks
     if (!inputRPCPort.open((rootName + "/rpc:i"))) {

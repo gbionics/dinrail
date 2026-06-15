@@ -182,6 +182,9 @@ bool RemoteControlBoard::open(Searchable& config)
 {
     if (!parseParams(config)) { return false; }
 
+    const std::string localRoot = m_local + m_namesuffix;
+    const std::string remoteRoot = m_remote + m_namesuffix;
+
     extendedIntputStatePort.setTimeout(m_timeout);
 
     //handle local Qos
@@ -228,13 +231,13 @@ bool RemoteControlBoard::open(Searchable& config)
     //open ports
     bool portProblem = false;
     if (m_local != "") {
-        std::string s1 = m_local;
+        std::string s1 = localRoot;
         s1 += "/rpc:o";
         if (!rpc_p.open(s1)) { portProblem = true; }
-        s1 = m_local;
+        s1 = localRoot;
         s1 += "/command:o";
         if (!command_p.open(s1)) { portProblem = true; }
-        s1 = m_local;
+        s1 = localRoot;
         s1 += "/stateExt:i";
         if (!extendedIntputStatePort.open(s1)) { portProblem = true; }
         if (!portProblem)
@@ -246,9 +249,9 @@ bool RemoteControlBoard::open(Searchable& config)
     bool connectionProblem = false;
     if (m_remote != "" && !portProblem)
     {
-        std::string s1 = m_remote;
+        std::string s1 = remoteRoot;
         s1 += "/rpc:i";
-        std::string s2 = m_local;
+        std::string s2 = localRoot;
         s2 += "/rpc:o";
         bool ok = false;
         // RPC port needs to be tcp, therefore no carrier option is added here
@@ -260,9 +263,9 @@ bool RemoteControlBoard::open(Searchable& config)
             connectionProblem = true;
         }
 
-        s1 = m_remote;
+        s1 = remoteRoot;
         s1 += "/command:i";
-        s2 = m_local;
+        s2 = localRoot;
         s2 += "/command:o";
         //ok = Network::connect(s2.c_str(), s1.c_str(), carrier);
         // ok=Network::connect(command_p.getName(), s1.c_str(), carrier); //doesn't take into consideration possible YARP_PORT_PREFIX on local ports
@@ -276,9 +279,9 @@ bool RemoteControlBoard::open(Searchable& config)
             NetworkBase::setConnectionQos(command_p.getName(), s1, localQos, remoteQos, false);
         }
 
-        s1 = m_remote;
+        s1 = remoteRoot;
         s1 += "/stateExt:o";
-        s2 = m_local;
+        s2 = localRoot;
         s2 += "/stateExt:i";
         // not checking return value for now since it is wip (different machines can have different compilation flags
         ok = Network::connect(s1, extendedIntputStatePort.getName(), m_carrier);
