@@ -259,7 +259,16 @@ static void checkRemapperMicro(yarp::dev::PolyDriver & ddRemapper, int rand, siz
 
     // Do a similar test for the encoders
     // in fakeMotionControl their value is the one setted with setPosition
-    CHECK(encs->getEncoders(readedEncoders.data())); // getEncoders correctly called
+    bool gotEncoders = false;
+    for (int wait = 0; wait < 20 && !gotEncoders; wait++)
+    {
+        gotEncoders = encs->getEncoders(readedEncoders.data());
+        if (!gotEncoders)
+        {
+            yarp::os::Time::delay(0.001);
+        }
+    }
+    CHECK(gotEncoders); // getEncoders correctly called
 }
 
 
