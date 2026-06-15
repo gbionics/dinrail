@@ -43,11 +43,11 @@ bool DinRailControlBoardRemapperNWCYarp::close()
 {
     bool ret = true;
 
-    bool ok = ControlBoardRemapper::detachAll();
+    bool ok = DinRailControlBoardRemapper::detachAll();
 
     ret = ret && ok;
 
-    ok = ControlBoardRemapper::close();
+    ok = DinRailControlBoardRemapper::close();
 
     ret = ret && ok;
 
@@ -129,24 +129,24 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
         remoteControlBoardsList.push((m_remoteControlBoardDevices[ctrlBrd]),remote.c_str());
     }
 
-    // Device opened, now we open the ControlBoardRemapper and then we call attachAll
-    bool ok = ControlBoardRemapper::open(prop);
+    // Device opened, now we open the DinRailControlBoardRemapper and then we call attachAll
+    bool ok = DinRailControlBoardRemapper::open(prop);
 
     if( !ok )
     {
         yCError(REMOTECONTROLBOARDREMAPPER) << "Opening the controlboardremapper device, opening the device failed.";
-        ControlBoardRemapper::close();
+        DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;
     }
 
     // If open went ok, we now call attachAll
-    ok = ControlBoardRemapper::attachAll(remoteControlBoardsList);
+    ok = DinRailControlBoardRemapper::attachAll(remoteControlBoardsList);
 
     if( !ok )
     {
         yCError(REMOTECONTROLBOARDREMAPPER) << "Calling attachAll in the controlboardremapper device, opening the device failed.";
-        ControlBoardRemapper::close();
+        DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;
     }

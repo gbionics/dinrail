@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "ControlBoardRemapper.h"
-#include "ControlBoardRemapperHelpers.h"
-#include "ControlBoardRemapperLogComponent.h"
+#include "DinRailControlBoardRemapper.h"
+#include "DinRailControlBoardRemapperHelpers.h"
+#include "DinRailControlBoardRemapperLogComponent.h"
 
 #include <yarp/os/Log.h>
 #include <yarp/os/LogStream.h>
@@ -20,12 +20,12 @@ using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 
-bool ControlBoardRemapper::close()
+bool DinRailControlBoardRemapper::close()
 {
     return detachAll();
 }
 
-bool ControlBoardRemapper::open(Searchable& config)
+bool DinRailControlBoardRemapper::open(Searchable& config)
 {
     Property prop;
     prop.fromString(config.toString());
@@ -44,7 +44,7 @@ bool ControlBoardRemapper::open(Searchable& config)
     return true;
 }
 
-bool ControlBoardRemapper::parseOptions(Property& prop)
+bool DinRailControlBoardRemapper::parseOptions(Property& prop)
 {
     bool ok = true;
 
@@ -79,7 +79,7 @@ bool ControlBoardRemapper::parseOptions(Property& prop)
     return ok;
 }
 
-bool ControlBoardRemapper::parseAxesNames(const Property& prop)
+bool DinRailControlBoardRemapper::parseAxesNames(const Property& prop)
 {
     Bottle *propAxesNames=prop.find("axesNames").asList();
     if(propAxesNames==nullptr)
@@ -99,7 +99,7 @@ bool ControlBoardRemapper::parseAxesNames(const Property& prop)
     return true;
 }
 
-bool ControlBoardRemapper::parseNetworks(const Property& prop)
+bool DinRailControlBoardRemapper::parseNetworks(const Property& prop)
 {
     Bottle *nets=prop.find("networks").asList();
     if(nets==nullptr)
@@ -201,7 +201,7 @@ bool ControlBoardRemapper::parseNetworks(const Property& prop)
     return true;
 }
 
-void ControlBoardRemapper::setNrOfControlledAxes(const size_t nrOfControlledAxes)
+void DinRailControlBoardRemapper::setNrOfControlledAxes(const size_t nrOfControlledAxes)
 {
     controlledJoints = nrOfControlledAxes;
     buffers.controlBoardModes.resize(nrOfControlledAxes,0);
@@ -209,7 +209,7 @@ void ControlBoardRemapper::setNrOfControlledAxes(const size_t nrOfControlledAxes
 }
 
 
-bool ControlBoardRemapper::updateAxesName()
+bool DinRailControlBoardRemapper::updateAxesName()
 {
     bool ret = true;
     axesNames.resize(controlledJoints);
@@ -229,7 +229,7 @@ bool ControlBoardRemapper::updateAxesName()
     return ret;
 }
 
-bool ControlBoardRemapper::attachAll(const PolyDriverList &polylist)
+bool DinRailControlBoardRemapper::attachAll(const PolyDriverList &polylist)
 {
     // For both cases, now configure everything that need
     // all the attribute to be correctly configured
@@ -279,7 +279,7 @@ struct axisLocation
 };
 
 
-bool ControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& polylist)
+bool DinRailControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& polylist)
 {
     std::map<std::string, axisLocation> axesLocationMap;
 
@@ -417,7 +417,7 @@ bool ControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& polylis
 }
 
 
-bool ControlBoardRemapper::attachAllUsingNetworks(const PolyDriverList &polylist)
+bool DinRailControlBoardRemapper::attachAllUsingNetworks(const PolyDriverList &polylist)
 {
     for(int p=0;p<polylist.size();p++)
     {
@@ -459,7 +459,7 @@ bool ControlBoardRemapper::attachAllUsingNetworks(const PolyDriverList &polylist
 }
 
 
-bool ControlBoardRemapper::detachAll()
+bool DinRailControlBoardRemapper::detachAll()
 {
     //check if we already instantiated a subdevice previously
     int devices=remappedControlBoards.getNrOfSubControlBoards();
@@ -471,14 +471,14 @@ bool ControlBoardRemapper::detachAll()
     return true;
 }
 
-void ControlBoardRemapper::configureBuffers()
+void DinRailControlBoardRemapper::configureBuffers()
 {
     allJointsBuffers.configure(remappedControlBoards);
     selectedJointsBuffers.configure(remappedControlBoards);
 }
 
 
-bool ControlBoardRemapper::setControlModeAllAxes(const int cm)
+bool DinRailControlBoardRemapper::setControlModeAllAxes(const int cm)
 {
     std::lock_guard<std::mutex> lock(buffers.mutex);
 
@@ -497,7 +497,7 @@ bool ControlBoardRemapper::setControlModeAllAxes(const int cm)
 //
 //  IPid Interface
 //
-bool ControlBoardRemapper::setPid(const PidControlTypeEnum& pidtype, int j, const Pid &p)
+bool DinRailControlBoardRemapper::setPid(const PidControlTypeEnum& pidtype, int j, const Pid &p)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -516,7 +516,7 @@ bool ControlBoardRemapper::setPid(const PidControlTypeEnum& pidtype, int j, cons
     return false;
 }
 
-bool ControlBoardRemapper::setPids(const PidControlTypeEnum& pidtype, const Pid *ps)
+bool DinRailControlBoardRemapper::setPids(const PidControlTypeEnum& pidtype, const Pid *ps)
 {
     bool ret=true;
 
@@ -545,7 +545,7 @@ bool ControlBoardRemapper::setPids(const PidControlTypeEnum& pidtype, const Pid 
     return ret;
 }
 
-bool ControlBoardRemapper::setPidReference(const PidControlTypeEnum& pidtype, int j, double ref)
+bool DinRailControlBoardRemapper::setPidReference(const PidControlTypeEnum& pidtype, int j, double ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -565,7 +565,7 @@ bool ControlBoardRemapper::setPidReference(const PidControlTypeEnum& pidtype, in
     return false;
 }
 
-bool ControlBoardRemapper::setPidReferences(const PidControlTypeEnum& pidtype, const double *refs)
+bool DinRailControlBoardRemapper::setPidReferences(const PidControlTypeEnum& pidtype, const double *refs)
 {
     bool ret=true;
 
@@ -594,7 +594,7 @@ bool ControlBoardRemapper::setPidReferences(const PidControlTypeEnum& pidtype, c
     return ret;
 }
 
-bool ControlBoardRemapper::setPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double limit)
+bool DinRailControlBoardRemapper::setPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double limit)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -613,7 +613,7 @@ bool ControlBoardRemapper::setPidErrorLimit(const PidControlTypeEnum& pidtype, i
     return false;
 }
 
-bool ControlBoardRemapper::setPidErrorLimits(const PidControlTypeEnum& pidtype, const double *limits)
+bool DinRailControlBoardRemapper::setPidErrorLimits(const PidControlTypeEnum& pidtype, const double *limits)
 {
     bool ret=true;
 
@@ -642,7 +642,7 @@ bool ControlBoardRemapper::setPidErrorLimits(const PidControlTypeEnum& pidtype, 
     return ret;
 }
 
-bool ControlBoardRemapper::getPidError(const PidControlTypeEnum& pidtype, int j, double *err)
+bool DinRailControlBoardRemapper::getPidError(const PidControlTypeEnum& pidtype, int j, double *err)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -662,7 +662,7 @@ bool ControlBoardRemapper::getPidError(const PidControlTypeEnum& pidtype, int j,
     return false;
 }
 
-bool ControlBoardRemapper::getPidErrors(const PidControlTypeEnum& pidtype, double *errs)
+bool DinRailControlBoardRemapper::getPidErrors(const PidControlTypeEnum& pidtype, double *errs)
 {
     bool ret=true;
 
@@ -690,7 +690,7 @@ bool ControlBoardRemapper::getPidErrors(const PidControlTypeEnum& pidtype, doubl
     return ret;
 }
 
-bool ControlBoardRemapper::getPidOutput(const PidControlTypeEnum& pidtype, int j, double *out)
+bool DinRailControlBoardRemapper::getPidOutput(const PidControlTypeEnum& pidtype, int j, double *out)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -709,7 +709,7 @@ bool ControlBoardRemapper::getPidOutput(const PidControlTypeEnum& pidtype, int j
     return false;
 }
 
-bool ControlBoardRemapper::getPidOutputs(const PidControlTypeEnum& pidtype, double *outs)
+bool DinRailControlBoardRemapper::getPidOutputs(const PidControlTypeEnum& pidtype, double *outs)
 {
     bool ret=true;
 
@@ -737,7 +737,7 @@ bool ControlBoardRemapper::getPidOutputs(const PidControlTypeEnum& pidtype, doub
     return ret;
 }
 
-bool ControlBoardRemapper::setPidOffset(const PidControlTypeEnum& pidtype, int j, double v)
+bool DinRailControlBoardRemapper::setPidOffset(const PidControlTypeEnum& pidtype, int j, double v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -756,7 +756,7 @@ bool ControlBoardRemapper::setPidOffset(const PidControlTypeEnum& pidtype, int j
     return false;
 }
 
-bool ControlBoardRemapper::getPid(const PidControlTypeEnum& pidtype, int j, Pid *p)
+bool DinRailControlBoardRemapper::getPid(const PidControlTypeEnum& pidtype, int j, Pid *p)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -775,7 +775,7 @@ bool ControlBoardRemapper::getPid(const PidControlTypeEnum& pidtype, int j, Pid 
     return false;
 }
 
-bool ControlBoardRemapper::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
+bool DinRailControlBoardRemapper::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
 {
     bool ret=true;
 
@@ -804,7 +804,7 @@ bool ControlBoardRemapper::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
     return ret;
 }
 
-bool ControlBoardRemapper::getPidReference(const PidControlTypeEnum& pidtype, int j, double *ref)
+bool DinRailControlBoardRemapper::getPidReference(const PidControlTypeEnum& pidtype, int j, double *ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -823,7 +823,7 @@ bool ControlBoardRemapper::getPidReference(const PidControlTypeEnum& pidtype, in
     return false;
 }
 
-bool ControlBoardRemapper::getPidReferences(const PidControlTypeEnum& pidtype, double *refs)
+bool DinRailControlBoardRemapper::getPidReferences(const PidControlTypeEnum& pidtype, double *refs)
 {
     bool ret=true;
 
@@ -852,7 +852,7 @@ bool ControlBoardRemapper::getPidReferences(const PidControlTypeEnum& pidtype, d
     return ret;
 }
 
-bool ControlBoardRemapper::getPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double *limit)
+bool DinRailControlBoardRemapper::getPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double *limit)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -871,7 +871,7 @@ bool ControlBoardRemapper::getPidErrorLimit(const PidControlTypeEnum& pidtype, i
     return false;
 }
 
-bool ControlBoardRemapper::getPidErrorLimits(const PidControlTypeEnum& pidtype, double *limits)
+bool DinRailControlBoardRemapper::getPidErrorLimits(const PidControlTypeEnum& pidtype, double *limits)
 {
     bool ret=true;
 
@@ -901,7 +901,7 @@ bool ControlBoardRemapper::getPidErrorLimits(const PidControlTypeEnum& pidtype, 
     return ret;
 }
 
-bool ControlBoardRemapper::resetPid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardRemapper::resetPid(const PidControlTypeEnum& pidtype, int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -921,7 +921,7 @@ bool ControlBoardRemapper::resetPid(const PidControlTypeEnum& pidtype, int j)
     return false;
 }
 
-bool ControlBoardRemapper::disablePid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardRemapper::disablePid(const PidControlTypeEnum& pidtype, int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -936,7 +936,7 @@ bool ControlBoardRemapper::disablePid(const PidControlTypeEnum& pidtype, int j)
     return p->pid->disablePid(pidtype, off);
 }
 
-bool ControlBoardRemapper::enablePid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardRemapper::enablePid(const PidControlTypeEnum& pidtype, int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -956,7 +956,7 @@ bool ControlBoardRemapper::enablePid(const PidControlTypeEnum& pidtype, int j)
     return false;
 }
 
-bool ControlBoardRemapper::isPidEnabled(const PidControlTypeEnum& pidtype, int j, bool* enabled)
+bool DinRailControlBoardRemapper::isPidEnabled(const PidControlTypeEnum& pidtype, int j, bool* enabled)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -977,13 +977,13 @@ bool ControlBoardRemapper::isPidEnabled(const PidControlTypeEnum& pidtype, int j
 }
 
 /* IPositionControl */
-bool ControlBoardRemapper::getAxes(int *ax)
+bool DinRailControlBoardRemapper::getAxes(int *ax)
 {
     *ax=controlledJoints;
     return true;
 }
 
-bool ControlBoardRemapper::positionMove(int j, double ref)
+bool DinRailControlBoardRemapper::positionMove(int j, double ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1003,7 +1003,7 @@ bool ControlBoardRemapper::positionMove(int j, double ref)
     return false;
 }
 
-bool ControlBoardRemapper::positionMove(const double *refs)
+bool DinRailControlBoardRemapper::positionMove(const double *refs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1029,7 +1029,7 @@ bool ControlBoardRemapper::positionMove(const double *refs)
     return ret;
 }
 
-bool ControlBoardRemapper::positionMove(const int n_joints, const int *joints, const double *refs)
+bool DinRailControlBoardRemapper::positionMove(const int n_joints, const int *joints, const double *refs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1055,7 +1055,7 @@ bool ControlBoardRemapper::positionMove(const int n_joints, const int *joints, c
     return ret;
 }
 
-bool ControlBoardRemapper::getTargetPosition(const int j, double* ref)
+bool DinRailControlBoardRemapper::getTargetPosition(const int j, double* ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1076,7 +1076,7 @@ bool ControlBoardRemapper::getTargetPosition(const int j, double* ref)
     return false;
 }
 
-bool ControlBoardRemapper::getTargetPositions(double *spds)
+bool DinRailControlBoardRemapper::getTargetPositions(double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1107,7 +1107,7 @@ bool ControlBoardRemapper::getTargetPositions(double *spds)
 }
 
 
-bool ControlBoardRemapper::getTargetPositions(const int n_joints, const int *joints, double *targets)
+bool DinRailControlBoardRemapper::getTargetPositions(const int n_joints, const int *joints, double *targets)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1140,7 +1140,7 @@ bool ControlBoardRemapper::getTargetPositions(const int n_joints, const int *joi
     return ret;
 }
 
-bool ControlBoardRemapper::relativeMove(int j, double delta)
+bool DinRailControlBoardRemapper::relativeMove(int j, double delta)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1160,7 +1160,7 @@ bool ControlBoardRemapper::relativeMove(int j, double delta)
     return false;
 }
 
-bool ControlBoardRemapper::relativeMove(const double *deltas)
+bool DinRailControlBoardRemapper::relativeMove(const double *deltas)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1185,7 +1185,7 @@ bool ControlBoardRemapper::relativeMove(const double *deltas)
     return ret;
 }
 
-bool ControlBoardRemapper::relativeMove(const int n_joints, const int *joints, const double *deltas)
+bool DinRailControlBoardRemapper::relativeMove(const int n_joints, const int *joints, const double *deltas)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1210,7 +1210,7 @@ bool ControlBoardRemapper::relativeMove(const int n_joints, const int *joints, c
     return ret;
 }
 
-bool ControlBoardRemapper::checkMotionDone(int j, bool *flag)
+bool DinRailControlBoardRemapper::checkMotionDone(int j, bool *flag)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1230,7 +1230,7 @@ bool ControlBoardRemapper::checkMotionDone(int j, bool *flag)
     return false;
 }
 
-bool ControlBoardRemapper::checkMotionDone(bool *flag)
+bool DinRailControlBoardRemapper::checkMotionDone(bool *flag)
 {
     bool ret=true;
     *flag=true;
@@ -1262,7 +1262,7 @@ bool ControlBoardRemapper::checkMotionDone(bool *flag)
     return ret;
 }
 
-bool ControlBoardRemapper::checkMotionDone(const int n_joints, const int *joints, bool *flag)
+bool DinRailControlBoardRemapper::checkMotionDone(const int n_joints, const int *joints, bool *flag)
 {
     bool ret=true;
     *flag=true;
@@ -1297,7 +1297,7 @@ bool ControlBoardRemapper::checkMotionDone(const int n_joints, const int *joints
     return ret;
 }
 
-bool ControlBoardRemapper::setRefSpeed(int j, double sp)
+bool DinRailControlBoardRemapper::setRefSpeed(int j, double sp)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1317,7 +1317,7 @@ bool ControlBoardRemapper::setRefSpeed(int j, double sp)
     return false;
 }
 
-bool ControlBoardRemapper::setRefSpeeds(const double *spds)
+bool DinRailControlBoardRemapper::setRefSpeeds(const double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1343,7 +1343,7 @@ bool ControlBoardRemapper::setRefSpeeds(const double *spds)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefSpeeds(const int n_joints, const int *joints, const double *spds)
+bool DinRailControlBoardRemapper::setRefSpeeds(const int n_joints, const int *joints, const double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1369,7 +1369,7 @@ bool ControlBoardRemapper::setRefSpeeds(const int n_joints, const int *joints, c
     return ret;
 }
 
-bool ControlBoardRemapper::setRefAcceleration(int j, double acc)
+bool DinRailControlBoardRemapper::setRefAcceleration(int j, double acc)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1389,7 +1389,7 @@ bool ControlBoardRemapper::setRefAcceleration(int j, double acc)
     return false;
 }
 
-bool ControlBoardRemapper::setRefAccelerations(const double *accs)
+bool DinRailControlBoardRemapper::setRefAccelerations(const double *accs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1415,7 +1415,7 @@ bool ControlBoardRemapper::setRefAccelerations(const double *accs)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefAccelerations(const int n_joints, const int *joints, const double *accs)
+bool DinRailControlBoardRemapper::setRefAccelerations(const int n_joints, const int *joints, const double *accs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1441,7 +1441,7 @@ bool ControlBoardRemapper::setRefAccelerations(const int n_joints, const int *jo
     return ret;
 }
 
-bool ControlBoardRemapper::getRefSpeed(int j, double *ref)
+bool DinRailControlBoardRemapper::getRefSpeed(int j, double *ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1461,7 +1461,7 @@ bool ControlBoardRemapper::getRefSpeed(int j, double *ref)
     return false;
 }
 
-bool ControlBoardRemapper::getRefSpeeds(double *spds)
+bool DinRailControlBoardRemapper::getRefSpeeds(double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1491,7 +1491,7 @@ bool ControlBoardRemapper::getRefSpeeds(double *spds)
 }
 
 
-bool ControlBoardRemapper::getRefSpeeds(const int n_joints, const int *joints, double *spds)
+bool DinRailControlBoardRemapper::getRefSpeeds(const int n_joints, const int *joints, double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1524,7 +1524,7 @@ bool ControlBoardRemapper::getRefSpeeds(const int n_joints, const int *joints, d
     return ret;
 }
 
-bool ControlBoardRemapper::getRefAcceleration(int j, double *acc)
+bool DinRailControlBoardRemapper::getRefAcceleration(int j, double *acc)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1544,7 +1544,7 @@ bool ControlBoardRemapper::getRefAcceleration(int j, double *acc)
     return false;
 }
 
-bool ControlBoardRemapper::getRefAccelerations(double *accs)
+bool DinRailControlBoardRemapper::getRefAccelerations(double *accs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1574,7 +1574,7 @@ bool ControlBoardRemapper::getRefAccelerations(double *accs)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefAccelerations(const int n_joints, const int *joints, double *accs)
+bool DinRailControlBoardRemapper::getRefAccelerations(const int n_joints, const int *joints, double *accs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1606,7 +1606,7 @@ bool ControlBoardRemapper::getRefAccelerations(const int n_joints, const int *jo
     return ret;
 }
 
-bool ControlBoardRemapper::stop(int j)
+bool DinRailControlBoardRemapper::stop(int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1626,7 +1626,7 @@ bool ControlBoardRemapper::stop(int j)
     return false;
 }
 
-bool ControlBoardRemapper::stop()
+bool DinRailControlBoardRemapper::stop()
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1646,7 +1646,7 @@ bool ControlBoardRemapper::stop()
     return ret;
 }
 
-bool ControlBoardRemapper::stop(const int n_joints, const int *joints)
+bool DinRailControlBoardRemapper::stop(const int n_joints, const int *joints)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -1674,7 +1674,7 @@ bool ControlBoardRemapper::stop(const int n_joints, const int *joints)
 }
 
 /* IJointFaultControl */
-bool ControlBoardRemapper::getLastJointFault(int j, int& fault, std::string& message)
+bool DinRailControlBoardRemapper::getLastJointFault(int j, int& fault, std::string& message)
 {
     int off = (int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1696,7 +1696,7 @@ bool ControlBoardRemapper::getLastJointFault(int j, int& fault, std::string& mes
 
 /* IVelocityControl */
 
-bool ControlBoardRemapper::velocityMove(int j, double v)
+bool DinRailControlBoardRemapper::velocityMove(int j, double v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1716,7 +1716,7 @@ bool ControlBoardRemapper::velocityMove(int j, double v)
     return false;
 }
 
-bool ControlBoardRemapper::velocityMove(const double *v)
+bool DinRailControlBoardRemapper::velocityMove(const double *v)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -1743,7 +1743,7 @@ bool ControlBoardRemapper::velocityMove(const double *v)
 }
 
 /* IEncoders */
-bool ControlBoardRemapper::resetEncoder(int j)
+bool DinRailControlBoardRemapper::resetEncoder(int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1762,7 +1762,7 @@ bool ControlBoardRemapper::resetEncoder(int j)
     return false;
 }
 
-bool ControlBoardRemapper::resetEncoders()
+bool DinRailControlBoardRemapper::resetEncoders()
 {
     bool ret=true;
 
@@ -1790,7 +1790,7 @@ bool ControlBoardRemapper::resetEncoders()
     return ret;
 }
 
-bool ControlBoardRemapper::setEncoder(int j, double val)
+bool DinRailControlBoardRemapper::setEncoder(int j, double val)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1810,7 +1810,7 @@ bool ControlBoardRemapper::setEncoder(int j, double val)
     return false;
 }
 
-bool ControlBoardRemapper::setEncoders(const double *vals)
+bool DinRailControlBoardRemapper::setEncoders(const double *vals)
 {
     bool ret=true;
 
@@ -1839,7 +1839,7 @@ bool ControlBoardRemapper::setEncoders(const double *vals)
     return ret;
 }
 
-bool ControlBoardRemapper::getEncoder(int j, double *v)
+bool DinRailControlBoardRemapper::getEncoder(int j, double *v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1859,7 +1859,7 @@ bool ControlBoardRemapper::getEncoder(int j, double *v)
     return false;
 }
 
-bool ControlBoardRemapper::getEncoders(double *encs)
+bool DinRailControlBoardRemapper::getEncoders(double *encs)
 {
     bool ret=true;
 
@@ -1888,7 +1888,7 @@ bool ControlBoardRemapper::getEncoders(double *encs)
     return ret;
 }
 
-bool ControlBoardRemapper::getEncodersTimed(double *encs, double *t)
+bool DinRailControlBoardRemapper::getEncodersTimed(double *encs, double *t)
 {
     bool ret=true;
 
@@ -1917,7 +1917,7 @@ bool ControlBoardRemapper::getEncodersTimed(double *encs, double *t)
     return ret;
 }
 
-bool ControlBoardRemapper::getEncoderTimed(int j, double *v, double *t)
+bool DinRailControlBoardRemapper::getEncoderTimed(int j, double *v, double *t)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1937,7 +1937,7 @@ bool ControlBoardRemapper::getEncoderTimed(int j, double *v, double *t)
     return false;
 }
 
-bool ControlBoardRemapper::getEncoderSpeed(int j, double *sp)
+bool DinRailControlBoardRemapper::getEncoderSpeed(int j, double *sp)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -1957,7 +1957,7 @@ bool ControlBoardRemapper::getEncoderSpeed(int j, double *sp)
     return false;
 }
 
-bool ControlBoardRemapper::getEncoderSpeeds(double *spds)
+bool DinRailControlBoardRemapper::getEncoderSpeeds(double *spds)
 {
     bool ret=true;
 
@@ -1986,7 +1986,7 @@ bool ControlBoardRemapper::getEncoderSpeeds(double *spds)
     return ret;
 }
 
-bool ControlBoardRemapper::getEncoderAcceleration(int j, double *acc)
+bool DinRailControlBoardRemapper::getEncoderAcceleration(int j, double *acc)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2006,7 +2006,7 @@ bool ControlBoardRemapper::getEncoderAcceleration(int j, double *acc)
     return false;
 }
 
-bool ControlBoardRemapper::getEncoderAccelerations(double *accs)
+bool DinRailControlBoardRemapper::getEncoderAccelerations(double *accs)
 {
     bool ret=true;
 
@@ -2036,13 +2036,13 @@ bool ControlBoardRemapper::getEncoderAccelerations(double *accs)
 }
 
 /* IMotor */
-bool ControlBoardRemapper::getNumberOfMotors(int *num)
+bool DinRailControlBoardRemapper::getNumberOfMotors(int *num)
 {
     *num=controlledJoints;
     return true;
 }
 
-bool ControlBoardRemapper::getTemperature(int m, double* val)
+bool DinRailControlBoardRemapper::getTemperature(int m, double* val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2062,7 +2062,7 @@ bool ControlBoardRemapper::getTemperature(int m, double* val)
     return false;
 }
 
-bool ControlBoardRemapper::getTemperatures(double *vals)
+bool DinRailControlBoardRemapper::getTemperatures(double *vals)
 {
     bool ret=true;
     for(int l=0;l<controlledJoints;l++)
@@ -2088,7 +2088,7 @@ bool ControlBoardRemapper::getTemperatures(double *vals)
     return ret;
 }
 
-bool ControlBoardRemapper::getTemperatureLimit(int m, double* val)
+bool DinRailControlBoardRemapper::getTemperatureLimit(int m, double* val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2108,7 +2108,7 @@ bool ControlBoardRemapper::getTemperatureLimit(int m, double* val)
     return false;
 }
 
-bool ControlBoardRemapper::setTemperatureLimit (int m, const double val)
+bool DinRailControlBoardRemapper::setTemperatureLimit (int m, const double val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2128,7 +2128,7 @@ bool ControlBoardRemapper::setTemperatureLimit (int m, const double val)
     return false;
 }
 
-bool ControlBoardRemapper::getGearboxRatio(int m, double* val)
+bool DinRailControlBoardRemapper::getGearboxRatio(int m, double* val)
 {
     int off = (int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2148,7 +2148,7 @@ bool ControlBoardRemapper::getGearboxRatio(int m, double* val)
     return false;
 }
 
-bool ControlBoardRemapper::setGearboxRatio(int m, const double val)
+bool DinRailControlBoardRemapper::setGearboxRatio(int m, const double val)
 {
     int off = (int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2169,7 +2169,7 @@ bool ControlBoardRemapper::setGearboxRatio(int m, const double val)
 }
 
 /* IRemoteVariables */
-bool ControlBoardRemapper::getRemoteVariable(std::string key, yarp::os::Bottle& val)
+bool DinRailControlBoardRemapper::getRemoteVariable(std::string key, yarp::os::Bottle& val)
 {
     yCWarning(CONTROLBOARDREMAPPER, "getRemoteVariable is not properly implemented, use at your own risk.");
 
@@ -2203,7 +2203,7 @@ bool ControlBoardRemapper::getRemoteVariable(std::string key, yarp::os::Bottle& 
     return b;
 }
 
-bool ControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bottle& val)
+bool DinRailControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bottle& val)
 {
     yCWarning(CONTROLBOARDREMAPPER, "setRemoteVariable is not properly implemented, use at your own risk.");
 
@@ -2211,7 +2211,7 @@ bool ControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bo
     size_t device_size = remappedControlBoards.getNrOfSubControlBoards();
     if (bottle_size != device_size)
     {
-        yCError(CONTROLBOARDREMAPPER, "ControlBoardRemapper::setRemoteVariable bottle_size != device_size failure");
+        yCError(CONTROLBOARDREMAPPER, "DinRailControlBoardRemapper::setRemoteVariable bottle_size != device_size failure");
         return false;
     }
 
@@ -2219,8 +2219,8 @@ bool ControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bo
     for (unsigned int i = 0; i < device_size; i++)
     {
         RemappedSubControlBoard *p = remappedControlBoards.getSubControlBoard(i);
-        if (!p)  { yCError(CONTROLBOARDREMAPPER, "ControlBoardRemapper::setRemoteVariable !p failure"); return false; }
-        if (!p->iVar) { yCError(CONTROLBOARDREMAPPER, "ControlBoardRemapper::setRemoteVariable !p->iVar failure"); return false; }
+        if (!p)  { yCError(CONTROLBOARDREMAPPER, "DinRailControlBoardRemapper::setRemoteVariable !p failure"); return false; }
+        if (!p->iVar) { yCError(CONTROLBOARDREMAPPER, "DinRailControlBoardRemapper::setRemoteVariable !p->iVar failure"); return false; }
         Bottle* partial_val = val.get(i).asList();
         if (partial_val)
         {
@@ -2228,7 +2228,7 @@ bool ControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bo
         }
         else
         {
-            yCError(CONTROLBOARDREMAPPER, "ControlBoardRemapper::setRemoteVariable general failure");
+            yCError(CONTROLBOARDREMAPPER, "DinRailControlBoardRemapper::setRemoteVariable general failure");
             return false;
         }
     }
@@ -2236,7 +2236,7 @@ bool ControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bo
     return b;
 }
 
-bool ControlBoardRemapper::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
+bool DinRailControlBoardRemapper::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 {
     yCWarning(CONTROLBOARDREMAPPER, "getRemoteVariablesList is not properly implemented, use at your own risk.");
 
@@ -2258,7 +2258,7 @@ bool ControlBoardRemapper::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 
 /* IMotorEncoders */
 
-bool ControlBoardRemapper::resetMotorEncoder(int m)
+bool DinRailControlBoardRemapper::resetMotorEncoder(int m)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2278,7 +2278,7 @@ bool ControlBoardRemapper::resetMotorEncoder(int m)
     return false;
 }
 
-bool ControlBoardRemapper::resetMotorEncoders()
+bool DinRailControlBoardRemapper::resetMotorEncoders()
 {
     bool ret=true;
 
@@ -2307,7 +2307,7 @@ bool ControlBoardRemapper::resetMotorEncoders()
     return ret;
 }
 
-bool ControlBoardRemapper::setMotorEncoder(int m, const double val)
+bool DinRailControlBoardRemapper::setMotorEncoder(int m, const double val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2327,7 +2327,7 @@ bool ControlBoardRemapper::setMotorEncoder(int m, const double val)
     return false;
 }
 
-bool ControlBoardRemapper::setMotorEncoders(const double *vals)
+bool DinRailControlBoardRemapper::setMotorEncoders(const double *vals)
 {
     bool ret=true;
 
@@ -2357,7 +2357,7 @@ bool ControlBoardRemapper::setMotorEncoders(const double *vals)
     return ret;
 }
 
-bool ControlBoardRemapper::setMotorEncoderCountsPerRevolution(int m, double cpr)
+bool DinRailControlBoardRemapper::setMotorEncoderCountsPerRevolution(int m, double cpr)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2377,7 +2377,7 @@ bool ControlBoardRemapper::setMotorEncoderCountsPerRevolution(int m, double cpr)
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoderCountsPerRevolution(int m, double *cpr)
+bool DinRailControlBoardRemapper::getMotorEncoderCountsPerRevolution(int m, double *cpr)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2397,7 +2397,7 @@ bool ControlBoardRemapper::getMotorEncoderCountsPerRevolution(int m, double *cpr
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoder(int m, double *v)
+bool DinRailControlBoardRemapper::getMotorEncoder(int m, double *v)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2417,7 +2417,7 @@ bool ControlBoardRemapper::getMotorEncoder(int m, double *v)
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoders(double *encs)
+bool DinRailControlBoardRemapper::getMotorEncoders(double *encs)
 {
     bool ret=true;
 
@@ -2441,7 +2441,7 @@ bool ControlBoardRemapper::getMotorEncoders(double *encs)
     return ret;
 }
 
-bool ControlBoardRemapper::getMotorEncodersTimed(double *encs, double *t)
+bool DinRailControlBoardRemapper::getMotorEncodersTimed(double *encs, double *t)
 {
     bool ret=true;
 
@@ -2470,7 +2470,7 @@ bool ControlBoardRemapper::getMotorEncodersTimed(double *encs, double *t)
     return ret;
 }
 
-bool ControlBoardRemapper::getMotorEncoderTimed(int m, double *v, double *t)
+bool DinRailControlBoardRemapper::getMotorEncoderTimed(int m, double *v, double *t)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2490,7 +2490,7 @@ bool ControlBoardRemapper::getMotorEncoderTimed(int m, double *v, double *t)
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoderSpeed(int m, double *sp)
+bool DinRailControlBoardRemapper::getMotorEncoderSpeed(int m, double *sp)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2510,7 +2510,7 @@ bool ControlBoardRemapper::getMotorEncoderSpeed(int m, double *sp)
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoderSpeeds(double *spds)
+bool DinRailControlBoardRemapper::getMotorEncoderSpeeds(double *spds)
 {
     bool ret=true;
 
@@ -2539,7 +2539,7 @@ bool ControlBoardRemapper::getMotorEncoderSpeeds(double *spds)
     return ret;
 }
 
-bool ControlBoardRemapper::getMotorEncoderAcceleration(int m, double *acc)
+bool DinRailControlBoardRemapper::getMotorEncoderAcceleration(int m, double *acc)
 {
     int off = (int) remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2559,7 +2559,7 @@ bool ControlBoardRemapper::getMotorEncoderAcceleration(int m, double *acc)
     return false;
 }
 
-bool ControlBoardRemapper::getMotorEncoderAccelerations(double *accs)
+bool DinRailControlBoardRemapper::getMotorEncoderAccelerations(double *accs)
 {
     bool ret=true;
 
@@ -2590,14 +2590,14 @@ bool ControlBoardRemapper::getMotorEncoderAccelerations(double *accs)
 }
 
 
-bool ControlBoardRemapper::getNumberOfMotorEncoders(int *num)
+bool DinRailControlBoardRemapper::getNumberOfMotorEncoders(int *num)
 {
     *num=controlledJoints;
     return true;
 }
 
 /* IAmplifierControl */
-bool ControlBoardRemapper::enableAmp(int j)
+bool DinRailControlBoardRemapper::enableAmp(int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2617,12 +2617,12 @@ bool ControlBoardRemapper::enableAmp(int j)
     return false;
 }
 
-bool ControlBoardRemapper::disableAmp(int j)
+bool DinRailControlBoardRemapper::disableAmp(int j)
 {
     return this->setControlMode(j, VOCAB_CM_IDLE);
 }
 
-bool ControlBoardRemapper::getAmpStatus(int *st)
+bool DinRailControlBoardRemapper::getAmpStatus(int *st)
 {
     bool ret=true;
 
@@ -2652,7 +2652,7 @@ bool ControlBoardRemapper::getAmpStatus(int *st)
     return ret;
 }
 
-bool ControlBoardRemapper::getAmpStatus(int j, int *v)
+bool DinRailControlBoardRemapper::getAmpStatus(int j, int *v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2672,7 +2672,7 @@ bool ControlBoardRemapper::getAmpStatus(int j, int *v)
     return false;
 }
 
-bool ControlBoardRemapper::setMaxCurrent(int j, double v)
+bool DinRailControlBoardRemapper::setMaxCurrent(int j, double v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2692,7 +2692,7 @@ bool ControlBoardRemapper::setMaxCurrent(int j, double v)
     return false;
 }
 
-bool ControlBoardRemapper::getMaxCurrent(int j, double* v)
+bool DinRailControlBoardRemapper::getMaxCurrent(int j, double* v)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2712,7 +2712,7 @@ bool ControlBoardRemapper::getMaxCurrent(int j, double* v)
     return false;
 }
 
-bool ControlBoardRemapper::getNominalCurrent(int m, double *val)
+bool DinRailControlBoardRemapper::getNominalCurrent(int m, double *val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2732,7 +2732,7 @@ bool ControlBoardRemapper::getNominalCurrent(int m, double *val)
     return p->amp->getNominalCurrent(off, val);
 }
 
-bool ControlBoardRemapper::getPeakCurrent(int m, double *val)
+bool DinRailControlBoardRemapper::getPeakCurrent(int m, double *val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2752,7 +2752,7 @@ bool ControlBoardRemapper::getPeakCurrent(int m, double *val)
     return p->amp->getPeakCurrent(off, val);
 }
 
-bool ControlBoardRemapper::setPeakCurrent(int m, const double val)
+bool DinRailControlBoardRemapper::setPeakCurrent(int m, const double val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2772,7 +2772,7 @@ bool ControlBoardRemapper::setPeakCurrent(int m, const double val)
     return p->amp->setPeakCurrent(off, val);
 }
 
-bool ControlBoardRemapper::setNominalCurrent(int m, const double val)
+bool DinRailControlBoardRemapper::setNominalCurrent(int m, const double val)
 {
     int off = (int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2792,7 +2792,7 @@ bool ControlBoardRemapper::setNominalCurrent(int m, const double val)
     return p->amp->setNominalCurrent(off, val);
 }
 
-bool ControlBoardRemapper::getPWM(int m, double* val)
+bool DinRailControlBoardRemapper::getPWM(int m, double* val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2811,7 +2811,7 @@ bool ControlBoardRemapper::getPWM(int m, double* val)
 
     return p->amp->getPWM(off, val);
 }
-bool ControlBoardRemapper::getPWMLimit(int m, double* val)
+bool DinRailControlBoardRemapper::getPWMLimit(int m, double* val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2831,7 +2831,7 @@ bool ControlBoardRemapper::getPWMLimit(int m, double* val)
     return p->amp->getPWMLimit(off, val);
 }
 
-bool ControlBoardRemapper::setPWMLimit(int m, const double val)
+bool DinRailControlBoardRemapper::setPWMLimit(int m, const double val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2851,7 +2851,7 @@ bool ControlBoardRemapper::setPWMLimit(int m, const double val)
     return p->amp->setPWMLimit(off, val);
 }
 
-bool ControlBoardRemapper::getPowerSupplyVoltage(int m, double* val)
+bool DinRailControlBoardRemapper::getPowerSupplyVoltage(int m, double* val)
 {
     int off=(int)remappedControlBoards.lut[m].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[m].subControlBoardIndex;
@@ -2874,7 +2874,7 @@ bool ControlBoardRemapper::getPowerSupplyVoltage(int m, double* val)
 
 /* IControlLimits */
 
-bool ControlBoardRemapper::setLimits(int j, double min, double max)
+bool DinRailControlBoardRemapper::setLimits(int j, double min, double max)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2894,7 +2894,7 @@ bool ControlBoardRemapper::setLimits(int j, double min, double max)
     return false;
 }
 
-bool ControlBoardRemapper::getLimits(int j, double *min, double *max)
+bool DinRailControlBoardRemapper::getLimits(int j, double *min, double *max)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2914,7 +2914,7 @@ bool ControlBoardRemapper::getLimits(int j, double *min, double *max)
     return false;
 }
 
-bool ControlBoardRemapper::setVelLimits(int j, double min, double max)
+bool DinRailControlBoardRemapper::setVelLimits(int j, double min, double max)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2934,7 +2934,7 @@ bool ControlBoardRemapper::setVelLimits(int j, double min, double max)
     return p->lim->setVelLimits(off,min, max);
 }
 
-bool ControlBoardRemapper::getVelLimits(int j, double *min, double *max)
+bool DinRailControlBoardRemapper::getVelLimits(int j, double *min, double *max)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -2955,17 +2955,17 @@ bool ControlBoardRemapper::getVelLimits(int j, double *min, double *max)
 }
 
 /* IRemoteCalibrator */
-IRemoteCalibrator *ControlBoardRemapper::getCalibratorDevice()
+IRemoteCalibrator *DinRailControlBoardRemapper::getCalibratorDevice()
 {
     return yarp::dev::IRemoteCalibrator::getCalibratorDevice();
 }
 
-bool ControlBoardRemapper::isCalibratorDevicePresent(bool *isCalib)
+bool DinRailControlBoardRemapper::isCalibratorDevicePresent(bool *isCalib)
 {
     return yarp::dev::IRemoteCalibrator::isCalibratorDevicePresent(isCalib);
 }
 
-bool ControlBoardRemapper::calibrateSingleJoint(int j)
+bool DinRailControlBoardRemapper::calibrateSingleJoint(int j)
 {
     if(!getCalibratorDevice())
     {
@@ -2991,7 +2991,7 @@ bool ControlBoardRemapper::calibrateSingleJoint(int j)
     }
 }
 
-bool ControlBoardRemapper::calibrateWholePart()
+bool DinRailControlBoardRemapper::calibrateWholePart()
 {
     if(!getCalibratorDevice())
     {
@@ -3017,7 +3017,7 @@ bool ControlBoardRemapper::calibrateWholePart()
     }
 }
 
-bool ControlBoardRemapper::homingSingleJoint(int j)
+bool DinRailControlBoardRemapper::homingSingleJoint(int j)
 {
     if(!getCalibratorDevice())
     {
@@ -3043,7 +3043,7 @@ bool ControlBoardRemapper::homingSingleJoint(int j)
     }
 }
 
-bool ControlBoardRemapper::homingWholePart()
+bool DinRailControlBoardRemapper::homingWholePart()
 {
     if(!getCalibratorDevice())
     {
@@ -3062,7 +3062,7 @@ bool ControlBoardRemapper::homingWholePart()
     }
 }
 
-bool ControlBoardRemapper::parkSingleJoint(int j, bool _wait)
+bool DinRailControlBoardRemapper::parkSingleJoint(int j, bool _wait)
 {
     if(!getCalibratorDevice())
     {
@@ -3088,7 +3088,7 @@ bool ControlBoardRemapper::parkSingleJoint(int j, bool _wait)
     }
 }
 
-bool ControlBoardRemapper::parkWholePart()
+bool DinRailControlBoardRemapper::parkWholePart()
 {
     if(!getCalibratorDevice())
     {
@@ -3109,7 +3109,7 @@ bool ControlBoardRemapper::parkWholePart()
     }
 }
 
-bool ControlBoardRemapper::quitCalibrate()
+bool DinRailControlBoardRemapper::quitCalibrate()
 {
     if(!getCalibratorDevice())
     {
@@ -3135,7 +3135,7 @@ bool ControlBoardRemapper::quitCalibrate()
     }
 }
 
-bool ControlBoardRemapper::quitPark()
+bool DinRailControlBoardRemapper::quitPark()
 {
     if(!getCalibratorDevice())
     {
@@ -3163,7 +3163,7 @@ bool ControlBoardRemapper::quitPark()
 
 
 /* IControlCalibration */
-bool ControlBoardRemapper::calibrateAxisWithParams(int j, unsigned int ui, double v1, double v2, double v3)
+bool DinRailControlBoardRemapper::calibrateAxisWithParams(int j, unsigned int ui, double v1, double v2, double v3)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3177,7 +3177,7 @@ bool ControlBoardRemapper::calibrateAxisWithParams(int j, unsigned int ui, doubl
     return false;
 }
 
-bool ControlBoardRemapper::setCalibrationParameters(int j, const CalibrationParameters& params)
+bool DinRailControlBoardRemapper::setCalibrationParameters(int j, const CalibrationParameters& params)
 {
     int off = (int) remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3192,7 +3192,7 @@ bool ControlBoardRemapper::setCalibrationParameters(int j, const CalibrationPara
     return false;
 }
 
-bool ControlBoardRemapper::calibrationDone(int j)
+bool DinRailControlBoardRemapper::calibrationDone(int j)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3212,13 +3212,13 @@ bool ControlBoardRemapper::calibrationDone(int j)
     return false;
 }
 
-bool ControlBoardRemapper::abortPark()
+bool DinRailControlBoardRemapper::abortPark()
 {
     yCError(CONTROLBOARDREMAPPER, "Calling abortPark -- not implemented");
     return false;
 }
 
-bool ControlBoardRemapper::abortCalibration()
+bool DinRailControlBoardRemapper::abortCalibration()
 {
     yCError(CONTROLBOARDREMAPPER, "Calling abortCalibration -- not implemented");
     return false;
@@ -3226,7 +3226,7 @@ bool ControlBoardRemapper::abortCalibration()
 
 /* IAxisInfo */
 
-bool ControlBoardRemapper::getAxisName(int j, std::string& name)
+bool DinRailControlBoardRemapper::getAxisName(int j, std::string& name)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3246,7 +3246,7 @@ bool ControlBoardRemapper::getAxisName(int j, std::string& name)
     return false;
 }
 
-bool ControlBoardRemapper::getJointType(int j, yarp::dev::JointTypeEnum& type)
+bool DinRailControlBoardRemapper::getJointType(int j, yarp::dev::JointTypeEnum& type)
 {
     int off = (int) remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3266,7 +3266,7 @@ bool ControlBoardRemapper::getJointType(int j, yarp::dev::JointTypeEnum& type)
     return false;
 }
 
-bool ControlBoardRemapper::getRefTorques(double *refs)
+bool DinRailControlBoardRemapper::getRefTorques(double *refs)
 {
     bool ret=true;
 
@@ -3295,7 +3295,7 @@ bool ControlBoardRemapper::getRefTorques(double *refs)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefTorque(int j, double *t)
+bool DinRailControlBoardRemapper::getRefTorque(int j, double *t)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3314,7 +3314,7 @@ bool ControlBoardRemapper::getRefTorque(int j, double *t)
     return false;
 }
 
-bool ControlBoardRemapper::setRefTorques(const double *t)
+bool DinRailControlBoardRemapper::setRefTorques(const double *t)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -3344,7 +3344,7 @@ bool ControlBoardRemapper::setRefTorques(const double *t)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefTorque(int j, double t)
+bool DinRailControlBoardRemapper::setRefTorque(int j, double t)
 {
     int off = (int) remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3362,7 +3362,7 @@ bool ControlBoardRemapper::setRefTorque(int j, double t)
     return false;
 }
 
-bool ControlBoardRemapper::setRefTorques(const int n_joints, const int *joints, const double *t)
+bool DinRailControlBoardRemapper::setRefTorques(const int n_joints, const int *joints, const double *t)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -3382,7 +3382,7 @@ bool ControlBoardRemapper::setRefTorques(const int n_joints, const int *joints, 
     return ret;
 }
 
-bool ControlBoardRemapper::getMotorTorqueParams(int j,  yarp::dev::MotorTorqueParameters *params)
+bool DinRailControlBoardRemapper::getMotorTorqueParams(int j,  yarp::dev::MotorTorqueParameters *params)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3402,7 +3402,7 @@ bool ControlBoardRemapper::getMotorTorqueParams(int j,  yarp::dev::MotorTorquePa
     return false;
 }
 
-bool ControlBoardRemapper::setMotorTorqueParams(int j,  const yarp::dev::MotorTorqueParameters params)
+bool DinRailControlBoardRemapper::setMotorTorqueParams(int j,  const yarp::dev::MotorTorqueParameters params)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3422,7 +3422,7 @@ bool ControlBoardRemapper::setMotorTorqueParams(int j,  const yarp::dev::MotorTo
     return false;
 }
 
-bool ControlBoardRemapper::setImpedance(int j, double stiff, double damp)
+bool DinRailControlBoardRemapper::setImpedance(int j, double stiff, double damp)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3442,7 +3442,7 @@ bool ControlBoardRemapper::setImpedance(int j, double stiff, double damp)
     return false;
 }
 
-bool ControlBoardRemapper::setImpedanceOffset(int j, double offset)
+bool DinRailControlBoardRemapper::setImpedanceOffset(int j, double offset)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3462,7 +3462,7 @@ bool ControlBoardRemapper::setImpedanceOffset(int j, double offset)
     return false;
 }
 
-bool ControlBoardRemapper::getTorque(int j, double *t)
+bool DinRailControlBoardRemapper::getTorque(int j, double *t)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3482,7 +3482,7 @@ bool ControlBoardRemapper::getTorque(int j, double *t)
     return false;
 }
 
-bool ControlBoardRemapper::getTorques(double *t)
+bool DinRailControlBoardRemapper::getTorques(double *t)
 {
     bool ret=true;
 
@@ -3512,7 +3512,7 @@ bool ControlBoardRemapper::getTorques(double *t)
     return ret;
  }
 
-bool ControlBoardRemapper::getTorqueRange(int j, double *min, double *max)
+bool DinRailControlBoardRemapper::getTorqueRange(int j, double *min, double *max)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3532,7 +3532,7 @@ bool ControlBoardRemapper::getTorqueRange(int j, double *min, double *max)
     return false;
 }
 
-bool ControlBoardRemapper::getTorqueRanges(double *min, double *max)
+bool DinRailControlBoardRemapper::getTorqueRanges(double *min, double *max)
 {
     bool ret=true;
 
@@ -3561,7 +3561,7 @@ bool ControlBoardRemapper::getTorqueRanges(double *min, double *max)
     return ret;
  }
 
-bool ControlBoardRemapper::getImpedance(int j, double* stiff, double* damp)
+bool DinRailControlBoardRemapper::getImpedance(int j, double* stiff, double* damp)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3581,7 +3581,7 @@ bool ControlBoardRemapper::getImpedance(int j, double* stiff, double* damp)
     return false;
 }
 
-bool ControlBoardRemapper::getImpedanceOffset(int j, double* offset)
+bool DinRailControlBoardRemapper::getImpedanceOffset(int j, double* offset)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3601,7 +3601,7 @@ bool ControlBoardRemapper::getImpedanceOffset(int j, double* offset)
     return false;
 }
 
-bool ControlBoardRemapper::getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp)
+bool DinRailControlBoardRemapper::getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3621,7 +3621,7 @@ bool ControlBoardRemapper::getCurrentImpedanceLimit(int j, double *min_stiff, do
     return false;
 }
 
-bool ControlBoardRemapper::getControlMode(int j, int *mode)
+bool DinRailControlBoardRemapper::getControlMode(int j, int *mode)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3644,7 +3644,7 @@ bool ControlBoardRemapper::getControlMode(int j, int *mode)
 
 }
 
-bool ControlBoardRemapper::getControlModes(int *modes)
+bool DinRailControlBoardRemapper::getControlModes(int *modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -3675,7 +3675,7 @@ bool ControlBoardRemapper::getControlModes(int *modes)
 }
 
 // IControlMode interface
-bool ControlBoardRemapper::getControlModes(const int n_joints, const int *joints, int *modes)
+bool DinRailControlBoardRemapper::getControlModes(const int n_joints, const int *joints, int *modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -3708,7 +3708,7 @@ bool ControlBoardRemapper::getControlModes(const int n_joints, const int *joints
     return ret;
 }
 
-bool ControlBoardRemapper::setControlMode(const int j, const int mode)
+bool DinRailControlBoardRemapper::setControlMode(const int j, const int mode)
 {
     bool ret = true;
 
@@ -3734,7 +3734,7 @@ bool ControlBoardRemapper::setControlMode(const int j, const int mode)
     return ret;
 }
 
-bool ControlBoardRemapper::setControlModes(const int n_joints, const int *joints, int *modes)
+bool DinRailControlBoardRemapper::setControlModes(const int n_joints, const int *joints, int *modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -3760,7 +3760,7 @@ bool ControlBoardRemapper::setControlModes(const int n_joints, const int *joints
     return ret;
 }
 
-bool ControlBoardRemapper::setControlModes(int *modes)
+bool DinRailControlBoardRemapper::setControlModes(int *modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -3786,7 +3786,7 @@ bool ControlBoardRemapper::setControlModes(int *modes)
     return ret;
 }
 
-bool ControlBoardRemapper::setPosition(int j, double ref)
+bool DinRailControlBoardRemapper::setPosition(int j, double ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3806,7 +3806,7 @@ bool ControlBoardRemapper::setPosition(int j, double ref)
     return false;
 }
 
-bool ControlBoardRemapper::setPositions(const int n_joints, const int *joints, const double *dpos)
+bool DinRailControlBoardRemapper::setPositions(const int n_joints, const int *joints, const double *dpos)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -3832,7 +3832,7 @@ bool ControlBoardRemapper::setPositions(const int n_joints, const int *joints, c
     return ret;
 }
 
-bool ControlBoardRemapper::setPositions(const double *refs)
+bool DinRailControlBoardRemapper::setPositions(const double *refs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -3858,7 +3858,7 @@ bool ControlBoardRemapper::setPositions(const double *refs)
     return ret;
 }
 
-yarp::os::Stamp ControlBoardRemapper::getLastInputStamp()
+yarp::os::Stamp DinRailControlBoardRemapper::getLastInputStamp()
 {
     double averageTimestamp = 0.0;
     int collectedTimestamps = 0;
@@ -3896,7 +3896,7 @@ yarp::os::Stamp ControlBoardRemapper::getLastInputStamp()
     return buffers.stamp;
 }
 
-bool ControlBoardRemapper::getRefPosition(const int j, double* ref)
+bool DinRailControlBoardRemapper::getRefPosition(const int j, double* ref)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -3917,7 +3917,7 @@ bool ControlBoardRemapper::getRefPosition(const int j, double* ref)
     return false;
 }
 
-bool ControlBoardRemapper::getRefPositions(double *spds)
+bool DinRailControlBoardRemapper::getRefPositions(double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -3948,7 +3948,7 @@ bool ControlBoardRemapper::getRefPositions(double *spds)
 }
 
 
-bool ControlBoardRemapper::getRefPositions(const int n_joints, const int *joints, double *targets)
+bool DinRailControlBoardRemapper::getRefPositions(const int n_joints, const int *joints, double *targets)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -3984,7 +3984,7 @@ bool ControlBoardRemapper::getRefPositions(const int n_joints, const int *joints
 
 
 // IVelocityControl interface
-bool ControlBoardRemapper::velocityMove(const int n_joints, const int *joints, const double *spds)
+bool DinRailControlBoardRemapper::velocityMove(const int n_joints, const int *joints, const double *spds)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -4011,7 +4011,7 @@ bool ControlBoardRemapper::velocityMove(const int n_joints, const int *joints, c
     return ret;
 }
 
-bool ControlBoardRemapper::getRefVelocity(const int j, double* vel)
+bool DinRailControlBoardRemapper::getRefVelocity(const int j, double* vel)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -4033,7 +4033,7 @@ bool ControlBoardRemapper::getRefVelocity(const int j, double* vel)
 }
 
 
-bool ControlBoardRemapper::getRefVelocities(double* vels)
+bool DinRailControlBoardRemapper::getRefVelocities(double* vels)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -4063,7 +4063,7 @@ bool ControlBoardRemapper::getRefVelocities(double* vels)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefVelocities(const int n_joints, const int* joints, double* vels)
+bool DinRailControlBoardRemapper::getRefVelocities(const int n_joints, const int* joints, double* vels)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -4096,7 +4096,7 @@ bool ControlBoardRemapper::getRefVelocities(const int n_joints, const int* joint
     return ret;
 }
 
-bool ControlBoardRemapper::getInteractionMode(int j, yarp::dev::InteractionModeEnum* mode)
+bool DinRailControlBoardRemapper::getInteractionMode(int j, yarp::dev::InteractionModeEnum* mode)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -4116,7 +4116,7 @@ bool ControlBoardRemapper::getInteractionMode(int j, yarp::dev::InteractionModeE
     return false;
 }
 
-bool ControlBoardRemapper::getInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardRemapper::getInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -4149,7 +4149,7 @@ bool ControlBoardRemapper::getInteractionModes(int n_joints, int *joints, yarp::
     return ret;
 }
 
-bool ControlBoardRemapper::getInteractionModes(yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardRemapper::getInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -4179,7 +4179,7 @@ bool ControlBoardRemapper::getInteractionModes(yarp::dev::InteractionModeEnum* m
     return ret;
 }
 
-bool ControlBoardRemapper::setInteractionMode(int j, yarp::dev::InteractionModeEnum mode)
+bool DinRailControlBoardRemapper::setInteractionMode(int j, yarp::dev::InteractionModeEnum mode)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
     size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
@@ -4199,7 +4199,7 @@ bool ControlBoardRemapper::setInteractionMode(int j, yarp::dev::InteractionModeE
     return false;
 }
 
-bool ControlBoardRemapper::setInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardRemapper::setInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -4219,7 +4219,7 @@ bool ControlBoardRemapper::setInteractionModes(int n_joints, int *joints, yarp::
     return ret;
 }
 
-bool ControlBoardRemapper::setInteractionModes(yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardRemapper::setInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -4239,7 +4239,7 @@ bool ControlBoardRemapper::setInteractionModes(yarp::dev::InteractionModeEnum* m
     return ret;
 }
 
-bool ControlBoardRemapper::setRefDutyCycle(int m, double ref)
+bool DinRailControlBoardRemapper::setRefDutyCycle(int m, double ref)
 {
     bool ret = false;
 
@@ -4256,7 +4256,7 @@ bool ControlBoardRemapper::setRefDutyCycle(int m, double ref)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefDutyCycles(const double* refs)
+bool DinRailControlBoardRemapper::setRefDutyCycles(const double* refs)
 {
     bool ret=true;
 
@@ -4286,7 +4286,7 @@ bool ControlBoardRemapper::setRefDutyCycles(const double* refs)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefDutyCycle(int m, double* ref)
+bool DinRailControlBoardRemapper::getRefDutyCycle(int m, double* ref)
 {
     bool ret = false;
 
@@ -4303,7 +4303,7 @@ bool ControlBoardRemapper::getRefDutyCycle(int m, double* ref)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefDutyCycles(double* refs)
+bool DinRailControlBoardRemapper::getRefDutyCycles(double* refs)
 {
     bool ret=true;
 
@@ -4333,7 +4333,7 @@ bool ControlBoardRemapper::getRefDutyCycles(double* refs)
     return ret;
 }
 
-bool ControlBoardRemapper::getDutyCycle(int m, double* val)
+bool DinRailControlBoardRemapper::getDutyCycle(int m, double* val)
 {
     bool ret = false;
 
@@ -4350,7 +4350,7 @@ bool ControlBoardRemapper::getDutyCycle(int m, double* val)
     return ret;
 }
 
-bool ControlBoardRemapper::getDutyCycles(double* vals)
+bool DinRailControlBoardRemapper::getDutyCycles(double* vals)
 {
     bool ret=true;
 
@@ -4380,7 +4380,7 @@ bool ControlBoardRemapper::getDutyCycles(double* vals)
     return ret;
 }
 
-bool ControlBoardRemapper::getCurrent(int j, double *val)
+bool DinRailControlBoardRemapper::getCurrent(int j, double *val)
 {
     bool ret = false;
 
@@ -4397,7 +4397,7 @@ bool ControlBoardRemapper::getCurrent(int j, double *val)
     return ret;
 }
 
-bool ControlBoardRemapper::getCurrents(double *vals)
+bool DinRailControlBoardRemapper::getCurrents(double *vals)
 {
     bool ret=true;
 
@@ -4427,7 +4427,7 @@ bool ControlBoardRemapper::getCurrents(double *vals)
     return ret;
 }
 
-bool ControlBoardRemapper::getCurrentRange(int m, double* min, double* max)
+bool DinRailControlBoardRemapper::getCurrentRange(int m, double* min, double* max)
 {
     bool ret = false;
 
@@ -4444,7 +4444,7 @@ bool ControlBoardRemapper::getCurrentRange(int m, double* min, double* max)
     return ret;
 }
 
-bool ControlBoardRemapper::getCurrentRanges(double* min, double* max)
+bool DinRailControlBoardRemapper::getCurrentRanges(double* min, double* max)
 {
     bool ret=true;
 
@@ -4474,7 +4474,7 @@ bool ControlBoardRemapper::getCurrentRanges(double* min, double* max)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefCurrent(int m, double curr)
+bool DinRailControlBoardRemapper::setRefCurrent(int m, double curr)
 {
     bool ret = false;
 
@@ -4491,7 +4491,7 @@ bool ControlBoardRemapper::setRefCurrent(int m, double curr)
     return ret;
 }
 
-bool ControlBoardRemapper::setRefCurrents(const int n_motor, const int* motors, const double* currs)
+bool DinRailControlBoardRemapper::setRefCurrents(const int n_motor, const int* motors, const double* currs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
@@ -4517,7 +4517,7 @@ bool ControlBoardRemapper::setRefCurrents(const int n_motor, const int* motors, 
     return ret;
 }
 
-bool ControlBoardRemapper::setRefCurrents(const double* currs)
+bool DinRailControlBoardRemapper::setRefCurrents(const double* currs)
 {
     bool ret=true;
     std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
@@ -4537,7 +4537,7 @@ bool ControlBoardRemapper::setRefCurrents(const double* currs)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefCurrent(int m, double* curr)
+bool DinRailControlBoardRemapper::getRefCurrent(int m, double* curr)
 {
     bool ret = false;
 
@@ -4554,7 +4554,7 @@ bool ControlBoardRemapper::getRefCurrent(int m, double* curr)
     return ret;
 }
 
-bool ControlBoardRemapper::getRefCurrents(double* currs)
+bool DinRailControlBoardRemapper::getRefCurrents(double* currs)
 {
     bool ret=true;
 

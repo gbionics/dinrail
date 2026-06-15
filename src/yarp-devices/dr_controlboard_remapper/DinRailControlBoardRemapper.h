@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "ControlBoardRemapperHelpers.h"
+#include "DinRailControlBoardRemapperHelpers.h"
 
 #ifdef MSVC
     #pragma warning(disable:4355)
@@ -66,7 +66,7 @@
  *
  */
 
-class ControlBoardRemapper :
+class DinRailControlBoardRemapper :
         public yarp::dev::DeviceDriver,
         public yarp::dev::IPidControl,
         public yarp::dev::IPositionControl,
@@ -104,7 +104,7 @@ private:
     std::string partName;
 
     // Buffer data used to simplify implementation of multi joint methods
-    ControlBoardRemapperBuffers buffers;
+    DinRailControlBoardRemapperBuffers buffers;
 
     // Buffer data used for full controlboard methods
     ControlBoardSubControlBoardAxesDecomposition allJointsBuffers;
@@ -172,12 +172,12 @@ private:
 
 
 public:
-    ControlBoardRemapper() = default;
-    ControlBoardRemapper(const ControlBoardRemapper&) = delete;
-    ControlBoardRemapper(ControlBoardRemapper&&) = delete;
-    ControlBoardRemapper& operator=(const ControlBoardRemapper&) = delete;
-    ControlBoardRemapper& operator=(ControlBoardRemapper&&) = delete;
-    ~ControlBoardRemapper() override = default;
+    DinRailControlBoardRemapper() = default;
+    DinRailControlBoardRemapper(const DinRailControlBoardRemapper&) = delete;
+    DinRailControlBoardRemapper(DinRailControlBoardRemapper&&) = delete;
+    DinRailControlBoardRemapper& operator=(const DinRailControlBoardRemapper&) = delete;
+    DinRailControlBoardRemapper& operator=(DinRailControlBoardRemapper&&) = delete;
+    ~DinRailControlBoardRemapper() override = default;
 
     /**
     * Return the value of the verbose flag.

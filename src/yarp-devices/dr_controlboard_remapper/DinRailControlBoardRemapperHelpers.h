@@ -34,7 +34,7 @@
 #endif
 
 /*
- * Helper class for the ControlBoardRemapper.
+ * Helper class for the DinRailControlBoardRemapper.
  * It contains all the data structure related
  * to a given controlboard used by the remapper.
  */
@@ -135,7 +135,7 @@ public:
     }
 };
 
-class ControlBoardRemapperBuffers
+class DinRailControlBoardRemapperBuffers
 {
 public:
     std::mutex mutex;
@@ -186,13 +186,13 @@ public:
                                                             const RemappedControlBoards & remappedControlBoards);
 
     /**
-     * Fill a vector of joints of the ControlBoardRemapper from
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      */
     void fillCompleteJointVectorFromSubControlBoardBuffers(double * full, const RemappedControlBoards & remappedControlBoards);
 
     /**
-     * Fill a vector of joints of the ControlBoardRemapper from
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      *
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
@@ -202,7 +202,7 @@ public:
                                                             const RemappedControlBoards & remappedControlBoards);
 
     /**
-     * Fill a vector of joints of the ControlBoardRemapper from
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      *
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
@@ -293,7 +293,7 @@ public:
                                       const RemappedControlBoards & remappedControlBoards);
 
     /**
-    * Fill a vector of joints of the ControlBoardRemapper from
+    * Fill a vector of joints of the DinRailControlBoardRemapper from
     * the buffers of the SubControlBoard .
     *
     * Before calling this method you should have called the resizeSubControlBoardBuffers method.
@@ -303,7 +303,7 @@ public:
                                                             const RemappedControlBoards & remappedControlBoards);
 
     /**
-     * Fill a vector of joints of the ControlBoardRemapper from
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      *
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
@@ -314,7 +314,7 @@ public:
                                                             const RemappedControlBoards & remappedControlBoards);
 
     /**
-     * Fill a vector of joints of the ControlBoardRemapper from
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      *
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.

@@ -3,6 +3,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "ControlBoardRemapperLogComponent.h"
+#include "DinRailControlBoardRemapperLogComponent.h"
 
 YARP_LOG_COMPONENT(CONTROLBOARDREMAPPER, "yarp.device.controlboardremapper")

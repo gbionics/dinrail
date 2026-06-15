@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "ControlBoardRemapperHelpers.h"
-#include "ControlBoardRemapperLogComponent.h"
+#include "DinRailControlBoardRemapperHelpers.h"
+#include "DinRailControlBoardRemapperLogComponent.h"
 
 #include <yarp/os/LogStream.h>
 

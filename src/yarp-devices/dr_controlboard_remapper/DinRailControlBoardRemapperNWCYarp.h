@@ -8,7 +8,7 @@
 
 #include <yarp/dev/PolyDriver.h>
 
-#include "ControlBoardRemapper.h"
+#include "DinRailControlBoardRemapper.h"
 
 /**
  *  @ingroup dev_impl_network_clients
@@ -27,7 +27,7 @@
  * | localPortPrefix |     -         | string             | -   |   -           | Yes          | All ports opened by this device will start with this prefix       |       |
  * | REMOTE_CONTROLBOARD_OPTIONS | - | group              | -   |   -           | No           | Options that will be passed directly to the remote_controlboard devices | |
  * All the passed remote controlboards are opened, and then the axesNames and the opened device are
- * passed to the ControlBoardRemapper device. If different axes
+ * passed to the DinRailControlBoardRemapper device. If different axes
  * in two attached controlboard have the same name, the behaviour of this device is undefined.
  *
  *
@@ -91,7 +91,7 @@
  *
  */
 
-class DinRailControlBoardRemapperNWCYarp : public ControlBoardRemapper
+class DinRailControlBoardRemapperNWCYarp : public DinRailControlBoardRemapper
 {
 private:
     /**

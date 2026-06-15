@@ -3,8 +3,8 @@
 
 yarp_prepare_plugin(dr_controlboard_remapper
   CATEGORY device
-  TYPE ControlBoardRemapper
-  INCLUDE ControlBoardRemapper.h
+  TYPE DinRailControlBoardRemapper
+  INCLUDE DinRailControlBoardRemapper.h
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
@@ -24,12 +24,12 @@ if(NOT SKIP_dr_controlboard_remapper OR NOT SKIP_dr_controlboard_remapper_nwc_ya
 
   target_sources(dr_controlboard_remapper
     PRIVATE
-      ControlBoardRemapper.cpp
-      ControlBoardRemapper.h
-      ControlBoardRemapperHelpers.cpp
-      ControlBoardRemapperHelpers.h
-      ControlBoardRemapperLogComponent.cpp
-      ControlBoardRemapperLogComponent.h
+      DinRailControlBoardRemapper.cpp
+      DinRailControlBoardRemapper.h
+      DinRailControlBoardRemapperHelpers.cpp
+      DinRailControlBoardRemapperHelpers.h
+      DinRailControlBoardRemapperLogComponent.cpp
+      DinRailControlBoardRemapperLogComponent.h
       DinRailControlBoardRemapperNWCYarp.cpp
       DinRailControlBoardRemapperNWCYarp.h)
 
