@@ -110,7 +110,7 @@ bool RemoteControlBoardRemapper::open(Searchable& config)
         std::string local = localPortPrefix+remote;
 
         Property options = remoteControlBoardsOptions;
-        options.put("device", "remote_controlboard");
+        options.put("device", "ControlBoardNWCDinRailYARPPorts");
         options.put("local", local);
         options.put("remote", remote);
 

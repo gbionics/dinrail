@@ -7,15 +7,14 @@
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperSingle.h>
 
-#include <catch2/catch_amalgamated.hpp>
-#include <harness.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace yarp::dev;
 using namespace yarp::os;
 
 TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
 {
-    YARP_REQUIRE_PLUGIN("controlBoard_nws_yarp", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
 
     Network::setLocalMode(true);
 
@@ -26,7 +25,7 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         ////////"Checking opening map2DServer and map2DClient polydrivers"
         {
             Property pcfg;
-            pcfg.put("device", "controlBoard_nws_yarp");
+            pcfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             pcfg.put("name", "/controlboard");
             REQUIRE(ddnws.open(pcfg));
         }
@@ -45,13 +44,11 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "controlBoard_nws_yarp");
+        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControl");
         REQUIRE(dd_fake.open(p_fake));
         REQUIRE(dd_nws.open(p_nws));
-
-        yarp::os::SystemClock::delaySystem(0.5);
 
         //attach
         {
@@ -60,8 +57,6 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
             bool result_att = ww_nws->attach(&dd_fake);
             REQUIRE(result_att);
         }
-
-        yarp::os::SystemClock::delaySystem(1.0);
 
         //Close all polydrivers and check
         {
@@ -78,13 +73,11 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "controlBoard_nws_yarp");
+        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
         p_nws.put("name", "/controlboard");
         p_fake2.put("device", "fakeSpeaker");
         REQUIRE(dd_fake2.open(p_fake2));
         REQUIRE(dd_nws.open(p_nws));
-
-        yarp::os::SystemClock::delaySystem(0.5);
 
         //attach
         {
@@ -93,8 +86,6 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
             bool result_att = ww_nws->attach(&dd_fake2);
             REQUIRE(!result_att);
         }
-
-        yarp::os::SystemClock::delaySystem(1.0);
 
         //Close all polydrivers and check
         {
@@ -111,13 +102,11 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "controlBoard_nws_yarp");
+        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControlMicro");
         REQUIRE(dd_fake.open(p_fake));
         REQUIRE(dd_nws.open(p_nws));
-
-        yarp::os::SystemClock::delaySystem(0.5);
 
         //attach
         {
@@ -126,8 +115,6 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
             bool result_att = ww_nws->attach(&dd_fake);
             REQUIRE(result_att);
         }
-
-        yarp::os::SystemClock::delaySystem(1.0);
 
         //Close all polydrivers and check
         {

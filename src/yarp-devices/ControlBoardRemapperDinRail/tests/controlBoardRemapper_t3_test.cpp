@@ -21,36 +21,35 @@
 #include <yarp/os/Network.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperMultiple.h>
-#include <yarp/dev/tests/IPositionControlTest.h>
-#include <yarp/dev/tests/IVelocityControlTest.h>
-#include <yarp/dev/tests/ITorqueControlTest.h>
-#include <yarp/dev/tests/IEncodersTimedTest.h>
-#include <yarp/dev/tests/IAxisInfoTest.h>
-#include <yarp/dev/tests/IControlModeTest.h>
-#include <yarp/dev/tests/IInteractionModeTest.h>
-#include <yarp/dev/tests/ICurrentControlTest.h>
-#include <yarp/dev/tests/IPWMControlTest.h>
-#include <yarp/dev/tests/IPidControlTest.h>
-#include <yarp/dev/tests/IMotorTest.h>
-#include <yarp/dev/tests/IMotorEncodersTest.h>
-#include <yarp/dev/tests/IRemoteCalibratorTest.h>
-#include <yarp/dev/tests/IJointFaultTest.h>
-#include <yarp/dev/tests/IControlLimitsTest.h>
-#include <yarp/dev/tests/IImpedanceControlTest.h>
+#include <dinrail/yarp/dev/tests/IPositionControlTest.h>
+#include <dinrail/yarp/dev/tests/IVelocityControlTest.h>
+#include <dinrail/yarp/dev/tests/ITorqueControlTest.h>
+#include <dinrail/yarp/dev/tests/IEncodersTimedTest.h>
+#include <dinrail/yarp/dev/tests/IAxisInfoTest.h>
+#include <dinrail/yarp/dev/tests/IControlModeTest.h>
+#include <dinrail/yarp/dev/tests/IInteractionModeTest.h>
+#include <dinrail/yarp/dev/tests/ICurrentControlTest.h>
+#include <dinrail/yarp/dev/tests/IPWMControlTest.h>
+#include <dinrail/yarp/dev/tests/IPidControlTest.h>
+#include <dinrail/yarp/dev/tests/IMotorTest.h>
+#include <dinrail/yarp/dev/tests/IMotorEncodersTest.h>
+#include <dinrail/yarp/dev/tests/IRemoteCalibratorTest.h>
+#include <dinrail/yarp/dev/tests/IJointFaultTest.h>
+#include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceControlTest.h>
 
-#include <catch2/catch_amalgamated.hpp>
-#include <harness.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace yarp::dev;
 using namespace yarp::os;
 
 TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
 {
-    YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    YARP_REQUIRE_PLUGIN("controlboardremapper", "device");
-    YARP_REQUIRE_PLUGIN("controlBoard_nws_yarp", "device");
-    //YARP_REQUIRE_PLUGIN("controlBoard_nwc_yarp", "device");
-    YARP_REQUIRE_PLUGIN("remote_controlboard", "device");
+    // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("controlBoard_nwc_yarp", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWCDinRailYARPPorts", "device");
 
     Network::setLocalMode(true);
 
@@ -89,7 +88,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlBoard_nws_yarp");
+            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             p_cfg.put("name", "/alljoints");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -101,20 +100,18 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
             REQUIRE(result_att);
         }
 
-        yarp::os::Time::delay(0.1);
-
         //client side
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "remote_controlboard");
+            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
             p_cfg.put("local", "/localalljoints");
             p_cfg.put("remote", "/alljoints");
             REQUIRE(ddnwc.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlboardremapper");
+            p_cfg.put("device", "ControlBoardRemapperDinRail");
             yarp::os::Value* jlist = yarp::os::Value::makeList("joint3 joint2");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));
@@ -220,13 +217,13 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlBoard_nws_yarp");
+            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             p_cfg.put("name", "/alljoints1");
             REQUIRE(ddnws1.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlBoard_nws_yarp");
+            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             p_cfg.put("name", "/alljoints2");
             REQUIRE(ddnws2.open(p_cfg));
         }
@@ -245,13 +242,11 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
             REQUIRE(result_att);
         }
 
-        yarp::os::Time::delay(0.1);
-
         //client side
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "remote_controlboard");
+            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
             p_cfg.put("local", "/localalljoints1");
             p_cfg.put("remote", "/alljoints1");
             REQUIRE(ddnwc1.open(p_cfg));
@@ -259,14 +254,14 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "remote_controlboard");
+            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
             p_cfg.put("local", "/localalljoints2");
             p_cfg.put("remote", "/alljoints2");
             REQUIRE(ddnwc2.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlboardremapper");
+            p_cfg.put("device", "ControlBoardRemapperDinRail");
             yarp::os::Value* jlist = yarp::os::Value::makeList("a3 b12");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));

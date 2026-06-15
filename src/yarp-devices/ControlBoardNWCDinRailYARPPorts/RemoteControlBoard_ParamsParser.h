@@ -60,7 +60,7 @@ public:
 
 public:
     const std::string m_device_classname = {"RemoteControlBoard"};
-    const std::string m_device_name = {"remote_controlboard"};
+    const std::string m_device_name = {"ControlBoardNWCDinRailYARPPorts"};
     bool m_parser_is_strict = false;
     struct parser_version_type
     {

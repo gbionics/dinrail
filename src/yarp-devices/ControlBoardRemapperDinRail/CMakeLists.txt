@@ -1,28 +1,28 @@
 # SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
-yarp_prepare_plugin(controlboardremapper
+yarp_prepare_plugin(ControlBoardRemapperDinRail
   CATEGORY device
   TYPE ControlBoardRemapper
   INCLUDE ControlBoardRemapper.h
   EXTRA_CONFIG
-    WRAPPER=controlBoard_nws_yarp
+    WRAPPER=ControlBoardNWSDinRailYARPPorts
   DEFAULT ON
 )
 
-yarp_prepare_plugin(remotecontrolboardremapper
+yarp_prepare_plugin(RemoteControlBoardRemapperDinRail
   CATEGORY device
   TYPE RemoteControlBoardRemapper
   INCLUDE RemoteControlBoardRemapper.h
   EXTRA_CONFIG
-    WRAPPER=controlBoard_nws_yarp
+    WRAPPER=ControlBoardNWSDinRailYARPPorts 
   DEFAULT ON
 )
 
-if(NOT SKIP_controlboardremapper OR NOT SKIP_remotecontrolboardremapper)
-  yarp_add_plugin(yarp_controlboardremapper)
+if(NOT SKIP_ControlBoardRemapperDinRail OR NOT SKIP_RemoteControlBoardRemapperDinRail)
+  yarp_add_plugin(ControlBoardRemapperDinRail)
 
-  target_sources(yarp_controlboardremapper
+  target_sources(ControlBoardRemapperDinRail
     PRIVATE
       ControlBoardRemapper.cpp
       ControlBoardRemapper.h
@@ -33,32 +33,21 @@ if(NOT SKIP_controlboardremapper OR NOT SKIP_remotecontrolboardremapper)
       RemoteControlBoardRemapper.cpp
       RemoteControlBoardRemapper.h)
 
-  target_link_libraries(yarp_controlboardremapper
+  target_link_libraries(ControlBoardRemapperDinRail
     PRIVATE
       YARP::YARP_os
       YARP::YARP_sig
       YARP::YARP_dev
   )
-  list(APPEND YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS
-    YARP_os
-    YARP_sig
-    YARP_dev
-  )
 
   yarp_install(
-    TARGETS yarp_controlboardremapper
-    EXPORT YARP_${YARP_PLUGIN_MASTER}
-    COMPONENT ${YARP_PLUGIN_MASTER}
+    TARGETS ControlBoardRemapperDinRail
     LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}
     ARCHIVE DESTINATION ${YARP_STATIC_PLUGINS_INSTALL_DIR}
     YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR}
   )
 
-  set(YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS ${YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS} PARENT_SCOPE)
-
-  set_property(TARGET yarp_controlboardremapper PROPERTY FOLDER "Plugins/Device")
-
-  if(YARP_COMPILE_TESTS)
+  if(BUILD_TESTING)
     add_subdirectory(tests)
   endif()
 

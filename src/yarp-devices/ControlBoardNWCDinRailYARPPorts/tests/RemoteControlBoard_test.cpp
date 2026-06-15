@@ -21,34 +21,33 @@
 #include <yarp/os/Network.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperSingle.h>
-#include <yarp/dev/tests/IPositionControlTest.h>
-#include <yarp/dev/tests/ITorqueControlTest.h>
-#include <yarp/dev/tests/IEncodersTimedTest.h>
-#include <yarp/dev/tests/IVelocityControlTest.h>
-#include <yarp/dev/tests/IAxisInfoTest.h>
-#include <yarp/dev/tests/IControlModeTest.h>
-#include <yarp/dev/tests/IInteractionModeTest.h>
-#include <yarp/dev/tests/ICurrentControlTest.h>
-#include <yarp/dev/tests/IImpedanceControlTest.h>
-#include <yarp/dev/tests/IPWMControlTest.h>
-#include <yarp/dev/tests/IPidControlTest.h>
-#include <yarp/dev/tests/IMotorTest.h>
-#include <yarp/dev/tests/IMotorEncodersTest.h>
-#include <yarp/dev/tests/IRemoteCalibratorTest.h>
-#include <yarp/dev/tests/IJointFaultTest.h>
-#include <yarp/dev/tests/IControlLimitsTest.h>
+#include <dinrail/yarp/dev/tests/IPositionControlTest.h>
+#include <dinrail/yarp/dev/tests/ITorqueControlTest.h>
+#include <dinrail/yarp/dev/tests/IEncodersTimedTest.h>
+#include <dinrail/yarp/dev/tests/IVelocityControlTest.h>
+#include <dinrail/yarp/dev/tests/IAxisInfoTest.h>
+#include <dinrail/yarp/dev/tests/IControlModeTest.h>
+#include <dinrail/yarp/dev/tests/IInteractionModeTest.h>
+#include <dinrail/yarp/dev/tests/ICurrentControlTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceControlTest.h>
+#include <dinrail/yarp/dev/tests/IPWMControlTest.h>
+#include <dinrail/yarp/dev/tests/IPidControlTest.h>
+#include <dinrail/yarp/dev/tests/IMotorTest.h>
+#include <dinrail/yarp/dev/tests/IMotorEncodersTest.h>
+#include <dinrail/yarp/dev/tests/IRemoteCalibratorTest.h>
+#include <dinrail/yarp/dev/tests/IJointFaultTest.h>
+#include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
 
-#include <catch2/catch_amalgamated.hpp>
-#include <harness.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace yarp::dev;
 using namespace yarp::os;
 
 TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
 {
-    YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    YARP_REQUIRE_PLUGIN("controlBoard_nws_yarp", "device");
-    YARP_REQUIRE_PLUGIN("remote_controlboard", "device");
+    // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWCDinRailYARPPorts", "device");
 
     Network::setLocalMode(true);
 
@@ -83,10 +82,9 @@ TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
             grp.put("Joints", 2);
             REQUIRE(ddmc.open(p_cfg));
         }
-        yarp::os::Time::delay(0.1);
         {
             Property p_cfg;
-            p_cfg.put("device", "controlBoard_nws_yarp");
+            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             p_cfg.put("name", "/controlboardserver");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -99,18 +97,14 @@ TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
             REQUIRE(result_att);
         }
 
-        yarp::os::Time::delay(0.9);
-
         //open the nwc
         {
             Property p_cfg;
-            p_cfg.put("device", "remote_controlboard");
+            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
             p_cfg.put("local", "/local_controlboard");
             p_cfg.put("remote", "/controlboardserver");
             REQUIRE(ddnwc.open(p_cfg));
         }
-
-        yarp::os::Time::delay(0.1);
 
         //test
         ddnwc.view(ipos);    REQUIRE(ipos);
@@ -178,10 +172,9 @@ TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
             grp.put("Joints", 2);
             REQUIRE(ddmc.open(p_cfg));
         }
-        yarp::os::Time::delay(0.1);
         {
             Property p_cfg;
-            p_cfg.put("device", "controlBoard_nws_yarp");
+            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
             p_cfg.put("name", "/controlboardserver");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -194,18 +187,14 @@ TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
             REQUIRE(result_att);
         }
 
-        yarp::os::Time::delay(0.9);
-
         //open the nwc
         {
             Property p_cfg;
-            p_cfg.put("device", "remote_controlboard");
+            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
             p_cfg.put("local", "/local_controlboard");
             p_cfg.put("remote", "/controlboardserver");
             REQUIRE(ddnwc.open(p_cfg));
         }
-
-        yarp::os::Time::delay(0.1);
 
         //test
         ddnwc.view(ipos);  REQUIRE(ipos);

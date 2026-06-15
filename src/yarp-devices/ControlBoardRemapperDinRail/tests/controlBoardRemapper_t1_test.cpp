@@ -12,8 +12,7 @@
 
 #include <vector>
 
-#include <catch2/catch_amalgamated.hpp>
-#include <harness.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace yarp::os;
 using namespace yarp::dev;
@@ -54,15 +53,15 @@ const char *fmcC_file_content_micro   =  "device fakeMotionControlMicro\n"
                                   "\n"
                                   "AxisName (\"axisC1\" \"axisC2\" \"axisC3\" \"axisC4\")  \n";
 
-const char *wrapperA_file_content   = "device controlBoard_nws_yarp\n"
+const char *wrapperA_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
                                       "name /testRemapperRobot/a\n"
                                       "period 0.01\n";
 
-const char *wrapperB_file_content   = "device controlBoard_nws_yarp\n"
+const char *wrapperB_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
                                       "name /testRemapperRobot/b\n"
                                       "period 0.01\n";
 
-const char *wrapperC_file_content   = "device controlBoard_nws_yarp\n"
+const char *wrapperC_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
                                       "name /testRemapperRobot/c\n"
                                       "period 0.01\n";
 
@@ -116,7 +115,10 @@ static void checkRemapper(yarp::dev::PolyDriver & ddRemapper, int rand, size_t n
     for(int wait=0; wait < 20 && !getControlModesOk; wait++)
     {
         getControlModesOk = ctrlmode->getControlModes(readedControlMode.data());
-        yarp::os::Time::delay(0.005);
+        if (!getControlModesOk)
+        {
+            yarp::os::Time::delay(0.001);
+        }
     }
     CHECK(getControlModesOk); // getControlModes correctly called
 
@@ -136,10 +138,18 @@ static void checkRemapper(yarp::dev::PolyDriver & ddRemapper, int rand, size_t n
 
     // Wait some time to make sure that the vector has been correctly propagated
     // back and forth
-    yarp::os::Time::delay(0.1);
 
-    // Read position
-    CHECK(posdir->getRefPositions(readedPosition.data())); // getRefPositions correctly called
+    // Read position and retry briefly to allow async propagation through wrappers.
+    bool gotRefPositions = false;
+    for (int wait = 0; wait < 20 && !gotRefPositions; wait++)
+    {
+        gotRefPositions = posdir->getRefPositions(readedPosition.data());
+        if (!gotRefPositions)
+        {
+            yarp::os::Time::delay(0.001);
+        }
+    }
+    CHECK(gotRefPositions); // getRefPositions correctly called
 
     // Check that the two vector match
     for(size_t i=0; i < nrOfRemappedAxes; i++)
@@ -149,7 +159,31 @@ static void checkRemapper(yarp::dev::PolyDriver & ddRemapper, int rand, size_t n
 
     // Do a similar test for the encoders
     // in fakeMotionControl their value is the one setted with setPosition
-    CHECK(encs->getEncoders(readedEncoders.data())); // getEncoders correctly called
+    bool encodersReady = false;
+    for (int wait = 0; wait < 20 && !encodersReady; wait++)
+    {
+        if (!encs->getEncoders(readedEncoders.data()))
+        {
+            yarp::os::Time::delay(0.001);
+            continue;
+        }
+
+        encodersReady = true;
+        for (size_t i = 0; i < nrOfRemappedAxes; i++)
+        {
+            if (setPosition[i] != readedEncoders[i])
+            {
+                encodersReady = false;
+                break;
+            }
+        }
+
+        if (!encodersReady)
+        {
+            yarp::os::Time::delay(0.001);
+        }
+    }
+    CHECK(encodersReady); // getEncoders correctly called
 
     // Check that the two vector match
     for(size_t i=0; i < nrOfRemappedAxes; i++)
@@ -208,7 +242,6 @@ static void checkRemapperMicro(yarp::dev::PolyDriver & ddRemapper, int rand, siz
     for(int wait=0; wait < 20 && !getControlModesOk; wait++)
     {
         getControlModesOk = ctrlmode->getControlModes(readedControlMode.data());
-        yarp::os::Time::delay(0.005);
     }
     CHECK_FALSE(getControlModesOk);
 
@@ -220,7 +253,6 @@ static void checkRemapperMicro(yarp::dev::PolyDriver & ddRemapper, int rand, siz
 
     // Wait some time to make sure that the vector has been correctly propagated
     // back and forth
-    yarp::os::Time::delay(0.1);
 
     // Read position
     CHECK_FALSE(posdir->getRefPositions(readedPosition.data()));
@@ -233,11 +265,11 @@ static void checkRemapperMicro(yarp::dev::PolyDriver & ddRemapper, int rand, siz
 
 TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
 {
-    YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    YARP_REQUIRE_PLUGIN("fakeMotionControlMicro", "device");
-    YARP_REQUIRE_PLUGIN("controlboardremapper", "device");
-    YARP_REQUIRE_PLUGIN("controlBoard_nws_yarp", "device");
-    YARP_REQUIRE_PLUGIN("remotecontrolboardremapper", "device");
+    // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
+    // YARP_REQUIRE_PLUGIN("fakeMotionControlMicro", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("RemoteControlBoardRemapperDinRail", "device");
 
     Network::setLocalMode(true);
 
@@ -317,7 +349,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // and make sure that if fails during attachAll
         PolyDriver ddRemapperWN;
         Property pRemapperWN;
-        pRemapperWN.put("device","controlboardremapper");
+        pRemapperWN.put("device","ControlBoardRemapperDinRail");
         pRemapperWN.addGroup("axesNames");
         Bottle & axesListWN = pRemapperWN.findGroup("axesNames").addList();
         axesListWN.addString("axisA1");
@@ -343,7 +375,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the controlboardremapper
         PolyDriver ddRemapper;
         Property pRemapper;
-        pRemapper.put("device","controlboardremapper");
+        pRemapper.put("device","ControlBoardRemapperDinRail");
         pRemapper.addGroup("axesNames");
         Bottle & axesList = pRemapper.findGroup("axesNames").addList();
         axesList.addString("axisA1");
@@ -369,7 +401,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","remotecontrolboardremapper");
+        pRemoteRemapper.put("device","RemoteControlBoardRemapperDinRail");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");
@@ -492,7 +524,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // and make sure that if fails during attachAll
         PolyDriver ddRemapperWN;
         Property pRemapperWN;
-        pRemapperWN.put("device","controlboardremapper");
+        pRemapperWN.put("device","ControlBoardRemapperDinRail");
         pRemapperWN.addGroup("axesNames");
         Bottle & axesListWN = pRemapperWN.findGroup("axesNames").addList();
         axesListWN.addString("axisA1");
@@ -518,7 +550,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the controlboardremapper
         PolyDriver ddRemapper;
         Property pRemapper;
-        pRemapper.put("device","controlboardremapper");
+        pRemapper.put("device","ControlBoardRemapperDinRail");
         pRemapper.addGroup("axesNames");
         Bottle & axesList = pRemapper.findGroup("axesNames").addList();
         axesList.addString("axisA1");
@@ -544,7 +576,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","remotecontrolboardremapper");
+        pRemoteRemapper.put("device","RemoteControlBoardRemapperDinRail");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");

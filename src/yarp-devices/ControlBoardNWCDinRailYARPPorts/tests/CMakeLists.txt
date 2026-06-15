@@ -1,4 +1,24 @@
 # SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
-create_device_test(RemoteControlBoard)
+add_executable(harness_device_RemoteControlBoard
+	RemoteControlBoard_test.cpp
+)
+
+target_link_libraries(harness_device_RemoteControlBoard
+	PRIVATE
+		YARP::YARP_os
+		YARP::YARP_sig
+		YARP::YARP_dev
+		Catch2::Catch2WithMain
+		dinrail::dinrail-yarp-dev-test-helpers
+)
+target_link_options(harness_device_RemoteControlBoard
+	PRIVATE
+		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
+)
+target_include_directories(harness_device_RemoteControlBoard
+	PRIVATE
+		${PROJECT_SOURCE_DIR}/src/yarp-devices
+)
+add_test(NAME harness_device_RemoteControlBoard COMMAND harness_device_RemoteControlBoard)

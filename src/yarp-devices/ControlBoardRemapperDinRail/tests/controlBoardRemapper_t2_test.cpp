@@ -21,33 +21,32 @@
 #include <yarp/os/Network.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperMultiple.h>
-#include <yarp/dev/tests/IPositionControlTest.h>
-#include <yarp/dev/tests/IVelocityControlTest.h>
-#include <yarp/dev/tests/ITorqueControlTest.h>
-#include <yarp/dev/tests/IEncodersTimedTest.h>
-#include <yarp/dev/tests/IAxisInfoTest.h>
-#include <yarp/dev/tests/IControlModeTest.h>
-#include <yarp/dev/tests/IInteractionModeTest.h>
-#include <yarp/dev/tests/ICurrentControlTest.h>
-#include <yarp/dev/tests/IPWMControlTest.h>
-#include <yarp/dev/tests/IPidControlTest.h>
-#include <yarp/dev/tests/IMotorTest.h>
-#include <yarp/dev/tests/IMotorEncodersTest.h>
-#include <yarp/dev/tests/IRemoteCalibratorTest.h>
-#include <yarp/dev/tests/IJointFaultTest.h>
-#include <yarp/dev/tests/IControlLimitsTest.h>
-#include <yarp/dev/tests/IImpedanceControlTest.h>
+#include <dinrail/yarp/dev/tests/IPositionControlTest.h>
+#include <dinrail/yarp/dev/tests/IVelocityControlTest.h>
+#include <dinrail/yarp/dev/tests/ITorqueControlTest.h>
+#include <dinrail/yarp/dev/tests/IEncodersTimedTest.h>
+#include <dinrail/yarp/dev/tests/IAxisInfoTest.h>
+#include <dinrail/yarp/dev/tests/IControlModeTest.h>
+#include <dinrail/yarp/dev/tests/IInteractionModeTest.h>
+#include <dinrail/yarp/dev/tests/ICurrentControlTest.h>
+#include <dinrail/yarp/dev/tests/IPWMControlTest.h>
+#include <dinrail/yarp/dev/tests/IPidControlTest.h>
+#include <dinrail/yarp/dev/tests/IMotorTest.h>
+#include <dinrail/yarp/dev/tests/IMotorEncodersTest.h>
+#include <dinrail/yarp/dev/tests/IRemoteCalibratorTest.h>
+#include <dinrail/yarp/dev/tests/IJointFaultTest.h>
+#include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceControlTest.h>
 
-#include <catch2/catch_amalgamated.hpp>
-#include <harness.h>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace yarp::dev;
 using namespace yarp::os;
 
 TEST_CASE("dev::ControlBoardRemapperTest2", "[yarp::dev]")
 {
-    YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    YARP_REQUIRE_PLUGIN("controlboardremapper", "device");
+    // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
+    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
 
     Network::setLocalMode(true);
 
@@ -83,7 +82,7 @@ TEST_CASE("dev::ControlBoardRemapperTest2", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "controlboardremapper");
+            p_cfg.put("device", "ControlBoardRemapperDinRail");
             yarp::os::Value* jlist = yarp::os::Value::makeList("joint0 joint1");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));
