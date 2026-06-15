@@ -12,8 +12,8 @@ yarp_prepare_plugin(dr_controlboard_remapper
 
 yarp_prepare_plugin(dr_controlboard_remapper_nwc_yarp
   CATEGORY device
-  TYPE RemoteControlBoardRemapper
-  INCLUDE RemoteControlBoardRemapper.h
+  TYPE DinRailControlBoardRemapperNWCYarp
+  INCLUDE DinRailControlBoardRemapperNWCYarp.h
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp 
   DEFAULT ON
@@ -30,8 +30,8 @@ if(NOT SKIP_dr_controlboard_remapper OR NOT SKIP_dr_controlboard_remapper_nwc_ya
       ControlBoardRemapperHelpers.h
       ControlBoardRemapperLogComponent.cpp
       ControlBoardRemapperLogComponent.h
-      RemoteControlBoardRemapper.cpp
-      RemoteControlBoardRemapper.h)
+      DinRailControlBoardRemapperNWCYarp.cpp
+      DinRailControlBoardRemapperNWCYarp.h)
 
   target_link_libraries(dr_controlboard_remapper
     PRIVATE

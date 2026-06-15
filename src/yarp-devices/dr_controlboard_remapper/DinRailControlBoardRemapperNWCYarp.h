@@ -17,7 +17,7 @@
  * multiple controlboards, a list of remote controlboards in which this axes are
  * located, that is opening all the remote controlboards but is exposing them
  *
- * \section RemoteControlBoardRemapper
+ * \section DinRailControlBoardRemapperNWCYarp
  *
  *  Parameters required by this device are:
  * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required     | Description                                                       | Notes |
@@ -80,22 +80,22 @@
  *
  *
  * \section Caveat
- * By design, the RemoteControlBoardRemapper is more limited with respect to a true RemoteControlBoard.
+ * By design, the DinRailControlBoardRemapperNWCYarp is more limited with respect to a true RemoteControlBoard.
  * Known limitations include:
- *   * If some axes belong to a coupled mechanics, all the axes should be added to the RemoteControlBoardRemapper.
+ *   * If some axes belong to a coupled mechanics, all the axes should be added to the DinRailControlBoardRemapperNWCYarp.
  *     If only an axis of a coupled mechanics is added to the remapper, the semantic of the coupled mechanics
  *     in the underlyng implementation could create confusing behaviour. For example, changing the control mode
  *     of an axis in a coupled mechanism could change the control mode of the other coupled axes, even if the
  *     other coupled axes are not part of the remapped controlboard.
- *   * The debug methods provided by IRemoteVariables are not supported by the RemoteControlBoardRemapper .
+ *   * The debug methods provided by IRemoteVariables are not supported by the DinRailControlBoardRemapperNWCYarp .
  *
  */
 
-class RemoteControlBoardRemapper : public ControlBoardRemapper
+class DinRailControlBoardRemapperNWCYarp : public ControlBoardRemapper
 {
 private:
     /**
-     * List of remote_controlboard devices opened by the RemoteControlBoardRemapper device.
+     * List of remote_controlboard devices opened by the DinRailControlBoardRemapperNWCYarp device.
      */
     std::vector<yarp::dev::PolyDriver*> m_remoteControlBoardDevices;
 
@@ -104,12 +104,12 @@ private:
     void closeAllRemoteControlBoards();
 
 public:
-    RemoteControlBoardRemapper() = default;
-    RemoteControlBoardRemapper(const RemoteControlBoardRemapper&) = delete;
-    RemoteControlBoardRemapper(RemoteControlBoardRemapper&&) = delete;
-    RemoteControlBoardRemapper& operator=(const RemoteControlBoardRemapper&) = delete;
-    RemoteControlBoardRemapper& operator=(RemoteControlBoardRemapper&&) = delete;
-    ~RemoteControlBoardRemapper() override = default;
+    DinRailControlBoardRemapperNWCYarp() = default;
+    DinRailControlBoardRemapperNWCYarp(const DinRailControlBoardRemapperNWCYarp&) = delete;
+    DinRailControlBoardRemapperNWCYarp(DinRailControlBoardRemapperNWCYarp&&) = delete;
+    DinRailControlBoardRemapperNWCYarp& operator=(const DinRailControlBoardRemapperNWCYarp&) = delete;
+    DinRailControlBoardRemapperNWCYarp& operator=(DinRailControlBoardRemapperNWCYarp&&) = delete;
+    ~DinRailControlBoardRemapperNWCYarp() override = default;
 
    /**
      * Open the device driver.

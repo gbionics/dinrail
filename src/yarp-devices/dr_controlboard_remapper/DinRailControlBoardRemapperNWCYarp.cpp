@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "RemoteControlBoardRemapper.h"
+#include "DinRailControlBoardRemapperNWCYarp.h"
 
 #include <yarp/os/Log.h>
 #include <yarp/os/LogComponent.h>
@@ -23,7 +23,7 @@ YARP_LOG_COMPONENT(REMOTECONTROLBOARDREMAPPER, "yarp.device.remotecontrolboardre
 }
 
 
-void RemoteControlBoardRemapper::closeAllRemoteControlBoards()
+void DinRailControlBoardRemapperNWCYarp::closeAllRemoteControlBoards()
 {
     for(auto& m_remoteControlBoardDevice : m_remoteControlBoardDevices)
     {
@@ -39,7 +39,7 @@ void RemoteControlBoardRemapper::closeAllRemoteControlBoards()
 }
 
 
-bool RemoteControlBoardRemapper::close()
+bool DinRailControlBoardRemapperNWCYarp::close()
 {
     bool ret = true;
 
@@ -56,7 +56,7 @@ bool RemoteControlBoardRemapper::close()
     return ret;
 }
 
-bool RemoteControlBoardRemapper::open(Searchable& config)
+bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
 {
     Property prop;
     prop.fromString(config.toString());

@@ -278,7 +278,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
     // YARP_REQUIRE_PLUGIN("fakeMotionControlMicro", "device");
     // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
     // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
-    // YARP_REQUIRE_PLUGIN("RemoteControlBoardRemapperDinRail", "device");
+    // YARP_REQUIRE_PLUGIN("DinRailControlBoardRemapperNWCYarpDinRail", "device");
 
     Network::setLocalMode(true);
 
@@ -358,7 +358,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // and make sure that if fails during attachAll
         PolyDriver ddRemapperWN;
         Property pRemapperWN;
-        pRemapperWN.put("device","ControlBoardRemapperDinRail");
+        pRemapperWN.put("device","dr_controlboard_remapper");
         pRemapperWN.addGroup("axesNames");
         Bottle & axesListWN = pRemapperWN.findGroup("axesNames").addList();
         axesListWN.addString("axisA1");
@@ -410,7 +410,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","RemoteControlBoardRemapperDinRail");
+        pRemoteRemapper.put("device","DinRailControlBoardRemapperNWCYarpDinRail");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");
@@ -585,7 +585,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","RemoteControlBoardRemapperDinRail");
+        pRemoteRemapper.put("device","DinRailControlBoardRemapperNWCYarpDinRail");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");
