@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "RemoteControlBoard.h"
-#include "RemoteControlBoardLogComponent.h"
+#include "DinRailControlBoardNWCYarp.h"
+#include "DinRailControlBoardNWCYarpLogComponent.h"
 #include "stateExtendedReader.h"
 
 #include <cstring>
@@ -99,7 +99,7 @@ public:
 };
 
 
-bool RemoteControlBoard::isLive()
+bool DinRailControlBoardNWCYarp::isLive()
 {
     if (!njIsKnown)
     {
@@ -115,7 +115,7 @@ bool RemoteControlBoard::isLive()
 }
 
 
-bool RemoteControlBoard::checkProtocolVersion(bool ignore)
+bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
 {
     bool error=false;
     // verify protocol
@@ -178,7 +178,7 @@ bool RemoteControlBoard::checkProtocolVersion(bool ignore)
     return ret;
 }
 
-bool RemoteControlBoard::open(Searchable& config)
+bool DinRailControlBoardNWCYarp::open(Searchable& config)
 {
     if (!parseParams(config)) { return false; }
 
@@ -210,13 +210,13 @@ bool RemoteControlBoard::open(Searchable& config)
     {
         writeStrict_singleJoint = true;
         writeStrict_moreJoints  = true;
-        yCInfo(REMOTECONTROLBOARD, "RemoteControlBoard is ENABLING the writeStrict option for all commands");
+        yCInfo(REMOTECONTROLBOARD, "DinRailControlBoardNWCYarp is ENABLING the writeStrict option for all commands");
     }
     else if(m_writeStrict == "off")
     {
         writeStrict_singleJoint = false;
         writeStrict_moreJoints  = false;
-        yCInfo(REMOTECONTROLBOARD, "RemoteControlBoard is DISABLING the writeStrict option for all commands");
+        yCInfo(REMOTECONTROLBOARD, "DinRailControlBoardNWCYarp is DISABLING the writeStrict option for all commands");
     }
     else if (m_writeStrict.empty())
     {
@@ -367,7 +367,7 @@ bool RemoteControlBoard::open(Searchable& config)
     return true;
 }
 
-bool RemoteControlBoard::close()
+bool DinRailControlBoardNWCYarp::close()
 {
     if (diagnosticThread!=nullptr)
     {
@@ -387,7 +387,7 @@ bool RemoteControlBoard::close()
 
 // BEGIN Helpers functions
 
-bool RemoteControlBoard::send1V(int v)
+bool DinRailControlBoardNWCYarp::send1V(int v)
 {
     Bottle cmd, response;
     cmd.addVocab32(v);
@@ -398,7 +398,7 @@ bool RemoteControlBoard::send1V(int v)
     return false;
 }
 
-bool RemoteControlBoard::send2V(int v1, int v2)
+bool DinRailControlBoardNWCYarp::send2V(int v1, int v2)
 {
     Bottle cmd, response;
     cmd.addVocab32(v1);
@@ -410,7 +410,7 @@ bool RemoteControlBoard::send2V(int v1, int v2)
     return false;
 }
 
-bool RemoteControlBoard::send2V1I(int v1, int v2, int axis)
+bool DinRailControlBoardNWCYarp::send2V1I(int v1, int v2, int axis)
 {
     Bottle cmd, response;
     cmd.addVocab32(v1);
@@ -423,7 +423,7 @@ bool RemoteControlBoard::send2V1I(int v1, int v2, int axis)
     return false;
 }
 
-bool RemoteControlBoard::send1V1I(int v, int axis)
+bool DinRailControlBoardNWCYarp::send1V1I(int v, int axis)
 {
     Bottle cmd, response;
     cmd.addVocab32(v);
@@ -435,7 +435,7 @@ bool RemoteControlBoard::send1V1I(int v, int axis)
     return false;
 }
 
-bool RemoteControlBoard::send3V1I(int v1, int v2, int v3, int j)
+bool DinRailControlBoardNWCYarp::send3V1I(int v1, int v2, int v3, int j)
 {
     Bottle cmd, response;
     cmd.addVocab32(v1);
@@ -449,7 +449,7 @@ bool RemoteControlBoard::send3V1I(int v1, int v2, int v3, int j)
     return false;
 }
 
-bool RemoteControlBoard::set1V(int code)
+bool DinRailControlBoardNWCYarp::set1V(int code)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -459,7 +459,7 @@ bool RemoteControlBoard::set1V(int code)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set1V2D(int code, double v)
+bool DinRailControlBoardNWCYarp::set1V2D(int code, double v)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -471,7 +471,7 @@ bool RemoteControlBoard::set1V2D(int code, double v)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set1V1I(int code, int v)
+bool DinRailControlBoardNWCYarp::set1V1I(int code, int v)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -483,7 +483,7 @@ bool RemoteControlBoard::set1V1I(int code, int v)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::get1V1D(int code, double& v) const
+bool DinRailControlBoardNWCYarp::get1V1D(int code, double& v) const
 {
     Bottle cmd;
     Bottle response;
@@ -503,7 +503,7 @@ bool RemoteControlBoard::get1V1D(int code, double& v) const
     return false;
 }
 
-bool RemoteControlBoard::get1V1I(int code, int& v) const
+bool DinRailControlBoardNWCYarp::get1V1I(int code, int& v) const
 {
     Bottle cmd;
     Bottle response;
@@ -523,7 +523,7 @@ bool RemoteControlBoard::get1V1I(int code, int& v) const
     return false;
 }
 
-bool RemoteControlBoard::set1V1I1D(int code, int j, double val)
+bool DinRailControlBoardNWCYarp::set1V1I1D(int code, int j, double val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -534,7 +534,7 @@ bool RemoteControlBoard::set1V1I1D(int code, int j, double val)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set1V1I2D(int code, int j, double val1, double val2)
+bool DinRailControlBoardNWCYarp::set1V1I2D(int code, int j, double val1, double val2)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -547,7 +547,7 @@ bool RemoteControlBoard::set1V1I2D(int code, int j, double val1, double val2)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set1VDA(int v, const double *val)
+bool DinRailControlBoardNWCYarp::set1VDA(int v, const double *val)
 {
     if (!isLive()) {
         return false;
@@ -563,7 +563,7 @@ bool RemoteControlBoard::set1VDA(int v, const double *val)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set2V1DA(int v1, int v2, const double *val)
+bool DinRailControlBoardNWCYarp::set2V1DA(int v1, int v2, const double *val)
 {
     if (!isLive()) {
         return false;
@@ -580,7 +580,7 @@ bool RemoteControlBoard::set2V1DA(int v1, int v2, const double *val)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set2V2DA(int v1, int v2, const double *val1, const double *val2)
+bool DinRailControlBoardNWCYarp::set2V2DA(int v1, int v2, const double *val1, const double *val2)
 {
     if (!isLive()) {
         return false;
@@ -601,7 +601,7 @@ bool RemoteControlBoard::set2V2DA(int v1, int v2, const double *val1, const doub
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set1V1I1IA1DA(int v, const int len, const int *val1, const double *val2)
+bool DinRailControlBoardNWCYarp::set1V1I1IA1DA(int v, const int len, const int *val1, const double *val2)
 {
     if (!isLive()) {
         return false;
@@ -623,7 +623,7 @@ bool RemoteControlBoard::set1V1I1IA1DA(int v, const int len, const int *val1, co
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::set2V1I1D(int v1, int v2, int axis, double val)
+bool DinRailControlBoardNWCYarp::set2V1I1D(int v1, int v2, int axis, double val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -635,7 +635,7 @@ bool RemoteControlBoard::set2V1I1D(int v1, int v2, int axis, double val)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setValWithPidType(int voc, PidControlTypeEnum type, int axis, double val)
+bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum type, int axis, double val)
 {
     if (!isLive()) {
         return false;
@@ -651,7 +651,7 @@ bool RemoteControlBoard::setValWithPidType(int voc, PidControlTypeEnum type, int
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setValWithPidType(int voc, PidControlTypeEnum type, const double* val_arr)
+bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum type, const double* val_arr)
 {
     if (!isLive()) {
         return false;
@@ -669,7 +669,7 @@ bool RemoteControlBoard::setValWithPidType(int voc, PidControlTypeEnum type, con
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::getValWithPidType(int voc, PidControlTypeEnum type, int j, double *val)
+bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum type, int j, double *val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -688,7 +688,7 @@ bool RemoteControlBoard::getValWithPidType(int voc, PidControlTypeEnum type, int
     return false;
 }
 
-bool RemoteControlBoard::getValWithPidType(int voc, PidControlTypeEnum type, double *val)
+bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum type, double *val)
 {
     if (!isLive()) {
         return false;
@@ -716,7 +716,7 @@ bool RemoteControlBoard::getValWithPidType(int voc, PidControlTypeEnum type, dou
     return false;
 }
 
-bool RemoteControlBoard::set2V1I(int v1, int v2, int axis)
+bool DinRailControlBoardNWCYarp::set2V1I(int v1, int v2, int axis)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -727,7 +727,7 @@ bool RemoteControlBoard::set2V1I(int v1, int v2, int axis)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::get1V1I1D(int v, int j, double *val)
+bool DinRailControlBoardNWCYarp::get1V1I1D(int v, int j, double *val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -745,7 +745,7 @@ bool RemoteControlBoard::get1V1I1D(int v, int j, double *val)
     return false;
 }
 
-bool RemoteControlBoard::get1V1I1I(int v, int j, int *val)
+bool DinRailControlBoardNWCYarp::get1V1I1I(int v, int j, int *val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -762,7 +762,7 @@ bool RemoteControlBoard::get1V1I1I(int v, int j, int *val)
     return false;
 }
 
-bool RemoteControlBoard::get2V1I1D(int v1, int v2, int j, double *val)
+bool DinRailControlBoardNWCYarp::get2V1I1D(int v1, int v2, int j, double *val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -781,7 +781,7 @@ bool RemoteControlBoard::get2V1I1D(int v1, int v2, int j, double *val)
     return false;
 }
 
-bool RemoteControlBoard::get2V1I2D(int v1, int v2, int j, double *val1, double *val2)
+bool DinRailControlBoardNWCYarp::get2V1I2D(int v1, int v2, int j, double *val1, double *val2)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -800,7 +800,7 @@ bool RemoteControlBoard::get2V1I2D(int v1, int v2, int j, double *val1, double *
     return false;
 }
 
-bool RemoteControlBoard::get1V1I2D(int code, int axis, double *v1, double *v2)
+bool DinRailControlBoardNWCYarp::get1V1I2D(int code, int axis, double *v1, double *v2)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -817,7 +817,7 @@ bool RemoteControlBoard::get1V1I2D(int code, int axis, double *v1, double *v2)
     return false;
 }
 
-bool RemoteControlBoard::get1V1I1B(int v, int j, bool &val)
+bool DinRailControlBoardNWCYarp::get1V1I1B(int v, int j, bool &val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -832,7 +832,7 @@ bool RemoteControlBoard::get1V1I1B(int v, int j, bool &val)
     return false;
 }
 
-bool RemoteControlBoard::get1V1I1IA1B(int v,  const int len, const int *val1, bool &retVal)
+bool DinRailControlBoardNWCYarp::get1V1I1IA1B(int v,  const int len, const int *val1, bool &retVal)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -853,7 +853,7 @@ bool RemoteControlBoard::get1V1I1IA1B(int v,  const int len, const int *val1, bo
     return false;
 }
 
-bool RemoteControlBoard::get2V1I1IA1DA(int v1, int v2, const int n_joints, const int *joints, double *retVals, std::string functionName)
+bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1, int v2, const int n_joints, const int *joints, double *retVals, std::string functionName)
 {
     Bottle cmd, response;
     if (!isLive()) {
@@ -899,7 +899,7 @@ bool RemoteControlBoard::get2V1I1IA1DA(int v1, int v2, const int n_joints, const
     return false;
 }
 
-bool RemoteControlBoard::get1V1B(int v, bool &val)
+bool DinRailControlBoardNWCYarp::get1V1B(int v, bool &val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -913,7 +913,7 @@ bool RemoteControlBoard::get1V1B(int v, bool &val)
     return false;
 }
 
-bool RemoteControlBoard::get1VIA(int v, int *val)
+bool DinRailControlBoardNWCYarp::get1VIA(int v, int *val)
 {
     if (!isLive()) {
         return false;
@@ -940,7 +940,7 @@ bool RemoteControlBoard::get1VIA(int v, int *val)
     return false;
 }
 
-bool RemoteControlBoard::get1VDA(int v, double *val)
+bool DinRailControlBoardNWCYarp::get1VDA(int v, double *val)
 {
     if (!isLive()) {
         return false;
@@ -967,7 +967,7 @@ bool RemoteControlBoard::get1VDA(int v, double *val)
     return false;
 }
 
-bool RemoteControlBoard::get1V1DA(int v1, double *val)
+bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double *val)
 {
     if (!isLive()) {
         return false;
@@ -994,7 +994,7 @@ bool RemoteControlBoard::get1V1DA(int v1, double *val)
     return false;
 }
 
-bool RemoteControlBoard::get2V1DA(int v1, int v2, double *val)
+bool DinRailControlBoardNWCYarp::get2V1DA(int v1, int v2, double *val)
 {
     if (!isLive()) {
         return false;
@@ -1022,7 +1022,7 @@ bool RemoteControlBoard::get2V1DA(int v1, int v2, double *val)
     return false;
 }
 
-bool RemoteControlBoard::get2V2DA(int v1, int v2, double *val1, double *val2)
+bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double *val1, double *val2)
 {
     if (!isLive()) {
         return false;
@@ -1062,7 +1062,7 @@ bool RemoteControlBoard::get2V2DA(int v1, int v2, double *val1, double *val2)
     return false;
 }
 
-bool RemoteControlBoard::get1V1I1S(int code, int j, std::string &name)
+bool DinRailControlBoardNWCYarp::get1V1I1S(int code, int j, std::string &name)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1078,7 +1078,7 @@ bool RemoteControlBoard::get1V1I1S(int code, int j, std::string &name)
 }
 
 
-bool RemoteControlBoard::get1V1I1IA1DA(int v, const int len, const int *val1, double *val2)
+bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int *val1, double *val2)
 {
     if (!isLive()) {
         return false;
@@ -1120,14 +1120,14 @@ bool RemoteControlBoard::get1V1I1IA1DA(int v, const int len, const int *val1, do
 
 // END Helpers functions
 
-bool RemoteControlBoard::getAxes(int *ax)
+bool DinRailControlBoardNWCYarp::getAxes(int *ax)
 {
     return get1V1I(VOCAB_AXES, *ax);
 }
 
 // BEGIN IPidControl
 
-bool RemoteControlBoard::setPid(const PidControlTypeEnum& pidtype, int j, const Pid &pid)
+bool DinRailControlBoardNWCYarp::setPid(const PidControlTypeEnum& pidtype, int j, const Pid &pid)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -1150,7 +1150,7 @@ bool RemoteControlBoard::setPid(const PidControlTypeEnum& pidtype, int j, const 
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setPids(const PidControlTypeEnum& pidtype, const Pid *pids)
+bool DinRailControlBoardNWCYarp::setPids(const PidControlTypeEnum& pidtype, const Pid *pids)
 {
     if (!isLive()) {
         return false;
@@ -1179,37 +1179,37 @@ bool RemoteControlBoard::setPids(const PidControlTypeEnum& pidtype, const Pid *p
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setPidReference(const PidControlTypeEnum& pidtype, int j, double ref)
+bool DinRailControlBoardNWCYarp::setPidReference(const PidControlTypeEnum& pidtype, int j, double ref)
 {
     return setValWithPidType(VOCAB_REF, pidtype, j, ref);
 }
 
-bool RemoteControlBoard::setPidReferences(const PidControlTypeEnum& pidtype, const double *refs)
+bool DinRailControlBoardNWCYarp::setPidReferences(const PidControlTypeEnum& pidtype, const double *refs)
 {
     return setValWithPidType(VOCAB_REFS, pidtype, refs);
 }
 
-bool RemoteControlBoard::setPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double limit)
+bool DinRailControlBoardNWCYarp::setPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double limit)
 {
     return setValWithPidType(VOCAB_LIM, pidtype, j, limit);
 }
 
-bool RemoteControlBoard::setPidErrorLimits(const PidControlTypeEnum& pidtype, const double *limits)
+bool DinRailControlBoardNWCYarp::setPidErrorLimits(const PidControlTypeEnum& pidtype, const double *limits)
 {
     return setValWithPidType(VOCAB_LIMS, pidtype, limits);
 }
 
-bool RemoteControlBoard::getPidError(const PidControlTypeEnum& pidtype, int j, double *err)
+bool DinRailControlBoardNWCYarp::getPidError(const PidControlTypeEnum& pidtype, int j, double *err)
 {
     return getValWithPidType(VOCAB_ERR, pidtype, j, err);
 }
 
-bool RemoteControlBoard::getPidErrors(const PidControlTypeEnum& pidtype, double *errs)
+bool DinRailControlBoardNWCYarp::getPidErrors(const PidControlTypeEnum& pidtype, double *errs)
 {
     return getValWithPidType(VOCAB_ERRS, pidtype, errs);
 }
 
-bool RemoteControlBoard::getPid(const PidControlTypeEnum& pidtype, int j, Pid *pid)
+bool DinRailControlBoardNWCYarp::getPid(const PidControlTypeEnum& pidtype, int j, Pid *pid)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1239,7 +1239,7 @@ bool RemoteControlBoard::getPid(const PidControlTypeEnum& pidtype, int j, Pid *p
     return false;
 }
 
-bool RemoteControlBoard::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
+bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
 {
     if (!isLive()) {
         return false;
@@ -1280,27 +1280,27 @@ bool RemoteControlBoard::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
     return false;
 }
 
-bool RemoteControlBoard::getPidReference(const PidControlTypeEnum& pidtype, int j, double *ref)
+bool DinRailControlBoardNWCYarp::getPidReference(const PidControlTypeEnum& pidtype, int j, double *ref)
 {
     return getValWithPidType(VOCAB_REF, pidtype, j, ref);
 }
 
-bool RemoteControlBoard::getPidReferences(const PidControlTypeEnum& pidtype, double *refs)
+bool DinRailControlBoardNWCYarp::getPidReferences(const PidControlTypeEnum& pidtype, double *refs)
 {
     return getValWithPidType(VOCAB_REFS, pidtype, refs);
 }
 
-bool RemoteControlBoard::getPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double *limit)
+bool DinRailControlBoardNWCYarp::getPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double *limit)
 {
     return getValWithPidType(VOCAB_LIM, pidtype, j, limit);
 }
 
-bool RemoteControlBoard::getPidErrorLimits(const PidControlTypeEnum& pidtype, double *limits)
+bool DinRailControlBoardNWCYarp::getPidErrorLimits(const PidControlTypeEnum& pidtype, double *limits)
 {
     return getValWithPidType(VOCAB_LIMS, pidtype, limits);
 }
 
-bool RemoteControlBoard::resetPid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardNWCYarp::resetPid(const PidControlTypeEnum& pidtype, int j)
 {
     if (!isLive()) {
         return false;
@@ -1315,7 +1315,7 @@ bool RemoteControlBoard::resetPid(const PidControlTypeEnum& pidtype, int j)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::disablePid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardNWCYarp::disablePid(const PidControlTypeEnum& pidtype, int j)
 {
     if (!isLive()) {
         return false;
@@ -1330,7 +1330,7 @@ bool RemoteControlBoard::disablePid(const PidControlTypeEnum& pidtype, int j)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::enablePid(const PidControlTypeEnum& pidtype, int j)
+bool DinRailControlBoardNWCYarp::enablePid(const PidControlTypeEnum& pidtype, int j)
 {
     if (!isLive()) {
         return false;
@@ -1345,7 +1345,7 @@ bool RemoteControlBoard::enablePid(const PidControlTypeEnum& pidtype, int j)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::isPidEnabled(const PidControlTypeEnum& pidtype, int j, bool* enabled)
+bool DinRailControlBoardNWCYarp::isPidEnabled(const PidControlTypeEnum& pidtype, int j, bool* enabled)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1362,17 +1362,17 @@ bool RemoteControlBoard::isPidEnabled(const PidControlTypeEnum& pidtype, int j, 
     return false;
 }
 
-bool RemoteControlBoard::getPidOutput(const PidControlTypeEnum& pidtype, int j, double *out)
+bool DinRailControlBoardNWCYarp::getPidOutput(const PidControlTypeEnum& pidtype, int j, double *out)
 {
     return getValWithPidType(VOCAB_OUTPUT, pidtype, j, out);
 }
 
-bool RemoteControlBoard::getPidOutputs(const PidControlTypeEnum& pidtype, double *outs)
+bool DinRailControlBoardNWCYarp::getPidOutputs(const PidControlTypeEnum& pidtype, double *outs)
 {
     return getValWithPidType(VOCAB_OUTPUTS, pidtype, outs);
 }
 
-bool RemoteControlBoard::setPidOffset(const PidControlTypeEnum& pidtype, int j, double v)
+bool DinRailControlBoardNWCYarp::setPidOffset(const PidControlTypeEnum& pidtype, int j, double v)
 {
     return setValWithPidType(VOCAB_OFFSET, pidtype, j, v);
 }
@@ -1381,27 +1381,27 @@ bool RemoteControlBoard::setPidOffset(const PidControlTypeEnum& pidtype, int j, 
 
 // BEGIN IEncoder
 
-bool RemoteControlBoard::resetEncoder(int j)
+bool DinRailControlBoardNWCYarp::resetEncoder(int j)
 {
     return set1V1I(VOCAB_E_RESET, j);
 }
 
-bool RemoteControlBoard::resetEncoders()
+bool DinRailControlBoardNWCYarp::resetEncoders()
 {
     return set1V(VOCAB_E_RESETS);
 }
 
-bool RemoteControlBoard::setEncoder(int j, double val)
+bool DinRailControlBoardNWCYarp::setEncoder(int j, double val)
 {
     return set1V1I1D(VOCAB_ENCODER, j, val);
 }
 
-bool RemoteControlBoard::setEncoders(const double *vals)
+bool DinRailControlBoardNWCYarp::setEncoders(const double *vals)
 {
     return set1VDA(VOCAB_ENCODERS, vals);
 }
 
-bool RemoteControlBoard::getEncoder(int j, double *v)
+bool DinRailControlBoardNWCYarp::getEncoder(int j, double *v)
 {
     double localArrivalTime = 0.0;
 
@@ -1411,7 +1411,7 @@ bool RemoteControlBoard::getEncoder(int j, double *v)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoderTimed(int j, double *v, double *t)
+bool DinRailControlBoardNWCYarp::getEncoderTimed(int j, double *v, double *t)
 {
     double localArrivalTime = 0.0;
 
@@ -1422,7 +1422,7 @@ bool RemoteControlBoard::getEncoderTimed(int j, double *v, double *t)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoders(double *encs)
+bool DinRailControlBoardNWCYarp::getEncoders(double *encs)
 {
     double localArrivalTime = 0.0;
 
@@ -1433,7 +1433,7 @@ bool RemoteControlBoard::getEncoders(double *encs)
     return ret;
 }
 
-bool RemoteControlBoard::getEncodersTimed(double *encs, double *ts)
+bool DinRailControlBoardNWCYarp::getEncodersTimed(double *encs, double *ts)
 {
     double localArrivalTime=0.0;
 
@@ -1444,7 +1444,7 @@ bool RemoteControlBoard::getEncodersTimed(double *encs, double *ts)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoderSpeed(int j, double *sp)
+bool DinRailControlBoardNWCYarp::getEncoderSpeed(int j, double *sp)
 {
     double localArrivalTime=0.0;
 
@@ -1454,7 +1454,7 @@ bool RemoteControlBoard::getEncoderSpeed(int j, double *sp)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoderSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getEncoderSpeeds(double *spds)
 {
     double localArrivalTime=0.0;
 
@@ -1464,7 +1464,7 @@ bool RemoteControlBoard::getEncoderSpeeds(double *spds)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoderAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getEncoderAcceleration(int j, double *acc)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1473,7 +1473,7 @@ bool RemoteControlBoard::getEncoderAcceleration(int j, double *acc)
     return ret;
 }
 
-bool RemoteControlBoard::getEncoderAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getEncoderAccelerations(double *accs)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1486,7 +1486,7 @@ bool RemoteControlBoard::getEncoderAccelerations(double *accs)
 
 // BEGIN IRemoteVariable
 
-bool RemoteControlBoard::getRemoteVariable(std::string key, yarp::os::Bottle& val)
+bool DinRailControlBoardNWCYarp::getRemoteVariable(std::string key, yarp::os::Bottle& val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1502,7 +1502,7 @@ bool RemoteControlBoard::getRemoteVariable(std::string key, yarp::os::Bottle& va
     return false;
 }
 
-bool RemoteControlBoard::setRemoteVariable(std::string key, const yarp::os::Bottle& val)
+bool DinRailControlBoardNWCYarp::setRemoteVariable(std::string key, const yarp::os::Bottle& val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -1517,7 +1517,7 @@ bool RemoteControlBoard::setRemoteVariable(std::string key, const yarp::os::Bott
 }
 
 
-bool RemoteControlBoard::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
+bool DinRailControlBoardNWCYarp::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1538,37 +1538,37 @@ bool RemoteControlBoard::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 
 // BEGIN IMotor
 
-bool RemoteControlBoard::getNumberOfMotors(int *num)
+bool DinRailControlBoardNWCYarp::getNumberOfMotors(int *num)
 {
     return get1V1I(VOCAB_MOTORS_NUMBER, *num);
 }
 
-bool RemoteControlBoard::getTemperature      (int m, double* val)
+bool DinRailControlBoardNWCYarp::getTemperature      (int m, double* val)
 {
     return get1V1I1D(VOCAB_TEMPERATURE, m, val);
 }
 
-bool RemoteControlBoard::getTemperatures     (double *vals)
+bool DinRailControlBoardNWCYarp::getTemperatures     (double *vals)
 {
     return get1VDA(VOCAB_TEMPERATURES, vals);
 }
 
-bool RemoteControlBoard::getTemperatureLimit (int m, double* val)
+bool DinRailControlBoardNWCYarp::getTemperatureLimit (int m, double* val)
 {
     return get1V1I1D(VOCAB_TEMPERATURE_LIMIT, m, val);
 }
 
-bool RemoteControlBoard::setTemperatureLimit (int m, const double val)
+bool DinRailControlBoardNWCYarp::setTemperatureLimit (int m, const double val)
 {
     return set1V1I1D(VOCAB_TEMPERATURE_LIMIT, m, val);
 }
 
-bool RemoteControlBoard::getGearboxRatio(int m, double* val)
+bool DinRailControlBoardNWCYarp::getGearboxRatio(int m, double* val)
 {
     return get1V1I1D(VOCAB_GEARBOX_RATIO, m, val);
 }
 
-bool RemoteControlBoard::setGearboxRatio(int m, const double val)
+bool DinRailControlBoardNWCYarp::setGearboxRatio(int m, const double val)
 {
     return set1V1I1D(VOCAB_GEARBOX_RATIO, m, val);
 }
@@ -1577,37 +1577,37 @@ bool RemoteControlBoard::setGearboxRatio(int m, const double val)
 
 // BEGIN IMotorEncoder
 
-bool RemoteControlBoard::resetMotorEncoder(int j)
+bool DinRailControlBoardNWCYarp::resetMotorEncoder(int j)
 {
     return set1V1I(VOCAB_MOTOR_E_RESET, j);
 }
 
-bool RemoteControlBoard::resetMotorEncoders()
+bool DinRailControlBoardNWCYarp::resetMotorEncoders()
 {
     return set1V(VOCAB_MOTOR_E_RESETS);
 }
 
-bool RemoteControlBoard::setMotorEncoder(int j, const double val)
+bool DinRailControlBoardNWCYarp::setMotorEncoder(int j, const double val)
 {
     return set1V1I1D(VOCAB_MOTOR_ENCODER, j, val);
 }
 
-bool RemoteControlBoard::setMotorEncoderCountsPerRevolution(int m, const double cpr)
+bool DinRailControlBoardNWCYarp::setMotorEncoderCountsPerRevolution(int m, const double cpr)
 {
     return set1V1I1D(VOCAB_MOTOR_CPR, m, cpr);
 }
 
-bool RemoteControlBoard::getMotorEncoderCountsPerRevolution(int m, double *cpr)
+bool DinRailControlBoardNWCYarp::getMotorEncoderCountsPerRevolution(int m, double *cpr)
 {
      return get1V1I1D(VOCAB_MOTOR_CPR, m, cpr);
 }
 
-bool RemoteControlBoard::setMotorEncoders(const double *vals)
+bool DinRailControlBoardNWCYarp::setMotorEncoders(const double *vals)
 {
     return set1VDA(VOCAB_MOTOR_ENCODERS, vals);
 }
 
-bool RemoteControlBoard::getMotorEncoder(int j, double *v)
+bool DinRailControlBoardNWCYarp::getMotorEncoder(int j, double *v)
 {
     double localArrivalTime = 0.0;
 
@@ -1617,7 +1617,7 @@ bool RemoteControlBoard::getMotorEncoder(int j, double *v)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoderTimed(int j, double *v, double *t)
+bool DinRailControlBoardNWCYarp::getMotorEncoderTimed(int j, double *v, double *t)
 {
     double localArrivalTime = 0.0;
 
@@ -1628,7 +1628,7 @@ bool RemoteControlBoard::getMotorEncoderTimed(int j, double *v, double *t)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoders(double *encs)
+bool DinRailControlBoardNWCYarp::getMotorEncoders(double *encs)
 {
     double localArrivalTime=0.0;
 
@@ -1639,7 +1639,7 @@ bool RemoteControlBoard::getMotorEncoders(double *encs)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncodersTimed(double *encs, double *ts)
+bool DinRailControlBoardNWCYarp::getMotorEncodersTimed(double *encs, double *ts)
 {
     double localArrivalTime=0.0;
 
@@ -1650,7 +1650,7 @@ bool RemoteControlBoard::getMotorEncodersTimed(double *encs, double *ts)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoderSpeed(int j, double *sp)
+bool DinRailControlBoardNWCYarp::getMotorEncoderSpeed(int j, double *sp)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1659,7 +1659,7 @@ bool RemoteControlBoard::getMotorEncoderSpeed(int j, double *sp)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoderSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getMotorEncoderSpeeds(double *spds)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1668,7 +1668,7 @@ bool RemoteControlBoard::getMotorEncoderSpeeds(double *spds)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoderAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getMotorEncoderAcceleration(int j, double *acc)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1677,7 +1677,7 @@ bool RemoteControlBoard::getMotorEncoderAcceleration(int j, double *acc)
     return ret;
 }
 
-bool RemoteControlBoard::getMotorEncoderAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getMotorEncoderAccelerations(double *accs)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -1686,7 +1686,7 @@ bool RemoteControlBoard::getMotorEncoderAccelerations(double *accs)
     return ret;
 }
 
-bool RemoteControlBoard::getNumberOfMotorEncoders(int *num)
+bool DinRailControlBoardNWCYarp::getNumberOfMotorEncoders(int *num)
 {
     return get1V1I(VOCAB_MOTOR_ENCODER_NUMBER, *num);
 }
@@ -1699,7 +1699,7 @@ bool RemoteControlBoard::getNumberOfMotorEncoders(int *num)
  * Get the time stamp for the last read data
  * @return last time stamp.
  */
-Stamp RemoteControlBoard::getLastInputStamp()
+Stamp DinRailControlBoardNWCYarp::getLastInputStamp()
 {
     Stamp ret;
 //    mutex.lock();
@@ -1712,132 +1712,132 @@ Stamp RemoteControlBoard::getLastInputStamp()
 
 // BEGIN IPositionControl
 
-bool RemoteControlBoard::positionMove(int j, double ref)
+bool DinRailControlBoardNWCYarp::positionMove(int j, double ref)
 {
     return set1V1I1D(VOCAB_POSITION_MOVE, j, ref);
 }
 
-bool RemoteControlBoard::positionMove(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::positionMove(const int n_joint, const int *joints, const double *refs)
 {
     return set1V1I1IA1DA(VOCAB_POSITION_MOVE_GROUP, n_joint, joints, refs);
 }
 
-bool RemoteControlBoard::positionMove(const double *refs)
+bool DinRailControlBoardNWCYarp::positionMove(const double *refs)
 {
     return set1VDA(VOCAB_POSITION_MOVES, refs);
 }
 
-bool RemoteControlBoard::getTargetPosition(const int joint, double *ref)
+bool DinRailControlBoardNWCYarp::getTargetPosition(const int joint, double *ref)
 {
     return get1V1I1D(VOCAB_POSITION_MOVE, joint, ref);
 }
 
-bool RemoteControlBoard::getTargetPositions(double *refs)
+bool DinRailControlBoardNWCYarp::getTargetPositions(double *refs)
 {
     return get1V1DA(VOCAB_POSITION_MOVES, refs);
 }
 
-bool RemoteControlBoard::getTargetPositions(const int n_joint, const int *joints, double *refs)
+bool DinRailControlBoardNWCYarp::getTargetPositions(const int n_joint, const int *joints, double *refs)
 {
     return get1V1I1IA1DA(VOCAB_POSITION_MOVE_GROUP, n_joint, joints, refs);
 }
 
-bool RemoteControlBoard::relativeMove(int j, double delta)
+bool DinRailControlBoardNWCYarp::relativeMove(int j, double delta)
 {
     return set1V1I1D(VOCAB_RELATIVE_MOVE, j, delta);
 }
 
-bool RemoteControlBoard::relativeMove(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::relativeMove(const int n_joint, const int *joints, const double *refs)
 {
     return set1V1I1IA1DA(VOCAB_RELATIVE_MOVE_GROUP, n_joint, joints, refs);
 }
 
-bool RemoteControlBoard::relativeMove(const double *deltas)
+bool DinRailControlBoardNWCYarp::relativeMove(const double *deltas)
 {
     return set1VDA(VOCAB_RELATIVE_MOVES, deltas);
 }
 
-bool RemoteControlBoard::checkMotionDone(int j, bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(int j, bool *flag)
 {
     return get1V1I1B(VOCAB_MOTION_DONE, j, *flag);
 }
 
-bool RemoteControlBoard::checkMotionDone(const int n_joint, const int *joints, bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(const int n_joint, const int *joints, bool *flag)
 {
     return get1V1I1IA1B(VOCAB_MOTION_DONE_GROUP, n_joint, joints, *flag);
 }
 
-bool RemoteControlBoard::checkMotionDone(bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(bool *flag)
 {
     return get1V1B(VOCAB_MOTION_DONES, *flag);
 }
 
-bool RemoteControlBoard::setRefSpeed(int j, double sp)
+bool DinRailControlBoardNWCYarp::setRefSpeed(int j, double sp)
 {
     return set1V1I1D(VOCAB_REF_SPEED, j, sp);
 }
 
-bool RemoteControlBoard::setRefSpeeds(const int n_joint, const int *joints, const double *spds)
+bool DinRailControlBoardNWCYarp::setRefSpeeds(const int n_joint, const int *joints, const double *spds)
 {
     return set1V1I1IA1DA(VOCAB_REF_SPEED_GROUP, n_joint, joints, spds);
 }
 
-bool RemoteControlBoard::setRefSpeeds(const double *spds)
+bool DinRailControlBoardNWCYarp::setRefSpeeds(const double *spds)
 {
     return set1VDA(VOCAB_REF_SPEEDS, spds);
 }
 
-bool RemoteControlBoard::setRefAcceleration(int j, double acc)
+bool DinRailControlBoardNWCYarp::setRefAcceleration(int j, double acc)
 {
     return set1V1I1D(VOCAB_REF_ACCELERATION, j, acc);
 }
 
-bool RemoteControlBoard::setRefAccelerations(const int n_joint, const int *joints, const double *accs)
+bool DinRailControlBoardNWCYarp::setRefAccelerations(const int n_joint, const int *joints, const double *accs)
 {
     return set1V1I1IA1DA(VOCAB_REF_ACCELERATION_GROUP, n_joint, joints, accs);
 }
 
-bool RemoteControlBoard::setRefAccelerations(const double *accs)
+bool DinRailControlBoardNWCYarp::setRefAccelerations(const double *accs)
 {
     return set1VDA(VOCAB_REF_ACCELERATIONS, accs);
 }
 
-bool RemoteControlBoard::getRefSpeed(int j, double *ref)
+bool DinRailControlBoardNWCYarp::getRefSpeed(int j, double *ref)
 {
     return get1V1I1D(VOCAB_REF_SPEED, j, ref);
 }
 
-bool RemoteControlBoard::getRefSpeeds(const int n_joint, const int *joints, double *spds)
+bool DinRailControlBoardNWCYarp::getRefSpeeds(const int n_joint, const int *joints, double *spds)
 {
     return get1V1I1IA1DA(VOCAB_REF_SPEED_GROUP, n_joint, joints, spds);
 }
 
-bool RemoteControlBoard::getRefSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getRefSpeeds(double *spds)
 {
     return get1VDA(VOCAB_REF_SPEEDS, spds);
 }
 
-bool RemoteControlBoard::getRefAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getRefAcceleration(int j, double *acc)
 {
     return get1V1I1D(VOCAB_REF_ACCELERATION, j, acc);
 }
 
-bool RemoteControlBoard::getRefAccelerations(const int n_joint, const int *joints, double *accs)
+bool DinRailControlBoardNWCYarp::getRefAccelerations(const int n_joint, const int *joints, double *accs)
 {
     return get1V1I1IA1DA(VOCAB_REF_ACCELERATION_GROUP, n_joint, joints, accs);
 }
 
-bool RemoteControlBoard::getRefAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getRefAccelerations(double *accs)
 {
     return get1VDA(VOCAB_REF_ACCELERATIONS, accs);
 }
 
-bool RemoteControlBoard::stop(int j)
+bool DinRailControlBoardNWCYarp::stop(int j)
 {
     return set1V1I(VOCAB_STOP, j);
 }
 
-bool RemoteControlBoard::stop(const int len, const int *val1)
+bool DinRailControlBoardNWCYarp::stop(const int len, const int *val1)
 {
     if (!isLive()) {
         return false;
@@ -1856,7 +1856,7 @@ bool RemoteControlBoard::stop(const int len, const int *val1)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::stop()
+bool DinRailControlBoardNWCYarp::stop()
 {
     return set1V(VOCAB_STOPS);
 }
@@ -1864,7 +1864,7 @@ bool RemoteControlBoard::stop()
 // END IPositionControl
 
 // BEGIN IJoint Fault
-bool RemoteControlBoard::getLastJointFault(int j, int& fault, std::string& message)
+bool DinRailControlBoardNWCYarp::getLastJointFault(int j, int& fault, std::string& message)
 {
     Bottle cmd, response;
 
@@ -1889,7 +1889,7 @@ bool RemoteControlBoard::getLastJointFault(int j, int& fault, std::string& messa
 
 // BEGIN IVelocityControl
 
-bool RemoteControlBoard::velocityMove(int j, double v)
+bool DinRailControlBoardNWCYarp::velocityMove(int j, double v)
 {
  //   return set1V1I1D(VOCAB_VELOCITY_MOVE, j, v);
  if (!isLive()) {
@@ -1905,7 +1905,7 @@ bool RemoteControlBoard::velocityMove(int j, double v)
     return true;
 }
 
-bool RemoteControlBoard::velocityMove(const double *v)
+bool DinRailControlBoardNWCYarp::velocityMove(const double *v)
 {
     if (!isLive()) {
         return false;
@@ -1923,57 +1923,57 @@ bool RemoteControlBoard::velocityMove(const double *v)
 
 // BEGIN IAmplifierControl
 
-bool RemoteControlBoard::enableAmp(int j)
+bool DinRailControlBoardNWCYarp::enableAmp(int j)
 {
     return set1V1I(VOCAB_AMP_ENABLE, j);
 }
 
-bool RemoteControlBoard::disableAmp(int j)
+bool DinRailControlBoardNWCYarp::disableAmp(int j)
 {
     return set1V1I(VOCAB_AMP_DISABLE, j);
 }
 
-bool RemoteControlBoard::getAmpStatus(int *st)
+bool DinRailControlBoardNWCYarp::getAmpStatus(int *st)
 {
     return get1VIA(VOCAB_AMP_STATUS, st);
 }
 
-bool RemoteControlBoard::getAmpStatus(int j, int *st)
+bool DinRailControlBoardNWCYarp::getAmpStatus(int j, int *st)
 {
     return get1V1I1I(VOCAB_AMP_STATUS_SINGLE, j, st);
 }
 
-bool RemoteControlBoard::setMaxCurrent(int j, double v)
+bool DinRailControlBoardNWCYarp::setMaxCurrent(int j, double v)
 {
     return set1V1I1D(VOCAB_AMP_MAXCURRENT, j, v);
 }
 
-bool RemoteControlBoard::getMaxCurrent(int j, double *v)
+bool DinRailControlBoardNWCYarp::getMaxCurrent(int j, double *v)
 {
     return get1V1I1D(VOCAB_AMP_MAXCURRENT, j, v);
 }
 
-bool RemoteControlBoard::getNominalCurrent(int m, double *val)
+bool DinRailControlBoardNWCYarp::getNominalCurrent(int m, double *val)
 {
     return get1V1I1D(VOCAB_AMP_NOMINAL_CURRENT, m, val);
 }
 
-bool RemoteControlBoard::setNominalCurrent(int m, const double val)
+bool DinRailControlBoardNWCYarp::setNominalCurrent(int m, const double val)
 {
     return set1V1I1D(VOCAB_AMP_NOMINAL_CURRENT, m, val);
 }
 
-bool RemoteControlBoard::getPeakCurrent(int m, double *val)
+bool DinRailControlBoardNWCYarp::getPeakCurrent(int m, double *val)
 {
     return get1V1I1D(VOCAB_AMP_PEAK_CURRENT, m, val);
 }
 
-bool RemoteControlBoard::setPeakCurrent(int m, const double val)
+bool DinRailControlBoardNWCYarp::setPeakCurrent(int m, const double val)
 {
     return set1V1I1D(VOCAB_AMP_PEAK_CURRENT, m, val);
 }
 
-bool RemoteControlBoard::getPWM(int m, double* val)
+bool DinRailControlBoardNWCYarp::getPWM(int m, double* val)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
@@ -1982,17 +1982,17 @@ bool RemoteControlBoard::getPWM(int m, double* val)
     return ret;
 }
 
-bool RemoteControlBoard::getPWMLimit(int m, double* val)
+bool DinRailControlBoardNWCYarp::getPWMLimit(int m, double* val)
 {
     return get1V1I1D(VOCAB_AMP_PWM_LIMIT, m, val);
 }
 
-bool RemoteControlBoard::setPWMLimit(int m, const double val)
+bool DinRailControlBoardNWCYarp::setPWMLimit(int m, const double val)
 {
     return set1V1I1D(VOCAB_AMP_PWM_LIMIT, m, val);
 }
 
-bool RemoteControlBoard::getPowerSupplyVoltage(int m, double* val)
+bool DinRailControlBoardNWCYarp::getPowerSupplyVoltage(int m, double* val)
 {
     return get1V1I1D(VOCAB_AMP_VOLTAGE_SUPPLY, m, val);
 }
@@ -2001,22 +2001,22 @@ bool RemoteControlBoard::getPowerSupplyVoltage(int m, double* val)
 
 // BEGIN IControlLimits
 
-bool RemoteControlBoard::setLimits(int axis, double min, double max)
+bool DinRailControlBoardNWCYarp::setLimits(int axis, double min, double max)
 {
     return set1V1I2D(VOCAB_LIMITS, axis, min, max);
 }
 
-bool RemoteControlBoard::getLimits(int axis, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getLimits(int axis, double *min, double *max)
 {
     return get1V1I2D(VOCAB_LIMITS, axis, min, max);
 }
 
-bool RemoteControlBoard::setVelLimits(int axis, double min, double max)
+bool DinRailControlBoardNWCYarp::setVelLimits(int axis, double min, double max)
 {
     return set1V1I2D(VOCAB_VEL_LIMITS, axis, min, max);
 }
 
-bool RemoteControlBoard::getVelLimits(int axis, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getVelLimits(int axis, double *min, double *max)
 {
     return get1V1I2D(VOCAB_VEL_LIMITS, axis, min, max);
 }
@@ -2025,12 +2025,12 @@ bool RemoteControlBoard::getVelLimits(int axis, double *min, double *max)
 
 // BEGIN IAxisInfo
 
-bool RemoteControlBoard::getAxisName(int j, std::string& name)
+bool DinRailControlBoardNWCYarp::getAxisName(int j, std::string& name)
 {
     return get1V1I1S(VOCAB_INFO_NAME, j, name);
 }
 
-bool RemoteControlBoard::getJointType(int j, yarp::dev::JointTypeEnum& type)
+bool DinRailControlBoardNWCYarp::getJointType(int j, yarp::dev::JointTypeEnum& type)
 {
     return get1V1I1I(VOCAB_INFO_TYPE, j, (int*)&type);
 }
@@ -2038,27 +2038,27 @@ bool RemoteControlBoard::getJointType(int j, yarp::dev::JointTypeEnum& type)
 // END IAxisInfo
 
 // BEGIN IControlCalibration
-bool RemoteControlBoard::calibrateRobot()
+bool DinRailControlBoardNWCYarp::calibrateRobot()
 {
     return send1V(VOCAB_CALIBRATE);
 }
 
-bool RemoteControlBoard::abortCalibration()
+bool DinRailControlBoardNWCYarp::abortCalibration()
 {
     return send1V(VOCAB_ABORTCALIB);
 }
 
-bool RemoteControlBoard::abortPark()
+bool DinRailControlBoardNWCYarp::abortPark()
 {
     return send1V(VOCAB_ABORTPARK);
 }
 
-bool RemoteControlBoard::park(bool wait)
+bool DinRailControlBoardNWCYarp::park(bool wait)
 {
     return send1V(VOCAB_PARK);
 }
 
-bool RemoteControlBoard::calibrateAxisWithParams(int j, unsigned int ui, double v1, double v2, double v3)
+bool DinRailControlBoardNWCYarp::calibrateAxisWithParams(int j, unsigned int ui, double v1, double v2, double v3)
 {
     Bottle cmd, response;
 
@@ -2077,7 +2077,7 @@ bool RemoteControlBoard::calibrateAxisWithParams(int j, unsigned int ui, double 
     return false;
 }
 
-bool RemoteControlBoard::setCalibrationParameters(int j, const CalibrationParameters& params)
+bool DinRailControlBoardNWCYarp::setCalibrationParameters(int j, const CalibrationParameters& params)
 {
     Bottle cmd, response;
 
@@ -2097,7 +2097,7 @@ bool RemoteControlBoard::setCalibrationParameters(int j, const CalibrationParame
     return false;
 }
 
-bool RemoteControlBoard::calibrationDone(int j)
+bool DinRailControlBoardNWCYarp::calibrationDone(int j)
 {
     return send1V1I(VOCAB_CALIBRATE_DONE, j);
 }
@@ -2106,17 +2106,17 @@ bool RemoteControlBoard::calibrationDone(int j)
 
 // BEGIN ITorqueControl
 
-bool RemoteControlBoard::getRefTorque(int j, double *t)
+bool DinRailControlBoardNWCYarp::getRefTorque(int j, double *t)
 {
     return get2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, t);
 }
 
-bool RemoteControlBoard::getRefTorques(double *t)
+bool DinRailControlBoardNWCYarp::getRefTorques(double *t)
 {
     return get2V1DA(VOCAB_TORQUE, VOCAB_REFS, t);
 }
 
-bool RemoteControlBoard::setRefTorques(const double *t)
+bool DinRailControlBoardNWCYarp::setRefTorques(const double *t)
 {
     //Now we use streaming instead of rpc
     //return set2V1DA(VOCAB_TORQUE, VOCAB_REFS, t);
@@ -2135,7 +2135,7 @@ bool RemoteControlBoard::setRefTorques(const double *t)
     return true;
 }
 
-bool RemoteControlBoard::setRefTorque(int j, double v)
+bool DinRailControlBoardNWCYarp::setRefTorque(int j, double v)
 {
     //return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
     // use the streaming port!
@@ -2155,7 +2155,7 @@ bool RemoteControlBoard::setRefTorque(int j, double v)
     return true;
 }
 
-bool RemoteControlBoard::setRefTorques(const int n_joint, const int *joints, const double *t)
+bool DinRailControlBoardNWCYarp::setRefTorques(const int n_joint, const int *joints, const double *t)
 {
     //return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
     // use the streaming port!
@@ -2177,7 +2177,7 @@ bool RemoteControlBoard::setRefTorques(const int n_joint, const int *joints, con
     return true;
 }
 
-bool RemoteControlBoard::setMotorTorqueParams(int j, const MotorTorqueParameters params)
+bool DinRailControlBoardNWCYarp::setMotorTorqueParams(int j, const MotorTorqueParameters params)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2198,7 +2198,7 @@ bool RemoteControlBoard::setMotorTorqueParams(int j, const MotorTorqueParameters
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::getMotorTorqueParams(int j, MotorTorqueParameters *params)
+bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParameters *params)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2231,7 +2231,7 @@ bool RemoteControlBoard::getMotorTorqueParams(int j, MotorTorqueParameters *para
     return false;
 }
 
-bool RemoteControlBoard::getTorque(int j, double *t)
+bool DinRailControlBoardNWCYarp::getTorque(int j, double *t)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2240,7 +2240,7 @@ bool RemoteControlBoard::getTorque(int j, double *t)
     return ret;
 }
 
-bool RemoteControlBoard::getTorques(double *t)
+bool DinRailControlBoardNWCYarp::getTorques(double *t)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2249,12 +2249,12 @@ bool RemoteControlBoard::getTorques(double *t)
     return ret;
 }
 
-bool RemoteControlBoard::getTorqueRange(int j, double *min, double* max)
+bool DinRailControlBoardNWCYarp::getTorqueRange(int j, double *min, double* max)
 {
     return get2V1I2D(VOCAB_TORQUE, VOCAB_RANGE, j, min, max);
 }
 
-bool RemoteControlBoard::getTorqueRanges(double *min, double *max)
+bool DinRailControlBoardNWCYarp::getTorqueRanges(double *min, double *max)
 {
     return get2V2DA(VOCAB_TORQUE, VOCAB_RANGES, min, max);
 }
@@ -2263,7 +2263,7 @@ bool RemoteControlBoard::getTorqueRanges(double *min, double *max)
 
 // BEGIN IImpedanceControl
 
-bool RemoteControlBoard::getImpedance(int j, double *stiffness, double *damping)
+bool DinRailControlBoardNWCYarp::getImpedance(int j, double *stiffness, double *damping)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2284,7 +2284,7 @@ bool RemoteControlBoard::getImpedance(int j, double *stiffness, double *damping)
     return false;
 }
 
-bool RemoteControlBoard::getImpedanceOffset(int j, double *offset)
+bool DinRailControlBoardNWCYarp::getImpedanceOffset(int j, double *offset)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2304,7 +2304,7 @@ bool RemoteControlBoard::getImpedanceOffset(int j, double *offset)
     return false;
 }
 
-bool RemoteControlBoard::setImpedance(int j, double stiffness, double damping)
+bool DinRailControlBoardNWCYarp::setImpedance(int j, double stiffness, double damping)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2320,7 +2320,7 @@ bool RemoteControlBoard::setImpedance(int j, double stiffness, double damping)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setImpedanceOffset(int j, double offset)
+bool DinRailControlBoardNWCYarp::setImpedanceOffset(int j, double offset)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2335,7 +2335,7 @@ bool RemoteControlBoard::setImpedanceOffset(int j, double offset)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp)
+bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2362,7 +2362,7 @@ bool RemoteControlBoard::getCurrentImpedanceLimit(int j, double *min_stiff, doub
 
 // BEGIN IControlMode
 
-bool RemoteControlBoard::getControlMode(int j, int *mode)
+bool DinRailControlBoardNWCYarp::getControlMode(int j, int *mode)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2371,7 +2371,7 @@ bool RemoteControlBoard::getControlMode(int j, int *mode)
     return ret;
 }
 
-bool RemoteControlBoard::getControlModes(int *modes)
+bool DinRailControlBoardNWCYarp::getControlModes(int *modes)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2380,7 +2380,7 @@ bool RemoteControlBoard::getControlModes(int *modes)
     return ret;
 }
 
-bool RemoteControlBoard::getControlModes(const int n_joint, const int *joints, int *modes)
+bool DinRailControlBoardNWCYarp::getControlModes(const int n_joint, const int *joints, int *modes)
 {
     double localArrivalTime=0.0;
 
@@ -2399,7 +2399,7 @@ bool RemoteControlBoard::getControlModes(const int n_joint, const int *joints, i
     return ret;
 }
 
-bool RemoteControlBoard::setControlMode(const int j, const int mode)
+bool DinRailControlBoardNWCYarp::setControlMode(const int j, const int mode)
 {
     if (!isLive()) {
         return false;
@@ -2415,7 +2415,7 @@ bool RemoteControlBoard::setControlMode(const int j, const int mode)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setControlModes(const int n_joint, const int *joints, int *modes)
+bool DinRailControlBoardNWCYarp::setControlModes(const int n_joint, const int *joints, int *modes)
 {
     if (!isLive()) {
         return false;
@@ -2440,7 +2440,7 @@ bool RemoteControlBoard::setControlModes(const int n_joint, const int *joints, i
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setControlModes(int *modes)
+bool DinRailControlBoardNWCYarp::setControlModes(int *modes)
 {
     if (!isLive()) {
         return false;
@@ -2463,7 +2463,7 @@ bool RemoteControlBoard::setControlModes(int *modes)
 
 // BEGIN IPositionDirect
 
-bool RemoteControlBoard::setPosition(int j, double ref)
+bool DinRailControlBoardNWCYarp::setPosition(int j, double ref)
 {
     if (!isLive()) {
         return false;
@@ -2478,7 +2478,7 @@ bool RemoteControlBoard::setPosition(int j, double ref)
     return true;
 }
 
-bool RemoteControlBoard::setPositions(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::setPositions(const int n_joint, const int *joints, const double *refs)
 {
     if (!isLive()) {
         return false;
@@ -2497,7 +2497,7 @@ bool RemoteControlBoard::setPositions(const int n_joint, const int *joints, cons
     return true;
 }
 
-bool RemoteControlBoard::setPositions(const double *refs)
+bool DinRailControlBoardNWCYarp::setPositions(const double *refs)
 {
     if (!isLive()) {
         return false;
@@ -2511,17 +2511,17 @@ bool RemoteControlBoard::setPositions(const double *refs)
     return true;
 }
 
-bool RemoteControlBoard::getRefPosition(const int joint, double* ref)
+bool DinRailControlBoardNWCYarp::getRefPosition(const int joint, double* ref)
 {
     return get1V1I1D(VOCAB_POSITION_DIRECT, joint, ref);
 }
 
-bool RemoteControlBoard::getRefPositions(double* refs)
+bool DinRailControlBoardNWCYarp::getRefPositions(double* refs)
 {
     return get1V1DA(VOCAB_POSITION_DIRECTS, refs);
 }
 
-bool RemoteControlBoard::getRefPositions(const int n_joint, const int* joints, double* refs)
+bool DinRailControlBoardNWCYarp::getRefPositions(const int n_joint, const int* joints, double* refs)
 {
     return get1V1I1IA1DA(VOCAB_POSITION_DIRECT_GROUP, n_joint, joints, refs);
 }
@@ -2530,7 +2530,7 @@ bool RemoteControlBoard::getRefPositions(const int n_joint, const int* joints, d
 
 // BEGIN IVelocityControl
 
-bool RemoteControlBoard::velocityMove(const int n_joint, const int *joints, const double *spds)
+bool DinRailControlBoardNWCYarp::velocityMove(const int n_joint, const int *joints, const double *spds)
 {
     // streaming port
     if (!isLive()) {
@@ -2550,17 +2550,17 @@ bool RemoteControlBoard::velocityMove(const int n_joint, const int *joints, cons
     return true;
 }
 
-bool RemoteControlBoard::getRefVelocity(const int joint, double* vel)
+bool DinRailControlBoardNWCYarp::getRefVelocity(const int joint, double* vel)
 {
     return get1V1I1D(VOCAB_VELOCITY_MOVE, joint, vel);
 }
 
-bool RemoteControlBoard::getRefVelocities(double* vels)
+bool DinRailControlBoardNWCYarp::getRefVelocities(double* vels)
 {
     return get1VDA(VOCAB_VELOCITY_MOVES, vels);
 }
 
-bool RemoteControlBoard::getRefVelocities(const int n_joint, const int* joints, double* vels)
+bool DinRailControlBoardNWCYarp::getRefVelocities(const int n_joint, const int* joints, double* vels)
 {
     return get1V1I1IA1DA(VOCAB_VELOCITY_MOVE_GROUP, n_joint, joints, vels);
 }
@@ -2569,7 +2569,7 @@ bool RemoteControlBoard::getRefVelocities(const int n_joint, const int* joints, 
 
 // BEGIN IInteractionMode
 
-bool RemoteControlBoard::getInteractionMode(int axis, yarp::dev::InteractionModeEnum* mode)
+bool DinRailControlBoardNWCYarp::getInteractionMode(int axis, yarp::dev::InteractionModeEnum* mode)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2578,7 +2578,7 @@ bool RemoteControlBoard::getInteractionMode(int axis, yarp::dev::InteractionMode
     return ret;
 }
 
-bool RemoteControlBoard::getInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::getInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
 {
     double localArrivalTime=0.0;
 
@@ -2597,7 +2597,7 @@ bool RemoteControlBoard::getInteractionModes(int n_joints, int *joints, yarp::de
     return ret;
 }
 
-bool RemoteControlBoard::getInteractionModes(yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::getInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2606,7 +2606,7 @@ bool RemoteControlBoard::getInteractionModes(yarp::dev::InteractionModeEnum* mod
     return ret;
 }
 
-bool RemoteControlBoard::setInteractionMode(int axis, yarp::dev::InteractionModeEnum mode)
+bool DinRailControlBoardNWCYarp::setInteractionMode(int axis, yarp::dev::InteractionModeEnum mode)
 {
     Bottle cmd, response;
     if (!isLive()) {
@@ -2623,7 +2623,7 @@ bool RemoteControlBoard::setInteractionMode(int axis, yarp::dev::InteractionMode
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::setInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
 {
     Bottle cmd, response;
     if (!isLive()) {
@@ -2649,7 +2649,7 @@ bool RemoteControlBoard::setInteractionModes(int n_joints, int *joints, yarp::de
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::setInteractionModes(yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::setInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
     Bottle cmd, response;
     if (!isLive()) {
@@ -2673,7 +2673,7 @@ bool RemoteControlBoard::setInteractionModes(yarp::dev::InteractionModeEnum* mod
 
 // BEGIN IRemoteCalibrator
 
-bool RemoteControlBoard::isCalibratorDevicePresent(bool *isCalib)
+bool DinRailControlBoardNWCYarp::isCalibratorDevicePresent(bool *isCalib)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2688,12 +2688,12 @@ bool RemoteControlBoard::isCalibratorDevicePresent(bool *isCalib)
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::calibrateSingleJoint(int j)
+bool DinRailControlBoardNWCYarp::calibrateSingleJoint(int j)
 {
     return set2V1I(VOCAB_REMOTE_CALIBRATOR_INTERFACE, VOCAB_CALIBRATE_SINGLE_JOINT, j);
 }
 
-bool RemoteControlBoard::calibrateWholePart()
+bool DinRailControlBoardNWCYarp::calibrateWholePart()
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2703,12 +2703,12 @@ bool RemoteControlBoard::calibrateWholePart()
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::homingSingleJoint(int j)
+bool DinRailControlBoardNWCYarp::homingSingleJoint(int j)
 {
     return set2V1I(VOCAB_REMOTE_CALIBRATOR_INTERFACE, VOCAB_HOMING_SINGLE_JOINT, j);
 }
 
-bool RemoteControlBoard::homingWholePart()
+bool DinRailControlBoardNWCYarp::homingWholePart()
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2719,12 +2719,12 @@ bool RemoteControlBoard::homingWholePart()
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::parkSingleJoint(int j, bool _wait)
+bool DinRailControlBoardNWCYarp::parkSingleJoint(int j, bool _wait)
 {
     return set2V1I(VOCAB_REMOTE_CALIBRATOR_INTERFACE, VOCAB_PARK_SINGLE_JOINT, j);
 }
 
-bool RemoteControlBoard::parkWholePart()
+bool DinRailControlBoardNWCYarp::parkWholePart()
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2734,7 +2734,7 @@ bool RemoteControlBoard::parkWholePart()
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::quitCalibrate()
+bool DinRailControlBoardNWCYarp::quitCalibrate()
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2744,7 +2744,7 @@ bool RemoteControlBoard::quitCalibrate()
     return CHECK_FAIL(ok, response);
 }
 
-bool RemoteControlBoard::quitPark()
+bool DinRailControlBoardNWCYarp::quitPark()
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -2758,17 +2758,17 @@ bool RemoteControlBoard::quitPark()
 
 // BEGIN ICurrentControl
 
-bool RemoteControlBoard::getRefCurrents(double *t)
+bool DinRailControlBoardNWCYarp::getRefCurrents(double *t)
 {
     return get2V1DA(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_REFS, t);
 }
 
-bool RemoteControlBoard::getRefCurrent(int j, double *t)
+bool DinRailControlBoardNWCYarp::getRefCurrent(int j, double *t)
 {
     return get2V1I1D(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_REF, j, t);
 }
 
-bool RemoteControlBoard::setRefCurrents(const double *refs)
+bool DinRailControlBoardNWCYarp::setRefCurrents(const double *refs)
 {
     if (!isLive()) {
         return false;
@@ -2783,7 +2783,7 @@ bool RemoteControlBoard::setRefCurrents(const double *refs)
     return true;
 }
 
-bool RemoteControlBoard::setRefCurrent(int j, double ref)
+bool DinRailControlBoardNWCYarp::setRefCurrent(int j, double ref)
 {
     if (!isLive()) {
         return false;
@@ -2799,7 +2799,7 @@ bool RemoteControlBoard::setRefCurrent(int j, double ref)
     return true;
 }
 
-bool RemoteControlBoard::setRefCurrents(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::setRefCurrents(const int n_joint, const int *joints, const double *refs)
 {
     if (!isLive()) {
         return false;
@@ -2819,7 +2819,7 @@ bool RemoteControlBoard::setRefCurrents(const int n_joint, const int *joints, co
     return true;
 }
 
-bool RemoteControlBoard::getCurrents(double *vals)
+bool DinRailControlBoardNWCYarp::getCurrents(double *vals)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2828,7 +2828,7 @@ bool RemoteControlBoard::getCurrents(double *vals)
     return ret;
 }
 
-bool RemoteControlBoard::getCurrent(int j, double *val)
+bool DinRailControlBoardNWCYarp::getCurrent(int j, double *val)
 {
     double localArrivalTime=0.0;
     extendedPortMutex.lock();
@@ -2837,12 +2837,12 @@ bool RemoteControlBoard::getCurrent(int j, double *val)
     return ret;
 }
 
-bool RemoteControlBoard::getCurrentRange(int j, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getCurrentRange(int j, double *min, double *max)
 {
     return get2V1I2D(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_RANGE, j, min, max);
 }
 
-bool RemoteControlBoard::getCurrentRanges(double *min, double *max)
+bool DinRailControlBoardNWCYarp::getCurrentRanges(double *min, double *max)
 {
     return get2V2DA(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_RANGES, min, max);
 }
@@ -2850,7 +2850,7 @@ bool RemoteControlBoard::getCurrentRanges(double *min, double *max)
 // END ICurrentControl
 
 // BEGIN IPWMControl
-bool RemoteControlBoard::setRefDutyCycle(int j, double v)
+bool DinRailControlBoardNWCYarp::setRefDutyCycle(int j, double v)
 {
     // using the streaming port
     if (!isLive()) {
@@ -2870,7 +2870,7 @@ bool RemoteControlBoard::setRefDutyCycle(int j, double v)
     return true;
 }
 
-bool RemoteControlBoard::setRefDutyCycles(const double *v)
+bool DinRailControlBoardNWCYarp::setRefDutyCycles(const double *v)
 {
     // using the streaming port
     if (!isLive()) {
@@ -2890,7 +2890,7 @@ bool RemoteControlBoard::setRefDutyCycles(const double *v)
     return true;
 }
 
-bool RemoteControlBoard::getRefDutyCycle(int j, double *ref)
+bool DinRailControlBoardNWCYarp::getRefDutyCycle(int j, double *ref)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2913,12 +2913,12 @@ bool RemoteControlBoard::getRefDutyCycle(int j, double *ref)
     }
 }
 
-bool RemoteControlBoard::getRefDutyCycles(double *refs)
+bool DinRailControlBoardNWCYarp::getRefDutyCycles(double *refs)
 {
     return get2V1DA(VOCAB_PWMCONTROL_INTERFACE, VOCAB_PWMCONTROL_REF_PWMS, refs);
 }
 
-bool RemoteControlBoard::getDutyCycle(int j, double *out)
+bool DinRailControlBoardNWCYarp::getDutyCycle(int j, double *out)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
@@ -2927,7 +2927,7 @@ bool RemoteControlBoard::getDutyCycle(int j, double *out)
     return ret;
 }
 
-bool RemoteControlBoard::getDutyCycles(double *outs)
+bool DinRailControlBoardNWCYarp::getDutyCycles(double *outs)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();

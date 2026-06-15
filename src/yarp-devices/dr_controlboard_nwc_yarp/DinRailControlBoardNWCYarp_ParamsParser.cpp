@@ -11,21 +11,21 @@
 // Generated on: Thu May 22 11:32:44 2025
 
 
-#include "RemoteControlBoard_ParamsParser.h"
+#include "DinRailControlBoardNWCYarp_ParamsParser.h"
 #include <yarp/os/LogStream.h>
 #include <yarp/os/Value.h>
 
 namespace {
-    YARP_LOG_COMPONENT(RemoteControlBoardParamsCOMPONENT, "yarp.device.RemoteControlBoard")
+    YARP_LOG_COMPONENT(DinRailControlBoardNWCYarpParamsCOMPONENT, "yarp.device.DinRailControlBoardNWCYarp")
 }
 
 
-RemoteControlBoard_ParamsParser::RemoteControlBoard_ParamsParser()
+DinRailControlBoardNWCYarp_ParamsParser::DinRailControlBoardNWCYarp_ParamsParser()
 {
 }
 
 
-std::vector<std::string> RemoteControlBoard_ParamsParser::getListOfParams() const
+std::vector<std::string> DinRailControlBoardNWCYarp_ParamsParser::getListOfParams() const
 {
     std::vector<std::string> params;
     params.push_back("remote");
@@ -48,7 +48,7 @@ std::vector<std::string> RemoteControlBoard_ParamsParser::getListOfParams() cons
 }
 
 
-bool RemoteControlBoard_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
+bool DinRailControlBoardNWCYarp_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
 {
     if (paramName =="remote")
     {
@@ -141,7 +141,7 @@ bool RemoteControlBoard_ParamsParser::getParamValue(const std::string& paramName
 }
 
 
-std::string RemoteControlBoard_ParamsParser::getConfiguration() const
+std::string DinRailControlBoardNWCYarp_ParamsParser::getConfiguration() const
 {
     //This is a sub-optimal solution.
     //Ideally getConfiguration() should return all parameters but it is currently
@@ -151,12 +151,12 @@ std::string RemoteControlBoard_ParamsParser::getConfiguration() const
     return s_cfg;
 }
 
-bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchable & config)
+bool      DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Searchable & config)
 {
     //Check for --help option
     if (config.check("help"))
     {
-        yCInfo(RemoteControlBoardParamsCOMPONENT) << getDocumentationOfDeviceParams();
+        yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << getDocumentationOfDeviceParams();
     }
 
     m_provided_configuration = config.toString();
@@ -166,12 +166,12 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("remote"))
         {
             m_remote = config.find("remote").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote' using value:" << m_remote;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote' using value:" << m_remote;
         }
         else
         {
-            yCError(RemoteControlBoardParamsCOMPONENT) << "Mandatory parameter 'remote' not found!";
-            yCError(RemoteControlBoardParamsCOMPONENT) << "Description of the parameter: Prefix of the port to which to connect.";
+            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Mandatory parameter 'remote' not found!";
+            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Description of the parameter: Prefix of the port to which to connect.";
             return false;
         }
         prop_check.unput("remote");
@@ -182,12 +182,12 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("local"))
         {
             m_local = config.find("local").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local' using value:" << m_local;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local' using value:" << m_local;
         }
         else
         {
-            yCError(RemoteControlBoardParamsCOMPONENT) << "Mandatory parameter 'local' not found!";
-            yCError(RemoteControlBoardParamsCOMPONENT) << "Description of the parameter: Port prefix of the port opened by this device.";
+            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Mandatory parameter 'local' not found!";
+            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Description of the parameter: Port prefix of the port opened by this device.";
             return false;
         }
         prop_check.unput("local");
@@ -198,11 +198,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("namesuffix"))
         {
             m_namesuffix = config.find("namesuffix").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
         }
         prop_check.unput("namesuffix");
     }
@@ -212,11 +212,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("writeStrict"))
         {
             m_writeStrict = config.find("writeStrict").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'writeStrict' using value:" << m_writeStrict;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'writeStrict' using value:" << m_writeStrict;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'writeStrict' using DEFAULT value:" << m_writeStrict;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'writeStrict' using DEFAULT value:" << m_writeStrict;
         }
         prop_check.unput("writeStrict");
     }
@@ -226,11 +226,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("carrier"))
         {
             m_carrier = config.find("carrier").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'carrier' using value:" << m_carrier;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'carrier' using value:" << m_carrier;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'carrier' using DEFAULT value:" << m_carrier;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'carrier' using DEFAULT value:" << m_carrier;
         }
         prop_check.unput("carrier");
     }
@@ -240,11 +240,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("timeout"))
         {
             m_timeout = config.find("timeout").asFloat32();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'timeout' using value:" << m_timeout;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'timeout' using value:" << m_timeout;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'timeout' using DEFAULT value:" << m_timeout;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'timeout' using DEFAULT value:" << m_timeout;
         }
         prop_check.unput("timeout");
     }
@@ -256,11 +256,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("enable"))
         {
             m_local_qos_enable = sectionp.find("enable").asBool();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::enable' using value:" << m_local_qos_enable;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::enable' using value:" << m_local_qos_enable;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::enable' using DEFAULT value:" << m_local_qos_enable;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::enable' using DEFAULT value:" << m_local_qos_enable;
         }
         prop_check.unput("local_qos::enable");
     }
@@ -272,11 +272,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("thread_priority"))
         {
             m_local_qos_thread_priority = sectionp.find("thread_priority").asInt64();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::thread_priority' using value:" << m_local_qos_thread_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::thread_priority' using value:" << m_local_qos_thread_priority;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::thread_priority' using DEFAULT value:" << m_local_qos_thread_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::thread_priority' using DEFAULT value:" << m_local_qos_thread_priority;
         }
         prop_check.unput("local_qos::thread_priority");
     }
@@ -288,11 +288,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("thread_policy"))
         {
             m_local_qos_thread_policy = sectionp.find("thread_policy").asInt64();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::thread_policy' using value:" << m_local_qos_thread_policy;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::thread_policy' using value:" << m_local_qos_thread_policy;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::thread_policy' using DEFAULT value:" << m_local_qos_thread_policy;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::thread_policy' using DEFAULT value:" << m_local_qos_thread_policy;
         }
         prop_check.unput("local_qos::thread_policy");
     }
@@ -304,11 +304,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("packet_priority"))
         {
             m_local_qos_packet_priority = sectionp.find("packet_priority").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::packet_priority' using value:" << m_local_qos_packet_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::packet_priority' using value:" << m_local_qos_packet_priority;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'local_qos::packet_priority' using DEFAULT value:" << m_local_qos_packet_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'local_qos::packet_priority' using DEFAULT value:" << m_local_qos_packet_priority;
         }
         prop_check.unput("local_qos::packet_priority");
     }
@@ -320,11 +320,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("enable"))
         {
             m_remote_qos_enable = sectionp.find("enable").asBool();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::enable' using value:" << m_remote_qos_enable;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::enable' using value:" << m_remote_qos_enable;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::enable' using DEFAULT value:" << m_remote_qos_enable;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::enable' using DEFAULT value:" << m_remote_qos_enable;
         }
         prop_check.unput("remote_qos::enable");
     }
@@ -336,11 +336,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("thread_priority"))
         {
             m_remote_qos_thread_priority = sectionp.find("thread_priority").asInt64();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::thread_priority' using value:" << m_remote_qos_thread_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::thread_priority' using value:" << m_remote_qos_thread_priority;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::thread_priority' using DEFAULT value:" << m_remote_qos_thread_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::thread_priority' using DEFAULT value:" << m_remote_qos_thread_priority;
         }
         prop_check.unput("remote_qos::thread_priority");
     }
@@ -352,11 +352,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("thread_policy"))
         {
             m_remote_qos_thread_policy = sectionp.find("thread_policy").asInt64();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::thread_policy' using value:" << m_remote_qos_thread_policy;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::thread_policy' using value:" << m_remote_qos_thread_policy;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::thread_policy' using DEFAULT value:" << m_remote_qos_thread_policy;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::thread_policy' using DEFAULT value:" << m_remote_qos_thread_policy;
         }
         prop_check.unput("remote_qos::thread_policy");
     }
@@ -368,11 +368,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (sectionp.check("packet_priority"))
         {
             m_remote_qos_packet_priority = sectionp.find("packet_priority").asString();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::packet_priority' using value:" << m_remote_qos_packet_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::packet_priority' using value:" << m_remote_qos_packet_priority;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'remote_qos::packet_priority' using DEFAULT value:" << m_remote_qos_packet_priority;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'remote_qos::packet_priority' using DEFAULT value:" << m_remote_qos_packet_priority;
         }
         prop_check.unput("remote_qos::packet_priority");
     }
@@ -382,11 +382,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("ignoreProtocolCheck"))
         {
             m_ignoreProtocolCheck = config.find("ignoreProtocolCheck").asBool();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'ignoreProtocolCheck' using value:" << m_ignoreProtocolCheck;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'ignoreProtocolCheck' using value:" << m_ignoreProtocolCheck;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'ignoreProtocolCheck' using DEFAULT value:" << m_ignoreProtocolCheck;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'ignoreProtocolCheck' using DEFAULT value:" << m_ignoreProtocolCheck;
         }
         prop_check.unput("ignoreProtocolCheck");
     }
@@ -396,11 +396,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         if (config.check("diagnostic"))
         {
             m_diagnostic = config.find("diagnostic").asBool();
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'diagnostic' using value:" << m_diagnostic;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'diagnostic' using value:" << m_diagnostic;
         }
         else
         {
-            yCInfo(RemoteControlBoardParamsCOMPONENT) << "Parameter 'diagnostic' using DEFAULT value:" << m_diagnostic;
+            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter 'diagnostic' using DEFAULT value:" << m_diagnostic;
         }
         prop_check.unput("diagnostic");
     }
@@ -415,12 +415,12 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
         {
             if (m_parser_is_strict)
             {
-                yCError(RemoteControlBoardParamsCOMPONENT) << "User asking for parameter: "<<it->name <<" which is unknown to this parser!";
+                yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "User asking for parameter: "<<it->name <<" which is unknown to this parser!";
                 extra_params_found = true;
             }
             else
             {
-                yCWarning(RemoteControlBoardParamsCOMPONENT) << "User asking for parameter: "<< it->name <<" which is unknown to this parser!";
+                yCWarning(DinRailControlBoardNWCYarpParamsCOMPONENT) << "User asking for parameter: "<< it->name <<" which is unknown to this parser!";
             }
         }
 
@@ -434,11 +434,11 @@ bool      RemoteControlBoard_ParamsParser::parseParams(const yarp::os::Searchabl
 }
 
 
-std::string      RemoteControlBoard_ParamsParser::getDocumentationOfDeviceParams() const
+std::string      DinRailControlBoardNWCYarp_ParamsParser::getDocumentationOfDeviceParams() const
 {
     std::string doc;
     doc = doc + std::string("\n=============================================\n");
-    doc = doc + std::string("This is the help for device: RemoteControlBoard\n");
+    doc = doc + std::string("This is the help for device: DinRailControlBoardNWCYarp\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'remote': Prefix of the port to which to connect.\n");

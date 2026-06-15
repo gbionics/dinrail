@@ -3,8 +3,8 @@
 
 yarp_prepare_plugin(dr_controlboard_nwc_yarp
   CATEGORY device
-  TYPE RemoteControlBoard
-  INCLUDE RemoteControlBoard.h
+  TYPE DinRailControlBoardNWCYarp
+  INCLUDE DinRailControlBoardNWCYarp.h
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
@@ -16,12 +16,12 @@ if(NOT SKIP_dr_controlboard_nwc_yarp)
 
   target_sources(dr_controlboard_nwc_yarp
     PRIVATE
-      RemoteControlBoard.cpp
-      RemoteControlBoard.h
-      RemoteControlBoard_ParamsParser.cpp
-      RemoteControlBoard_ParamsParser.h
-      RemoteControlBoardLogComponent.cpp
-      RemoteControlBoardLogComponent.h
+      DinRailControlBoardNWCYarp.cpp
+      DinRailControlBoardNWCYarp.h
+      DinRailControlBoardNWCYarp_ParamsParser.cpp
+      DinRailControlBoardNWCYarp_ParamsParser.h
+      DinRailControlBoardNWCYarpLogComponent.cpp
+      DinRailControlBoardNWCYarpLogComponent.h
       stateExtendedReader.cpp
       stateExtendedReader.h
   )

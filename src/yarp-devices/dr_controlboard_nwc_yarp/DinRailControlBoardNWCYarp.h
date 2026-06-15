@@ -34,7 +34,7 @@
 #include <yarp/dev/ControlBoardHelpers.h>
 
 #include "stateExtendedReader.h"
-#include "RemoteControlBoard_ParamsParser.h"
+#include "DinRailControlBoardNWCYarp_ParamsParser.h"
 
 struct ProtocolVersion
 {
@@ -55,9 +55,10 @@ class DiagnosticThread;
 * to use a device exposing controlboard method even from a different process (or even computer)
 * from the one that opened the controlboard device.
 *
-* Parameters required by this device are shown in class: RemoteControlBoard_ParamsParser
+* Parameters required by this device are shown in class: DinRailControlBoardNWCYarp_ParamsParser
 */
-class RemoteControlBoard :
+
+class DinRailControlBoardNWCYarp :
         public yarp::dev::IPidControl,
         public yarp::dev::IPositionControl,
         public yarp::dev::IVelocityControl,
@@ -80,7 +81,7 @@ class RemoteControlBoard :
         public yarp::dev::IPWMControl,
         public yarp::dev::ICurrentControl,
         public yarp::dev::IJointFault,
-        public RemoteControlBoard_ParamsParser
+        public DinRailControlBoardNWCYarp_ParamsParser
 {
 protected:
     yarp::os::Port rpc_p;
@@ -261,12 +262,12 @@ protected:
     bool get1V1I1IA1DA(int v, const int len, const int *val1, double *val2);
 
 public:
-    RemoteControlBoard() = default;
-    RemoteControlBoard(const RemoteControlBoard&) = delete;
-    RemoteControlBoard(RemoteControlBoard&&) = delete;
-    RemoteControlBoard& operator=(const RemoteControlBoard&) = delete;
-    RemoteControlBoard& operator=(RemoteControlBoard&&) = delete;
-    ~RemoteControlBoard() override = default;
+    DinRailControlBoardNWCYarp() = default;
+    DinRailControlBoardNWCYarp(const DinRailControlBoardNWCYarp&) = delete;
+    DinRailControlBoardNWCYarp(DinRailControlBoardNWCYarp&&) = delete;
+    DinRailControlBoardNWCYarp& operator=(const DinRailControlBoardNWCYarp&) = delete;
+    DinRailControlBoardNWCYarp& operator=(DinRailControlBoardNWCYarp&&) = delete;
+    ~DinRailControlBoardNWCYarp() override = default;
 
     bool open(Searchable& config) override;
 

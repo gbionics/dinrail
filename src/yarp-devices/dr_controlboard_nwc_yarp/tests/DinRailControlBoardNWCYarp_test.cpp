@@ -43,7 +43,7 @@
 using namespace yarp::dev;
 using namespace yarp::os;
 
-TEST_CASE("dev::RemoteControlBoardTest", "[yarp::dev]")
+TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
 {
     // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
     // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");

@@ -20,7 +20,7 @@
 #include <cmath>
 
 /**
-* This class is the parameters parser for class RemoteControlBoard.
+* This class is the parameters parser for class DinRailControlBoardNWCYarp.
 *
 * These are the used parameters:
 * | Group name | Parameter name      | Type   | Units | Default Value | Required | Description                                                        | Notes              |
@@ -53,14 +53,14 @@
 *
 */
 
-class RemoteControlBoard_ParamsParser : public yarp::dev::IDeviceDriverParams
+class DinRailControlBoardNWCYarp_ParamsParser : public yarp::dev::IDeviceDriverParams
 {
 public:
-    RemoteControlBoard_ParamsParser();
-    ~RemoteControlBoard_ParamsParser() override = default;
+    DinRailControlBoardNWCYarp_ParamsParser();
+    ~DinRailControlBoardNWCYarp_ParamsParser() override = default;
 
 public:
-    const std::string m_device_classname = {"RemoteControlBoard"};
+    const std::string m_device_classname = {"DinRailControlBoardNWCYarp"};
     const std::string m_device_name = {"dr_controlboard_nwc_yarp"};
     bool m_parser_is_strict = false;
     struct parser_version_type
