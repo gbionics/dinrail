@@ -53,15 +53,15 @@ const char *fmcC_file_content_micro   =  "device fakeMotionControlMicro\n"
                                   "\n"
                                   "AxisName (\"axisC1\" \"axisC2\" \"axisC3\" \"axisC4\")  \n";
 
-const char *wrapperA_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
+const char *wrapperA_file_content   = "device dr_controlboard_nws_yarp\n"
                                       "name /testRemapperRobot/a\n"
                                       "period 0.01\n";
 
-const char *wrapperB_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
+const char *wrapperB_file_content   = "device dr_controlboard_nws_yarp\n"
                                       "name /testRemapperRobot/b\n"
                                       "period 0.01\n";
 
-const char *wrapperC_file_content   = "device ControlBoardNWSDinRailYARPPorts\n"
+const char *wrapperC_file_content   = "device dr_controlboard_nws_yarp\n"
                                       "name /testRemapperRobot/c\n"
                                       "period 0.01\n";
 
@@ -276,8 +276,8 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
 {
     // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
     // YARP_REQUIRE_PLUGIN("fakeMotionControlMicro", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_remapper", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nws_yarp", "device");
     // YARP_REQUIRE_PLUGIN("DinRailControlBoardRemapperNWCYarpDinRail", "device");
 
     Network::setLocalMode(true);
@@ -384,7 +384,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the controlboardremapper
         PolyDriver ddRemapper;
         Property pRemapper;
-        pRemapper.put("device","ControlBoardRemapperDinRail");
+        pRemapper.put("device","dr_controlboard_remapper");
         pRemapper.addGroup("axesNames");
         Bottle & axesList = pRemapper.findGroup("axesNames").addList();
         axesList.addString("axisA1");
@@ -410,7 +410,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","DinRailControlBoardRemapperNWCYarpDinRail");
+        pRemoteRemapper.put("device","dr_controlboard_remapper_nwc_yarp");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");
@@ -533,7 +533,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // and make sure that if fails during attachAll
         PolyDriver ddRemapperWN;
         Property pRemapperWN;
-        pRemapperWN.put("device","ControlBoardRemapperDinRail");
+        pRemapperWN.put("device","dr_controlboard_remapper");
         pRemapperWN.addGroup("axesNames");
         Bottle & axesListWN = pRemapperWN.findGroup("axesNames").addList();
         axesListWN.addString("axisA1");
@@ -559,7 +559,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the controlboardremapper
         PolyDriver ddRemapper;
         Property pRemapper;
-        pRemapper.put("device","ControlBoardRemapperDinRail");
+        pRemapper.put("device","dr_controlboard_remapper");
         pRemapper.addGroup("axesNames");
         Bottle & axesList = pRemapper.findGroup("axesNames").addList();
         axesList.addString("axisA1");
@@ -585,7 +585,7 @@ TEST_CASE("dev::ControlBoardRemapperTest", "[yarp::dev]")
         // Open the remotecontrolboardremapper
         PolyDriver ddRemoteRemapper;
         Property pRemoteRemapper;
-        pRemoteRemapper.put("device","DinRailControlBoardRemapperNWCYarpDinRail");
+        pRemoteRemapper.put("device","dr_controlboard_remapper_nwc_yarp");
         pRemoteRemapper.addGroup("axesNames");
         Bottle & remoteAxesList = pRemoteRemapper.findGroup("axesNames").addList();
         remoteAxesList.addString("axisA1");

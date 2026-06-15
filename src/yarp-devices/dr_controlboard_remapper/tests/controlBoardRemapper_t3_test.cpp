@@ -46,10 +46,10 @@ using namespace yarp::os;
 TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
 {
     // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_remapper", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nws_yarp", "device");
     // YARP_REQUIRE_PLUGIN("controlBoard_nwc_yarp", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWCDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nwc_yarp", "device");
 
     Network::setLocalMode(true);
 
@@ -88,7 +88,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -104,14 +104,14 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nwc_yarp");
             p_cfg.put("local", "/localalljoints");
             p_cfg.put("remote", "/alljoints");
             REQUIRE(ddnwc.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardRemapperDinRail");
+            p_cfg.put("device", "dr_controlboard_remapper");
             yarp::os::Value* jlist = yarp::os::Value::makeList("joint3 joint2");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));
@@ -217,13 +217,13 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints1");
             REQUIRE(ddnws1.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints2");
             REQUIRE(ddnws2.open(p_cfg));
         }
@@ -246,7 +246,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nwc_yarp");
             p_cfg.put("local", "/localalljoints1");
             p_cfg.put("remote", "/alljoints1");
             REQUIRE(ddnwc1.open(p_cfg));
@@ -254,14 +254,14 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         {
             Property p_cfg;
             //p_cfg.put("device", "controlBoard_nwc_yarp");
-            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nwc_yarp");
             p_cfg.put("local", "/localalljoints2");
             p_cfg.put("remote", "/alljoints2");
             REQUIRE(ddnwc2.open(p_cfg));
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardRemapperDinRail");
+            p_cfg.put("device", "dr_controlboard_remapper");
             yarp::os::Value* jlist = yarp::os::Value::makeList("a3 b12");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));

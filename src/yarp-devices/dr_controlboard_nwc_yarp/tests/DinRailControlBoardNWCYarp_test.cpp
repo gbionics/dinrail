@@ -46,8 +46,8 @@ using namespace yarp::os;
 TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
 {
     // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWCDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nws_yarp", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nwc_yarp", "device");
 
     Network::setLocalMode(true);
 
@@ -84,7 +84,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/controlboardserver");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -100,7 +100,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         //open the nwc
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nwc_yarp");
             p_cfg.put("local", "/local_controlboard");
             p_cfg.put("remote", "/controlboardserver");
             REQUIRE(ddnwc.open(p_cfg));
@@ -174,7 +174,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/controlboardserver");
             REQUIRE(ddnws.open(p_cfg));
         }
@@ -190,7 +190,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         //open the nwc
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardNWCDinRailYARPPorts");
+            p_cfg.put("device", "dr_controlboard_nwc_yarp");
             p_cfg.put("local", "/local_controlboard");
             p_cfg.put("remote", "/controlboardserver");
             REQUIRE(ddnwc.open(p_cfg));

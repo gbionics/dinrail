@@ -110,7 +110,7 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
         std::string local = localPortPrefix+remote;
 
         Property options = remoteControlBoardsOptions;
-        options.put("device", "ControlBoardNWCDinRailYARPPorts");
+        options.put("device", "dr_controlboard_nwc_yarp");
         options.put("local", local);
         options.put("remote", remote);
 

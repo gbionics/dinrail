@@ -46,7 +46,7 @@ using namespace yarp::os;
 TEST_CASE("dev::ControlBoardRemapperTest2", "[yarp::dev]")
 {
     // YARP_REQUIRE_PLUGIN("fakeMotionControl", "device");
-    // YARP_REQUIRE_PLUGIN("ControlBoardRemapperDinRail", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_remapper", "device");
 
     Network::setLocalMode(true);
 
@@ -82,7 +82,7 @@ TEST_CASE("dev::ControlBoardRemapperTest2", "[yarp::dev]")
         }
         {
             Property p_cfg;
-            p_cfg.put("device", "ControlBoardRemapperDinRail");
+            p_cfg.put("device", "dr_controlboard_remapper");
             yarp::os::Value* jlist = yarp::os::Value::makeList("joint0 joint1");
             p_cfg.put("axesNames", jlist);
             REQUIRE(ddremapper.open(p_cfg));

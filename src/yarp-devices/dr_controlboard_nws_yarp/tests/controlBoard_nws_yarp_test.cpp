@@ -14,7 +14,7 @@ using namespace yarp::os;
 
 TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
 {
-    // YARP_REQUIRE_PLUGIN("ControlBoardNWSDinRailYARPPorts", "device");
+    // YARP_REQUIRE_PLUGIN("dr_controlboard_nws_yarp", "device");
 
     Network::setLocalMode(true);
 
@@ -25,7 +25,7 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         ////////"Checking opening map2DServer and map2DClient polydrivers"
         {
             Property pcfg;
-            pcfg.put("device", "ControlBoardNWSDinRailYARPPorts");
+            pcfg.put("device", "dr_controlboard_nws_yarp");
             pcfg.put("name", "/controlboard");
             REQUIRE(ddnws.open(pcfg));
         }
@@ -44,7 +44,7 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
+        p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControl");
         REQUIRE(dd_fake.open(p_fake));
@@ -73,7 +73,7 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
+        p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake2.put("device", "fakeSpeaker");
         REQUIRE(dd_fake2.open(p_fake2));
@@ -102,7 +102,7 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_nws;
 
         //open
-        p_nws.put("device", "ControlBoardNWSDinRailYARPPorts");
+        p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControlMicro");
         REQUIRE(dd_fake.open(p_fake));
