@@ -11,21 +11,21 @@
 // Generated on: Thu May 22 11:32:44 2025
 
 
-#include "ControlBoard_nws_yarp_ParamsParser.h"
+#include "DinRailControlBoardNWSYarp_ParamsParser.h"
 #include <yarp/os/LogStream.h>
 #include <yarp/os/Value.h>
 
 namespace {
-    YARP_LOG_COMPONENT(ControlBoard_nws_yarpParamsCOMPONENT, "yarp.device.ControlBoard_nws_yarp")
+    YARP_LOG_COMPONENT(DinRailControlBoardNWSYarpParamsCOMPONENT, "yarp.device.DinRailControlBoardNWSYarp")
 }
 
 
-ControlBoard_nws_yarp_ParamsParser::ControlBoard_nws_yarp_ParamsParser()
+DinRailControlBoardNWSYarp_ParamsParser::DinRailControlBoardNWSYarp_ParamsParser()
 {
 }
 
 
-std::vector<std::string> ControlBoard_nws_yarp_ParamsParser::getListOfParams() const
+std::vector<std::string> DinRailControlBoardNWSYarp_ParamsParser::getListOfParams() const
 {
     std::vector<std::string> params;
     params.push_back("period");
@@ -35,7 +35,7 @@ std::vector<std::string> ControlBoard_nws_yarp_ParamsParser::getListOfParams() c
 }
 
 
-bool ControlBoard_nws_yarp_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
+bool DinRailControlBoardNWSYarp_ParamsParser::getParamValue(const std::string& paramName, std::string& paramValue) const
 {
     if (paramName =="period")
     {
@@ -59,7 +59,7 @@ bool ControlBoard_nws_yarp_ParamsParser::getParamValue(const std::string& paramN
 }
 
 
-std::string ControlBoard_nws_yarp_ParamsParser::getConfiguration() const
+std::string DinRailControlBoardNWSYarp_ParamsParser::getConfiguration() const
 {
     //This is a sub-optimal solution.
     //Ideally getConfiguration() should return all parameters but it is currently
@@ -69,12 +69,12 @@ std::string ControlBoard_nws_yarp_ParamsParser::getConfiguration() const
     return s_cfg;
 }
 
-bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Searchable & config)
+bool      DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Searchable & config)
 {
     //Check for --help option
     if (config.check("help"))
     {
-        yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << getDocumentationOfDeviceParams();
+        yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << getDocumentationOfDeviceParams();
     }
 
     m_provided_configuration = config.toString();
@@ -84,11 +84,11 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("period"))
         {
             m_period = config.find("period").asFloat64();
-            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'period' using value:" << m_period;
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'period' using value:" << m_period;
         }
         else
         {
-            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'period' using DEFAULT value:" << m_period;
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'period' using DEFAULT value:" << m_period;
         }
         prop_check.unput("period");
     }
@@ -98,12 +98,12 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("name"))
         {
             m_name = config.find("name").asString();
-            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'name' using value:" << m_name;
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'name' using value:" << m_name;
         }
         else
         {
-            yCError(ControlBoard_nws_yarpParamsCOMPONENT) << "Mandatory parameter 'name' not found!";
-            yCError(ControlBoard_nws_yarpParamsCOMPONENT) << "Description of the parameter: Prefix name of the ports opened by the device";
+            yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Mandatory parameter 'name' not found!";
+            yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Description of the parameter: Prefix name of the ports opened by the device";
             return false;
         }
         prop_check.unput("name");
@@ -114,11 +114,11 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("namesuffix"))
         {
             m_namesuffix = config.find("namesuffix").asString();
-            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'namesuffix' using value:" << m_namesuffix;
         }
         else
         {
-            yCInfo(ControlBoard_nws_yarpParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
         }
         prop_check.unput("namesuffix");
     }
@@ -133,12 +133,12 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
         {
             if (m_parser_is_strict)
             {
-                yCError(ControlBoard_nws_yarpParamsCOMPONENT) << "User asking for parameter: "<<it->name <<" which is unknown to this parser!";
+                yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "User asking for parameter: "<<it->name <<" which is unknown to this parser!";
                 extra_params_found = true;
             }
             else
             {
-                yCWarning(ControlBoard_nws_yarpParamsCOMPONENT) << "User asking for parameter: "<< it->name <<" which is unknown to this parser!";
+                yCWarning(DinRailControlBoardNWSYarpParamsCOMPONENT) << "User asking for parameter: "<< it->name <<" which is unknown to this parser!";
             }
         }
 
@@ -152,11 +152,11 @@ bool      ControlBoard_nws_yarp_ParamsParser::parseParams(const yarp::os::Search
 }
 
 
-std::string      ControlBoard_nws_yarp_ParamsParser::getDocumentationOfDeviceParams() const
+std::string      DinRailControlBoardNWSYarp_ParamsParser::getDocumentationOfDeviceParams() const
 {
     std::string doc;
     doc = doc + std::string("\n=============================================\n");
-    doc = doc + std::string("This is the help for device: ControlBoard_nws_yarp\n");
+    doc = doc + std::string("This is the help for device: DinRailControlBoardNWSYarp\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("This is the list of the parameters accepted by the device:\n");
     doc = doc + std::string("'period': period of the main thread\n");

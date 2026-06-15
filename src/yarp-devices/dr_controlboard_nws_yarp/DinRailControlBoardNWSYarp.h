@@ -42,7 +42,7 @@
 
 #include "StreamingMessagesParser.h"
 #include "RPCMessagesParser.h"
-#include "ControlBoard_nws_yarp_ParamsParser.h"
+#include "DinRailControlBoardNWSYarp_ParamsParser.h"
 
 /**
  * @ingroup dev_impl_nws_yarp
@@ -51,7 +51,7 @@
  *
  * \section controlBoard_nws_yarp_device_parameters Description of input parameters
  *
- * Parameters required by this device are shown in class: ControlBoard_nws_yarp_ParamsParser
+ * Parameters required by this device are shown in class: DinRailControlBoardNWSYarp_ParamsParser
  *
  *  Parameters required by this device are:
  * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required                    | Description                                                       | Notes |
@@ -60,11 +60,11 @@
  * | period         |      -         | double  | s              |   0.02        | No                          | refresh period of the broadcasted values in s                     | optional, default 0.02s period|
  */
 
-class ControlBoard_nws_yarp :
+class DinRailControlBoardNWSYarp :
         public yarp::dev::DeviceDriver,
         public yarp::os::PeriodicThread,
         public yarp::dev::WrapperSingle,
-        public ControlBoard_nws_yarp_ParamsParser
+        public DinRailControlBoardNWSYarp_ParamsParser
 {
 private:
     yarp::os::BufferedPort<yarp::sig::Vector> outputPositionStatePort; // Port /state:o streaming out the encoder positions
@@ -113,12 +113,12 @@ private:
     void closePorts();
 
 public:
-    ControlBoard_nws_yarp();
-    ControlBoard_nws_yarp(const ControlBoard_nws_yarp&) = delete;
-    ControlBoard_nws_yarp(ControlBoard_nws_yarp&&) = delete;
-    ControlBoard_nws_yarp& operator=(const ControlBoard_nws_yarp&) = delete;
-    ControlBoard_nws_yarp& operator=(ControlBoard_nws_yarp&&) = delete;
-    ~ControlBoard_nws_yarp() override = default;
+    DinRailControlBoardNWSYarp();
+    DinRailControlBoardNWSYarp(const DinRailControlBoardNWSYarp&) = delete;
+    DinRailControlBoardNWSYarp(DinRailControlBoardNWSYarp&&) = delete;
+    DinRailControlBoardNWSYarp& operator=(const DinRailControlBoardNWSYarp&) = delete;
+    DinRailControlBoardNWSYarp& operator=(DinRailControlBoardNWSYarp&&) = delete;
+    ~DinRailControlBoardNWSYarp() override = default;
 
     // yarp::dev::DeviceDriver
     bool close() override;

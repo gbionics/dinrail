@@ -20,7 +20,7 @@
 #include <cmath>
 
 /**
-* This class is the parameters parser for class ControlBoard_nws_yarp.
+* This class is the parameters parser for class DinRailControlBoardNWSYarp.
 *
 * These are the used parameters:
 * | Group name | Parameter name | Type   | Units | Default Value | Required | Description                                   | Notes                                                                    |
@@ -40,14 +40,14 @@
 *
 */
 
-class ControlBoard_nws_yarp_ParamsParser : public yarp::dev::IDeviceDriverParams
+class DinRailControlBoardNWSYarp_ParamsParser : public yarp::dev::IDeviceDriverParams
 {
 public:
-    ControlBoard_nws_yarp_ParamsParser();
-    ~ControlBoard_nws_yarp_ParamsParser() override = default;
+    DinRailControlBoardNWSYarp_ParamsParser();
+    ~DinRailControlBoardNWSYarp_ParamsParser() override = default;
 
 public:
-    const std::string m_device_classname = {"ControlBoard_nws_yarp"};
+    const std::string m_device_classname = {"DinRailControlBoardNWSYarp"};
     const std::string m_device_name = {"dr_controlboard_nws_yarp"};
     bool m_parser_is_strict = false;
     struct parser_version_type

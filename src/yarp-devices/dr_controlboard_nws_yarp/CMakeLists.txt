@@ -4,8 +4,8 @@
 yarp_prepare_plugin(
   dr_controlboard_nws_yarp
   CATEGORY device
-  TYPE ControlBoard_nws_yarp
-  INCLUDE ControlBoard_nws_yarp.h
+  TYPE DinRailControlBoardNWSYarp
+  INCLUDE DinRailControlBoardNWSYarp.h
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
@@ -22,10 +22,10 @@ if(NOT SKIP_dr_controlboard_nws_yarp)
 
   target_sources(dr_controlboard_nws_yarp
     PRIVATE
-      ControlBoard_nws_yarp.cpp
-      ControlBoard_nws_yarp.h
-      ControlBoard_nws_yarp_ParamsParser.cpp
-      ControlBoard_nws_yarp_ParamsParser.h
+      DinRailControlBoardNWSYarp.cpp
+      DinRailControlBoardNWSYarp.h
+      DinRailControlBoardNWSYarp_ParamsParser.cpp
+      DinRailControlBoardNWSYarp_ParamsParser.h
       RPCMessagesParser.cpp
       RPCMessagesParser.h
       StreamingMessagesParser.cpp

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include "ControlBoard_nws_yarp.h"
+#include "DinRailControlBoardNWSYarp.h"
 
 #include "ControlBoardLogComponent.h"
 #include "RPCMessagesParser.h"
@@ -23,12 +23,12 @@ using yarp::dev::impl::jointData;
 
 const double DEFAULT_PERIOD = 0.02;
 
-ControlBoard_nws_yarp::ControlBoard_nws_yarp() :
+DinRailControlBoardNWSYarp::DinRailControlBoardNWSYarp() :
         yarp::os::PeriodicThread(DEFAULT_PERIOD)
 {
 }
 
-void ControlBoard_nws_yarp::closePorts()
+void DinRailControlBoardNWSYarp::closePorts()
 {
     inputRPCPort.interrupt();
     inputRPCPort.removeCallbackLock();
@@ -44,7 +44,7 @@ void ControlBoard_nws_yarp::closePorts()
     extendedOutputStatePort.close();
 }
 
-bool ControlBoard_nws_yarp::close()
+bool DinRailControlBoardNWSYarp::close()
 {
     // Ensure that the device is not running
     if (isRunning()) {
@@ -57,7 +57,7 @@ bool ControlBoard_nws_yarp::close()
     return true;
 }
 
-bool ControlBoard_nws_yarp::open(Searchable& config)
+bool DinRailControlBoardNWSYarp::open(Searchable& config)
 {
     if (!parseParams(config)) { return false; }
 
@@ -108,7 +108,7 @@ bool ControlBoard_nws_yarp::open(Searchable& config)
     return true;
 }
 
-bool ControlBoard_nws_yarp::setDevice(yarp::dev::DeviceDriver* driver, bool owned)
+bool DinRailControlBoardNWSYarp::setDevice(yarp::dev::DeviceDriver* driver, bool owned)
 {
     // Save the pointer and subDeviceOwned
     yarp::dev::DeviceDriver* subdevice_ptr = driver;
@@ -281,7 +281,7 @@ bool ControlBoard_nws_yarp::setDevice(yarp::dev::DeviceDriver* driver, bool owne
     return true;
 }
 
-void ControlBoard_nws_yarp::closeDevice()
+void DinRailControlBoardNWSYarp::closeDevice()
 {
     // Reset callbacks
     streaming_parser.reset();
@@ -315,7 +315,7 @@ void ControlBoard_nws_yarp::closeDevice()
     iJointFault = nullptr;
 }
 
-bool ControlBoard_nws_yarp::attach(yarp::dev::PolyDriver* poly)
+bool DinRailControlBoardNWSYarp::attach(yarp::dev::PolyDriver* poly)
 {
     // Check if we already instantiated a subdevice previously
     if (subdevice_ready) {
@@ -335,7 +335,7 @@ bool ControlBoard_nws_yarp::attach(yarp::dev::PolyDriver* poly)
     return true;
 }
 
-bool ControlBoard_nws_yarp::detach()
+bool DinRailControlBoardNWSYarp::detach()
 {
     // Ensure that the device is not running
     if (isRunning()) {
@@ -347,7 +347,7 @@ bool ControlBoard_nws_yarp::detach()
     return true;
 }
 
-void ControlBoard_nws_yarp::run()
+void DinRailControlBoardNWSYarp::run()
 {
     // check we are not overflowing with input messages
     constexpr int reads_for_warning = 20;
