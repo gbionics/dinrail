@@ -32,11 +32,6 @@ if(NOT SKIP_dr_controlboard_nwc_yarp)
       YARP::YARP_sig
       YARP::YARP_dev
   )
-  list(APPEND YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS
-    YARP_os
-    YARP_sig
-    YARP_dev
-  )
 
   yarp_install(
     TARGETS dr_controlboard_nwc_yarp
@@ -46,8 +41,6 @@ if(NOT SKIP_dr_controlboard_nwc_yarp)
     ARCHIVE DESTINATION ${YARP_STATIC_PLUGINS_INSTALL_DIR}
     YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR}
   )
-
-  set(YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS ${YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS} PARENT_SCOPE)
 
   set_property(TARGET dr_controlboard_nwc_yarp PROPERTY FOLDER "Plugins/Device")
 
