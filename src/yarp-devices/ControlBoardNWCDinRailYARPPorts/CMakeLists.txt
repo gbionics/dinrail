@@ -1,20 +1,20 @@
 # SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
-yarp_prepare_plugin(ControlBoardNWCDinRailYARPPorts
+yarp_prepare_plugin(dr_controlboard_nwc_yarp
   CATEGORY device
   TYPE RemoteControlBoard
   INCLUDE RemoteControlBoard.h
   EXTRA_CONFIG
-    WRAPPER=ControlBoardNWSDinRailYARPPorts
+    WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
   GENERATE_PARSER
 )
 
-if(NOT SKIP_ControlBoardNWCDinRailYARPPorts)
-  yarp_add_plugin(ControlBoardNWCDinRailYARPPorts)
+if(NOT SKIP_dr_controlboard_nwc_yarp)
+  yarp_add_plugin(dr_controlboard_nwc_yarp)
 
-  target_sources(ControlBoardNWCDinRailYARPPorts
+  target_sources(dr_controlboard_nwc_yarp
     PRIVATE
       RemoteControlBoard.cpp
       RemoteControlBoard.h
@@ -26,7 +26,7 @@ if(NOT SKIP_ControlBoardNWCDinRailYARPPorts)
       stateExtendedReader.h
   )
 
-  target_link_libraries(ControlBoardNWCDinRailYARPPorts
+  target_link_libraries(dr_controlboard_nwc_yarp
     PRIVATE
       YARP::YARP_os
       YARP::YARP_sig
@@ -39,7 +39,7 @@ if(NOT SKIP_ControlBoardNWCDinRailYARPPorts)
   )
 
   yarp_install(
-    TARGETS ControlBoardNWCDinRailYARPPorts
+    TARGETS dr_controlboard_nwc_yarp
     EXPORT YARP_${YARP_PLUGIN_MASTER}
     COMPONENT ${YARP_PLUGIN_MASTER}
     LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}
@@ -49,7 +49,7 @@ if(NOT SKIP_ControlBoardNWCDinRailYARPPorts)
 
   set(YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS ${YARP_${YARP_PLUGIN_MASTER}_PRIVATE_DEPS} PARENT_SCOPE)
 
-  set_property(TARGET ControlBoardNWCDinRailYARPPorts PROPERTY FOLDER "Plugins/Device")
+  set_property(TARGET dr_controlboard_nwc_yarp PROPERTY FOLDER "Plugins/Device")
 
   if(BUILD_TESTING)
     add_subdirectory(tests)

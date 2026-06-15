@@ -2,25 +2,25 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 yarp_prepare_plugin(
-  ControlBoardNWSDinRailYARPPorts
+  dr_controlboard_nws_yarp
   CATEGORY device
   TYPE ControlBoard_nws_yarp
   INCLUDE ControlBoard_nws_yarp.h
   EXTRA_CONFIG
-    WRAPPER=ControlBoardNWSDinRailYARPPorts
+    WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
   GENERATE_PARSER
 )
 
-if(NOT SKIP_ControlBoardNWSDinRailYARPPorts)
-  yarp_add_plugin(ControlBoardNWSDinRailYARPPorts)
+if(NOT SKIP_dr_controlboard_nws_yarp)
+  yarp_add_plugin(dr_controlboard_nws_yarp)
 
-  target_compile_definitions(ControlBoardNWSDinRailYARPPorts
+  target_compile_definitions(dr_controlboard_nws_yarp
     PRIVATE
       LOG_COMPONENT="yarp.devices.controlBoard_nws_yarp"
   )
 
-  target_sources(ControlBoardNWSDinRailYARPPorts
+  target_sources(dr_controlboard_nws_yarp
     PRIVATE
       ControlBoard_nws_yarp.cpp
       ControlBoard_nws_yarp.h
@@ -34,7 +34,7 @@ if(NOT SKIP_ControlBoardNWSDinRailYARPPorts)
       ControlBoardLogComponent.h
   )
 
-  target_link_libraries(ControlBoardNWSDinRailYARPPorts
+  target_link_libraries(dr_controlboard_nws_yarp
     PRIVATE
       YARP::YARP_os
       YARP::YARP_sig
@@ -42,7 +42,7 @@ if(NOT SKIP_ControlBoardNWSDinRailYARPPorts)
   )
 
   yarp_install(
-    TARGETS ControlBoardNWSDinRailYARPPorts
+    TARGETS dr_controlboard_nws_yarp
     EXPORT YARP_${YARP_PLUGIN_MASTER}
     COMPONENT ${YARP_PLUGIN_MASTER}
     LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}

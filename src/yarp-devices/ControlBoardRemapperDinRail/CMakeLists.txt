@@ -1,28 +1,28 @@
 # SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
-yarp_prepare_plugin(ControlBoardRemapperDinRail
+yarp_prepare_plugin(dr_controlboard_remapper
   CATEGORY device
   TYPE ControlBoardRemapper
   INCLUDE ControlBoardRemapper.h
   EXTRA_CONFIG
-    WRAPPER=ControlBoardNWSDinRailYARPPorts
+    WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
 )
 
-yarp_prepare_plugin(RemoteControlBoardRemapperDinRail
+yarp_prepare_plugin(dr_controlboard_remapper_nwc_yarp
   CATEGORY device
   TYPE RemoteControlBoardRemapper
   INCLUDE RemoteControlBoardRemapper.h
   EXTRA_CONFIG
-    WRAPPER=ControlBoardNWSDinRailYARPPorts 
+    WRAPPER=dr_controlboard_nws_yarp 
   DEFAULT ON
 )
 
-if(NOT SKIP_ControlBoardRemapperDinRail OR NOT SKIP_RemoteControlBoardRemapperDinRail)
-  yarp_add_plugin(ControlBoardRemapperDinRail)
+if(NOT SKIP_dr_controlboard_remapper OR NOT SKIP_dr_controlboard_remapper_nwc_yarp)
+  yarp_add_plugin(dr_controlboard_remapper)
 
-  target_sources(ControlBoardRemapperDinRail
+  target_sources(dr_controlboard_remapper
     PRIVATE
       ControlBoardRemapper.cpp
       ControlBoardRemapper.h
@@ -33,7 +33,7 @@ if(NOT SKIP_ControlBoardRemapperDinRail OR NOT SKIP_RemoteControlBoardRemapperDi
       RemoteControlBoardRemapper.cpp
       RemoteControlBoardRemapper.h)
 
-  target_link_libraries(ControlBoardRemapperDinRail
+  target_link_libraries(dr_controlboard_remapper
     PRIVATE
       YARP::YARP_os
       YARP::YARP_sig
@@ -41,7 +41,7 @@ if(NOT SKIP_ControlBoardRemapperDinRail OR NOT SKIP_RemoteControlBoardRemapperDi
   )
 
   yarp_install(
-    TARGETS ControlBoardRemapperDinRail
+    TARGETS dr_controlboard_remapper
     LIBRARY DESTINATION ${YARP_DYNAMIC_PLUGINS_INSTALL_DIR}
     ARCHIVE DESTINATION ${YARP_STATIC_PLUGINS_INSTALL_DIR}
     YARP_INI DESTINATION ${YARP_PLUGIN_MANIFESTS_INSTALL_DIR}

@@ -48,7 +48,7 @@ public:
 
 public:
     const std::string m_device_classname = {"ControlBoard_nws_yarp"};
-    const std::string m_device_name = {"ControlBoardNWSDinRailYARPPorts"};
+    const std::string m_device_name = {"dr_controlboard_nws_yarp"};
     bool m_parser_is_strict = false;
     struct parser_version_type
     {
