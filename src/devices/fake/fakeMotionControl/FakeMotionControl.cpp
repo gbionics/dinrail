@@ -12,6 +12,11 @@ namespace dinrail
 
 namespace
 {
+bool isValidJointIndex(int axis, int njoints)
+{
+    return axis >= 0 && axis < njoints;
+}
+
 bool parseJointType(const std::string& typeString, JointType& type)
 {
     std::string normalized = typeString;
@@ -63,6 +68,11 @@ bool FakeMotionControl::open(const Parameters& config)
     m_axisNames.reserve(static_cast<std::size_t>(m_njoints));
     m_jointTypes.clear();
     m_jointTypes.assign(static_cast<std::size_t>(m_njoints), JointType::REVOLUTE);
+    m_posSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_velSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_torqueSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_stiffnessSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_dampingSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
 
     for (int j = 0; j < m_njoints; ++j)
     {
@@ -138,12 +148,202 @@ bool FakeMotionControl::getAxisName(int axis, std::string& name)
 bool FakeMotionControl::getJointType(int axis, JointType& type)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
-    if (!m_opened || axis < 0 || axis >= m_njoints)
+    if (!m_opened || !isValidJointIndex(axis, m_njoints))
     {
         return false;
     }
 
     type = m_jointTypes[static_cast<std::size_t>(axis)];
+    return true;
+}
+
+bool FakeMotionControl::setSetPoint(int j,
+                                    double pos,
+                                    double vel,
+                                    double torque,
+                                    double stiffness,
+                                    double damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    m_posSetpoints[index] = pos;
+    m_velSetpoints[index] = vel;
+    m_torqueSetpoints[index] = torque;
+    m_stiffnessSetpoints[index] = stiffness;
+    m_dampingSetpoints[index] = damping;
+    return true;
+}
+
+bool FakeMotionControl::setSetPoints(const VectorProxy<const int>::Ref jointIndeces,
+                                     const VectorProxy<const double>::Ref pos,
+                                     const VectorProxy<const double>::Ref vel,
+                                     const VectorProxy<const double>::Ref torque,
+                                     const VectorProxy<const double>::Ref stiffness,
+                                     const VectorProxy<const double>::Ref damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return false;
+    }
+
+    const auto inputSize = jointIndeces.size();
+    if (inputSize != pos.size() || inputSize != vel.size() || inputSize != torque.size()
+        || inputSize != stiffness.size() || inputSize != damping.size())
+    {
+        return false;
+    }
+
+    for (std::ptrdiff_t i = 0; i < inputSize; ++i)
+    {
+        if (!isValidJointIndex(jointIndeces[i], m_njoints))
+        {
+            return false;
+        }
+    }
+
+    for (std::ptrdiff_t i = 0; i < inputSize; ++i)
+    {
+        const auto index = static_cast<std::size_t>(jointIndeces[i]);
+        m_posSetpoints[index] = pos[i];
+        m_velSetpoints[index] = vel[i];
+        m_torqueSetpoints[index] = torque[i];
+        m_stiffnessSetpoints[index] = stiffness[i];
+        m_dampingSetpoints[index] = damping[i];
+    }
+
+    return true;
+}
+
+bool FakeMotionControl::setSetPoints(const VectorProxy<const double>::Ref pos,
+                                     const VectorProxy<const double>::Ref vel,
+                                     const VectorProxy<const double>::Ref torque,
+                                     const VectorProxy<const double>::Ref stiffness,
+                                     const VectorProxy<const double>::Ref damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return false;
+    }
+
+    const auto expectedSize = static_cast<std::ptrdiff_t>(m_njoints);
+    if (expectedSize != pos.size() || expectedSize != vel.size() || expectedSize != torque.size()
+        || expectedSize != stiffness.size() || expectedSize != damping.size())
+    {
+        return false;
+    }
+
+    for (std::ptrdiff_t i = 0; i < expectedSize; ++i)
+    {
+        const auto index = static_cast<std::size_t>(i);
+        m_posSetpoints[index] = pos[i];
+        m_velSetpoints[index] = vel[i];
+        m_torqueSetpoints[index] = torque[i];
+        m_stiffnessSetpoints[index] = stiffness[i];
+        m_dampingSetpoints[index] = damping[i];
+    }
+
+    return true;
+}
+
+bool FakeMotionControl::getSetPoint(int j,
+                                    double& pos,
+                                    double& vel,
+                                    double& torque,
+                                    double& stiffness,
+                                    double& damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    pos = m_posSetpoints[index];
+    vel = m_velSetpoints[index];
+    torque = m_torqueSetpoints[index];
+    stiffness = m_stiffnessSetpoints[index];
+    damping = m_dampingSetpoints[index];
+    return true;
+}
+
+bool FakeMotionControl::getSetPoints(const VectorProxy<const int>::Ref jointIndeces,
+                                     VectorProxy<double>::Ref pos,
+                                     VectorProxy<double>::Ref vel,
+                                     VectorProxy<double>::Ref torque,
+                                     VectorProxy<double>::Ref stiffness,
+                                     VectorProxy<double>::Ref damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return false;
+    }
+
+    const auto outputSize = jointIndeces.size();
+    if (outputSize != pos.size() || outputSize != vel.size() || outputSize != torque.size()
+        || outputSize != stiffness.size() || outputSize != damping.size())
+    {
+        return false;
+    }
+
+    for (std::ptrdiff_t i = 0; i < outputSize; ++i)
+    {
+        if (!isValidJointIndex(jointIndeces[i], m_njoints))
+        {
+            return false;
+        }
+    }
+
+    for (std::ptrdiff_t i = 0; i < outputSize; ++i)
+    {
+        const auto jointIndex = static_cast<std::size_t>(jointIndeces[i]);
+        pos[i] = m_posSetpoints[jointIndex];
+        vel[i] = m_velSetpoints[jointIndex];
+        torque[i] = m_torqueSetpoints[jointIndex];
+        stiffness[i] = m_stiffnessSetpoints[jointIndex];
+        damping[i] = m_dampingSetpoints[jointIndex];
+    }
+
+    return true;
+}
+
+bool FakeMotionControl::getSetPoints(VectorProxy<double>::Ref pos,
+                                     VectorProxy<double>::Ref vel,
+                                     VectorProxy<double>::Ref torque,
+                                     VectorProxy<double>::Ref stiffness,
+                                     VectorProxy<double>::Ref damping)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return false;
+    }
+
+    const auto expectedSize = static_cast<std::ptrdiff_t>(m_njoints);
+    if (expectedSize != pos.size() || expectedSize != vel.size() || expectedSize != torque.size()
+        || expectedSize != stiffness.size() || expectedSize != damping.size())
+    {
+        return false;
+    }
+
+    for (std::ptrdiff_t i = 0; i < expectedSize; ++i)
+    {
+        const auto index = static_cast<std::size_t>(i);
+        pos[i] = m_posSetpoints[index];
+        vel[i] = m_velSetpoints[index];
+        torque[i] = m_torqueSetpoints[index];
+        stiffness[i] = m_stiffnessSetpoints[index];
+        damping[i] = m_dampingSetpoints[index];
+    }
+
     return true;
 }
 
