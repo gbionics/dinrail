@@ -6,7 +6,7 @@ This document describes the naming conventions used by dinrail plugins, and shou
 
 ### Device name
 
-`dinrail` devices should always be named following `CamelCase`, unless a different name is required to provide drop-in compatibility with legacy devices, for example YARP devices.
+`dinrail` devices should always be named following `snake_case`, unless a different name is required to provide drop-in compatibility with legacy devices, for example YARP devices. The class implementing the device should be named according to the `CamelCase` name matching the `snake_case` name of the device.
 
 ### Device parameters
 

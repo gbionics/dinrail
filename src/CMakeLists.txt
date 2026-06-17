@@ -10,7 +10,10 @@ add_subdirectory(devices)
 # Add command line tools.
 add_subdirectory(cli)
 
-# Optional YARP Property conversion support.
 if(DINRAIL_USES_YARP)
+    # Optional YARP Property conversion support.
     add_subdirectory(yarp)
+
+    # YARP devices (i.e. devices that can be opened via yarp::dev::PolyDriver and yarprobotinterface)
+    add_subdirectory(yarp-devices)
 endif()
