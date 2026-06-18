@@ -43,4 +43,6 @@ struct ControlBoardYARPJointData
   20: bool controlMode_isValid;
   21: VectorOfInt interactionMode;
   22: bool interactionMode_isValid;
+  23: VectorOfDouble temperature;
+  24: bool temperature_isValid;
 } ()

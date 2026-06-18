@@ -63,6 +63,7 @@ void StateExtendedInputPort::init(int numberOfJoints)
     last.torque.resize(numberOfJoints);
     last.pwmDutycycle.resize(numberOfJoints);
     last.current.resize(numberOfJoints);
+    last.temperature.resize(numberOfJoints);
     last.controlMode.resize(numberOfJoints);
     last.interactionMode.resize(numberOfJoints);
 }
@@ -152,6 +153,11 @@ bool StateExtendedInputPort::getLastSingle(int j, int field, double *data, Stamp
             case VOCAB_AMP_CURRENT:
                 ret = last.current_isValid;
                 *data = last.current[j];
+                break;
+
+            case VOCAB_TEMPERATURE:
+                ret = last.temperature_isValid;
+                *data = last.temperature[j];
                 break;
 
             default:
@@ -253,6 +259,11 @@ bool StateExtendedInputPort::getLastVector(int field, double* data, Stamp& stamp
             case VOCAB_AMP_CURRENTS:
                 ret = last.current_isValid;
                 memcpy(data, last.current.data(), last.current.size() * last.current.getElementSize());
+                break;
+
+            case VOCAB_TEMPERATURES:
+                ret = last.temperature_isValid;
+                memcpy(data, last.temperature.data(), last.temperature.size() * last.temperature.getElementSize());
                 break;
 
             default:

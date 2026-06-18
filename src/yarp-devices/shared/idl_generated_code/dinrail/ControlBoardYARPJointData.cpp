@@ -34,7 +34,9 @@ ControlBoardYARPJointData::ControlBoardYARPJointData(const yarp::sig::VectorOf<d
                                                      const yarp::sig::VectorOf<int>& controlMode,
                                                      const bool controlMode_isValid,
                                                      const yarp::sig::VectorOf<int>& interactionMode,
-                                                     const bool interactionMode_isValid) :
+                                                     const bool interactionMode_isValid,
+                                                     const yarp::sig::VectorOf<double>& temperature,
+                                                     const bool temperature_isValid) :
         WirePortable(),
         jointPosition(jointPosition),
         jointPosition_isValid(jointPosition_isValid),
@@ -57,7 +59,9 @@ ControlBoardYARPJointData::ControlBoardYARPJointData(const yarp::sig::VectorOf<d
         controlMode(controlMode),
         controlMode_isValid(controlMode_isValid),
         interactionMode(interactionMode),
-        interactionMode_isValid(interactionMode_isValid)
+        interactionMode_isValid(interactionMode_isValid),
+        temperature(temperature),
+        temperature_isValid(temperature_isValid)
 {
 }
 
@@ -130,6 +134,12 @@ bool ControlBoardYARPJointData::read(yarp::os::idl::WireReader& reader)
     if (!read_interactionMode_isValid(reader)) {
         return false;
     }
+    if (!nested_read_temperature(reader)) {
+        return false;
+    }
+    if (!read_temperature_isValid(reader)) {
+        return false;
+    }
     if (reader.isError()) {
         return false;
     }
@@ -140,7 +150,7 @@ bool ControlBoardYARPJointData::read(yarp::os::idl::WireReader& reader)
 bool ControlBoardYARPJointData::read(yarp::os::ConnectionReader& connection)
 {
     yarp::os::idl::WireReader reader(connection);
-    if (!reader.readListHeader(22)) {
+    if (!reader.readListHeader(24)) {
         return false;
     }
     if (!read(reader)) {
@@ -218,6 +228,12 @@ bool ControlBoardYARPJointData::write(const yarp::os::idl::WireWriter& writer) c
     if (!write_interactionMode_isValid(writer)) {
         return false;
     }
+    if (!nested_write_temperature(writer)) {
+        return false;
+    }
+    if (!write_temperature_isValid(writer)) {
+        return false;
+    }
     if (writer.isError()) {
         return false;
     }
@@ -228,7 +244,7 @@ bool ControlBoardYARPJointData::write(const yarp::os::idl::WireWriter& writer) c
 bool ControlBoardYARPJointData::write(yarp::os::ConnectionWriter& connection) const
 {
     yarp::os::idl::WireWriter writer(connection);
-    if (!writer.writeListHeader(22)) {
+    if (!writer.writeListHeader(24)) {
         return false;
     }
     if (!write(writer)) {
@@ -1254,6 +1270,98 @@ bool ControlBoardYARPJointData::nested_read_interactionMode_isValid(yarp::os::id
 bool ControlBoardYARPJointData::nested_write_interactionMode_isValid(const yarp::os::idl::WireWriter& writer) const
 {
     if (!writer.writeBool(interactionMode_isValid)) {
+        return false;
+    }
+    return true;
+}
+
+// read temperature field
+bool ControlBoardYARPJointData::read_temperature(yarp::os::idl::WireReader& reader)
+{
+    if (reader.noMore()) {
+        reader.fail();
+        return false;
+    }
+    if (!reader.read(temperature)) {
+        reader.fail();
+        return false;
+    }
+    return true;
+}
+
+// write temperature field
+bool ControlBoardYARPJointData::write_temperature(const yarp::os::idl::WireWriter& writer) const
+{
+    if (!writer.write(temperature)) {
+        return false;
+    }
+    return true;
+}
+
+// read (nested) temperature field
+bool ControlBoardYARPJointData::nested_read_temperature(yarp::os::idl::WireReader& reader)
+{
+    if (reader.noMore()) {
+        reader.fail();
+        return false;
+    }
+    if (!reader.readNested(temperature)) {
+        reader.fail();
+        return false;
+    }
+    return true;
+}
+
+// write (nested) temperature field
+bool ControlBoardYARPJointData::nested_write_temperature(const yarp::os::idl::WireWriter& writer) const
+{
+    if (!writer.writeNested(temperature)) {
+        return false;
+    }
+    return true;
+}
+
+// read temperature_isValid field
+bool ControlBoardYARPJointData::read_temperature_isValid(yarp::os::idl::WireReader& reader)
+{
+    if (reader.noMore()) {
+        reader.fail();
+        return false;
+    }
+    if (!reader.readBool(temperature_isValid)) {
+        reader.fail();
+        return false;
+    }
+    return true;
+}
+
+// write temperature_isValid field
+bool ControlBoardYARPJointData::write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const
+{
+    if (!writer.writeBool(temperature_isValid)) {
+        return false;
+    }
+    return true;
+}
+
+// read (nested) temperature_isValid field
+bool ControlBoardYARPJointData::nested_read_temperature_isValid(yarp::os::idl::WireReader& reader)
+{
+    if (reader.noMore()) {
+        reader.fail();
+        return false;
+    }
+    if (!reader.readBool(temperature_isValid)) {
+        reader.fail();
+        return false;
+    }
+    return true;
+}
+
+// write (nested) temperature_isValid field
+bool ControlBoardYARPJointData::nested_write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const
+{
+    if (!writer.writeBool(temperature_isValid)) {
         return false;
     }
     return true;

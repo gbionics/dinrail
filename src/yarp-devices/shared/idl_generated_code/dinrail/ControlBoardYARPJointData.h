@@ -44,6 +44,8 @@ public:
     bool controlMode_isValid{false};
     yarp::sig::VectorOf<int> interactionMode{};
     bool interactionMode_isValid{false};
+    yarp::sig::VectorOf<double> temperature{};
+    bool temperature_isValid{false};
 
     // Default constructor
     ControlBoardYARPJointData() = default;
@@ -70,7 +72,9 @@ public:
                               const yarp::sig::VectorOf<int>& controlMode,
                               const bool controlMode_isValid,
                               const yarp::sig::VectorOf<int>& interactionMode,
-                              const bool interactionMode_isValid);
+                              const bool interactionMode_isValid,
+                              const yarp::sig::VectorOf<double>& temperature,
+                              const bool temperature_isValid);
 
     // Read structure on a Wire
     bool read(yarp::os::idl::WireReader& reader) override;
@@ -222,6 +226,18 @@ private:
     bool write_interactionMode_isValid(const yarp::os::idl::WireWriter& writer) const;
     bool nested_read_interactionMode_isValid(yarp::os::idl::WireReader& reader);
     bool nested_write_interactionMode_isValid(const yarp::os::idl::WireWriter& writer) const;
+
+    // read/write temperature field
+    bool read_temperature(yarp::os::idl::WireReader& reader);
+    bool write_temperature(const yarp::os::idl::WireWriter& writer) const;
+    bool nested_read_temperature(yarp::os::idl::WireReader& reader);
+    bool nested_write_temperature(const yarp::os::idl::WireWriter& writer) const;
+
+    // read/write temperature_isValid field
+    bool read_temperature_isValid(yarp::os::idl::WireReader& reader);
+    bool write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const;
+    bool nested_read_temperature_isValid(yarp::os::idl::WireReader& reader);
+    bool nested_write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const;
 };
 
 } // namespace dinrail

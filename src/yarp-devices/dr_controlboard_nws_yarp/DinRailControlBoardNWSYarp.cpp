@@ -369,6 +369,7 @@ void DinRailControlBoardNWSYarp::run()
     data.current.resize(subdevice_joints);
     data.controlMode.resize(subdevice_joints);
     data.interactionMode.resize(subdevice_joints);
+    data.temperature.resize(subdevice_joints);
 
     // Get data from HW
     if (iEncodersTimed) {
@@ -389,6 +390,12 @@ void DinRailControlBoardNWSYarp::run()
         data.motorPosition_isValid = false;
         data.motorVelocity_isValid = false;
         data.motorAcceleration_isValid = false;
+    }
+
+    if (iMotor) {
+        data.temperature_isValid = iMotor->getTemperatures(data.temperature.data());
+    } else {
+        data.temperature_isValid = false;
     }
 
     if (iTorqueControl) {

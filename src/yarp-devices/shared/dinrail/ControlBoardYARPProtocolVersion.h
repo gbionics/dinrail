@@ -9,8 +9,10 @@
 namespace dinrail
 {
 
-constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR = 1;
-constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR = 9;
+// The base protocol version is 1000.0.0, to ensure that there
+// may not be any confusion with nws/nwc protocol in YARP
+constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR = 1000;
+constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR = 0;
 constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK = 0;
 
 }
