@@ -1,0 +1,28 @@
+set(dinrail_VERSION @PACKAGE_VERSION@)
+
+@PACKAGE_INIT@
+
+@PACKAGE_DEPENDENCIES@
+
+include("${CMAKE_CURRENT_LIST_DIR}/dinrail-targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/DinrailAddDevice.cmake")
+
+if("yarp" IN_LIST dinrail_FIND_COMPONENTS)
+    set(dinrail_yarp_FOUND FALSE)
+
+    if(dinrail_FIND_REQUIRED_yarp)
+        find_dependency(dinrail-yarp REQUIRED)
+    else()
+        find_dependency(dinrail-yarp QUIET)
+    endif()
+
+    if(TARGET dinrail-yarp::dinrail-yarp-conversions)
+        set(dinrail_yarp_FOUND TRUE)
+    endif()
+
+    if(TARGET dinrail-yarp::dinrail-yarp-conversions AND NOT TARGET dinrail::dinrail-yarp-conversions)
+        add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp::dinrail-yarp-conversions)
+    endif()
+endif()
+
+check_required_components(dinrail)
