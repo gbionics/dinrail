@@ -67,7 +67,7 @@ void StateExtendedInputPort::init(int numberOfJoints)
     last.interactionMode.resize(numberOfJoints);
 }
 
-void StateExtendedInputPort::onRead(yarp::dev::impl::jointData &v)
+void StateExtendedInputPort::onRead(dinrail::ControlBoardYARPJointData &v)
 {
     now=Time::now();
     mutex.lock();

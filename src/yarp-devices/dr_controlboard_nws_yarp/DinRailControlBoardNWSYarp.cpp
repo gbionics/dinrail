@@ -10,8 +10,9 @@
 #include "RPCMessagesParser.h"
 #include "StreamingMessagesParser.h"
 
+#include <dinrail/ControlBoardYARPJointData.h>
+
 #include <yarp/os/LogStream.h>
-#include <yarp/dev/impl/jointData.h>
 
 #include <numeric>
 #include <cmath>
@@ -19,7 +20,7 @@
 using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
-using yarp::dev::impl::jointData;
+using dinrail::ControlBoardYARPJointData;
 
 const double DEFAULT_PERIOD = 0.02;
 
@@ -355,7 +356,7 @@ void DinRailControlBoardNWSYarp::run()
         yCIWarning(CONTROLBOARD, id()) << "Number of streaming input messages to be read is " << inputStreamingPort.getPendingReads() << " and can overflow";
     }
     // handle stateExt first
-    jointData& data = extendedOutputState_buffer.get();
+    ControlBoardYARPJointData& data = extendedOutputState_buffer.get();
 
     data.jointPosition.resize(subdevice_joints);
     data.jointVelocity.resize(subdevice_joints);
