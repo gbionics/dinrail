@@ -3,16 +3,17 @@
 
 find_package(Catch2 3 REQUIRED)
 
-add_executable(FakeMotionControlAxisInfoTest FakeMotionControlAxisInfoTest.cpp)
-target_link_libraries(FakeMotionControlAxisInfoTest
+add_executable(FakeMotionControlInterfacesTest FakeMotionControlInterfacesTest.cpp)
+target_link_libraries(FakeMotionControlInterfacesTest
     PRIVATE
         dinrail::dinrail
         Catch2::Catch2WithMain
 )
-add_test(NAME FakeMotionControlAxisInfoTest COMMAND FakeMotionControlAxisInfoTest)
+add_test(NAME FakeMotionControlInterfacesTest COMMAND FakeMotionControlInterfacesTest)
 
 # Tests must find plugins from the build tree even when the project is not installed.
-set_tests_properties(FakeMotionControlAxisInfoTest
+set_tests_properties(FakeMotionControlInterfacesTest
     PROPERTIES
         ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-fakeMotionControl>"
 )
+
