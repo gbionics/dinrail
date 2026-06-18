@@ -16,6 +16,9 @@ if(BUILD_TESTING)
 	find_package(Catch2 REQUIRED)
 endif()
 
+# Warning: the <package> option of yarp_configure_plugins_installation should be different from the plugin names
+yarp_configure_plugins_installation(dinrail_yarp_devices)
+
 add_subdirectory(test-helpers)
 
 add_subdirectory(dr_controlboard_nwc_yarp)
