@@ -5,6 +5,7 @@ This directory contains standalone example projects that consume `dinrail` as an
 ## Available examples
 
 - `implement-your-first-device/`: implement a minimal device plugin and load it at runtime with `dinrail::Device`.
+- `yarp-conversions/`: minimal conversion round-trip between `dinrail::Parameters` and `yarp::os::Property`.
 
 ## Run examples with Pixi
 
@@ -42,6 +43,12 @@ To build, install, and run the `implement-your-first-device` executable in one c
 
 ~~~
 pixi run run-implement-your-first-device
+~~~
+
+To build, install, and run the YARP conversion example in one command:
+
+~~~
+pixi run run-yarp-conversions-minimal
 ~~~
 
 ## Run examples against an external dinrail

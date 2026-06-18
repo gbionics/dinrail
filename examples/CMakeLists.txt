@@ -5,8 +5,10 @@ cmake_minimum_required(VERSION 3.28.3)
 
 project(dinrail-examples LANGUAGES C CXX)
 
-include(GNUInstallDirs)
-
-find_package(dinrail REQUIRED)
+option(DINRAIL_EXAMPLES_USES_YARP "Enable dinrail examples that use YARP" OFF)
 
 add_subdirectory(implement-your-first-device)
+
+if(DINRAIL_EXAMPLES_USES_YARP)
+  add_subdirectory(yarp-conversions)
+endif()

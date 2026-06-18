@@ -17,6 +17,7 @@ configure = { cmd = [
     "cmake",
     "-DCMAKE_BUILD_TYPE=Release",
     "-DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX",
+    "-DDINRAIL_EXAMPLES_USES_YARP:BOOL=ON",
     "-G",
     "Ninja",
     "-S",
@@ -28,11 +29,13 @@ configure = { cmd = [
 build = { cmd = "cmake --build .build --config Release", depends-on = ["configure"] }
 install = { cmd = ["cmake", "--install", ".build", "--config", "Release"], depends-on = ["build"] }
 run-implement-your-first-device = { cmd = "implement-your-first-device", depends-on = ["install"] }
+run-yarp-conversions = { cmd = "yarp-conversions", depends-on = ["install"] }
 
 [dependencies]
 cmake = "*"
 cxx-compiler = "*"
 ninja = "*"
 pkg-config = "*"
+libyarp = "*"
 
 dinrail = { path = ".." }
