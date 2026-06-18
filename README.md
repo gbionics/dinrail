@@ -78,6 +78,9 @@ Examples documentation (including Pixi commands) is available at:
 
 * [fakeMotionControl README](src/devices/fake/fakeMotionControl/README.md) — parameters accepted by the `fakeMotionControl` plugin
 
+## Versioning policy
+
+Any ABI, API or network protocol incompatible change will result in a minor (at least) release bump.
 
 ## Development
 
