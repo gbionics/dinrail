@@ -19,7 +19,8 @@ endif()
 # Warning: the <package> option of yarp_configure_plugins_installation should be different from the plugin names
 yarp_configure_plugins_installation(dinrail_yarp_devices)
 
-add_subdirectory(test-helpers)
+# Code shared among devices and tests
+add_subdirectory(shared)
 
 add_subdirectory(dr_controlboard_nwc_yarp)
 add_subdirectory(dr_controlboard_nws_yarp)
