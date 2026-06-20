@@ -8,6 +8,8 @@
 #include "DinRailControlBoardNWCYarpLogComponent.h"
 #include "stateExtendedReader.h"
 
+#include <dinrail/ControlBoardYARPProtocolVersion.h>
+
 #include <cstring>
 
 #include <yarp/os/PortablePair.h>
@@ -35,10 +37,6 @@ using namespace yarp::dev;
 using namespace yarp::sig;
 
 namespace {
-
-constexpr int PROTOCOL_VERSION_MAJOR = 1;
-constexpr int PROTOCOL_VERSION_MINOR = 9;
-constexpr int PROTOCOL_VERSION_TWEAK = 0;
 
 constexpr double DIAGNOSTIC_THREAD_PERIOD = 1.000;
 
@@ -140,11 +138,11 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
         protocolVersion.tweak=reply.get(3).asInt32();
 
         //verify protocol
-        if (protocolVersion.major != PROTOCOL_VERSION_MAJOR) {
+        if (protocolVersion.major != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR) {
             error = true;
         }
 
-        if (protocolVersion.minor != PROTOCOL_VERSION_MINOR) {
+        if (protocolVersion.minor != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR) {
             error = true;
         }
     }
@@ -156,9 +154,9 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
     // protocol did not match
     yCError(REMOTECONTROLBOARD,
             "Expecting protocol %d %d %d, but the device we are connecting to has protocol version %d %d %d",
-            PROTOCOL_VERSION_MAJOR,
-            PROTOCOL_VERSION_MINOR,
-            PROTOCOL_VERSION_TWEAK,
+            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR,
+            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR,
+            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK,
             protocolVersion.major,
             protocolVersion.minor,
             protocolVersion.tweak);
@@ -166,12 +164,12 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
     bool ret;
     if (ignore)
     {
-        yCWarning(REMOTECONTROLBOARD, "Ignoring error but please update YARP or the remotecontrolboard implementation");
+        yCWarning(REMOTECONTROLBOARD, "Ignoring error but please ensure that nws and nwc use compatible version of dinrail-yarp");
         ret = true;
     }
     else
     {
-        yCError(REMOTECONTROLBOARD, "Please update YARP or the remotecontrolboard implementation");
+        yCError(REMOTECONTROLBOARD, "Please ensure that nws and nwc use compatible version of dinrail-yarp");
         ret = false;
     }
 
@@ -1545,12 +1543,23 @@ bool DinRailControlBoardNWCYarp::getNumberOfMotors(int *num)
 
 bool DinRailControlBoardNWCYarp::getTemperature      (int m, double* val)
 {
-    return get1V1I1D(VOCAB_TEMPERATURE, m, val);
+    double localArrivalTime = 0.0;
+
+    extendedPortMutex.lock();
+    bool ret = extendedIntputStatePort.getLastSingle(m, VOCAB_TEMPERATURE, val, lastStamp, localArrivalTime);
+    extendedPortMutex.unlock();
+    return ret;
 }
 
 bool DinRailControlBoardNWCYarp::getTemperatures     (double *vals)
 {
-    return get1VDA(VOCAB_TEMPERATURES, vals);
+    double localArrivalTime = 0.0;
+
+    extendedPortMutex.lock();
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURE, vals, lastStamp, localArrivalTime);
+    extendedPortMutex.unlock();
+
+    return ret;
 }
 
 bool DinRailControlBoardNWCYarp::getTemperatureLimit (int m, double* val)

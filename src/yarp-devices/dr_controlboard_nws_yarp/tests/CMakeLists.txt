@@ -11,7 +11,7 @@ target_link_libraries(harness_device_controlBoard_nws_yarp
 		YARP::YARP_sig
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
-		dinrail::dinrail-yarp-dev-test-helpers
+		dinrail-yarp-dev-shared
 )
 target_link_options(harness_device_controlBoard_nws_yarp
 	PRIVATE

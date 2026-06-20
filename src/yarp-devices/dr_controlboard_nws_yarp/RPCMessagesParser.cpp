@@ -38,9 +38,9 @@ void RPCMessagesParser::handleProtocolVersionRequest(const yarp::os::Bottle& cmd
     }
 
     response.addVocab32(VOCAB_PROTOCOL_VERSION);
-    response.addInt32(PROTOCOL_VERSION_MAJOR);
-    response.addInt32(PROTOCOL_VERSION_MINOR);
-    response.addInt32(PROTOCOL_VERSION_TWEAK);
+    response.addInt32(dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR);
+    response.addInt32(dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR);
+    response.addInt32(dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK);
 
     *rec = true;
     *ok = true;

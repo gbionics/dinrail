@@ -27,9 +27,7 @@
 #include <string>
 #include <vector>
 
-constexpr int PROTOCOL_VERSION_MAJOR = 1;
-constexpr int PROTOCOL_VERSION_MINOR = 9;
-constexpr int PROTOCOL_VERSION_TWEAK = 0;
+#include <dinrail/ControlBoardYARPProtocolVersion.h>
 
 #ifdef MSVC
 #    pragma warning(disable : 4355)

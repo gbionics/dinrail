@@ -10,7 +10,7 @@ target_link_libraries(harness_device_controlBoardRemapper_t1
 		YARP::YARP_sig
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
-		dinrail::dinrail-yarp-dev-test-helpers
+		dinrail-yarp-dev-shared
 )
 target_link_options(harness_device_controlBoardRemapper_t1
 	PRIVATE
@@ -30,7 +30,7 @@ target_link_libraries(harness_device_controlBoardRemapper_t2
 		YARP::YARP_sig
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
-		dinrail::dinrail-yarp-dev-test-helpers
+		dinrail-yarp-dev-shared
 )
 target_link_options(harness_device_controlBoardRemapper_t2
 	PRIVATE
@@ -50,7 +50,7 @@ target_link_libraries(harness_device_controlBoardRemapper_t3
 		YARP::YARP_sig
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
-		dinrail::dinrail-yarp-dev-test-helpers
+		dinrail-yarp-dev-shared
 )
 target_link_options(harness_device_controlBoardRemapper_t3
 	PRIVATE
