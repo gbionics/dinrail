@@ -95,10 +95,10 @@ protected:
 
     // Buffer associated to the extendedOutputStatePort port; in this case we will use the type generated
     // from the YARP .thrift file
-    StateExtendedInputPort                          extendedIntputStatePort;  // Buffered port storing new data
+    StateExtendedInputPort                          extendedInputStatePort;  // Buffered port storing new data
     std::mutex extendedPortMutex;
     dinrail::ControlBoardYARPJointData last_singleJoint;     // tmp to store last received data for a particular joint
-//    yarp::os::Port extendedIntputStatePort;         // Port /stateExt:i reading the state of the joints
+//    yarp::os::Port extendedInputStatePort;         // Port /stateExt:i reading the state of the joints
     dinrail::ControlBoardYARPJointData last_wholePart;         // tmp to store last received data for whole part
 
     mutable Stamp lastStamp;  //this is shared among all calls that read encoders
