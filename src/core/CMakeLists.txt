@@ -18,9 +18,14 @@ add_library(dinrail)
 
 target_sources(dinrail
     PRIVATE
+    dinrail/InterfaceAdapterRegistry.cpp
+    dinrail/InterfaceAdapterRegistry.h
+    dinrail/RuntimeContext.cpp
+    dinrail/RuntimeContext.h
     dinrail/Device.cpp
     dinrail/Device.h
     dinrail/IAxisInfo.h
+    dinrail/ICompatibilityLayer.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h

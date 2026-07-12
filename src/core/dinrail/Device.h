@@ -5,14 +5,19 @@
 #ifndef DINRAIL_DEVICE_H
 #define DINRAIL_DEVICE_H
 
+#include <dinrail/IInterfaceQueryable.h>
+#include <dinrail/RuntimeContext.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/Parameters.h>
 
 #include <memory>
 #include <string>
+#include <typeinfo>
 
 namespace dinrail
 {
+
+class RuntimeContext;
 
 /**
  * @brief Runtime handle for opening and querying dinrail device plugins.
@@ -24,6 +29,7 @@ public:
      * @brief Construct an empty device handle.
      */
     Device();
+    explicit Device(const RuntimeContext& context);
 
     /**
      * @brief Destroy the device handle and release owned resources.
@@ -39,6 +45,8 @@ public:
     /**
      * @brief Open a device plugin from the provided configuration.
      * @param config Device configuration, including at least the device name.
+        * Optional key `dinrail_device_type` can be set to `auto` (default), `dinrail`,
+        * or `<compat_layer_name>` (for example `yarp`) to control native versus compatibility-layer loading.
      * @return true on success, false otherwise.
      */
     bool open(const Parameters& config);
@@ -65,12 +73,14 @@ public:
     {
         x = nullptr;
 
-        IDevice* impl = getImplementation();
+        IDevice* impl = getDriver();
         if (!impl)
         {
             return false;
         }
 
+        // This dynamic cast checks if the underlying device implementation
+        // directly supports the requested interface.
         T* v = dynamic_cast<T*>(impl);
         if (v != nullptr)
         {
@@ -78,16 +88,26 @@ public:
             return true;
         }
 
+        // If the direct cast fails, query the adapter registry and compatibility
+        // fallback path.
+        void* ptr = queryAdapter(typeid(T));
+        if (ptr != nullptr)
+        {
+            x = static_cast<T*>(ptr);
+            return true;
+        }
+
         return false;
     }
 
+    std::string getDeviceName() const;
+
 private:
+    void* queryAdapter(const std::type_info& interfaceType);
+    IDevice* getDriver();
+
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
-
-    // Internal method to retrieve the raw device implementation pointer,
-    // used in the view() method for dynamic casting.
-    IDevice* getImplementation();
 };
 
 } // namespace dinrail

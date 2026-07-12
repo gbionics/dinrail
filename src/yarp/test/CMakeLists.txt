@@ -36,3 +36,15 @@ target_compile_definitions(BLFParametersHandlerCompatibilityTest PRIVATE
     DINRAIL_YARP_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
 )
 add_test(NAME BLFParametersHandlerCompatibilityTest COMMAND BLFParametersHandlerCompatibilityTest)
+
+add_executable(YarpDropInCompatibilityTest YarpDropInCompatibilityTest.cpp)
+target_link_libraries(YarpDropInCompatibilityTest
+    PRIVATE
+        dinrail::dinrail
+    dinrail::dinrail-yarp-conversions
+    YARP::YARP_dev
+        Catch2::Catch2WithMain
+)
+add_test(NAME YarpDropInCompatibilityTest COMMAND YarpDropInCompatibilityTest)
+set_tests_properties(YarpDropInCompatibilityTest PROPERTIES
+    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-compat-yarp>")

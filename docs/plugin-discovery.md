@@ -11,6 +11,11 @@ For a device name `X`:
 - plugin library stem: `dinrail-device-X`
 - factory symbol: `dinrail_device_X` (with `-` in the device name converted to `_`)
 
+For a compatibility layer name `Y` (for example `yarp`):
+
+- plugin library stem: `dinrail-compat-Y`
+- factory symbol: `dinrail_compat_Y` (with `-` in the compatibility name converted to `_`)
+
 The logic lives in [src/core/dinrail/PluginUtils.h](../src/core/dinrail/PluginUtils.h) and [src/core/dinrail/PluginUtils.cpp](../src/core/dinrail/PluginUtils.cpp).
 
 ## Search Path Resolution
@@ -21,6 +26,7 @@ The logic lives in [src/core/dinrail/PluginUtils.h](../src/core/dinrail/PluginUt
 2. Entries from `DINRAIL_PLUGIN_PATH` (split with `:` on Linux/macOS and `;` on Windows).
 
 `dinrail::Device::open(...)` extends the `sharedlibpp` search path with all returned directories.
+The same search path is used for both native device plugins and compatibility-layer plugins.
 
 The `dinrail` CLI (`dev --show-search-path` and `dev --list`) uses the same `getPluginSearchPaths()` function, so CLI output and runtime loading behavior are aligned.
 

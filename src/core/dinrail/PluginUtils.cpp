@@ -33,6 +33,24 @@ std::string getSharedlibppFactoryNameFromDeviceName(const std::string& deviceNam
     return factoryName;
 }
 
+std::string getSharedlibppLibraryNameFromCompatName(const std::string& compatibilityName)
+{
+    return "dinrail-compat-" + compatibilityName;
+}
+
+std::string getSharedlibppFactoryNameFromCompatName(const std::string& compatibilityName)
+{
+    std::string factoryName = "dinrail_compat_" + compatibilityName;
+    for (char& c : factoryName)
+    {
+        if (c == '-')
+        {
+            c = '_';
+        }
+    }
+    return factoryName;
+}
+
 std::optional<std::string> getPathOfDinrailSharedLibrary()
 {
     std::filesystem::path libraryLocation;

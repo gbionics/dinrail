@@ -28,6 +28,21 @@ std::string getSharedlibppLibraryNameFromDeviceName(const std::string& deviceNam
 std::string getSharedlibppFactoryNameFromDeviceName(const std::string& deviceName);
 
 /**
+ * @brief Build the shared library name for a dinrail compatibility plugin.
+ * @param compatibilityName Compatibility identifier (for example, "yarp").
+ * @return Library stem in the form "dinrail-compat-<compatibilityName>".
+ */
+std::string getSharedlibppLibraryNameFromCompatName(const std::string& compatibilityName);
+
+/**
+ * @brief Build the sharedlibpp factory symbol name for a compatibility plugin.
+ * @param compatibilityName Compatibility identifier (for example, "yarp").
+ * @return Factory symbol in the form "dinrail_compat_<compatibilityName>", with dashes
+ * converted to underscores.
+ */
+std::string getSharedlibppFactoryNameFromCompatName(const std::string& compatibilityName);
+
+/**
  * @brief Resolve the directory that contains the loaded dinrail shared library.
  *
  * This is used to discover plugin directories relative to the dinrail runtime library location,

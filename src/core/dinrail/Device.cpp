@@ -3,143 +3,59 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <dinrail/Device.h>
+#include <dinrail/IInterfaceQueryable.h>
+#include <dinrail/RuntimeContext.h>
 #include <dinrail/IDevice.h>
-#include <dinrail/PluginUtils.h>
 
-#include <sharedlibpp/SharedLibraryClassFactory.h>
+#include <utility>
 
 namespace dinrail
 {
 
-namespace
-{
-
-template <class T>
-struct FactoryDeleter
-{
-    const sharedlibpp::SharedLibraryClassFactory<T>* factory = nullptr;
-
-    void operator()(T* p) const noexcept
-    {
-        if (p != nullptr && factory != nullptr)
-        {
-            factory->destroy(p);
-        }
-    }
-};
-
-template <class T>
-using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
-
-template <class T>
-FactoryUniquePtr<T> make_factory_unique(const sharedlibpp::SharedLibraryClassFactory<T>& factory)
-{
-    return FactoryUniquePtr<T>(factory.create(), FactoryDeleter<T>{&factory});
-}
-
-} // namespace
-
 struct Device::Impl
 {
+    explicit Impl(RuntimeContext context)
+        : context(std::move(context))
+    {
+    }
+
+    RuntimeContext context;
     bool isValid{false};
-    std::unique_ptr<sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>> deviceFactory;
-    FactoryUniquePtr<dinrail::IDevice> device;
+    std::unique_ptr<dinrail::IDevice> driver;
 };
 
 Device::Device()
-    : m_pimpl{std::make_unique<Impl>()}
+    : Device(RuntimeContext::get_default())
 {
 }
 
-Device::~Device()
+Device::Device(const RuntimeContext& context)
+    : m_pimpl(std::make_unique<Impl>(context))
 {
-    close();
 }
+
+Device::~Device() = default;
 
 bool Device::open(const Parameters& config)
 {
-    m_pimpl->device.reset();
+    m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
-    if (!config.check<std::string>("device"))
-    {
-        // TODO(traversaro): avoid to call std::cerr here, and 
-        // implement a way for users to configure the logging system
-        std::cerr << "dinrail::Device: missing required parameter 'device'" << std::endl;
-        return false;
-    }
-
-    const std::string deviceName = config.find("device").as<std::string>();
-
-
-    const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
-    const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
-    const auto pluginSearchPaths = getPluginSearchPaths();
-
-    m_pimpl->deviceFactory = std::make_unique<
-        sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(SHLIBPP_DEFAULT_START_CHECK,
-                                                                   SHLIBPP_DEFAULT_END_CHECK,
-                                                                   SHLIBPP_DEFAULT_SYSTEM_VERSION,
-                                                                   factoryName.c_str());
-
-    for (const auto& path : pluginSearchPaths)
-    {
-        m_pimpl->deviceFactory->extendSearchPath(path.string());
-    }
-
-    bool ok = m_pimpl->deviceFactory->open(libraryName.c_str(), factoryName.c_str());
-    ok = ok && m_pimpl->deviceFactory->isValid();
-
-    if (!ok)
-    {
-        std::cerr << "dinrail::Device: impossible to find library for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
-        return false;
-    }
-
-    auto device = make_factory_unique(*(m_pimpl->deviceFactory));
-
-    if (!device)
-    {
-        std::cerr << "dinrail::Device: impossible to create factory for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
-        return false;
-    }
-
-    ok = device->open(config);
-
-    if (!ok)
-    {
-        std::cerr << "dinrail::Device: open return false for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
-        return false;
-    }
-
-    m_pimpl->device = std::move(device);
-    m_pimpl->isValid = true;
-    return true;
+    m_pimpl->driver = m_pimpl->context.createDevice(config);
+    m_pimpl->isValid = (m_pimpl->driver != nullptr);
+    return m_pimpl->isValid;
 }
 
 bool Device::close()
 {
     bool result = true;
-    if (m_pimpl->device)
+    if (m_pimpl->driver)
     {
-        result = m_pimpl->device->close();
+        result = m_pimpl->driver->close();
     }
 
     m_pimpl->isValid = false;
-
-    // This ensures that the device is deleted first (as it uses the factory's destroy method),
-    // before unloading the library in the factory destructor.
-    m_pimpl->device.reset();
-    m_pimpl->deviceFactory.reset();
+    m_pimpl->driver.reset();
     return result;
 }
 
@@ -148,9 +64,40 @@ bool Device::isValid() const
     return m_pimpl->isValid;
 }
 
-IDevice* Device::getImplementation()
+IDevice* Device::getDriver()
 {
-    return m_pimpl->device.get();
+    return m_pimpl->driver.get();
+}
+
+std::string Device::getDeviceName() const
+{
+    if (m_pimpl->driver)
+    {
+        return "loaded device";
+    }
+    return "null";
+}
+
+void* Device::queryAdapter(const std::type_info& interfaceType)
+{
+    void* ptr = m_pimpl->context.queryAdapter(m_pimpl->driver.get(), interfaceType);
+    if (ptr != nullptr)
+    {
+        return ptr;
+    }
+
+    if (!m_pimpl->driver)
+    {
+        return nullptr;
+    }
+
+    auto* queryable = dynamic_cast<IInterfaceQueryable*>(m_pimpl->driver.get());
+    if (queryable == nullptr)
+    {
+        return nullptr;
+    }
+
+    return queryable->queryInterface(interfaceType);
 }
 
 } // namespace dinrail
