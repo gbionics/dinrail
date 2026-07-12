@@ -32,6 +32,7 @@ RemappedSubControlBoard::RemappedSubControlBoard()
     info = nullptr;
     iTorque=nullptr;
     iImpedance=nullptr;
+    iImpedanceAllSetPointsControl=nullptr;
     iMode=nullptr;
     iInteract=nullptr;
     imotor=nullptr;
@@ -63,6 +64,7 @@ void RemappedSubControlBoard::detach()
     info=nullptr;
     iTorque=nullptr;
     iImpedance=nullptr;
+    iImpedanceAllSetPointsControl=nullptr;
     iMode=nullptr;
     iTimed=nullptr;
     iInteract=nullptr;
@@ -104,6 +106,7 @@ bool RemappedSubControlBoard::attach(yarp::dev::PolyDriver *d, const std::string
         subdevice->view(iTimed);
         subdevice->view(iTorque);
         subdevice->view(iImpedance);
+        subdevice->view(iImpedanceAllSetPointsControl);
         subdevice->view(iMode);
         subdevice->view(iJntEnc);
         subdevice->view(iMotEnc);
@@ -242,6 +245,11 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
     m_bufferForSubControlBoard.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoardControlModes.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoardInteractionModes.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointPos.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointVel.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointTorque.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointStiffness.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointDamping.resize(nrOfSubControlBoards);
 
     m_counterForControlBoard.resize(nrOfSubControlBoards);
 
@@ -252,6 +260,11 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
         m_bufferForSubControlBoard[ctrlBrd].clear();
         m_bufferForSubControlBoardControlModes[ctrlBrd].clear();
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].clear();
     }
 
     // Fill buffers
@@ -270,6 +283,11 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardControlModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
 
         m_counterForControlBoard[ctrlBrd] = 0;
     }
@@ -369,6 +387,56 @@ void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSu
     }
 }
 
+void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardSetPointBuffersFromCompleteJointVectors(const double* pos,
+                                                                                                              const double* vel,
+                                                                                                              const double* torque,
+                                                                                                              const double* stiffness,
+                                                                                                              const double* damping,
+                                                                                                              const RemappedControlBoards& remappedControlBoards)
+{
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    {
+        m_counterForControlBoard[ctrlBrd] = 0;
+    }
+
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    {
+        const size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+        const int counter = m_counterForControlBoard[subIndex]++;
+
+        m_bufferForSubControlBoardSetPointPos[subIndex][counter] = pos[j];
+        m_bufferForSubControlBoardSetPointVel[subIndex][counter] = vel[j];
+        m_bufferForSubControlBoardSetPointTorque[subIndex][counter] = torque[j];
+        m_bufferForSubControlBoardSetPointStiffness[subIndex][counter] = stiffness[j];
+        m_bufferForSubControlBoardSetPointDamping[subIndex][counter] = damping[j];
+    }
+}
+
+void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
+                                                                                                              double* vel,
+                                                                                                              double* torque,
+                                                                                                              double* stiffness,
+                                                                                                              double* damping,
+                                                                                                              const RemappedControlBoards& remappedControlBoards)
+{
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    {
+        m_counterForControlBoard[ctrlBrd] = 0;
+    }
+
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    {
+        const size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+        const int counter = m_counterForControlBoard[subIndex]++;
+
+        pos[j] = m_bufferForSubControlBoardSetPointPos[subIndex][counter];
+        vel[j] = m_bufferForSubControlBoardSetPointVel[subIndex][counter];
+        torque[j] = m_bufferForSubControlBoardSetPointTorque[subIndex][counter];
+        stiffness[j] = m_bufferForSubControlBoardSetPointStiffness[subIndex][counter];
+        damping[j] = m_bufferForSubControlBoardSetPointDamping[subIndex][counter];
+    }
+}
+
 bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoards& remappedControlBoards)
 {
     // Resize buffers
@@ -379,6 +447,11 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
     m_bufferForSubControlBoard.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoardControlModes.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoardInteractionModes.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointPos.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointVel.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointTorque.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointStiffness.resize(nrOfSubControlBoards);
+    m_bufferForSubControlBoardSetPointDamping.resize(nrOfSubControlBoards);
 
     m_counterForControlBoard.resize(nrOfSubControlBoards);
 
@@ -388,6 +461,11 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
         m_bufferForSubControlBoard[ctrlBrd].clear();
         m_bufferForSubControlBoardControlModes[ctrlBrd].clear();
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].clear();
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].clear();
 
     }
 
@@ -405,6 +483,11 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardControlModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
 
         m_counterForControlBoard[ctrlBrd] = 0;
         m_jointsInSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
@@ -561,5 +644,86 @@ void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardBuffers(const 
     {
         yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+    }
+}
+
+void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(const double* pos,
+                                                                                                          const double* vel,
+                                                                                                          const double* torque,
+                                                                                                          const double* stiffness,
+                                                                                                          const double* damping,
+                                                                                                          const int n_joints,
+                                                                                                          const int* joints,
+                                                                                                          const RemappedControlBoards& remappedControlBoards)
+{
+    this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    {
+        yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
+
+        m_counterForControlBoard[ctrlBrd] = 0;
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+    }
+
+    for (int j = 0; j < n_joints; j++)
+    {
+        const size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        const int counter = m_counterForControlBoard[subIndex]++;
+
+        m_bufferForSubControlBoardSetPointPos[subIndex][counter] = pos[j];
+        m_bufferForSubControlBoardSetPointVel[subIndex][counter] = vel[j];
+        m_bufferForSubControlBoardSetPointTorque[subIndex][counter] = torque[j];
+        m_bufferForSubControlBoardSetPointStiffness[subIndex][counter] = stiffness[j];
+        m_bufferForSubControlBoardSetPointDamping[subIndex][counter] = damping[j];
+    }
+}
+
+void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardSetPointBuffers(const int n_joints,
+                                                                                   const int* joints,
+                                                                                   const RemappedControlBoards& remappedControlBoards)
+{
+    this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    {
+        yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
+
+        m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+    }
+}
+
+void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
+                                                                                                          double* vel,
+                                                                                                          double* torque,
+                                                                                                          double* stiffness,
+                                                                                                          double* damping,
+                                                                                                          const int n_joints,
+                                                                                                          const int* joints,
+                                                                                                          const RemappedControlBoards& remappedControlBoards)
+{
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    {
+        m_counterForControlBoard[ctrlBrd] = 0;
+    }
+
+    for (int j = 0; j < n_joints; j++)
+    {
+        const size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        const int counter = m_counterForControlBoard[subIndex]++;
+
+        pos[j] = m_bufferForSubControlBoardSetPointPos[subIndex][counter];
+        vel[j] = m_bufferForSubControlBoardSetPointVel[subIndex][counter];
+        torque[j] = m_bufferForSubControlBoardSetPointTorque[subIndex][counter];
+        stiffness[j] = m_bufferForSubControlBoardSetPointStiffness[subIndex][counter];
+        damping[j] = m_bufferForSubControlBoardSetPointDamping[subIndex][counter];
     }
 }

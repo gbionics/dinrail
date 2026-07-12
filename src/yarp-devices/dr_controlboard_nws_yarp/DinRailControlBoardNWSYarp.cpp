@@ -192,6 +192,14 @@ bool DinRailControlBoardNWSYarp::setDevice(yarp::dev::DeviceDriver* driver, bool
         yCWarning(CONTROLBOARD, "Part <%s>: IImpedanceControl interface was not found in subdevice.", partName.c_str());
     }
 
+    // dinrail::IImpedanceAllSetPointsControl* iImpedanceAllSetPointsControl{nullptr};
+    subdevice_ptr->view(iImpedanceAllSetPointsControl);
+    if (!iImpedanceAllSetPointsControl) {
+        yCWarning(CONTROLBOARD,
+                  "Part <%s>: IImpedanceAllSetPointsControl interface was not found in subdevice.",
+                  partName.c_str());
+    }
+
     // yarp::dev::IControlMode* iControlMode{nullptr};
     subdevice_ptr->view(iControlMode);
     if (!iControlMode) {
@@ -273,9 +281,11 @@ bool DinRailControlBoardNWSYarp::setDevice(yarp::dev::DeviceDriver* driver, bool
     times.resize(subdevice_joints);
 
     // Initialization
+    streaming_parser.setImpedanceAllSetPointsControlEmulation(m_emulate_impedance_all_setpoints_control);
     streaming_parser.init(subdevice_ptr);
     streaming_parser.initialize();
 
+    RPC_parser.setImpedanceAllSetPointsControlEmulation(m_emulate_impedance_all_setpoints_control);
     RPC_parser.init(subdevice_ptr);
     RPC_parser.initialize();
 
@@ -306,6 +316,7 @@ void DinRailControlBoardNWSYarp::closeDevice()
     iControlCalibration = nullptr;
     iTorqueControl = nullptr;
     iImpedanceControl = nullptr;
+    iImpedanceAllSetPointsControl = nullptr;
     iControlMode = nullptr;
     iAxisInfo = nullptr;
     iPreciselyTimed = nullptr;

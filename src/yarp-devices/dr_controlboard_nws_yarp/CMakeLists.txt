@@ -36,6 +36,7 @@ if(NOT SKIP_dr_controlboard_nws_yarp)
 
   target_link_libraries(dr_controlboard_nws_yarp
     PRIVATE
+      dinrail::dinrail
       dinrail-yarp-dev-shared
       dinrail-yarp-dev-idl
       YARP::YARP_os

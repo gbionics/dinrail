@@ -28,6 +28,7 @@
 * | -          | period         | double | s     | 0.02          | 0        | period of the main thread                     | -                                                                        |
 * | -          | name           | string | -     | /robot/part   | 1        | Prefix name of the ports opened by the device | opened ports will be: xxx/rpc:i xxx/command:i xxx/state:o xxx/stateExt:o |
 * | -          | namesuffix     | string | -     | /dinrail      | 0        | Suffix appended to the base port prefix       | default keeps DinRail ports separated from stock YARP ports              |
+* | -          | emulate_impedance_all_setpoints_control | bool | - | false | 0 | Emulate dinrail IImpedanceAllSetPointsControl if subdevice does not expose it | uses existing YARP interfaces, disabled by default to avoid confusion |
 *
 * The device can be launched by yarpdev using one of the following examples (with and without all optional parameters):
 * \code{.unparsed}
@@ -62,10 +63,12 @@ public:
     const std::string m_period_defaultValue = {"0.02"};
     const std::string m_name_defaultValue = {"/robot/part"};
     const std::string m_namesuffix_defaultValue = {"/dinrail"};
+    const std::string m_emulate_impedance_all_setpoints_control_defaultValue = {"false"};
 
     double m_period = {0.02};
     std::string m_name = {"/robot/part"};
     std::string m_namesuffix = {"/dinrail"};
+    bool m_emulate_impedance_all_setpoints_control = {false};
 
     bool          parseParams(const yarp::os::Searchable & config) override;
     std::string   getDeviceClassName() const override { return m_device_classname; }

@@ -18,6 +18,7 @@
 #include <yarp/dev/IImpedanceControl.h>
 #include <yarp/dev/IRemoteCalibrator.h>
 #include <yarp/dev/IControlLimits.h>
+#include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <yarp/os/Network.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperSingle.h>
@@ -37,6 +38,7 @@
 #include <dinrail/yarp/dev/tests/IRemoteCalibratorTest.h>
 #include <dinrail/yarp/dev/tests/IJointFaultTest.h>
 #include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceAllSetPointsControlTest.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -72,6 +74,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         IJointFault* ifault = nullptr;
         IControlLimits* ilims = nullptr;
         IImpedanceControl* iimp = nullptr;
+        dinrail::IImpedanceAllSetPointsControl* iimpAll = nullptr;
         //IRemoteCalibrator* iremotecalib = nullptr;
 
         ////////"Checking opening fakeMotionControl and controlBoard_nws_yarp polydrivers"
@@ -86,6 +89,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/controlboardserver");
+            p_cfg.put("emulate_impedance_all_setpoints_control", true);
             REQUIRE(ddnws.open(p_cfg));
         }
 
@@ -122,6 +126,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         ddnwc.view(ifault);  REQUIRE(ifault);
         ddnwc.view(ilims);   REQUIRE(ilims);
         ddnwc.view(iimp);    REQUIRE(iimp);
+        ddnwc.view(iimpAll); REQUIRE(iimpAll);
         REQUIRE(iimp);
         //ddnwc.view(icalib);  REQUIRE(iremotecalib);
 
@@ -142,6 +147,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         yarp::dev::tests::exec_iJointFault_test_1(ifault);
         yarp::dev::tests::exec_iControlLimits_test1(ilims, iinfo);
         yarp::dev::tests::exec_iImpedanceControl_test_1(iimp);
+        yarp::dev::tests::exec_iImpedanceAllSetPointsControl_test_1(iimpAll, iinfo);
 
         //"Close all polydrivers and check"
         {

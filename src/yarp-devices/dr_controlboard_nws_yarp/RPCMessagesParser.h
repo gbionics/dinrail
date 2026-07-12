@@ -27,7 +27,8 @@
 #include <string>
 #include <vector>
 
-#include <dinrail/ControlBoardYARPProtocolVersion.h>
+#include <dinrail/ControlBoardYARPProtocolSharedDefinitions.h>
+#include <dinrail/IImpedanceAllSetPointsControl.h>
 
 #ifdef MSVC
 #    pragma warning(disable : 4355)
@@ -69,6 +70,7 @@ protected:
     yarp::dev::IRemoteCalibrator* rpc_IRemoteCalibrator {nullptr};
     yarp::dev::IControlCalibration* rpc_Icalib {nullptr};
     yarp::dev::IImpedanceControl* rpc_IImpedance {nullptr};
+    dinrail::IImpedanceAllSetPointsControl* rpc_IImpedanceAllSetPointsControl {nullptr};
     yarp::dev::IInteractionMode* rpc_IInteract {nullptr};
     yarp::dev::IMotor* rpc_IMotor {nullptr};
     yarp::dev::IRemoteVariables* rpc_IVar {nullptr};
@@ -79,6 +81,7 @@ protected:
     yarp::os::Stamp lastRpcStamp;
     std::mutex mutex;
     size_t controlledJoints {0};
+    bool emulateImpedanceAllSetPointsControl {false};
 
 public:
     /**
@@ -117,6 +120,11 @@ public:
                             bool* rec,
                             bool* ok);
 
+    void handleImpedanceAllSetPointsMsg(const yarp::os::Bottle& cmd,
+                                        yarp::os::Bottle& response,
+                                        bool* rec,
+                                        bool* ok);
+
     void handleInteractionModeMsg(const yarp::os::Bottle& cmd,
                                   yarp::os::Bottle& response,
                                   bool* rec,
@@ -142,6 +150,11 @@ public:
     * @return true/false on success/failure
     */
     virtual bool initialize();
+
+    void setImpedanceAllSetPointsControlEmulation(bool enable)
+    {
+        emulateImpedanceAllSetPointsControl = enable;
+    }
 };
 
 #endif // YARP_DEV_CONTROLBOARDWRAPPER_RPCMESSAGESPARSER_H

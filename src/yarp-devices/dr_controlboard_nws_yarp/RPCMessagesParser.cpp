@@ -16,7 +16,6 @@ using namespace yarp::dev;
 using namespace yarp::dev::impl;
 using namespace yarp::sig;
 
-
 inline void appendTimeStamp(Bottle& bot, Stamp& st)
 {
     int count = st.getCount();
@@ -128,6 +127,185 @@ void RPCMessagesParser::handleImpedanceMsg(const yarp::os::Bottle& cmd,
         *rec = false;
     } break;
     }
+}
+
+void RPCMessagesParser::handleImpedanceAllSetPointsMsg(const yarp::os::Bottle& cmd,
+                                                       yarp::os::Bottle& response,
+                                                       bool* rec,
+                                                       bool* ok)
+{
+    if (cmd.size() < 3) {
+        *rec = false;
+        *ok = false;
+        return;
+    }
+
+    const int code = cmd.get(0).asVocab32();
+    const int method = cmd.get(2).asVocab32();
+    if (method != dinrail::VOCAB_DINRAIL_SETPOINT) {
+        *rec = false;
+        *ok = false;
+        return;
+    }
+
+    *rec = true;
+    *ok = false;
+
+    if (code == VOCAB_SET) {
+        if (cmd.size() < 5) {
+            return;
+        }
+
+        const int axis = cmd.get(3).asInt32();
+        Bottle* b = cmd.get(4).asList();
+        if (b == nullptr || b->size() < 5) {
+            return;
+        }
+
+        const double pos = b->get(0).asFloat64();
+        const double vel = b->get(1).asFloat64();
+        const double torque = b->get(2).asFloat64();
+        const double stiffness = b->get(3).asFloat64();
+        const double damping = b->get(4).asFloat64();
+
+        if (rpc_IImpedanceAllSetPointsControl) {
+            *ok = rpc_IImpedanceAllSetPointsControl->setSetPoint(axis,
+                                                                 pos,
+                                                                 vel,
+                                                                 torque,
+                                                                 stiffness,
+                                                                 damping);
+            return;
+        }
+
+        if (!emulateImpedanceAllSetPointsControl) {
+            return;
+        }
+
+        if (!rpc_IPosDirect || !rpc_IVelCtrl || !rpc_ITorque || !rpc_IImpedance) {
+            return;
+        }
+
+        const bool setPosOk = rpc_IPosDirect->setPosition(axis, pos);
+        const bool setVelOk = rpc_IVelCtrl->velocityMove(axis, vel);
+        const bool setTorqueOk = rpc_ITorque->setRefTorque(axis, torque);
+        const bool setImpOk = rpc_IImpedance->setImpedance(axis, stiffness, damping);
+        *ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
+        return;
+    }
+
+    if (code == VOCAB_GET) {
+        std::vector<int> joints;
+        if (cmd.size() == 4) {
+            joints.push_back(cmd.get(3).asInt32());
+        } else if (cmd.size() == 5) {
+            const int nJoints = cmd.get(3).asInt32();
+            Bottle* jList = cmd.get(4).asList();
+            if (nJoints < 0 || jList == nullptr || static_cast<int>(jList->size()) != nJoints) {
+                return;
+            }
+            joints.resize(static_cast<size_t>(nJoints));
+            for (int i = 0; i < nJoints; ++i) {
+                joints[static_cast<size_t>(i)] = jList->get(i).asInt32();
+            }
+        } else if (cmd.size() == 3) {
+            joints.resize(controlledJoints);
+            for (size_t i = 0; i < controlledJoints; ++i) {
+                joints[i] = static_cast<int>(i);
+            }
+        } else {
+            return;
+        }
+
+        const size_t n = joints.size();
+        std::vector<double> pos(n, 0.0);
+        std::vector<double> vel(n, 0.0);
+        std::vector<double> torque(n, 0.0);
+        std::vector<double> stiffness(n, 0.0);
+        std::vector<double> damping(n, 0.0);
+
+        if (rpc_IImpedanceAllSetPointsControl) {
+            if (cmd.size() == 4) {
+                *ok = rpc_IImpedanceAllSetPointsControl->getSetPoint(joints[0],
+                                                                     pos[0],
+                                                                     vel[0],
+                                                                     torque[0],
+                                                                     stiffness[0],
+                                                                     damping[0]);
+            } else if (cmd.size() == 5) {
+                dinrail::VectorProxy<const int>::Ref jointsRef(joints);
+                dinrail::VectorProxy<double>::Ref posRef(pos);
+                dinrail::VectorProxy<double>::Ref velRef(vel);
+                dinrail::VectorProxy<double>::Ref torqueRef(torque);
+                dinrail::VectorProxy<double>::Ref stiffnessRef(stiffness);
+                dinrail::VectorProxy<double>::Ref dampingRef(damping);
+                *ok = rpc_IImpedanceAllSetPointsControl->getSetPoints(jointsRef,
+                                                                      posRef,
+                                                                      velRef,
+                                                                      torqueRef,
+                                                                      stiffnessRef,
+                                                                      dampingRef);
+            } else {
+                dinrail::VectorProxy<double>::Ref posRef(pos);
+                dinrail::VectorProxy<double>::Ref velRef(vel);
+                dinrail::VectorProxy<double>::Ref torqueRef(torque);
+                dinrail::VectorProxy<double>::Ref stiffnessRef(stiffness);
+                dinrail::VectorProxy<double>::Ref dampingRef(damping);
+                *ok = rpc_IImpedanceAllSetPointsControl->getSetPoints(posRef,
+                                                                      velRef,
+                                                                      torqueRef,
+                                                                      stiffnessRef,
+                                                                      dampingRef);
+            }
+        } else if (emulateImpedanceAllSetPointsControl
+                   && rpc_IPosDirect
+                   && rpc_IVelCtrl
+                   && rpc_ITorque
+                   && rpc_IImpedance) {
+            bool getPosOk = true;
+            bool getVelOk = true;
+            bool getTorqueOk = true;
+            bool getImpOk = true;
+            for (size_t i = 0; i < n; ++i) {
+                const int axis = joints[i];
+                getPosOk = getPosOk && rpc_IPosDirect->getRefPosition(axis, &pos[i]);
+                getVelOk = getVelOk && rpc_IVelCtrl->getRefVelocity(axis, &vel[i]);
+                getTorqueOk = getTorqueOk && rpc_ITorque->getRefTorque(axis, &torque[i]);
+                getImpOk = getImpOk && rpc_IImpedance->getImpedance(axis, &stiffness[i], &damping[i]);
+            }
+            *ok = getPosOk && getVelOk && getTorqueOk && getImpOk;
+        }
+
+        if (!*ok) {
+            return;
+        }
+
+        response.addVocab32(VOCAB_IS);
+        response.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+        Bottle& b = response.addList();
+        for (size_t i = 0; i < n; ++i) {
+            b.addFloat64(pos[i]);
+        }
+        for (size_t i = 0; i < n; ++i) {
+            b.addFloat64(vel[i]);
+        }
+        for (size_t i = 0; i < n; ++i) {
+            b.addFloat64(torque[i]);
+        }
+        for (size_t i = 0; i < n; ++i) {
+            b.addFloat64(stiffness[i]);
+        }
+        for (size_t i = 0; i < n; ++i) {
+            b.addFloat64(damping[i]);
+        }
+
+        lastRpcStamp.update();
+        appendTimeStamp(response, lastRpcStamp);
+        return;
+    }
+
+    *rec = false;
+    *ok = false;
 }
 
 void RPCMessagesParser::handleJointFaultMsg(const yarp::os::Bottle& cmd,
@@ -1404,6 +1582,10 @@ bool RPCMessagesParser::respond(const yarp::os::Bottle& cmd, yarp::os::Bottle& r
             handleImpedanceMsg(cmd, response, &rec, &ok);
             break;
 
+        case dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS:
+            handleImpedanceAllSetPointsMsg(cmd, response, &rec, &ok);
+            break;
+
         case VOCAB_INTERFACE_INTERACTION_MODE:
             handleInteractionModeMsg(cmd, response, &rec, &ok);
             break;
@@ -2522,6 +2704,7 @@ void RPCMessagesParser::init(yarp::dev::DeviceDriver* x)
     x->view(rpc_IRemoteCalibrator);
     x->view(rpc_Icalib);
     x->view(rpc_IImpedance);
+    x->view(rpc_IImpedanceAllSetPointsControl);
     x->view(rpc_ITorque);
     x->view(rpc_iCtrlMode);
     x->view(rpc_IInteract);
@@ -2547,6 +2730,7 @@ void RPCMessagesParser::reset()
     rpc_IRemoteCalibrator = nullptr;
     rpc_Icalib = nullptr;
     rpc_IImpedance = nullptr;
+    rpc_IImpedanceAllSetPointsControl = nullptr;
     rpc_ITorque = nullptr;
     rpc_iCtrlMode = nullptr;
     rpc_IInteract = nullptr;

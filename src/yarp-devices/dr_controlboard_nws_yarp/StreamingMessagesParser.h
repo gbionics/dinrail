@@ -25,6 +25,8 @@
 #include <yarp/dev/IPreciselyTimed.h>
 #include <yarp/dev/PolyDriver.h>
 
+#include <dinrail/IImpedanceAllSetPointsControl.h>
+
 #include <string>
 #include <vector>
 
@@ -55,9 +57,12 @@ protected:
     yarp::dev::IPositionDirect* stream_IPosDirect {nullptr};
     yarp::dev::IVelocityControl* stream_IVel {nullptr};
     yarp::dev::ITorqueControl* stream_ITorque {nullptr};
+    yarp::dev::IImpedanceControl* stream_IImpedance {nullptr};
+    dinrail::IImpedanceAllSetPointsControl* stream_IImpedanceAllSetPointsControl {nullptr};
     yarp::dev::IPWMControl* stream_IPWM {nullptr};
     yarp::dev::ICurrentControl* stream_ICurrent {nullptr};
     yarp::dev::IAxisInfo* stream_IAxis{ nullptr };
+    bool stream_emulateImpedanceAllSetPointsControl {false};
     int stream_nJoints {0};
 
 public:
@@ -82,6 +87,11 @@ public:
     void onRead(CommandMessage& v) override;
 
     bool initialize();
+
+    void setImpedanceAllSetPointsControlEmulation(bool enable)
+    {
+        stream_emulateImpedanceAllSetPointsControl = enable;
+    }
 };
 
 #endif // YARP_DEV_CONTROLBOARDWRAPPER_STREAMINGMESSAGESPARSER_H

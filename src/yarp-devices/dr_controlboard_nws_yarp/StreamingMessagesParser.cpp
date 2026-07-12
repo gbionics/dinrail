@@ -9,6 +9,7 @@
 #include <yarp/os/LogStream.h>
 
 #include "ControlBoardLogComponent.h"
+#include <dinrail/ControlBoardYARPProtocolSharedDefinitions.h>
 #include <iostream>
 
 using namespace yarp::os;
@@ -24,6 +25,8 @@ void StreamingMessagesParser::init(yarp::dev::DeviceDriver* x)
     x->view(stream_IPosDirect);
     x->view(stream_IVel);
     x->view(stream_ITorque);
+    x->view(stream_IImpedance);
+    x->view(stream_IImpedanceAllSetPointsControl);
     x->view(stream_IPWM);
     x->view(stream_ICurrent);
     x->view(stream_IAxis);
@@ -36,6 +39,8 @@ void StreamingMessagesParser::reset()
     stream_IPosDirect = nullptr;
     stream_IVel = nullptr;
     stream_ITorque = nullptr;
+    stream_IImpedance = nullptr;
+    stream_IImpedanceAllSetPointsControl = nullptr;
     stream_IPWM = nullptr;
     stream_ICurrent = nullptr;
     stream_IAxis = nullptr;
@@ -63,9 +68,14 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     yCTrace(CONTROLBOARD, "Received command %s, %s\n", b.toString().c_str(), cmdVector.toString().c_str());
 
     // some consistency checks
-    if (static_cast<int>(cmdVector.size()) > stream_nJoints) {
+    size_t maxCommandVectorSize = static_cast<size_t>(stream_nJoints);
+    if (b.get(0).asVocab32() == dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS) {
+        maxCommandVectorSize = 5 * static_cast<size_t>(stream_nJoints);
+    }
+
+    if (cmdVector.size() > maxCommandVectorSize) {
         std::string str = yarp::os::Vocab32::decode(b.get(0).asVocab32());
-        yCError(CONTROLBOARD, "Received command vector with number of elements bigger than axis controlled by this wrapper (cmd: %s requested jnts: %d received jnts: %d)\n", str.c_str(), stream_nJoints, (int)cmdVector.size());
+        yCError(CONTROLBOARD, "Received command vector with number of elements bigger than axis controlled by this wrapper (cmd: %s requested jnts: %zu received jnts: %zu)\n", str.c_str(), maxCommandVectorSize, cmdVector.size());
         return;
     }
     if (cmdVector.data() == nullptr) {
@@ -235,6 +245,147 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
 
             delete[] joint_list;
         }
+    } break;
+
+    case dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS: {
+        if (b.get(1).asVocab32() != dinrail::VOCAB_DINRAIL_SETPOINT) {
+            yCError(CONTROLBOARD, "Received unsupported dinrail impedance-all-setpoints method on streaming port");
+            break;
+        }
+
+        if (b.size() == 3) {
+            if (cmdVector.size() != 5) {
+                yCError(CONTROLBOARD, "Received invalid single-joint impedance-all-setpoints payload size %zu", cmdVector.size());
+                break;
+            }
+
+            const int joint = b.get(2).asInt32();
+            bool ok = false;
+            if (stream_IImpedanceAllSetPointsControl) {
+                ok = stream_IImpedanceAllSetPointsControl->setSetPoint(joint,
+                                                                       cmdVector[0],
+                                                                       cmdVector[1],
+                                                                       cmdVector[2],
+                                                                       cmdVector[3],
+                                                                       cmdVector[4]);
+            } else if (stream_emulateImpedanceAllSetPointsControl
+                       && stream_IPosDirect
+                       && stream_IVel
+                       && stream_ITorque
+                       && stream_IImpedance) {
+                const bool setPosOk = stream_IPosDirect->setPosition(joint, cmdVector[0]);
+                const bool setVelOk = stream_IVel->velocityMove(joint, cmdVector[1]);
+                const bool setTorqueOk = stream_ITorque->setRefTorque(joint, cmdVector[2]);
+                const bool setImpOk = stream_IImpedance->setImpedance(joint, cmdVector[3], cmdVector[4]);
+                ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
+            }
+            if (!ok) {
+                yCError(CONTROLBOARD, "Error while trying to command single-joint impedance-all-setpoints message\n");
+            }
+            break;
+        }
+
+        if (b.size() == 4) {
+            const int n_joints = b.get(2).asInt32();
+            Bottle* jlut = b.get(3).asList();
+            if (jlut == nullptr || static_cast<int>(jlut->size()) != n_joints || static_cast<int>(cmdVector.size()) != 5 * n_joints) {
+                yCError(CONTROLBOARD, "Received invalid impedance-all-setpoints group payload\n");
+                break;
+            }
+
+            std::vector<int> jointList(static_cast<size_t>(n_joints));
+            for (int i = 0; i < n_joints; i++) {
+                jointList[static_cast<size_t>(i)] = jlut->get(i).asInt32();
+            }
+
+            const double* raw = cmdVector.data();
+            dinrail::VectorProxy<const int>::Ref jointsRef(jointList);
+            dinrail::VectorProxy<const double>::Ref posRef(std::span<const double>(raw, static_cast<size_t>(n_joints)));
+            dinrail::VectorProxy<const double>::Ref velRef(std::span<const double>(raw + n_joints, static_cast<size_t>(n_joints)));
+            dinrail::VectorProxy<const double>::Ref torqueRef(std::span<const double>(raw + 2 * n_joints, static_cast<size_t>(n_joints)));
+            dinrail::VectorProxy<const double>::Ref stiffnessRef(std::span<const double>(raw + 3 * n_joints, static_cast<size_t>(n_joints)));
+            dinrail::VectorProxy<const double>::Ref dampingRef(std::span<const double>(raw + 4 * n_joints, static_cast<size_t>(n_joints)));
+
+            bool ok = false;
+            if (stream_IImpedanceAllSetPointsControl) {
+                ok = stream_IImpedanceAllSetPointsControl->setSetPoints(jointsRef,
+                                                                        posRef,
+                                                                        velRef,
+                                                                        torqueRef,
+                                                                        stiffnessRef,
+                                                                        dampingRef);
+            } else if (stream_emulateImpedanceAllSetPointsControl
+                       && stream_IPosDirect
+                       && stream_IVel
+                       && stream_ITorque
+                       && stream_IImpedance) {
+                bool setPosOk = true;
+                bool setVelOk = true;
+                bool setTorqueOk = true;
+                bool setImpOk = true;
+                for (int i = 0; i < n_joints; i++) {
+                    const int joint = jointList[static_cast<size_t>(i)];
+                    setPosOk = setPosOk && stream_IPosDirect->setPosition(joint, posRef[static_cast<size_t>(i)]);
+                    setVelOk = setVelOk && stream_IVel->velocityMove(joint, velRef[static_cast<size_t>(i)]);
+                    setTorqueOk = setTorqueOk && stream_ITorque->setRefTorque(joint, torqueRef[static_cast<size_t>(i)]);
+                    setImpOk = setImpOk && stream_IImpedance->setImpedance(joint,
+                                                                           stiffnessRef[static_cast<size_t>(i)],
+                                                                           dampingRef[static_cast<size_t>(i)]);
+                }
+                ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
+            }
+            if (!ok) {
+                yCError(CONTROLBOARD, "Error while trying to command group impedance-all-setpoints message\n");
+            }
+            break;
+        }
+
+        if (b.size() == 2) {
+            if (stream_nJoints <= 0 || static_cast<int>(cmdVector.size()) != 5 * stream_nJoints) {
+                yCError(CONTROLBOARD, "Received invalid full-joint impedance-all-setpoints payload size %zu", cmdVector.size());
+                break;
+            }
+
+            const double* raw = cmdVector.data();
+            dinrail::VectorProxy<const double>::Ref posRef(std::span<const double>(raw, static_cast<size_t>(stream_nJoints)));
+            dinrail::VectorProxy<const double>::Ref velRef(std::span<const double>(raw + stream_nJoints, static_cast<size_t>(stream_nJoints)));
+            dinrail::VectorProxy<const double>::Ref torqueRef(std::span<const double>(raw + 2 * stream_nJoints, static_cast<size_t>(stream_nJoints)));
+            dinrail::VectorProxy<const double>::Ref stiffnessRef(std::span<const double>(raw + 3 * stream_nJoints, static_cast<size_t>(stream_nJoints)));
+            dinrail::VectorProxy<const double>::Ref dampingRef(std::span<const double>(raw + 4 * stream_nJoints, static_cast<size_t>(stream_nJoints)));
+
+            bool ok = false;
+            if (stream_IImpedanceAllSetPointsControl) {
+                ok = stream_IImpedanceAllSetPointsControl->setSetPoints(posRef,
+                                                                        velRef,
+                                                                        torqueRef,
+                                                                        stiffnessRef,
+                                                                        dampingRef);
+            } else if (stream_emulateImpedanceAllSetPointsControl
+                       && stream_IPosDirect
+                       && stream_IVel
+                       && stream_ITorque
+                       && stream_IImpedance) {
+                bool setPosOk = true;
+                bool setVelOk = true;
+                bool setTorqueOk = true;
+                bool setImpOk = true;
+                for (int i = 0; i < stream_nJoints; i++) {
+                    setPosOk = setPosOk && stream_IPosDirect->setPosition(i, posRef[static_cast<size_t>(i)]);
+                    setVelOk = setVelOk && stream_IVel->velocityMove(i, velRef[static_cast<size_t>(i)]);
+                    setTorqueOk = setTorqueOk && stream_ITorque->setRefTorque(i, torqueRef[static_cast<size_t>(i)]);
+                    setImpOk = setImpOk && stream_IImpedance->setImpedance(i,
+                                                                           stiffnessRef[static_cast<size_t>(i)],
+                                                                           dampingRef[static_cast<size_t>(i)]);
+                }
+                ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
+            }
+            if (!ok) {
+                yCError(CONTROLBOARD, "Error while trying to command full-joint impedance-all-setpoints message\n");
+            }
+            break;
+        }
+
+        yCError(CONTROLBOARD, "Received malformed dinrail impedance-all-setpoints command header");
     } break;
 
     case VOCAB_POSITION_DIRECT_GROUP: {

@@ -8,7 +8,7 @@
 #include "DinRailControlBoardNWCYarpLogComponent.h"
 #include "stateExtendedReader.h"
 
-#include <dinrail/ControlBoardYARPProtocolVersion.h>
+#include <dinrail/ControlBoardYARPProtocolSharedDefinitions.h>
 
 #include <cstring>
 
@@ -30,6 +30,7 @@
 #include <yarp/dev/IPreciselyTimed.h>
 
 #include <mutex>
+#include <vector>
 
 
 using namespace yarp::os;
@@ -2368,6 +2369,227 @@ bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(int j, double *min_sti
 }
 
 // END IImpedanceControl
+
+// BEGIN dinrail::IImpedanceAllSetPointsControl
+
+bool DinRailControlBoardNWCYarp::setSetPoint(int j,
+                                             double pos,
+                                             double vel,
+                                             double torque,
+                                             double stiffness,
+                                             double damping)
+{
+    if (!isLive()) {
+        return false;
+    }
+
+    CommandMessage& c = command_buffer.get();
+    c.head.clear();
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+    c.head.addInt32(j);
+
+    c.body.resize(5);
+    c.body[0] = pos;
+    c.body[1] = vel;
+    c.body[2] = torque;
+    c.body[3] = stiffness;
+    c.body[4] = damping;
+
+    command_buffer.write(writeStrict_singleJoint);
+    return true;
+}
+
+bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                                              const dinrail::VectorProxy<const double>::Ref pos,
+                                              const dinrail::VectorProxy<const double>::Ref vel,
+                                              const dinrail::VectorProxy<const double>::Ref torque,
+                                              const dinrail::VectorProxy<const double>::Ref stiffness,
+                                              const dinrail::VectorProxy<const double>::Ref damping)
+{
+    if (!isLive()) {
+        return false;
+    }
+
+    const auto n = jointIndeces.size();
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+        return false;
+    }
+
+    CommandMessage& c = command_buffer.get();
+    c.head.clear();
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+    c.head.addInt32(static_cast<int>(n));
+
+    Bottle& jointList = c.head.addList();
+    for (std::ptrdiff_t i = 0; i < n; ++i) {
+        jointList.addInt32(jointIndeces[i]);
+    }
+
+    c.body.resize(5 * static_cast<size_t>(n));
+    const size_t nsz = static_cast<size_t>(n);
+    std::memcpy(c.body.data(), pos.data(), sizeof(double) * nsz);
+    std::memcpy(c.body.data() + nsz, vel.data(), sizeof(double) * nsz);
+    std::memcpy(c.body.data() + 2 * nsz, torque.data(), sizeof(double) * nsz);
+    std::memcpy(c.body.data() + 3 * nsz, stiffness.data(), sizeof(double) * nsz);
+    std::memcpy(c.body.data() + 4 * nsz, damping.data(), sizeof(double) * nsz);
+
+    command_buffer.write(writeStrict_moreJoints);
+    return true;
+}
+
+bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const double>::Ref pos,
+                                              const dinrail::VectorProxy<const double>::Ref vel,
+                                              const dinrail::VectorProxy<const double>::Ref torque,
+                                              const dinrail::VectorProxy<const double>::Ref stiffness,
+                                              const dinrail::VectorProxy<const double>::Ref damping)
+{
+    if (!isLive()) {
+        return false;
+    }
+
+    const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(nj);
+    if (pos.size() != expected || vel.size() != expected || torque.size() != expected
+        || stiffness.size() != expected || damping.size() != expected) {
+        return false;
+    }
+
+    CommandMessage& c = command_buffer.get();
+    c.head.clear();
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    c.head.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+
+    c.body.resize(5 * nj);
+    std::memcpy(c.body.data(), pos.data(), sizeof(double) * nj);
+    std::memcpy(c.body.data() + nj, vel.data(), sizeof(double) * nj);
+    std::memcpy(c.body.data() + 2 * nj, torque.data(), sizeof(double) * nj);
+    std::memcpy(c.body.data() + 3 * nj, stiffness.data(), sizeof(double) * nj);
+    std::memcpy(c.body.data() + 4 * nj, damping.data(), sizeof(double) * nj);
+
+    command_buffer.write(writeStrict_moreJoints);
+    return true;
+}
+
+bool DinRailControlBoardNWCYarp::getSetPoint(int j,
+                                             double& pos,
+                                             double& vel,
+                                             double& torque,
+                                             double& stiffness,
+                                             double& damping)
+{
+    Bottle cmd, response;
+    cmd.addVocab32(VOCAB_GET);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+    cmd.addInt32(j);
+
+    const bool ok = rpc_p.write(cmd, response);
+    if (!CHECK_FAIL(ok, response)) {
+        return false;
+    }
+
+    Bottle* b = response.get(2).asList();
+    if (b == nullptr || b->size() < 5) {
+        return false;
+    }
+
+    pos = b->get(0).asFloat64();
+    vel = b->get(1).asFloat64();
+    torque = b->get(2).asFloat64();
+    stiffness = b->get(3).asFloat64();
+    damping = b->get(4).asFloat64();
+    return true;
+}
+
+bool DinRailControlBoardNWCYarp::getSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                                              dinrail::VectorProxy<double>::Ref pos,
+                                              dinrail::VectorProxy<double>::Ref vel,
+                                              dinrail::VectorProxy<double>::Ref torque,
+                                              dinrail::VectorProxy<double>::Ref stiffness,
+                                              dinrail::VectorProxy<double>::Ref damping)
+{
+    const auto n = jointIndeces.size();
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+        return false;
+    }
+
+    Bottle cmd, response;
+    cmd.addVocab32(VOCAB_GET);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+    cmd.addInt32(static_cast<int>(n));
+    Bottle& joints = cmd.addList();
+    for (std::ptrdiff_t i = 0; i < n; ++i) {
+        joints.addInt32(jointIndeces[i]);
+    }
+
+    const bool ok = rpc_p.write(cmd, response);
+    if (!CHECK_FAIL(ok, response)) {
+        return false;
+    }
+
+    Bottle* b = response.get(2).asList();
+    if (b == nullptr || b->size() != static_cast<size_t>(5 * n)) {
+        return false;
+    }
+
+    const std::size_t nsz = static_cast<std::size_t>(n);
+    for (std::size_t i = 0; i < nsz; ++i) {
+        pos[i] = b->get(i).asFloat64();
+        vel[i] = b->get(nsz + i).asFloat64();
+        torque[i] = b->get(2 * nsz + i).asFloat64();
+        stiffness[i] = b->get(3 * nsz + i).asFloat64();
+        damping[i] = b->get(4 * nsz + i).asFloat64();
+    }
+
+    return true;
+}
+
+bool DinRailControlBoardNWCYarp::getSetPoints(dinrail::VectorProxy<double>::Ref pos,
+                                              dinrail::VectorProxy<double>::Ref vel,
+                                              dinrail::VectorProxy<double>::Ref torque,
+                                              dinrail::VectorProxy<double>::Ref stiffness,
+                                              dinrail::VectorProxy<double>::Ref damping)
+{
+    if (!isLive()) {
+        return false;
+    }
+
+    const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(nj);
+    if (pos.size() != expected || vel.size() != expected || torque.size() != expected
+        || stiffness.size() != expected || damping.size() != expected) {
+        return false;
+    }
+
+    Bottle cmd, response;
+    cmd.addVocab32(VOCAB_GET);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
+    cmd.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
+
+    const bool ok = rpc_p.write(cmd, response);
+    if (!CHECK_FAIL(ok, response)) {
+        return false;
+    }
+
+    Bottle* b = response.get(2).asList();
+    if (b == nullptr || b->size() != static_cast<size_t>(5 * expected)) {
+        return false;
+    }
+
+    const std::size_t nsz = static_cast<std::size_t>(expected);
+    for (std::size_t i = 0; i < nsz; ++i) {
+        pos[i] = b->get(i).asFloat64();
+        vel[i] = b->get(nsz + i).asFloat64();
+        torque[i] = b->get(2 * nsz + i).asFloat64();
+        stiffness[i] = b->get(3 * nsz + i).asFloat64();
+        damping[i] = b->get(4 * nsz + i).asFloat64();
+    }
+
+    return true;
+}
+
+// END dinrail::IImpedanceAllSetPointsControl
 
 // BEGIN IControlMode
 

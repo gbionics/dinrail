@@ -31,6 +31,7 @@ std::vector<std::string> DinRailControlBoardNWSYarp_ParamsParser::getListOfParam
     params.push_back("period");
     params.push_back("name");
     params.push_back("namesuffix");
+    params.push_back("emulate_impedance_all_setpoints_control");
     return params;
 }
 
@@ -50,6 +51,11 @@ bool DinRailControlBoardNWSYarp_ParamsParser::getParamValue(const std::string& p
     if (paramName =="namesuffix")
     {
         paramValue = m_namesuffix;
+        return true;
+    }
+    if (paramName =="emulate_impedance_all_setpoints_control")
+    {
+        paramValue = m_emulate_impedance_all_setpoints_control ? "true" : "false";
         return true;
     }
 
@@ -123,6 +129,20 @@ bool      DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::S
         prop_check.unput("namesuffix");
     }
 
+    //Parser of parameter emulate_impedance_all_setpoints_control
+    {
+        if (config.check("emulate_impedance_all_setpoints_control"))
+        {
+            m_emulate_impedance_all_setpoints_control = config.find("emulate_impedance_all_setpoints_control").asBool();
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'emulate_impedance_all_setpoints_control' using value:" << m_emulate_impedance_all_setpoints_control;
+        }
+        else
+        {
+            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Parameter 'emulate_impedance_all_setpoints_control' using DEFAULT value:" << m_emulate_impedance_all_setpoints_control;
+        }
+        prop_check.unput("emulate_impedance_all_setpoints_control");
+    }
+
     /*
     //This code check if the user set some parameter which are not check by the parser
     //If the parser is set in strict mode, this will generate an error
@@ -162,9 +182,10 @@ std::string      DinRailControlBoardNWSYarp_ParamsParser::getDocumentationOfDevi
     doc = doc + std::string("'period': period of the main thread\n");
     doc = doc + std::string("'name': Prefix name of the ports opened by the device\n");
     doc = doc + std::string("'namesuffix': Suffix appended to the base port prefix\n");
+    doc = doc + std::string("'emulate_impedance_all_setpoints_control': Emulate dinrail IImpedanceAllSetPointsControl if subdevice does not expose it\n");
     doc = doc + std::string("\n");
     doc = doc + std::string("Here are some examples of invocation command with yarpdev, with all params:\n");
-    doc = doc + " yarpdev --device controlBoard_nws_yarp --period 0.02 --name /robot/part --namesuffix /dinrail\n";
+    doc = doc + " yarpdev --device controlBoard_nws_yarp --period 0.02 --name /robot/part --namesuffix /dinrail --emulate_impedance_all_setpoints_control false\n";
     doc = doc + std::string("Using only mandatory params:\n");
     doc = doc + " yarpdev --device controlBoard_nws_yarp --name /robot/part\n";
     doc = doc + std::string("=============================================\n\n");    return doc;
