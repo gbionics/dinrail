@@ -14,9 +14,8 @@
 #include <yarp/conf/system.h>
 #include <yarp/os/LogStream.h>
 #include <yarp/os/ResourceFinder.h>
-#include <yarp/os/RpcServer.h>
 
-#if defined(YARP_HAS_EXECINFO_H) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
+#if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
 #  include <csignal>
 #  include <cstring>
 #  include <execinfo.h>
@@ -32,7 +31,7 @@ public:
     Private(Module *parent);
     ~Private();
 
-#if defined(YARP_HAS_EXECINFO_H) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
+#if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
     static struct sigaction old_action;
     static void sigsegv_handler(int nSignum, siginfo_t* si, void* vcontext);
 #endif
@@ -40,13 +39,12 @@ public:
     Module * const parent;
     yarp::robotinterface::Robot robot;
     int interruptReceived;
-    yarp::os::RpcServer rpcPort;
     bool closed;
     bool closeOk;
     bool autocloseAfterStart;
 };
 
-#if defined(YARP_HAS_EXECINFO_H) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
+#if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
 struct sigaction yarprobotinterface::Module::Private::old_action;
 #endif
 
@@ -60,7 +58,7 @@ yarprobotinterface::Module::Private::Private(Module *parent) :
 
 yarprobotinterface::Module::Private::~Private() = default;
 
-#if defined(YARP_HAS_EXECINFO_H) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
+#if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
 void yarprobotinterface::Module::Private::sigsegv_handler(int nSignum, siginfo_t* si, void* vcontext)
 {
     auto context = reinterpret_cast<ucontext_t*>(vcontext);
@@ -92,7 +90,7 @@ void yarprobotinterface::Module::Private::sigsegv_handler(int nSignum, siginfo_t
 yarprobotinterface::Module::Module() :
     mPriv(new Private(this))
 {
-#if defined(YARP_HAS_EXECINFO_H) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
+#if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     memset(&Private::old_action, 0, sizeof(struct sigaction));
@@ -161,10 +159,6 @@ bool yarprobotinterface::Module::configure(yarp::os::ResourceFinder& rf)
             "*************************************************************************************";
         portprefix = "/" + portprefix;
     }
-
-    std::string rpcPortName(portprefix + "/yarprobotinterface");
-    mPriv->rpcPort.open(rpcPortName);
-    attach(mPriv->rpcPort);
 
     // Enter startup phase
     if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseStartup) ||
@@ -268,39 +262,5 @@ bool yarprobotinterface::Module::close()
         mPriv->closeOk = false;
     }
 
-    mPriv->rpcPort.interrupt();
-    mPriv->rpcPort.close();
     return mPriv->closeOk;
-}
-
-bool yarprobotinterface::Module::attach(yarp::os::RpcServer &source)
-{
-    return this->yarp().attachAsServer(source);
-}
-
-
-std::string yarprobotinterface::Module::get_phase()
-{
-    return ActionPhaseToString(mPriv->robot.currentPhase());
-}
-
-int32_t yarprobotinterface::Module::get_level()
-{
-    return mPriv->robot.currentLevel();
-}
-
-bool yarprobotinterface::Module::is_ready()
-{
-    return (mPriv->robot.currentPhase() == yarp::robotinterface::ActionPhaseRun ? true : false);
-}
-
-std::string yarprobotinterface::Module::get_robot()
-{
-    return mPriv->robot.name();
-}
-
-std::string yarprobotinterface::Module::quit()
-{
-    stopModule();
-    return "bye";
 }

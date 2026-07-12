@@ -16,4 +16,7 @@ if(DINRAIL_USES_YARP)
 
     # YARP devices (i.e. devices that can be opened via yarp::dev::PolyDriver and yarprobotinterface)
     add_subdirectory(yarp-devices)
+
+    # Dinrail YARP tools (i.e. tools for interacting with dinrail that currently depend on YARP)
+    add_subdirectory(yarp-tools)
 endif()
