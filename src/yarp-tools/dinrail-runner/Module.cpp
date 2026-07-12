@@ -22,10 +22,10 @@
 #endif
 
 namespace {
-YARP_LOG_COMPONENT(YRI, "yarp.yri")
+YARP_LOG_COMPONENT(DINRAIL_RUNNER_LOG, "dinrail.runner")
 }
 
-class yarprobotinterface::Module::Private
+class dinrail::runner::Module::Private
 {
 public:
     Private(Module *parent);
@@ -45,10 +45,10 @@ public:
 };
 
 #if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
-struct sigaction yarprobotinterface::Module::Private::old_action;
+struct sigaction dinrail::runner::Module::Private::old_action;
 #endif
 
-yarprobotinterface::Module::Private::Private(Module *parent) :
+dinrail::runner::Module::Private::Private(Module *parent) :
     parent(parent),
     interruptReceived(0),
     closed(false),
@@ -56,10 +56,10 @@ yarprobotinterface::Module::Private::Private(Module *parent) :
 {
 }
 
-yarprobotinterface::Module::Private::~Private() = default;
+dinrail::runner::Module::Private::~Private() = default;
 
 #if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
-void yarprobotinterface::Module::Private::sigsegv_handler(int nSignum, siginfo_t* si, void* vcontext)
+void dinrail::runner::Module::Private::sigsegv_handler(int nSignum, siginfo_t* si, void* vcontext)
 {
     auto context = reinterpret_cast<ucontext_t*>(vcontext);
 #if defined(__x86_64__)
@@ -75,7 +75,7 @@ void yarprobotinterface::Module::Private::sigsegv_handler(int nSignum, siginfo_t
     stack_depth = backtrace(stack_addrs, max_depth);
     stack_strings = backtrace_symbols(stack_addrs, stack_depth);
 
-    yError("yarprobotinterface intercepted a segmentation fault caused by a faulty plugin:");
+    yError("dinrail-runner intercepted a segmentation fault caused by a faulty plugin:");
     yError("%s\n", stack_strings[2]);
     yarp_print_trace(stderr, __FILE__, __LINE__);
 
@@ -87,7 +87,7 @@ void yarprobotinterface::Module::Private::sigsegv_handler(int nSignum, siginfo_t
 }
 #endif
 
-yarprobotinterface::Module::Module() :
+dinrail::runner::Module::Module() :
     mPriv(new Private(this))
 {
 #if __has_include(<execinfo.h>) && !defined(__APPLE__) && !defined(__arm__) && !defined(__aarch64__) && !defined(__PPC__)
@@ -100,12 +100,12 @@ yarprobotinterface::Module::Module() :
 #endif
 }
 
-yarprobotinterface::Module::~Module()
+dinrail::runner::Module::~Module()
 {
     delete mPriv;
 }
 
-bool yarprobotinterface::Module::configure(yarp::os::ResourceFinder& rf)
+bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 {
     if (!rf.check("config")) {
         yFatal() << "Missing \"config\" argument";
@@ -126,7 +126,7 @@ bool yarprobotinterface::Module::configure(yarp::os::ResourceFinder& rf)
     // Prepare configuration for sub-devices
     yarp::os::Property config;
     config.fromString(rf.toString());
-    // The --config option is consumed by yarprobotinterface, and never
+    // The --config option is consumed by dinrail-runner, and never
     // forwarded to the devices)
     config.unput("config");
 
@@ -152,7 +152,7 @@ bool yarprobotinterface::Module::configure(yarp::os::ResourceFinder& rf)
     if (portprefix[0] != '/') {
         yWarning() <<
             "*************************************************************************************\n"
-            "* yarprobotinterface 'portprefix' parameter does not follow convention,  *\n"
+            "* dinrail-runner 'portprefix' parameter does not follow convention,  *\n"
             "* it MUST start with a leading '/' since it is used as the full prefix port name    *\n"
             "*     name:    full port prefix name with leading '/',  e.g.  /robotName      *\n"
             "* A temporary automatic fix will be done for you, but please fix your config file   *\n"
@@ -177,17 +177,17 @@ bool yarprobotinterface::Module::configure(yarp::os::ResourceFinder& rf)
     return true;
 }
 
-double yarprobotinterface::Module::getPeriod()
+double dinrail::runner::Module::getPeriod()
 {
     return 60;
 }
 
-bool yarprobotinterface::Module::updateModule()
+bool dinrail::runner::Module::updateModule()
 {
-    yCDebug(YRI) << "yarprobotinterface running happily";
+    yCDebug(DINRAIL_RUNNER_LOG) << "dinrail-runner running happily";
     if (mPriv->autocloseAfterStart && mPriv->robot.currentPhase() == yarp::robotinterface::ActionPhaseRun)
     {
-        yCInfo(YRI) << "`autocloseAfterStart` option selected. Calling close()";
+        yCInfo(DINRAIL_RUNNER_LOG) << "`autocloseAfterStart` option selected. Calling close()";
        // close();
         return false;
     }
@@ -195,11 +195,11 @@ bool yarprobotinterface::Module::updateModule()
     return true;
 }
 
-bool yarprobotinterface::Module::interruptModule()
+bool dinrail::runner::Module::interruptModule()
 {
     mPriv->interruptReceived++;
 
-    yCWarning(YRI) << "Interrupt #" << mPriv->interruptReceived << "# received.";
+    yCWarning(DINRAIL_RUNNER_LOG) << "Interrupt #" << mPriv->interruptReceived << "# received.";
 
     mPriv->robot.interrupt();
 
@@ -216,13 +216,13 @@ bool yarprobotinterface::Module::interruptModule()
         break;
     case 2:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt2)) {
-            yCError(YRI) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt2) << "phase... see previous messages for more info";
+            yCError(DINRAIL_RUNNER_LOG) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt2) << "phase... see previous messages for more info";
             return false;
         }
         break;
     case 3:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt3)) {
-            yCError(YRI) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt3) << "phase... see previous messages for more info";
+            yCError(DINRAIL_RUNNER_LOG) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt3) << "phase... see previous messages for more info";
             return false;
         }
         break;
@@ -233,7 +233,7 @@ bool yarprobotinterface::Module::interruptModule()
     return true;
 }
 
-bool yarprobotinterface::Module::close()
+bool dinrail::runner::Module::close()
 {
     if (mPriv->closed) {
         return mPriv->closeOk;
@@ -245,7 +245,7 @@ bool yarprobotinterface::Module::close()
     switch (mPriv->interruptReceived) {
     case 1:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt1)) {
-            yCError(YRI) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt1) << "phase... see previous messages for more info";
+            yCError(DINRAIL_RUNNER_LOG) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt1) << "phase... see previous messages for more info";
             mPriv->closeOk = false;
         }
         break;
@@ -258,7 +258,7 @@ bool yarprobotinterface::Module::close()
 
     // Finally call the shutdown phase.
     if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseShutdown)) {
-        yCError(YRI) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseShutdown) << "phase... see previous messages for more info";
+        yCError(DINRAIL_RUNNER_LOG) << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseShutdown) << "phase... see previous messages for more info";
         mPriv->closeOk = false;
     }
 

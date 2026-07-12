@@ -8,7 +8,7 @@
 
 #include <yarp/os/RFModule.h>
 
-namespace yarprobotinterface
+namespace dinrail::runner
 {
 
 class Module : public yarp::os::RFModule
@@ -29,6 +29,6 @@ private:
     Private * const mPriv;
 }; // class Module
 
-} // namespace yarprobotinterface
+} // namespace dinrail::runner
 
 #endif // YARP_YARPROBOTINTERFACE_MODULE_H
