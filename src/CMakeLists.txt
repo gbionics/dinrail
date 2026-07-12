@@ -8,7 +8,7 @@ add_subdirectory(core)
 add_subdirectory(devices)
 
 # Add command line tools.
-add_subdirectory(cli)
+add_subdirectory(tools)
 
 if(DINRAIL_USES_YARP)
     # Optional YARP Property conversion support.
