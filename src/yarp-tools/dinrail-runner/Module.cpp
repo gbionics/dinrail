@@ -5,6 +5,8 @@
 
 #include "Module.h"
 
+#include <dinrail/RTMemoryGuard.h>
+
 #include <yarp/robotinterface/Action.h>
 #include <yarp/robotinterface/Device.h>
 #include <yarp/robotinterface/Param.h>
@@ -19,6 +21,10 @@
 #  include <csignal>
 #  include <cstring>
 #  include <execinfo.h>
+#endif
+
+#ifndef DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS
+#define DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS false
 #endif
 
 namespace {
@@ -38,6 +44,7 @@ public:
 
     Module * const parent;
     yarp::robotinterface::Robot robot;
+    dinrail::RTMemoryGuard rtMemoryGuard;
     int interruptReceived;
     bool closed;
     bool closeOk;
@@ -50,6 +57,7 @@ struct sigaction dinrail::runner::Module::Private::old_action;
 
 dinrail::runner::Module::Private::Private(Module *parent) :
     parent(parent),
+    rtMemoryGuard(512 * 1024, 128 * 1024 * 1024, false),
     interruptReceived(0),
     closed(false),
     closeOk(true)
@@ -107,6 +115,25 @@ dinrail::runner::Module::~Module()
 
 bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 {
+    bool useRtSafeMemorySettings = DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS;
+    if (rf.check("use_rt_safe_memory_settings")) {
+        const yarp::os::Value optionValue = rf.find("use_rt_safe_memory_settings");
+        useRtSafeMemorySettings = optionValue.isNull() ? true : optionValue.asBool();
+    }
+
+    if (useRtSafeMemorySettings) {
+        if (!mPriv->rtMemoryGuard.activate()) {
+            const std::optional<std::string>& lastError = mPriv->rtMemoryGuard.lastError();
+            if (lastError.has_value()) {
+                yError() << "RT-safe memory settings requested but not fully applied:"
+                         << lastError.value();
+            } else {
+                yError() << "RT-safe memory settings requested but not fully applied.";
+            }
+            return false;
+        }
+    }
+
     if (!rf.check("config")) {
         yFatal() << "Missing \"config\" argument";
     }

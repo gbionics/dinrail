@@ -16,10 +16,15 @@ target_sources(dinrail-runner
 )
 target_link_libraries(dinrail-runner
   PRIVATE
+    dinrail::dinrail
     YARP::YARP_os
     YARP::YARP_dev
     YARP::YARP_init
     YARP::YARP_robotinterface
+)
+target_compile_definitions(dinrail-runner
+  PRIVATE
+    DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS=false
 )
 
 target_sources(dinrail-runner-rt
@@ -28,10 +33,15 @@ target_sources(dinrail-runner-rt
 )
 target_link_libraries(dinrail-runner-rt
   PRIVATE
+    dinrail::dinrail
     YARP::YARP_os
     YARP::YARP_dev
     YARP::YARP_init
     YARP::YARP_robotinterface
+)
+target_compile_definitions(dinrail-runner-rt
+  PRIVATE
+    DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS=true
 )
 
 install(TARGETS dinrail-runner dinrail-runner-rt)
