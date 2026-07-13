@@ -55,9 +55,13 @@ public:
 struct sigaction dinrail::runner::Module::Private::old_action;
 #endif
 
+// At initialization 0 bytes stack prefault in rtMemoryGuard, and default 128 MiB heap reserve, do not activate now.
+// However user is requested to call prefaultCurrentThreadStack(size_t bytes) in the begining of RT thread before loop starts.
+// This will avoid first-use stack page faults so jitter in first few milliseconds is reduced. 
+// User must ensure bytes stays comfortably under the thread's actual stack size.
 dinrail::runner::Module::Private::Private(Module *parent) :
     parent(parent),
-    rtMemoryGuard(512 * 1024, 128 * 1024 * 1024, false),
+    rtMemoryGuard(0, 128 * 1024 * 1024, false),
     interruptReceived(0),
     closed(false),
     closeOk(true)
