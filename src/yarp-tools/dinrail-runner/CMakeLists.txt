@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
+# SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
 add_executable(dinrail-runner)

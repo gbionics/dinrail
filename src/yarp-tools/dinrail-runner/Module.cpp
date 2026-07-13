@@ -179,6 +179,9 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 
 double dinrail::runner::Module::getPeriod()
 {
+    // This return the period (in seconds) with which the updateModule method is called by the main thread,
+    // as nothing is done there, 60 seconds (1 minute) is ok
+    // see https://www.yarp.it/v3.12/classyarp_1_1os_1_1RFModule.html#ace2fdadde1a2690f274079fabd6420d2
     return 60;
 }
 
@@ -187,8 +190,7 @@ bool dinrail::runner::Module::updateModule()
     yCDebug(DINRAIL_RUNNER_LOG) << "dinrail-runner running happily";
     if (mPriv->autocloseAfterStart && mPriv->robot.currentPhase() == yarp::robotinterface::ActionPhaseRun)
     {
-        yCInfo(DINRAIL_RUNNER_LOG) << "`autocloseAfterStart` option selected. Calling close()";
-       // close();
+        yCInfo(DINRAIL_RUNNER_LOG) << "`autocloseAfterStart` option selected. The executable is exiting";
         return false;
     }
 
