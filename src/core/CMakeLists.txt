@@ -25,6 +25,8 @@ target_sources(dinrail
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h
     dinrail/Placeholder.cpp
+    dinrail/RTMemoryGuard.h
+    dinrail/RTMemoryGuard.cpp
     dinrail/Value.cpp
 )
 
