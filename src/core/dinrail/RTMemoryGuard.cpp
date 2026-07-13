@@ -12,56 +12,86 @@
 #include <utility>
 
 #if defined(__linux__)
-#    include <errno.h>
-#    include <fcntl.h>
-#    include <malloc.h>
-#    include <sys/mman.h>
-#    include <sys/prctl.h>
-#    include <unistd.h>
+#include <alloca.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <malloc.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
+#include <sys/resource.h>
+#include <unistd.h>
 #elif defined(__APPLE__)
-#    include <errno.h>
-#    include <sys/mman.h>
-#    include <unistd.h>
+#include <alloca.h>
+#include <errno.h>
+#include <sys/mman.h>
+#include <unistd.h>
 #elif defined(_WIN32)
-#    include <malloc.h> // for _alloca
-#    include <windows.h>
+#include <malloc.h> // for _alloca
+#include <windows.h>
 #endif
 
 namespace dinrail
 {
 
-namespace {
-
-#if !defined(_WIN32)
-// Touch stack memory by recursing through real stack frames instead of growing a single
-// frame with alloca(). A single large alloca() is undone as soon as the function returns
-// (so it does not actually keep any pages resident for later use) and, for larger sizes or
-// threads with a smaller stack, it can blow straight through the stack guard page with no
-// safety margin. Recursing through small, fixed-size frames touches the same number of pages
-// while never growing any single frame by more than a page.
-constexpr std::size_t kStackTouchFrameSize = 4096;
-
-void touchStackFrames(std::size_t remainingBytes) noexcept
+namespace
 {
-    volatile std::uint8_t frame[kStackTouchFrameSize];
-    std::memset(const_cast<std::uint8_t*>(frame), 0, sizeof(frame));
-    if (remainingBytes > kStackTouchFrameSize) {
-        touchStackFrames(remainingBytes - kStackTouchFrameSize);
+
+    constexpr std::size_t kDefaultPageSize = 4096;
+
+#if defined(__linux__)
+
+    // RLIMIT_MEMLOCK only bounds the heap reserve, not the full mlockall()
+    // footprint (stack, code, all future mappings). It is a cheap early-out,
+    // not a guarantee that mlockall() will succeed.
+    bool checkMemoryLimit(std::size_t bytes)
+    {
+        struct rlimit limit{};
+
+        if (getrlimit(RLIMIT_MEMLOCK, &limit) != 0) {
+            return true;
+        }
+
+        if (limit.rlim_cur == RLIM_INFINITY){
+            return true;
+        }
+
+        return bytes <= limit.rlim_cur;
     }
-}
+
 #endif
 
-} // namespace
+#if defined(__linux__) || defined(__APPLE__)
 
-RTMemoryGuard::RTMemoryGuard(const std::size_t stackPrefaultBytes,
-                             const std::size_t heapReserveBytes,
-                             const bool activateNow)
-        : m_stackPrefaultBytes(stackPrefaultBytes),
-          m_heapReserveBytes(heapReserveBytes)
-{
-    if (activateNow) {
-        activate();
+    // Hard ceiling on a single prefault request. Guards against a bad
+    // caller-supplied byte count silently overflowing the thread stack.
+    constexpr std::size_t kMaxStackPrefaultBytes = 8 * 1024 * 1024;
+
+    // alloca() allocations inside a loop persist until the enclosing
+    // function returns, so a loop grows the same stack region a
+    // recursive version would, without recursion depth or call overhead.
+    void touchStackIterative(std::size_t bytes, std::size_t pageSize)
+    {
+        bytes = bytes < kMaxStackPrefaultBytes ? bytes : kMaxStackPrefaultBytes;
+
+        for (std::size_t touched = 0; touched < bytes; touched += pageSize)
+        {
+            volatile std::uint8_t *page =
+                static_cast<volatile std::uint8_t *>(alloca(pageSize));
+            page[0] = 0;
+        }
     }
+
+#endif
+
+}
+
+RTMemoryGuard::RTMemoryGuard(std::size_t stackPrefaultBytes,
+                             std::size_t heapReserveBytes, bool activateNow)
+                            : m_stackPrefaultBytes(stackPrefaultBytes),
+                              m_heapReserveBytes(heapReserveBytes)
+{
+    if (activateNow)
+        activate();
 }
 
 RTMemoryGuard::~RTMemoryGuard()
@@ -69,45 +99,44 @@ RTMemoryGuard::~RTMemoryGuard()
     unlock();
 }
 
-RTMemoryGuard::RTMemoryGuard(RTMemoryGuard&& other) noexcept
-        : m_stackPrefaultBytes(other.m_stackPrefaultBytes),
-          m_heapReserveBytes(other.m_heapReserveBytes),
-          m_isActive(other.m_isActive),
-          m_locked(other.m_locked),
-          m_heapReserved(other.m_heapReserved),
-          m_lastError(std::move(other.m_lastError))
+RTMemoryGuard::RTMemoryGuard(RTMemoryGuard &&other) noexcept
+    : m_stackPrefaultBytes(other.m_stackPrefaultBytes),
+      m_heapReserveBytes(other.m_heapReserveBytes),
+      m_isActive(other.m_isActive),
+      m_locked(other.m_locked),
+      m_heapReserved(other.m_heapReserved),
+      m_lastError(std::move(other.m_lastError))
 {
 #if defined(__linux__)
     m_dmaLatencyFd = other.m_dmaLatencyFd;
     other.m_dmaLatencyFd = -1;
 #endif
-    other.m_stackPrefaultBytes = 0;
-    other.m_heapReserveBytes = 0;
     other.m_isActive = false;
     other.m_locked = false;
     other.m_heapReserved = false;
 }
 
-RTMemoryGuard& RTMemoryGuard::operator=(RTMemoryGuard&& other) noexcept
+RTMemoryGuard &RTMemoryGuard::operator=(RTMemoryGuard &&other) noexcept
 {
-    if (this != &other) {
-        unlock();
-        m_stackPrefaultBytes = other.m_stackPrefaultBytes;
-        m_heapReserveBytes = other.m_heapReserveBytes;
-        m_isActive = other.m_isActive;
-        m_locked = other.m_locked;
-        m_heapReserved = other.m_heapReserved;
-        m_lastError = std::move(other.m_lastError);
+    if (this == &other)
+        return *this;
+
+    unlock();
+
+    m_stackPrefaultBytes = other.m_stackPrefaultBytes;
+    m_heapReserveBytes = other.m_heapReserveBytes;
+    m_isActive = other.m_isActive;
+    m_locked = other.m_locked;
+    m_heapReserved = other.m_heapReserved;
+    m_lastError = std::move(other.m_lastError);
 #if defined(__linux__)
-        m_dmaLatencyFd = other.m_dmaLatencyFd;
-        other.m_dmaLatencyFd = -1;
+    m_dmaLatencyFd = other.m_dmaLatencyFd;
+    other.m_dmaLatencyFd = -1;
 #endif
-        other.m_stackPrefaultBytes = 0;
-        other.m_heapReserveBytes = 0;
-        other.m_isActive = false;
-        other.m_locked = false;
-        other.m_heapReserved = false;
-    }
+    other.m_isActive = false;
+    other.m_locked = false;
+    other.m_heapReserved = false;
+
     return *this;
 }
 
@@ -121,7 +150,7 @@ bool RTMemoryGuard::isHeapReserved() const noexcept
     return m_heapReserved;
 }
 
-const std::optional<std::string>& RTMemoryGuard::lastError() const noexcept
+const std::optional<std::string> &RTMemoryGuard::lastError() const noexcept
 {
     return m_lastError;
 }
@@ -136,167 +165,199 @@ bool RTMemoryGuard::activate() noexcept
     disableTransparentHugePages();
     requestZeroLatency();
 
-    if (m_stackPrefaultBytes > 0) {
-        prefaultStack(m_stackPrefaultBytes);
+    if (!lockProcessMemory()) {
+        // Release anything already acquired above (e.g. the latency fd)
+        // so a failed activation does not leak resources or pin the
+        // zero-latency constraint for the process lifetime.
+        unlock();
+        return false;
     }
 
     if (m_heapReserveBytes > 0) {
         m_heapReserved = reserveHeap(m_heapReserveBytes);
     }
+    if (m_stackPrefaultBytes > 0) {
+        prefaultCurrentThreadStack(m_stackPrefaultBytes);
+    }
 
-    m_locked = lockProcessMemory();
+    m_locked = true;
     m_isActive = true;
-    return m_locked;
+
+    return true;
 }
 
-void RTMemoryGuard::setError(const char* what, int err) noexcept
+void RTMemoryGuard::setError(const char *what, int errorCode) noexcept
 {
-    m_lastError = std::string(what) + ": " + std::strerror(err);
+    m_lastError = std::string(what) + ": " + std::strerror(errorCode);
+}
+
+void RTMemoryGuard::setError(const char *what) noexcept
+{
+    m_lastError = what;
 }
 
 bool RTMemoryGuard::lockProcessMemory() noexcept
 {
 #if defined(__linux__)
-    if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0) {
-        setError("mlockall(MCL_CURRENT | MCL_FUTURE)", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to lock process memory: %s\n",
-                     m_lastError->c_str());
+
+    if (!checkMemoryLimit(m_heapReserveBytes))
+    {
+        setError("RLIMIT_MEMLOCK too small", ENOMEM);
         return false;
     }
+
+    if (mlockall(MCL_CURRENT | MCL_FUTURE) != 0)
+    {
+        setError("mlockall", errno);
+        std::fprintf(stderr, "RTMemoryGuard: %s\n", m_lastError->c_str());
+        return false;
+    }
+
     return true;
 
-#elif defined(__APPLE__) || defined(_WIN32)
-    return true;
 #else
+
+    // No mlockall()-equivalent is applied on this platform. Returning true
+    // still marks the guard active, so isLocked() will report true even
+    // though no real process-wide memory lock was taken here.
     return true;
+
 #endif
 }
 
 void RTMemoryGuard::disableMallocPageFaults() noexcept
 {
 #if defined(__linux__)
-    if (mallopt(M_MMAP_MAX, 0) != 1) {
-        setError("mallopt(M_MMAP_MAX)", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to set M_MMAP_MAX: %s\n",
-                     m_lastError->c_str());
-    }
-    if (mallopt(M_TRIM_THRESHOLD, -1) != 1) {
-        setError("mallopt(M_TRIM_THRESHOLD)", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to set M_TRIM_THRESHOLD: %s\n",
-                     m_lastError->c_str());
-    }
+
+    // glibc's mallopt() does not reliably set errno on failure, so errno
+    // is not trustworthy here; record a fixed diagnostic instead.
+    if (mallopt(M_MMAP_MAX, 0) == 0)
+        setError("mallopt(M_MMAP_MAX) failed");
+
+    if (mallopt(M_TRIM_THRESHOLD, -1) == 0)
+        setError("mallopt(M_TRIM_THRESHOLD) failed");
+
 #endif
 }
 
 void RTMemoryGuard::disableTransparentHugePages() noexcept
 {
 #if defined(__linux__) && defined(PR_SET_THP_DISABLE)
+
     if (prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0) != 0) {
         setError("prctl(PR_SET_THP_DISABLE)", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to disable transparent huge pages: %s\n",
-                     m_lastError->c_str());
     }
+
 #endif
 }
 
 void RTMemoryGuard::requestZeroLatency() noexcept
 {
 #if defined(__linux__)
+
+    // Avoid reopening (and leaking) the fd if a request is already active.
+    if (m_dmaLatencyFd >= 0)
+        return;
+
     m_dmaLatencyFd = open("/dev/cpu_dma_latency", O_RDWR);
-    if (m_dmaLatencyFd >= 0) {
-        const int32_t latency_target = 0;
-        if (write(m_dmaLatencyFd, &latency_target, sizeof(latency_target)) < 0) {
-            setError("write(/dev/cpu_dma_latency)", errno);
-            std::fprintf(stderr,
-                         "RTMemoryGuard: Failed to write to /dev/cpu_dma_latency: %s\n",
-                         m_lastError->c_str());
-        }
-    } else {
-        setError("open(/dev/cpu_dma_latency)", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to open /dev/cpu_dma_latency: %s\n",
-                     m_lastError->c_str());
+
+    if (m_dmaLatencyFd < 0) {
+        return;
+}
+    const int latency = 0;
+
+    if (write(m_dmaLatencyFd, &latency, sizeof(latency)) < 0) {
+        setError("cpu_dma_latency write", errno);
     }
 #endif
 }
 
-void RTMemoryGuard::prefaultStack(std::size_t bytes) noexcept
+// Must run on the calling RT thread; it only prefaults that thread's own
+// stack, not stacks of threads created later.
+void RTMemoryGuard::prefaultCurrentThreadStack(std::size_t bytes) noexcept
 {
-#if defined(_WIN32)
-    volatile std::uint8_t* dummy = static_cast<volatile std::uint8_t*>(_alloca(bytes));
-    const std::size_t pageSize = queryPageSize();
-    for (std::size_t i = 0; i < bytes; i += pageSize) {
-        dummy[i] = 0;
-    }
-#else
-    // Touch pages by recursing through real stack frames (see touchStackFrames() above)
-    // instead of a single alloca(bytes) call, which is reclaimed the instant this function
-    // returns and offers no protection against blowing through the stack guard page.
-    touchStackFrames(bytes);
+    if (bytes == 0)
+        return;
+
+#if defined(__linux__) || defined(__APPLE__)
+
+    touchStackIterative(bytes, queryPageSize());
+
+#elif defined(_WIN32)
+
+    volatile std::uint8_t *page =
+        static_cast<volatile std::uint8_t *>(_alloca(bytes));
+    page[0] = 0;
+
 #endif
 }
 
 std::size_t RTMemoryGuard::queryPageSize() noexcept
 {
 #if defined(__linux__) || defined(__APPLE__)
-    const long p = sysconf(_SC_PAGESIZE);
-    return p > 0 ? static_cast<std::size_t>(p) : 4096;
-#elif defined(_WIN32)
-    SYSTEM_INFO si;
-    GetSystemInfo(&si);
-    return si.dwPageSize;
-#else
-    return 4096;
+
+    const long size = sysconf(_SC_PAGESIZE);
+    if (size > 0)
+        return static_cast<std::size_t>(size);
+
 #endif
+
+    return kDefaultPageSize;
 }
 
 bool RTMemoryGuard::reserveHeap(std::size_t bytes) noexcept
 {
-    // IMPROVEMENT 3: Do not keep the pointer. Allocate, touch, and free immediately.
+    if (bytes == 0)
+        return true;
+
     const std::size_t pageSize = queryPageSize();
-    std::size_t heapSize = ((bytes + pageSize - 1) / pageSize) * pageSize;
-    void* ptr = nullptr;
+    bytes = (bytes + pageSize - 1) & ~(pageSize - 1);
+
+    void *memory = nullptr;
 
 #if defined(_WIN32)
-    ptr = VirtualAlloc(nullptr, heapSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-    if (!ptr) {
+
+    memory = VirtualAlloc(nullptr, bytes, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    if (!memory)
+    {
         setError("VirtualAlloc", static_cast<int>(GetLastError()));
         return false;
     }
+
 #else
-    if (posix_memalign(&ptr, pageSize, heapSize) != 0) {
-        setError("posix_memalign", errno);
-        std::fprintf(stderr,
-                     "RTMemoryGuard: Failed to allocate heap memory: %s\n",
-                     m_lastError->c_str());
+
+    const int rc = posix_memalign(&memory, pageSize, bytes);
+    if (rc != 0)
+    {
+        setError("posix_memalign", rc);
         return false;
     }
+
 #endif
 
-    volatile std::uint8_t* p = static_cast<volatile std::uint8_t*>(ptr);
-    for (std::size_t i = 0; i < heapSize; i += pageSize) {
-        p[i] = 0;
-    }
+    volatile std::uint8_t *ptr = static_cast<volatile std::uint8_t *>(memory);
 
-#if defined(_WIN32)
-    if (!VirtualLock(ptr, heapSize)) {
-        setError("VirtualLock", static_cast<int>(GetLastError()));
-    }
-    VirtualUnlock(ptr, heapSize);
-    VirtualFree(ptr, 0, MEM_RELEASE);
+    for (std::size_t offset = 0; offset < bytes; offset += pageSize)
+        ptr[offset] = 0;
+
+    ptr[bytes - 1] = 0;
+
+#if defined(__linux__)
+
+    // mlockall(MCL_FUTURE) is already active, so pages stay locked even
+    // after the block is freed back to the glibc arena for reuse.
+    std::free(memory);
+
 #elif defined(__APPLE__)
-    if (mlock(ptr, heapSize) != 0) {
-        setError("mlock", errno);
-    }
-    munlock(ptr, heapSize);
-    std::free(ptr);
-#else
-    // Linux returns the pre-faulted RAM to glibc's arena because of mallopt settings.
-    std::free(ptr);
+
+    // No process-wide MCL_FUTURE equivalent is active on this platform,
+    // so freeing here does not retain a lock. This only warms the pages.
+    std::free(memory);
+
+#elif defined(_WIN32)
+
+    VirtualFree(memory, 0, MEM_RELEASE);
+
 #endif
 
     return true;
@@ -304,26 +365,30 @@ bool RTMemoryGuard::reserveHeap(std::size_t bytes) noexcept
 
 void RTMemoryGuard::unlock() noexcept
 {
-    if (!m_isActive) {
-        return;
-    }
-
-#if defined(__linux__) || defined(__APPLE__)
-    if (m_locked) {
-        munlockall();
-    }
-#endif
+    // Intentionally not gated on m_isActive: activation acquires resources
+    // (the latency fd) before m_isActive is set, so cleanup must run even
+    // for a partially-completed activation. Each step below is idempotent.
 
 #if defined(__linux__)
-    if (m_dmaLatencyFd >= 0) {
+
+    if (m_locked)
+    {
+        // munlockall() is process-wide; do not run multiple independent
+        // RTMemoryGuard instances in the same process.
+        munlockall();
+    }
+
+    if (m_dmaLatencyFd >= 0)
+    {
         close(m_dmaLatencyFd);
         m_dmaLatencyFd = -1;
     }
+
 #endif
 
-    m_isActive = false;
     m_locked = false;
     m_heapReserved = false;
+    m_isActive = false;
 }
 
 } // namespace dinrail
