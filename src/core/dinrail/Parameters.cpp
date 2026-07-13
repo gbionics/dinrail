@@ -22,8 +22,7 @@ const T* getTyped(const std::unordered_map<std::string, Value>& values, std::str
 }
 
 template <typename T>
-bool copyVectorToVectorProxy(const std::vector<T>& source,
-                             typename VectorProxy<T>::Ref destination)
+bool copyVectorToVectorProxy(const std::vector<T>& source, typename VectorProxy<T>::Ref destination)
 {
     if (destination.size() != source.size() && !destination.resizeVector(source.size()))
     {
@@ -257,8 +256,7 @@ bool Parameters::getParameter(std::string_view key, VectorProxy<double>::Ref par
     return copyVectorToVectorProxy(*value, parameter);
 }
 
-bool Parameters::getParameter(std::string_view key,
-                              VectorProxy<std::string>::Ref parameter) const
+bool Parameters::getParameter(std::string_view key, VectorProxy<std::string>::Ref parameter) const
 {
     const std::vector<std::string>* value = getTyped<std::vector<std::string>>(m_values, key);
     if (value == nullptr)
@@ -322,8 +320,7 @@ void Parameters::setParameter(std::string_view key, const VectorProxy<const int>
     put(key, parameter);
 }
 
-void Parameters::setParameter(std::string_view key,
-                              const VectorProxy<const double>::Ref parameter)
+void Parameters::setParameter(std::string_view key, const VectorProxy<const double>::Ref parameter)
 {
     put(key, parameter);
 }

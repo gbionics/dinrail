@@ -20,10 +20,9 @@ bool isValidJointIndex(int axis, int njoints)
 bool parseJointType(const std::string& typeString, JointType& type)
 {
     std::string normalized = typeString;
-    std::transform(normalized.begin(),
-                   normalized.end(),
-                   normalized.begin(),
-                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    std::transform(normalized.begin(), normalized.end(), normalized.begin(), [](unsigned char c) {
+        return static_cast<char>(std::tolower(c));
+    });
 
     if (normalized == "revolute")
     {
@@ -53,7 +52,8 @@ bool FakeMotionControl::open(const Parameters& config)
     }
 
     const Parameters& general = config.findGroup("GENERAL");
-    if (!config.check<int>("number_of_joints") && !general.isNull() && general.find("Joints").isInt())
+    if (!config.check<int>("number_of_joints") && !general.isNull()
+        && general.find("Joints").isInt())
     {
         // Deprecated compatibility path with YARP fakeMotionControl.
         m_njoints = general.find("Joints").as<int>();
@@ -157,12 +157,8 @@ bool FakeMotionControl::getJointType(int axis, JointType& type)
     return true;
 }
 
-bool FakeMotionControl::setSetPoint(int j,
-                                    double pos,
-                                    double vel,
-                                    double torque,
-                                    double stiffness,
-                                    double damping)
+bool FakeMotionControl::setSetPoint(
+    int j, double pos, double vel, double torque, double stiffness, double damping)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (!m_opened || !isValidJointIndex(j, m_njoints))
@@ -252,12 +248,8 @@ bool FakeMotionControl::setSetPoints(const VectorProxy<const double>::Ref pos,
     return true;
 }
 
-bool FakeMotionControl::getSetPoint(int j,
-                                    double& pos,
-                                    double& vel,
-                                    double& torque,
-                                    double& stiffness,
-                                    double& damping)
+bool FakeMotionControl::getSetPoint(
+    int j, double& pos, double& vel, double& torque, double& stiffness, double& damping)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (!m_opened || !isValidJointIndex(j, m_njoints))

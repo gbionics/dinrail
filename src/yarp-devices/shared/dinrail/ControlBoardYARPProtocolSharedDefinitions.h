@@ -23,6 +23,6 @@ constexpr int CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK = 0;
 constexpr int VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS = yarp::os::createVocab32('d', 'i', 'a', 's');
 constexpr int VOCAB_DINRAIL_SETPOINT = yarp::os::createVocab32('s', 'e', 't', 'p');
 
-}
+} // namespace dinrail
 
 #endif // DINRAIL_CONTROLBOARD_YARP_PROTOCOL_SHARED_DEFINITIONS_H

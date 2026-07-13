@@ -15,10 +15,10 @@
 #include <yarp/os/idl/WireTypes.h>
 #include <yarp/sig/Vector.h>
 
-namespace dinrail {
+namespace dinrail
+{
 
-class ControlBoardYARPJointData :
-        public yarp::os::idl::WirePortable
+class ControlBoardYARPJointData : public yarp::os::idl::WirePortable
 {
 public:
     // Fields

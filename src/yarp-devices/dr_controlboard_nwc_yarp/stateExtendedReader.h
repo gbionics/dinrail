@@ -6,23 +6,22 @@
 #ifndef YARP_DEV_REMOTECONTROLBOARD_STATEEXTENDEDREADER_H
 #define YARP_DEV_REMOTECONTROLBOARD_STATEEXTENDEDREADER_H
 
-
-#include <yarp/os/PortablePair.h>
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/Time.h>
-#include <yarp/os/Network.h>
-#include <yarp/os/Thread.h>
-#include <yarp/os/Vocab.h>
-#include <yarp/os/Stamp.h>
 #include <yarp/os/Log.h>
+#include <yarp/os/Network.h>
+#include <yarp/os/PortablePair.h>
+#include <yarp/os/Stamp.h>
+#include <yarp/os/Thread.h>
+#include <yarp/os/Time.h>
+#include <yarp/os/Vocab.h>
 
 #include <yarp/sig/Vector.h>
 
-#include <yarp/dev/ControlBoardInterfaces.h>
-#include <yarp/dev/PolyDriver.h>
-#include <yarp/dev/ControlBoardInterfacesImpl.h>
 #include <yarp/dev/ControlBoardHelpers.h>
+#include <yarp/dev/ControlBoardInterfaces.h>
+#include <yarp/dev/ControlBoardInterfacesImpl.h>
 #include <yarp/dev/IPreciselyTimed.h>
+#include <yarp/dev/PolyDriver.h>
 
 #include <dinrail/ControlBoardYARPJointData.h>
 
@@ -36,8 +35,7 @@ using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 
-class StateExtendedInputPort :
-        public yarp::os::BufferedPort<dinrail::ControlBoardYARPJointData>
+class StateExtendedInputPort : public yarp::os::BufferedPort<dinrail::ControlBoardYARPJointData>
 {
     dinrail::ControlBoardYARPJointData last;
     std::mutex mutex;
@@ -51,15 +49,15 @@ class StateExtendedInputPort :
 
     bool valid;
     int count;
-public:
 
+public:
     StateExtendedInputPort();
 
     void resetStat();
     void init(int numberOfJoints);
 
     using yarp::os::BufferedPort<dinrail::ControlBoardYARPJointData>::onRead;
-    void onRead(dinrail::ControlBoardYARPJointData &v) override;
+    void onRead(dinrail::ControlBoardYARPJointData& v) override;
 
     /**
      * @brief setTimeout, set the timeout for retrieving data
@@ -69,16 +67,16 @@ public:
 
     // use vocab to identify the data to be read
     // get a value for a single joint
-    bool getLastSingle(int j, int field, double *data, Stamp &stamp, double &localArrivalTime);
-    bool getLastSingle(int j, int field, int    *data, Stamp &stamp, double &localArrivalTime);
+    bool getLastSingle(int j, int field, double* data, Stamp& stamp, double& localArrivalTime);
+    bool getLastSingle(int j, int field, int* data, Stamp& stamp, double& localArrivalTime);
 
     // get a value for all joints
-    bool getLastVector(int field, double *data, Stamp &stamp, double &localArrivalTime);
-    bool getLastVector(int field, int    *data, Stamp &stamp, double &localArrivalTime);
-    int  getIterations();
+    bool getLastVector(int field, double* data, Stamp& stamp, double& localArrivalTime);
+    bool getLastVector(int field, int* data, Stamp& stamp, double& localArrivalTime);
+    int getIterations();
 
     // time is in ms
-    void getEstFrequency(int &ite, double &av, double &min, double &max);
+    void getEstFrequency(int& ite, double& av, double& min, double& max);
 };
 
 #endif // YARP_DEV_REMOTECONTROLBOARD_STATEEXTENDEDREADER_H

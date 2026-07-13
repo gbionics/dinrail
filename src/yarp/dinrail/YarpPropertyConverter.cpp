@@ -62,10 +62,10 @@ std::string durationToBipedalYarpString(const std::chrono::nanoseconds& duration
 
     std::string timeString
         = std::string(zeroPadding - std::min(zeroPadding, hours.length()), '0') + hours + ":";
-    timeString += std::string(zeroPadding - std::min(zeroPadding, minutes.length()), '0')
-                  + minutes + ":";
-    timeString += std::string(zeroPadding - std::min(zeroPadding, seconds.length()), '0')
-                  + seconds + ":";
+    timeString
+        += std::string(zeroPadding - std::min(zeroPadding, minutes.length()), '0') + minutes + ":";
+    timeString
+        += std::string(zeroPadding - std::min(zeroPadding, seconds.length()), '0') + seconds + ":";
     timeString += std::string(zeroPaddingMicroseconds
                                   - std::min(zeroPaddingMicroseconds, microseconds.length()),
                               '0')

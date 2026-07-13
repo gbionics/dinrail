@@ -12,43 +12,42 @@
 
 #include <cstring>
 
-#include <yarp/os/PortablePair.h>
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/Time.h>
+#include <yarp/os/LogStream.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/PeriodicThread.h>
-#include <yarp/os/Vocab.h>
-#include <yarp/os/Stamp.h>
-#include <yarp/os/LogStream.h>
+#include <yarp/os/PortablePair.h>
 #include <yarp/os/QosStyle.h>
+#include <yarp/os/Stamp.h>
+#include <yarp/os/Time.h>
+#include <yarp/os/Vocab.h>
 
-
-#include <yarp/dev/ControlBoardInterfaces.h>
-#include <yarp/dev/PolyDriver.h>
-#include <yarp/dev/ControlBoardInterfacesImpl.h>
 #include <yarp/dev/ControlBoardHelpers.h>
+#include <yarp/dev/ControlBoardInterfaces.h>
+#include <yarp/dev/ControlBoardInterfacesImpl.h>
 #include <yarp/dev/IPreciselyTimed.h>
+#include <yarp/dev/PolyDriver.h>
 
 #include <mutex>
 #include <vector>
-
 
 using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 
-namespace {
+namespace
+{
 
 constexpr double DIAGNOSTIC_THREAD_PERIOD = 1.000;
 
-inline bool getTimeStamp(Bottle &bot, Stamp &st)
+inline bool getTimeStamp(Bottle& bot, Stamp& st)
 {
-    if (bot.get(3).asVocab32()==VOCAB_TIMESTAMP)
+    if (bot.get(3).asVocab32() == VOCAB_TIMESTAMP)
     {
-        //yup! we have a timestamp
-        int fr=bot.get(4).asInt32();
-        double ts=bot.get(5).asFloat64();
-        st=Stamp(fr,ts);
+        // yup! we have a timestamp
+        int fr = bot.get(4).asInt32();
+        double ts = bot.get(5).asFloat64();
+        st = Stamp(fr, ts);
         return true;
     }
     return false;
@@ -56,17 +55,15 @@ inline bool getTimeStamp(Bottle &bot, Stamp &st)
 
 } // namespace
 
-
-class DiagnosticThread :
-        public PeriodicThread
+class DiagnosticThread : public PeriodicThread
 {
-    StateExtendedInputPort *owner{nullptr};
+    StateExtendedInputPort* owner{nullptr};
     std::string ownerName;
 
 public:
     using PeriodicThread::PeriodicThread;
 
-    void setOwner(StateExtendedInputPort *o)
+    void setOwner(StateExtendedInputPort* o)
     {
         owner = o;
         ownerName = owner->getName();
@@ -92,11 +89,9 @@ public:
                         min,
                         max);
             }
-
         }
     }
 };
-
 
 bool DinRailControlBoardNWCYarp::isLive()
 {
@@ -113,10 +108,9 @@ bool DinRailControlBoardNWCYarp::isLive()
     return njIsKnown;
 }
 
-
 bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
 {
-    bool error=false;
+    bool error = false;
     // verify protocol
     Bottle cmd, reply;
     cmd.addVocab32(VOCAB_GET);
@@ -124,37 +118,43 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
     rpc_p.write(cmd, reply);
 
     // check size and format of messages, expected [prot] int int int [ok]
-    if (reply.size() != 5) {
+    if (reply.size() != 5)
+    {
         error = true;
     }
 
-    if (reply.get(0).asVocab32() != VOCAB_PROTOCOL_VERSION) {
+    if (reply.get(0).asVocab32() != VOCAB_PROTOCOL_VERSION)
+    {
         error = true;
     }
 
     if (!error)
     {
-        protocolVersion.major=reply.get(1).asInt32();
-        protocolVersion.minor=reply.get(2).asInt32();
-        protocolVersion.tweak=reply.get(3).asInt32();
+        protocolVersion.major = reply.get(1).asInt32();
+        protocolVersion.minor = reply.get(2).asInt32();
+        protocolVersion.tweak = reply.get(3).asInt32();
 
-        //verify protocol
-        if (protocolVersion.major != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR) {
+        // verify protocol
+        if (protocolVersion.major != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR)
+        {
             error = true;
         }
 
-        if (protocolVersion.minor != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR) {
+        if (protocolVersion.minor != dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR)
+        {
             error = true;
         }
     }
 
-    if (!error) {
+    if (!error)
+    {
         return true;
     }
 
     // protocol did not match
     yCError(REMOTECONTROLBOARD,
-            "Expecting protocol %d %d %d, but the device we are connecting to has protocol version %d %d %d",
+            "Expecting protocol %d %d %d, but the device we are connecting to has protocol version "
+            "%d %d %d",
             dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR,
             dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR,
             dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK,
@@ -165,12 +165,14 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
     bool ret;
     if (ignore)
     {
-        yCWarning(REMOTECONTROLBOARD, "Ignoring error but please ensure that nws and nwc use compatible version of dinrail-yarp");
+        yCWarning(REMOTECONTROLBOARD,
+                  "Ignoring error but please ensure that nws and nwc use compatible version of "
+                  "dinrail-yarp");
         ret = true;
-    }
-    else
+    } else
     {
-        yCError(REMOTECONTROLBOARD, "Please ensure that nws and nwc use compatible version of dinrail-yarp");
+        yCError(REMOTECONTROLBOARD,
+                "Please ensure that nws and nwc use compatible version of dinrail-yarp");
         ret = false;
     }
 
@@ -179,14 +181,17 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
 
 bool DinRailControlBoardNWCYarp::open(Searchable& config)
 {
-    if (!parseParams(config)) { return false; }
+    if (!parseParams(config))
+    {
+        return false;
+    }
 
     const std::string localRoot = m_local + m_namesuffix;
     const std::string remoteRoot = m_remote + m_namesuffix;
 
     extendedIntputStatePort.setTimeout(m_timeout);
 
-    //handle local Qos
+    // handle local Qos
     yarp::os::QosStyle localQos;
     if (m_local_qos_enable)
     {
@@ -195,7 +200,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         localQos.setPacketPriority(m_local_qos_packet_priority);
     }
 
-    //handle remote Qos
+    // handle remote Qos
     yarp::os::QosStyle remoteQos;
     if (m_remote_qos_enable)
     {
@@ -204,41 +209,51 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         remoteQos.setPacketPriority(m_remote_qos_packet_priority);
     }
 
-    //handle param writeStrict
+    // handle param writeStrict
     if (m_writeStrict == "on")
     {
         writeStrict_singleJoint = true;
-        writeStrict_moreJoints  = true;
-        yCInfo(REMOTECONTROLBOARD, "DinRailControlBoardNWCYarp is ENABLING the writeStrict option for all commands");
-    }
-    else if(m_writeStrict == "off")
+        writeStrict_moreJoints = true;
+        yCInfo(REMOTECONTROLBOARD,
+               "DinRailControlBoardNWCYarp is ENABLING the writeStrict option for all commands");
+    } else if (m_writeStrict == "off")
     {
         writeStrict_singleJoint = false;
-        writeStrict_moreJoints  = false;
-        yCInfo(REMOTECONTROLBOARD, "DinRailControlBoardNWCYarp is DISABLING the writeStrict option for all commands");
-    }
-    else if (m_writeStrict.empty())
+        writeStrict_moreJoints = false;
+        yCInfo(REMOTECONTROLBOARD,
+               "DinRailControlBoardNWCYarp is DISABLING the writeStrict option for all commands");
+    } else if (m_writeStrict.empty())
     {
-        //leave the default values
-    }
-    else
+        // leave the default values
+    } else
     {
-        yCError(REMOTECONTROLBOARD, "Found writeStrict option with wrong value. Accepted options are 'on' or 'off'");
+        yCError(REMOTECONTROLBOARD,
+                "Found writeStrict option with wrong value. Accepted options are 'on' or 'off'");
         return false;
     }
 
-    //open ports
+    // open ports
     bool portProblem = false;
-    if (m_local != "") {
+    if (m_local != "")
+    {
         std::string s1 = localRoot;
         s1 += "/rpc:o";
-        if (!rpc_p.open(s1)) { portProblem = true; }
+        if (!rpc_p.open(s1))
+        {
+            portProblem = true;
+        }
         s1 = localRoot;
         s1 += "/command:o";
-        if (!command_p.open(s1)) { portProblem = true; }
+        if (!command_p.open(s1))
+        {
+            portProblem = true;
+        }
         s1 = localRoot;
         s1 += "/stateExt:i";
-        if (!extendedIntputStatePort.open(s1)) { portProblem = true; }
+        if (!extendedIntputStatePort.open(s1))
+        {
+            portProblem = true;
+        }
         if (!portProblem)
         {
             extendedIntputStatePort.useCallback();
@@ -254,11 +269,17 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         s2 += "/rpc:o";
         bool ok = false;
         // RPC port needs to be tcp, therefore no carrier option is added here
-        // ok=Network::connect(s2.c_str(), s1.c_str());         //This doesn't take into consideration possible YARP_PORT_PREFIX on local ports
-        // ok=Network::connect(rpc_p.getName(), s1.c_str());    //This should work also with YARP_PORT_PREFIX because getting back the name of the port will return the modified name
-        ok=rpc_p.addOutput(s1);                         //This works because we are manipulating only remote side and let yarp handle the local side
-        if (!ok) {
-            yCError(REMOTECONTROLBOARD, "Problem connecting to %s, is the remote device available?", s1.c_str());
+        // ok=Network::connect(s2.c_str(), s1.c_str());         //This doesn't take into
+        // consideration possible YARP_PORT_PREFIX on local ports
+        // ok=Network::connect(rpc_p.getName(), s1.c_str());    //This should work also with
+        // YARP_PORT_PREFIX because getting back the name of the port will return the modified name
+        ok = rpc_p.addOutput(s1); // This works because we are manipulating only remote side and let
+                                  // yarp handle the local side
+        if (!ok)
+        {
+            yCError(REMOTECONTROLBOARD,
+                    "Problem connecting to %s, is the remote device available?",
+                    s1.c_str());
             connectionProblem = true;
         }
 
@@ -266,15 +287,20 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         s1 += "/command:i";
         s2 = localRoot;
         s2 += "/command:o";
-        //ok = Network::connect(s2.c_str(), s1.c_str(), carrier);
-        // ok=Network::connect(command_p.getName(), s1.c_str(), carrier); //doesn't take into consideration possible YARP_PORT_PREFIX on local ports
+        // ok = Network::connect(s2.c_str(), s1.c_str(), carrier);
+        //  ok=Network::connect(command_p.getName(), s1.c_str(), carrier); //doesn't take into
+        //  consideration possible YARP_PORT_PREFIX on local ports
         ok = command_p.addOutput(s1, m_carrier);
-        if (!ok) {
-            yCError(REMOTECONTROLBOARD, "Problem connecting to %s, is the remote device available?", s1.c_str());
+        if (!ok)
+        {
+            yCError(REMOTECONTROLBOARD,
+                    "Problem connecting to %s, is the remote device available?",
+                    s1.c_str());
             connectionProblem = true;
         }
         // set the QoS preferences for the 'command' port
-        if (m_local_qos_enable || m_remote_qos_enable) {
+        if (m_local_qos_enable || m_remote_qos_enable)
+        {
             NetworkBase::setConnectionQos(command_p.getName(), s1, localQos, remoteQos, false);
         }
 
@@ -282,23 +308,31 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         s1 += "/stateExt:o";
         s2 = localRoot;
         s2 += "/stateExt:i";
-        // not checking return value for now since it is wip (different machines can have different compilation flags
+        // not checking return value for now since it is wip (different machines can have different
+        // compilation flags
         ok = Network::connect(s1, extendedIntputStatePort.getName(), m_carrier);
         if (ok)
         {
             // set the QoS preferences for the 'state' port
-            if (m_local_qos_enable || m_remote_qos_enable) {
-                NetworkBase::setConnectionQos(s1, extendedIntputStatePort.getName(), remoteQos, localQos, false);
+            if (m_local_qos_enable || m_remote_qos_enable)
+            {
+                NetworkBase::setConnectionQos(s1,
+                                              extendedIntputStatePort.getName(),
+                                              remoteQos,
+                                              localQos,
+                                              false);
             }
-        }
-        else
+        } else
         {
-            yCError(REMOTECONTROLBOARD, "Problem connecting to %s, is the remote device available?", s1.c_str());
+            yCError(REMOTECONTROLBOARD,
+                    "Problem connecting to %s, is the remote device available?",
+                    s1.c_str());
             connectionProblem = true;
         }
     }
 
-    if (connectionProblem||portProblem) {
+    if (connectionProblem || portProblem)
+    {
 
         rpc_p.close();
         command_p.close();
@@ -319,8 +353,10 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         return false;
     }
 
-    if (!isLive()) {
-        if (m_remote!="") {
+    if (!isLive())
+    {
+        if (m_remote != "")
+        {
             yCError(REMOTECONTROLBOARD, "Problems with obtaining the number of controlled axes");
             command_buffer.detach();
             rpc_p.close();
@@ -368,7 +404,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
 
 bool DinRailControlBoardNWCYarp::close()
 {
-    if (diagnosticThread!=nullptr)
+    if (diagnosticThread != nullptr)
     {
         diagnosticThread->stop();
         delete diagnosticThread;
@@ -390,8 +426,9 @@ bool DinRailControlBoardNWCYarp::send1V(int v)
 {
     Bottle cmd, response;
     cmd.addVocab32(v);
-    bool ok=rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -402,8 +439,9 @@ bool DinRailControlBoardNWCYarp::send2V(int v1, int v2)
     Bottle cmd, response;
     cmd.addVocab32(v1);
     cmd.addVocab32(v2);
-    bool ok=rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -415,8 +453,9 @@ bool DinRailControlBoardNWCYarp::send2V1I(int v1, int v2, int axis)
     cmd.addVocab32(v1);
     cmd.addVocab32(v2);
     cmd.addInt32(axis);
-    bool ok=rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -427,8 +466,9 @@ bool DinRailControlBoardNWCYarp::send1V1I(int v, int axis)
     Bottle cmd, response;
     cmd.addVocab32(v);
     cmd.addInt32(axis);
-    bool ok=rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -441,8 +481,9 @@ bool DinRailControlBoardNWCYarp::send3V1I(int v1, int v2, int v3, int j)
     cmd.addVocab32(v2);
     cmd.addVocab32(v3);
     cmd.addInt32(j);
-    bool ok=rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -491,7 +532,8 @@ bool DinRailControlBoardNWCYarp::get1V1D(int code, double& v) const
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // response should be [cmd] [name] value
         v = response.get(2).asFloat64();
 
@@ -511,7 +553,8 @@ bool DinRailControlBoardNWCYarp::get1V1I(int code, int& v) const
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // response should be [cmd] [name] value
         v = response.get(2).asInt32();
 
@@ -546,25 +589,28 @@ bool DinRailControlBoardNWCYarp::set1V1I2D(int code, int j, double val1, double 
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::set1VDA(int v, const double *val)
+bool DinRailControlBoardNWCYarp::set1VDA(int v, const double* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
     cmd.addVocab32(v);
     Bottle& l = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l.addFloat64(val[i]);
     }
     bool ok = rpc_p.write(cmd, response);
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::set2V1DA(int v1, int v2, const double *val)
+bool DinRailControlBoardNWCYarp::set2V1DA(int v1, int v2, const double* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -572,16 +618,18 @@ bool DinRailControlBoardNWCYarp::set2V1DA(int v1, int v2, const double *val)
     cmd.addVocab32(v1);
     cmd.addVocab32(v2);
     Bottle& l = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l.addFloat64(val[i]);
     }
     bool ok = rpc_p.write(cmd, response);
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::set2V2DA(int v1, int v2, const double *val1, const double *val2)
+bool DinRailControlBoardNWCYarp::set2V2DA(int v1, int v2, const double* val1, const double* val2)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -589,20 +637,26 @@ bool DinRailControlBoardNWCYarp::set2V2DA(int v1, int v2, const double *val1, co
     cmd.addVocab32(v1);
     cmd.addVocab32(v2);
     Bottle& l1 = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l1.addFloat64(val1[i]);
     }
     Bottle& l2 = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l2.addFloat64(val2[i]);
     }
     bool ok = rpc_p.write(cmd, response);
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::set1V1I1IA1DA(int v, const int len, const int *val1, const double *val2)
+bool DinRailControlBoardNWCYarp::set1V1I1IA1DA(int v,
+                                               const int len,
+                                               const int* val1,
+                                               const double* val2)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -611,11 +665,13 @@ bool DinRailControlBoardNWCYarp::set1V1I1IA1DA(int v, const int len, const int *
     cmd.addInt32(len);
     int i;
     Bottle& l1 = cmd.addList();
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++)
+    {
         l1.addInt32(val1[i]);
     }
     Bottle& l2 = cmd.addList();
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++)
+    {
         l2.addFloat64(val2[i]);
     }
     bool ok = rpc_p.write(cmd, response);
@@ -634,9 +690,13 @@ bool DinRailControlBoardNWCYarp::set2V1I1D(int v1, int v2, int axis, double val)
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum type, int axis, double val)
+bool DinRailControlBoardNWCYarp::setValWithPidType(int voc,
+                                                   PidControlTypeEnum type,
+                                                   int axis,
+                                                   double val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -650,9 +710,12 @@ bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum t
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum type, const double* val_arr)
+bool DinRailControlBoardNWCYarp::setValWithPidType(int voc,
+                                                   PidControlTypeEnum type,
+                                                   const double* val_arr)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -661,14 +724,18 @@ bool DinRailControlBoardNWCYarp::setValWithPidType(int voc, PidControlTypeEnum t
     cmd.addVocab32(voc);
     cmd.addVocab32(type);
     Bottle& l = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l.addFloat64(val_arr[i]);
     }
     bool ok = rpc_p.write(cmd, response);
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum type, int j, double *val)
+bool DinRailControlBoardNWCYarp::getValWithPidType(int voc,
+                                                   PidControlTypeEnum type,
+                                                   int j,
+                                                   double* val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -687,9 +754,10 @@ bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum t
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum type, double *val)
+bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum type, double* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -701,12 +769,14 @@ bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum t
     if (CHECK_FAIL(ok, response))
     {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         yCAssert(REMOTECONTROLBOARD, nj == l.size());
-        for (size_t i = 0; i < nj; i++) {
+        for (size_t i = 0; i < nj; i++)
+        {
             val[i] = l.get(i).asFloat64();
         }
         getTimeStamp(response, lastStamp);
@@ -726,7 +796,7 @@ bool DinRailControlBoardNWCYarp::set2V1I(int v1, int v2, int axis)
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I1D(int v, int j, double *val)
+bool DinRailControlBoardNWCYarp::get1V1I1D(int v, int j, double* val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -734,7 +804,8 @@ bool DinRailControlBoardNWCYarp::get1V1I1D(int v, int j, double *val)
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // ok
         *val = response.get(2).asFloat64();
 
@@ -744,14 +815,15 @@ bool DinRailControlBoardNWCYarp::get1V1I1D(int v, int j, double *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I1I(int v, int j, int *val)
+bool DinRailControlBoardNWCYarp::get1V1I1I(int v, int j, int* val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // ok
         *val = response.get(2).asInt32();
 
@@ -761,7 +833,7 @@ bool DinRailControlBoardNWCYarp::get1V1I1I(int v, int j, int *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get2V1I1D(int v1, int v2, int j, double *val)
+bool DinRailControlBoardNWCYarp::get2V1I1D(int v1, int v2, int j, double* val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -770,7 +842,8 @@ bool DinRailControlBoardNWCYarp::get2V1I1D(int v1, int v2, int j, double *val)
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // ok
         *val = response.get(2).asFloat64();
 
@@ -780,7 +853,7 @@ bool DinRailControlBoardNWCYarp::get2V1I1D(int v1, int v2, int j, double *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get2V1I2D(int v1, int v2, int j, double *val1, double *val2)
+bool DinRailControlBoardNWCYarp::get2V1I2D(int v1, int v2, int j, double* val1, double* val2)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -788,7 +861,8 @@ bool DinRailControlBoardNWCYarp::get2V1I2D(int v1, int v2, int j, double *val1, 
     cmd.addVocab32(v2);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         // ok
         *val1 = response.get(2).asFloat64();
         *val2 = response.get(3).asFloat64();
@@ -799,7 +873,7 @@ bool DinRailControlBoardNWCYarp::get2V1I2D(int v1, int v2, int j, double *val1, 
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I2D(int code, int axis, double *v1, double *v2)
+bool DinRailControlBoardNWCYarp::get1V1I2D(int code, int axis, double* v1, double* v2)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -808,7 +882,8 @@ bool DinRailControlBoardNWCYarp::get1V1I2D(int code, int axis, double *v1, doubl
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         *v1 = response.get(2).asFloat64();
         *v2 = response.get(3).asFloat64();
         return true;
@@ -816,46 +891,55 @@ bool DinRailControlBoardNWCYarp::get1V1I2D(int code, int axis, double *v1, doubl
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I1B(int v, int j, bool &val)
+bool DinRailControlBoardNWCYarp::get1V1I1B(int v, int j, bool& val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
-        val = (response.get(2).asInt32()!=0);
+    if (CHECK_FAIL(ok, response))
+    {
+        val = (response.get(2).asInt32() != 0);
         getTimeStamp(response, lastStamp);
         return true;
     }
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I1IA1B(int v,  const int len, const int *val1, bool &retVal)
+bool DinRailControlBoardNWCYarp::get1V1I1IA1B(int v, const int len, const int* val1, bool& retVal)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     cmd.addInt32(len);
     Bottle& l1 = cmd.addList();
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++)
+    {
         l1.addInt32(val1[i]);
     }
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
-        retVal = (response.get(2).asInt32()!=0);
+    if (CHECK_FAIL(ok, response))
+    {
+        retVal = (response.get(2).asInt32() != 0);
         getTimeStamp(response, lastStamp);
         return true;
     }
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1, int v2, const int n_joints, const int *joints, double *retVals, std::string functionName)
+bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1,
+                                               int v2,
+                                               const int n_joints,
+                                               const int* joints,
+                                               double* retVals,
+                                               std::string functionName)
 {
     Bottle cmd, response;
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -865,7 +949,8 @@ bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1, int v2, const int n_joint
     cmd.addInt32(n_joints);
 
     Bottle& l1 = cmd.addList();
-    for (int i = 0; i < n_joints; i++) {
+    for (int i = 0; i < n_joints; i++)
+    {
         l1.addInt32(joints[i]);
     }
 
@@ -875,22 +960,22 @@ bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1, int v2, const int n_joint
     {
         int i;
         Bottle& list = *(response.get(0).asList());
-        yCAssert(REMOTECONTROLBOARD, list.size() >= (size_t) n_joints)
+        yCAssert(REMOTECONTROLBOARD, list.size() >= (size_t)n_joints)
 
-        if (list.size() != (size_t )n_joints)
+            if (list.size() != (size_t)n_joints)
         {
             yCError(REMOTECONTROLBOARD,
                     "%s length of response does not match: expected %d, received %zu\n ",
                     functionName.c_str(),
-                    n_joints ,
-                    list.size() );
+                    n_joints,
+                    list.size());
             return false;
         }
         else
         {
             for (i = 0; i < n_joints; i++)
             {
-                retVals[i] = (double) list.get(i).asFloat64();
+                retVals[i] = (double)list.get(i).asFloat64();
             }
             return true;
         }
@@ -898,37 +983,42 @@ bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1, int v2, const int n_joint
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1B(int v, bool &val)
+bool DinRailControlBoardNWCYarp::get1V1B(int v, bool& val)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
-        val = (response.get(2).asInt32()!=0);
+    if (CHECK_FAIL(ok, response))
+    {
+        val = (response.get(2).asInt32() != 0);
         getTimeStamp(response, lastStamp);
         return true;
     }
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1VIA(int v, int *val)
+bool DinRailControlBoardNWCYarp::get1VIA(int v, int* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         yCAssert(REMOTECONTROLBOARD, nj == l.size());
-        for (size_t i = 0; i < nj; i++) {
+        for (size_t i = 0; i < nj; i++)
+        {
             val[i] = l.get(i).asInt32();
         }
 
@@ -939,23 +1029,27 @@ bool DinRailControlBoardNWCYarp::get1VIA(int v, int *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1VDA(int v, double *val)
+bool DinRailControlBoardNWCYarp::get1VDA(int v, double* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         yCAssert(REMOTECONTROLBOARD, nj == l.size());
-        for (size_t i = 0; i < nj; i++) {
+        for (size_t i = 0; i < nj; i++)
+        {
             val[i] = l.get(i).asFloat64();
         }
 
@@ -966,9 +1060,10 @@ bool DinRailControlBoardNWCYarp::get1VDA(int v, double *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double *val)
+bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double* val)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -976,14 +1071,17 @@ bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double *val)
     cmd.addVocab32(v1);
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         yCAssert(REMOTECONTROLBOARD, nj == l.size());
-        for (size_t i = 0; i < nj; i++) {
+        for (size_t i = 0; i < nj; i++)
+        {
             val[i] = l.get(i).asFloat64();
         }
 
@@ -993,37 +1091,10 @@ bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double *val)
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get2V1DA(int v1, int v2, double *val)
+bool DinRailControlBoardNWCYarp::get2V1DA(int v1, int v2, double* val)
 {
-    if (!isLive()) {
-        return false;
-    }
-    Bottle cmd, response;
-    cmd.addVocab32(VOCAB_GET);
-    cmd.addVocab32(v1);
-    cmd.addVocab32(v2);
-    bool ok = rpc_p.write(cmd, response);
-
-    if (CHECK_FAIL(ok, response)) {
-        Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
-            return false;
-        }
-        Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
-        for (size_t i = 0; i < nj; i++) {
-            val[i] = l.get(i).asFloat64();
-        }
-
-        getTimeStamp(response, lastStamp);
-        return true;
-    }
-    return false;
-}
-
-bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double *val1, double *val2)
-{
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1031,27 +1102,64 @@ bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double *val1, double *
     cmd.addVocab32(v1);
     cmd.addVocab32(v2);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+
+    if (CHECK_FAIL(ok, response))
+    {
+        Bottle* lp = response.get(2).asList();
+        if (lp == nullptr)
+        {
+            return false;
+        }
+        Bottle& l = *lp;
+        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        for (size_t i = 0; i < nj; i++)
+        {
+            val[i] = l.get(i).asFloat64();
+        }
+
+        getTimeStamp(response, lastStamp);
+        return true;
+    }
+    return false;
+}
+
+bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double* val1, double* val2)
+{
+    if (!isLive())
+    {
+        return false;
+    }
+    Bottle cmd, response;
+    cmd.addVocab32(VOCAB_GET);
+    cmd.addVocab32(v1);
+    cmd.addVocab32(v2);
+    bool ok = rpc_p.write(cmd, response);
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp1 = response.get(2).asList();
-        if (lp1 == nullptr) {
+        if (lp1 == nullptr)
+        {
             return false;
         }
         Bottle& l1 = *lp1;
         Bottle* lp2 = response.get(3).asList();
-        if (lp2 == nullptr) {
+        if (lp2 == nullptr)
+        {
             return false;
         }
         Bottle& l2 = *lp2;
 
         size_t nj1 = l1.size();
         size_t nj2 = l2.size();
-       // yCAssert(REMOTECONTROLBOARD, nj == nj1);
-       // yCAssert(REMOTECONTROLBOARD, nj == nj2);
+        // yCAssert(REMOTECONTROLBOARD, nj == nj1);
+        // yCAssert(REMOTECONTROLBOARD, nj == nj2);
 
-        for (size_t i = 0; i < nj1; i++) {
+        for (size_t i = 0; i < nj1; i++)
+        {
             val1[i] = l1.get(i).asFloat64();
         }
-        for (size_t i = 0; i < nj2; i++) {
+        for (size_t i = 0; i < nj2; i++)
+        {
             val2[i] = l2.get(i).asFloat64();
         }
 
@@ -1061,7 +1169,7 @@ bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double *val1, double *
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::get1V1I1S(int code, int j, std::string &name)
+bool DinRailControlBoardNWCYarp::get1V1I1S(int code, int j, std::string& name)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1069,17 +1177,18 @@ bool DinRailControlBoardNWCYarp::get1V1I1S(int code, int j, std::string &name)
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         name = response.get(2).asString();
         return true;
     }
     return false;
 }
 
-
-bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int *val1, double *val2)
+bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int* val1, double* val2)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -1087,27 +1196,31 @@ bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int *
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(v);
     cmd.addInt32(len);
-    Bottle &l1 = cmd.addList();
-    for (int i = 0; i < len; i++) {
+    Bottle& l1 = cmd.addList();
+    for (int i = 0; i < len; i++)
+    {
         l1.addInt32(val1[i]);
     }
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp2 = response.get(2).asList();
-        if (lp2 == nullptr) {
+        if (lp2 == nullptr)
+        {
             return false;
         }
         Bottle& l2 = *lp2;
 
         size_t nj2 = l2.size();
-        if(nj2 != (unsigned)len)
+        if (nj2 != (unsigned)len)
         {
             yCError(REMOTECONTROLBOARD, "received an answer with an unexpected number of entries!");
             return false;
         }
-        for (size_t i = 0; i < nj2; i++) {
+        for (size_t i = 0; i < nj2; i++)
+        {
             val2[i] = l2.get(i).asFloat64();
         }
 
@@ -1119,14 +1232,14 @@ bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int *
 
 // END Helpers functions
 
-bool DinRailControlBoardNWCYarp::getAxes(int *ax)
+bool DinRailControlBoardNWCYarp::getAxes(int* ax)
 {
     return get1V1I(VOCAB_AXES, *ax);
 }
 
 // BEGIN IPidControl
 
-bool DinRailControlBoardNWCYarp::setPid(const PidControlTypeEnum& pidtype, int j, const Pid &pid)
+bool DinRailControlBoardNWCYarp::setPid(const PidControlTypeEnum& pidtype, int j, const Pid& pid)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_SET);
@@ -1149,9 +1262,10 @@ bool DinRailControlBoardNWCYarp::setPid(const PidControlTypeEnum& pidtype, int j
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setPids(const PidControlTypeEnum& pidtype, const Pid *pids)
+bool DinRailControlBoardNWCYarp::setPids(const PidControlTypeEnum& pidtype, const Pid* pids)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1160,7 +1274,8 @@ bool DinRailControlBoardNWCYarp::setPids(const PidControlTypeEnum& pidtype, cons
     cmd.addVocab32(VOCAB_PIDS);
     cmd.addVocab32(pidtype);
     Bottle& l = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         Bottle& m = l.addList();
         m.addFloat64(pids[i].kp);
         m.addFloat64(pids[i].kd);
@@ -1178,37 +1293,43 @@ bool DinRailControlBoardNWCYarp::setPids(const PidControlTypeEnum& pidtype, cons
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setPidReference(const PidControlTypeEnum& pidtype, int j, double ref)
+bool DinRailControlBoardNWCYarp::setPidReference(const PidControlTypeEnum& pidtype,
+                                                 int j,
+                                                 double ref)
 {
     return setValWithPidType(VOCAB_REF, pidtype, j, ref);
 }
 
-bool DinRailControlBoardNWCYarp::setPidReferences(const PidControlTypeEnum& pidtype, const double *refs)
+bool DinRailControlBoardNWCYarp::setPidReferences(const PidControlTypeEnum& pidtype,
+                                                  const double* refs)
 {
     return setValWithPidType(VOCAB_REFS, pidtype, refs);
 }
 
-bool DinRailControlBoardNWCYarp::setPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double limit)
+bool DinRailControlBoardNWCYarp::setPidErrorLimit(const PidControlTypeEnum& pidtype,
+                                                  int j,
+                                                  double limit)
 {
     return setValWithPidType(VOCAB_LIM, pidtype, j, limit);
 }
 
-bool DinRailControlBoardNWCYarp::setPidErrorLimits(const PidControlTypeEnum& pidtype, const double *limits)
+bool DinRailControlBoardNWCYarp::setPidErrorLimits(const PidControlTypeEnum& pidtype,
+                                                   const double* limits)
 {
     return setValWithPidType(VOCAB_LIMS, pidtype, limits);
 }
 
-bool DinRailControlBoardNWCYarp::getPidError(const PidControlTypeEnum& pidtype, int j, double *err)
+bool DinRailControlBoardNWCYarp::getPidError(const PidControlTypeEnum& pidtype, int j, double* err)
 {
     return getValWithPidType(VOCAB_ERR, pidtype, j, err);
 }
 
-bool DinRailControlBoardNWCYarp::getPidErrors(const PidControlTypeEnum& pidtype, double *errs)
+bool DinRailControlBoardNWCYarp::getPidErrors(const PidControlTypeEnum& pidtype, double* errs)
 {
     return getValWithPidType(VOCAB_ERRS, pidtype, errs);
 }
 
-bool DinRailControlBoardNWCYarp::getPid(const PidControlTypeEnum& pidtype, int j, Pid *pid)
+bool DinRailControlBoardNWCYarp::getPid(const PidControlTypeEnum& pidtype, int j, Pid* pid)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1217,9 +1338,11 @@ bool DinRailControlBoardNWCYarp::getPid(const PidControlTypeEnum& pidtype, int j
     cmd.addVocab32(pidtype);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
@@ -1238,9 +1361,10 @@ bool DinRailControlBoardNWCYarp::getPid(const PidControlTypeEnum& pidtype, int j
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid *pids)
+bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid* pids)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1252,7 +1376,8 @@ bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid 
     if (CHECK_FAIL(ok, response))
     {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
@@ -1260,7 +1385,8 @@ bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid 
         for (size_t i = 0; i < nj; i++)
         {
             Bottle* mp = l.get(i).asList();
-            if (mp == nullptr) {
+            if (mp == nullptr)
+            {
                 return false;
             }
             pids[i].kp = mp->get(0).asFloat64();
@@ -1279,29 +1405,35 @@ bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid 
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getPidReference(const PidControlTypeEnum& pidtype, int j, double *ref)
+bool DinRailControlBoardNWCYarp::getPidReference(const PidControlTypeEnum& pidtype,
+                                                 int j,
+                                                 double* ref)
 {
     return getValWithPidType(VOCAB_REF, pidtype, j, ref);
 }
 
-bool DinRailControlBoardNWCYarp::getPidReferences(const PidControlTypeEnum& pidtype, double *refs)
+bool DinRailControlBoardNWCYarp::getPidReferences(const PidControlTypeEnum& pidtype, double* refs)
 {
     return getValWithPidType(VOCAB_REFS, pidtype, refs);
 }
 
-bool DinRailControlBoardNWCYarp::getPidErrorLimit(const PidControlTypeEnum& pidtype, int j, double *limit)
+bool DinRailControlBoardNWCYarp::getPidErrorLimit(const PidControlTypeEnum& pidtype,
+                                                  int j,
+                                                  double* limit)
 {
     return getValWithPidType(VOCAB_LIM, pidtype, j, limit);
 }
 
-bool DinRailControlBoardNWCYarp::getPidErrorLimits(const PidControlTypeEnum& pidtype, double *limits)
+bool DinRailControlBoardNWCYarp::getPidErrorLimits(const PidControlTypeEnum& pidtype,
+                                                   double* limits)
 {
     return getValWithPidType(VOCAB_LIMS, pidtype, limits);
 }
 
 bool DinRailControlBoardNWCYarp::resetPid(const PidControlTypeEnum& pidtype, int j)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1316,7 +1448,8 @@ bool DinRailControlBoardNWCYarp::resetPid(const PidControlTypeEnum& pidtype, int
 
 bool DinRailControlBoardNWCYarp::disablePid(const PidControlTypeEnum& pidtype, int j)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1331,7 +1464,8 @@ bool DinRailControlBoardNWCYarp::disablePid(const PidControlTypeEnum& pidtype, i
 
 bool DinRailControlBoardNWCYarp::enablePid(const PidControlTypeEnum& pidtype, int j)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1344,7 +1478,9 @@ bool DinRailControlBoardNWCYarp::enablePid(const PidControlTypeEnum& pidtype, in
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::isPidEnabled(const PidControlTypeEnum& pidtype, int j, bool* enabled)
+bool DinRailControlBoardNWCYarp::isPidEnabled(const PidControlTypeEnum& pidtype,
+                                              int j,
+                                              bool* enabled)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -1361,12 +1497,12 @@ bool DinRailControlBoardNWCYarp::isPidEnabled(const PidControlTypeEnum& pidtype,
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getPidOutput(const PidControlTypeEnum& pidtype, int j, double *out)
+bool DinRailControlBoardNWCYarp::getPidOutput(const PidControlTypeEnum& pidtype, int j, double* out)
 {
     return getValWithPidType(VOCAB_OUTPUT, pidtype, j, out);
 }
 
-bool DinRailControlBoardNWCYarp::getPidOutputs(const PidControlTypeEnum& pidtype, double *outs)
+bool DinRailControlBoardNWCYarp::getPidOutputs(const PidControlTypeEnum& pidtype, double* outs)
 {
     return getValWithPidType(VOCAB_OUTPUTS, pidtype, outs);
 }
@@ -1395,88 +1531,106 @@ bool DinRailControlBoardNWCYarp::setEncoder(int j, double val)
     return set1V1I1D(VOCAB_ENCODER, j, val);
 }
 
-bool DinRailControlBoardNWCYarp::setEncoders(const double *vals)
+bool DinRailControlBoardNWCYarp::setEncoders(const double* vals)
 {
     return set1VDA(VOCAB_ENCODERS, vals);
 }
 
-bool DinRailControlBoardNWCYarp::getEncoder(int j, double *v)
+bool DinRailControlBoardNWCYarp::getEncoder(int j, double* v)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
+    bool ret
+        = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoderTimed(int j, double *v, double *t)
+bool DinRailControlBoardNWCYarp::getEncoderTimed(int j, double* v, double* t)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
-    *t=lastStamp.getTime();
+    bool ret
+        = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
+    *t = lastStamp.getTime();
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoders(double *encs)
+bool DinRailControlBoardNWCYarp::getEncoders(double* encs)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
+    bool ret
+        = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
 
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncodersTimed(double *encs, double *ts)
+bool DinRailControlBoardNWCYarp::getEncodersTimed(double* encs, double* ts)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
+    bool ret
+        = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
     std::fill_n(ts, nj, lastStamp.getTime());
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoderSpeed(int j, double *sp)
+bool DinRailControlBoardNWCYarp::getEncoderSpeed(int j, double* sp)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER_SPEED, sp, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_ENCODER_SPEED,
+                                                     sp,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoderSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getEncoderSpeeds(double* spds)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_SPEEDS, spds, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_SPEEDS,
+                                                     spds,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoderAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getEncoderAcceleration(int j, double* acc)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER_ACCELERATION, acc, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_ENCODER_ACCELERATION,
+                                                     acc,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getEncoderAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getEncoderAccelerations(double* accs)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_ACCELERATIONS, accs, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_ACCELERATIONS,
+                                                     accs,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -1509,12 +1663,11 @@ bool DinRailControlBoardNWCYarp::setRemoteVariable(std::string key, const yarp::
     cmd.addVocab32(VOCAB_VARIABLE);
     cmd.addString(key);
     cmd.append(val);
-    //std::string s = cmd.toString();
+    // std::string s = cmd.toString();
     bool ok = rpc_p.write(cmd, response);
 
     return CHECK_FAIL(ok, response);
 }
-
 
 bool DinRailControlBoardNWCYarp::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 {
@@ -1523,11 +1676,11 @@ bool DinRailControlBoardNWCYarp::getRemoteVariablesList(yarp::os::Bottle* listOf
     cmd.addVocab32(VOCAB_REMOTE_VARIABILE_INTERFACE);
     cmd.addVocab32(VOCAB_LIST_VARIABLES);
     bool ok = rpc_p.write(cmd, response);
-    //std::string s = response.toString();
+    // std::string s = response.toString();
     if (CHECK_FAIL(ok, response))
     {
         *listOfKeys = *(response.get(2).asList());
-        //std::string s = listOfKeys->toString();
+        // std::string s = listOfKeys->toString();
         return true;
     }
     return false;
@@ -1537,38 +1690,45 @@ bool DinRailControlBoardNWCYarp::getRemoteVariablesList(yarp::os::Bottle* listOf
 
 // BEGIN IMotor
 
-bool DinRailControlBoardNWCYarp::getNumberOfMotors(int *num)
+bool DinRailControlBoardNWCYarp::getNumberOfMotors(int* num)
 {
     return get1V1I(VOCAB_MOTORS_NUMBER, *num);
 }
 
-bool DinRailControlBoardNWCYarp::getTemperature      (int m, double* val)
+bool DinRailControlBoardNWCYarp::getTemperature(int m, double* val)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(m, VOCAB_TEMPERATURE, val, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(m,
+                                                     VOCAB_TEMPERATURE,
+                                                     val,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getTemperatures     (double *vals)
+bool DinRailControlBoardNWCYarp::getTemperatures(double* vals)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURE, vals, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURE,
+                                                     vals,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
 
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getTemperatureLimit (int m, double* val)
+bool DinRailControlBoardNWCYarp::getTemperatureLimit(int m, double* val)
 {
     return get1V1I1D(VOCAB_TEMPERATURE_LIMIT, m, val);
 }
 
-bool DinRailControlBoardNWCYarp::setTemperatureLimit (int m, const double val)
+bool DinRailControlBoardNWCYarp::setTemperatureLimit(int m, const double val)
 {
     return set1V1I1D(VOCAB_TEMPERATURE_LIMIT, m, val);
 }
@@ -1607,96 +1767,124 @@ bool DinRailControlBoardNWCYarp::setMotorEncoderCountsPerRevolution(int m, const
     return set1V1I1D(VOCAB_MOTOR_CPR, m, cpr);
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderCountsPerRevolution(int m, double *cpr)
+bool DinRailControlBoardNWCYarp::getMotorEncoderCountsPerRevolution(int m, double* cpr)
 {
-     return get1V1I1D(VOCAB_MOTOR_CPR, m, cpr);
+    return get1V1I1D(VOCAB_MOTOR_CPR, m, cpr);
 }
 
-bool DinRailControlBoardNWCYarp::setMotorEncoders(const double *vals)
+bool DinRailControlBoardNWCYarp::setMotorEncoders(const double* vals)
 {
     return set1VDA(VOCAB_MOTOR_ENCODERS, vals);
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoder(int j, double *v)
+bool DinRailControlBoardNWCYarp::getMotorEncoder(int j, double* v)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_MOTOR_ENCODER, v, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_MOTOR_ENCODER,
+                                                     v,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderTimed(int j, double *v, double *t)
+bool DinRailControlBoardNWCYarp::getMotorEncoderTimed(int j, double* v, double* t)
 {
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_MOTOR_ENCODER, v, lastStamp, localArrivalTime);
-    *t=lastStamp.getTime();
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_MOTOR_ENCODER,
+                                                     v,
+                                                     lastStamp,
+                                                     localArrivalTime);
+    *t = lastStamp.getTime();
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoders(double *encs)
+bool DinRailControlBoardNWCYarp::getMotorEncoders(double* encs)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS, encs, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
+                                                     encs,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
 
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncodersTimed(double *encs, double *ts)
+bool DinRailControlBoardNWCYarp::getMotorEncodersTimed(double* encs, double* ts)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS, encs, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
+                                                     encs,
+                                                     lastStamp,
+                                                     localArrivalTime);
     std::fill_n(ts, nj, lastStamp.getTime());
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderSpeed(int j, double *sp)
+bool DinRailControlBoardNWCYarp::getMotorEncoderSpeed(int j, double* sp)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_MOTOR_ENCODER_SPEED, sp, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_MOTOR_ENCODER_SPEED,
+                                                     sp,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getMotorEncoderSpeeds(double* spds)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS, spds, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
+                                                     spds,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getMotorEncoderAcceleration(int j, double* acc)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_MOTOR_ENCODER_ACCELERATION, acc, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_MOTOR_ENCODER_ACCELERATION,
+                                                     acc,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getMotorEncoderAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getMotorEncoderAccelerations(double* accs)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS, accs, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
+                                                     accs,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getNumberOfMotorEncoders(int *num)
+bool DinRailControlBoardNWCYarp::getNumberOfMotorEncoders(int* num)
 {
     return get1V1I(VOCAB_MOTOR_ENCODER_NUMBER, *num);
 }
@@ -1712,9 +1900,9 @@ bool DinRailControlBoardNWCYarp::getNumberOfMotorEncoders(int *num)
 Stamp DinRailControlBoardNWCYarp::getLastInputStamp()
 {
     Stamp ret;
-//    mutex.lock();
+    //    mutex.lock();
     ret = lastStamp;
-//    mutex.unlock();
+    //    mutex.unlock();
     return ret;
 }
 
@@ -1727,27 +1915,31 @@ bool DinRailControlBoardNWCYarp::positionMove(int j, double ref)
     return set1V1I1D(VOCAB_POSITION_MOVE, j, ref);
 }
 
-bool DinRailControlBoardNWCYarp::positionMove(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::positionMove(const int n_joint,
+                                              const int* joints,
+                                              const double* refs)
 {
     return set1V1I1IA1DA(VOCAB_POSITION_MOVE_GROUP, n_joint, joints, refs);
 }
 
-bool DinRailControlBoardNWCYarp::positionMove(const double *refs)
+bool DinRailControlBoardNWCYarp::positionMove(const double* refs)
 {
     return set1VDA(VOCAB_POSITION_MOVES, refs);
 }
 
-bool DinRailControlBoardNWCYarp::getTargetPosition(const int joint, double *ref)
+bool DinRailControlBoardNWCYarp::getTargetPosition(const int joint, double* ref)
 {
     return get1V1I1D(VOCAB_POSITION_MOVE, joint, ref);
 }
 
-bool DinRailControlBoardNWCYarp::getTargetPositions(double *refs)
+bool DinRailControlBoardNWCYarp::getTargetPositions(double* refs)
 {
     return get1V1DA(VOCAB_POSITION_MOVES, refs);
 }
 
-bool DinRailControlBoardNWCYarp::getTargetPositions(const int n_joint, const int *joints, double *refs)
+bool DinRailControlBoardNWCYarp::getTargetPositions(const int n_joint,
+                                                    const int* joints,
+                                                    double* refs)
 {
     return get1V1I1IA1DA(VOCAB_POSITION_MOVE_GROUP, n_joint, joints, refs);
 }
@@ -1757,27 +1949,29 @@ bool DinRailControlBoardNWCYarp::relativeMove(int j, double delta)
     return set1V1I1D(VOCAB_RELATIVE_MOVE, j, delta);
 }
 
-bool DinRailControlBoardNWCYarp::relativeMove(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::relativeMove(const int n_joint,
+                                              const int* joints,
+                                              const double* refs)
 {
     return set1V1I1IA1DA(VOCAB_RELATIVE_MOVE_GROUP, n_joint, joints, refs);
 }
 
-bool DinRailControlBoardNWCYarp::relativeMove(const double *deltas)
+bool DinRailControlBoardNWCYarp::relativeMove(const double* deltas)
 {
     return set1VDA(VOCAB_RELATIVE_MOVES, deltas);
 }
 
-bool DinRailControlBoardNWCYarp::checkMotionDone(int j, bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(int j, bool* flag)
 {
     return get1V1I1B(VOCAB_MOTION_DONE, j, *flag);
 }
 
-bool DinRailControlBoardNWCYarp::checkMotionDone(const int n_joint, const int *joints, bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(const int n_joint, const int* joints, bool* flag)
 {
     return get1V1I1IA1B(VOCAB_MOTION_DONE_GROUP, n_joint, joints, *flag);
 }
 
-bool DinRailControlBoardNWCYarp::checkMotionDone(bool *flag)
+bool DinRailControlBoardNWCYarp::checkMotionDone(bool* flag)
 {
     return get1V1B(VOCAB_MOTION_DONES, *flag);
 }
@@ -1787,12 +1981,14 @@ bool DinRailControlBoardNWCYarp::setRefSpeed(int j, double sp)
     return set1V1I1D(VOCAB_REF_SPEED, j, sp);
 }
 
-bool DinRailControlBoardNWCYarp::setRefSpeeds(const int n_joint, const int *joints, const double *spds)
+bool DinRailControlBoardNWCYarp::setRefSpeeds(const int n_joint,
+                                              const int* joints,
+                                              const double* spds)
 {
     return set1V1I1IA1DA(VOCAB_REF_SPEED_GROUP, n_joint, joints, spds);
 }
 
-bool DinRailControlBoardNWCYarp::setRefSpeeds(const double *spds)
+bool DinRailControlBoardNWCYarp::setRefSpeeds(const double* spds)
 {
     return set1VDA(VOCAB_REF_SPEEDS, spds);
 }
@@ -1802,42 +1998,46 @@ bool DinRailControlBoardNWCYarp::setRefAcceleration(int j, double acc)
     return set1V1I1D(VOCAB_REF_ACCELERATION, j, acc);
 }
 
-bool DinRailControlBoardNWCYarp::setRefAccelerations(const int n_joint, const int *joints, const double *accs)
+bool DinRailControlBoardNWCYarp::setRefAccelerations(const int n_joint,
+                                                     const int* joints,
+                                                     const double* accs)
 {
     return set1V1I1IA1DA(VOCAB_REF_ACCELERATION_GROUP, n_joint, joints, accs);
 }
 
-bool DinRailControlBoardNWCYarp::setRefAccelerations(const double *accs)
+bool DinRailControlBoardNWCYarp::setRefAccelerations(const double* accs)
 {
     return set1VDA(VOCAB_REF_ACCELERATIONS, accs);
 }
 
-bool DinRailControlBoardNWCYarp::getRefSpeed(int j, double *ref)
+bool DinRailControlBoardNWCYarp::getRefSpeed(int j, double* ref)
 {
     return get1V1I1D(VOCAB_REF_SPEED, j, ref);
 }
 
-bool DinRailControlBoardNWCYarp::getRefSpeeds(const int n_joint, const int *joints, double *spds)
+bool DinRailControlBoardNWCYarp::getRefSpeeds(const int n_joint, const int* joints, double* spds)
 {
     return get1V1I1IA1DA(VOCAB_REF_SPEED_GROUP, n_joint, joints, spds);
 }
 
-bool DinRailControlBoardNWCYarp::getRefSpeeds(double *spds)
+bool DinRailControlBoardNWCYarp::getRefSpeeds(double* spds)
 {
     return get1VDA(VOCAB_REF_SPEEDS, spds);
 }
 
-bool DinRailControlBoardNWCYarp::getRefAcceleration(int j, double *acc)
+bool DinRailControlBoardNWCYarp::getRefAcceleration(int j, double* acc)
 {
     return get1V1I1D(VOCAB_REF_ACCELERATION, j, acc);
 }
 
-bool DinRailControlBoardNWCYarp::getRefAccelerations(const int n_joint, const int *joints, double *accs)
+bool DinRailControlBoardNWCYarp::getRefAccelerations(const int n_joint,
+                                                     const int* joints,
+                                                     double* accs)
 {
     return get1V1I1IA1DA(VOCAB_REF_ACCELERATION_GROUP, n_joint, joints, accs);
 }
 
-bool DinRailControlBoardNWCYarp::getRefAccelerations(double *accs)
+bool DinRailControlBoardNWCYarp::getRefAccelerations(double* accs)
 {
     return get1VDA(VOCAB_REF_ACCELERATIONS, accs);
 }
@@ -1847,9 +2047,10 @@ bool DinRailControlBoardNWCYarp::stop(int j)
     return set1V1I(VOCAB_STOP, j);
 }
 
-bool DinRailControlBoardNWCYarp::stop(const int len, const int *val1)
+bool DinRailControlBoardNWCYarp::stop(const int len, const int* val1)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -1858,7 +2059,8 @@ bool DinRailControlBoardNWCYarp::stop(const int len, const int *val1)
     cmd.addInt32(len);
     int i;
     Bottle& l1 = cmd.addList();
-    for (i = 0; i < len; i++) {
+    for (i = 0; i < len; i++)
+    {
         l1.addInt32(val1[i]);
     }
 
@@ -1901,10 +2103,11 @@ bool DinRailControlBoardNWCYarp::getLastJointFault(int j, int& fault, std::strin
 
 bool DinRailControlBoardNWCYarp::velocityMove(int j, double v)
 {
- //   return set1V1I1D(VOCAB_VELOCITY_MOVE, j, v);
- if (!isLive()) {
-     return false;
- }
+    //   return set1V1I1D(VOCAB_VELOCITY_MOVE, j, v);
+    if (!isLive())
+    {
+        return false;
+    }
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVE);
@@ -1915,16 +2118,17 @@ bool DinRailControlBoardNWCYarp::velocityMove(int j, double v)
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::velocityMove(const double *v)
+bool DinRailControlBoardNWCYarp::velocityMove(const double* v)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVES);
     c.body.resize(nj);
-    memcpy(&(c.body[0]), v, sizeof(double)*nj);
+    memcpy(&(c.body[0]), v, sizeof(double) * nj);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
@@ -1943,12 +2147,12 @@ bool DinRailControlBoardNWCYarp::disableAmp(int j)
     return set1V1I(VOCAB_AMP_DISABLE, j);
 }
 
-bool DinRailControlBoardNWCYarp::getAmpStatus(int *st)
+bool DinRailControlBoardNWCYarp::getAmpStatus(int* st)
 {
     return get1VIA(VOCAB_AMP_STATUS, st);
 }
 
-bool DinRailControlBoardNWCYarp::getAmpStatus(int j, int *st)
+bool DinRailControlBoardNWCYarp::getAmpStatus(int j, int* st)
 {
     return get1V1I1I(VOCAB_AMP_STATUS_SINGLE, j, st);
 }
@@ -1958,12 +2162,12 @@ bool DinRailControlBoardNWCYarp::setMaxCurrent(int j, double v)
     return set1V1I1D(VOCAB_AMP_MAXCURRENT, j, v);
 }
 
-bool DinRailControlBoardNWCYarp::getMaxCurrent(int j, double *v)
+bool DinRailControlBoardNWCYarp::getMaxCurrent(int j, double* v)
 {
     return get1V1I1D(VOCAB_AMP_MAXCURRENT, j, v);
 }
 
-bool DinRailControlBoardNWCYarp::getNominalCurrent(int m, double *val)
+bool DinRailControlBoardNWCYarp::getNominalCurrent(int m, double* val)
 {
     return get1V1I1D(VOCAB_AMP_NOMINAL_CURRENT, m, val);
 }
@@ -1973,7 +2177,7 @@ bool DinRailControlBoardNWCYarp::setNominalCurrent(int m, const double val)
     return set1V1I1D(VOCAB_AMP_NOMINAL_CURRENT, m, val);
 }
 
-bool DinRailControlBoardNWCYarp::getPeakCurrent(int m, double *val)
+bool DinRailControlBoardNWCYarp::getPeakCurrent(int m, double* val)
 {
     return get1V1I1D(VOCAB_AMP_PEAK_CURRENT, m, val);
 }
@@ -1987,7 +2191,11 @@ bool DinRailControlBoardNWCYarp::getPWM(int m, double* val)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(m, VOCAB_PWMCONTROL_PWM_OUTPUT, val, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(m,
+                                                     VOCAB_PWMCONTROL_PWM_OUTPUT,
+                                                     val,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -2016,7 +2224,7 @@ bool DinRailControlBoardNWCYarp::setLimits(int axis, double min, double max)
     return set1V1I2D(VOCAB_LIMITS, axis, min, max);
 }
 
-bool DinRailControlBoardNWCYarp::getLimits(int axis, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getLimits(int axis, double* min, double* max)
 {
     return get1V1I2D(VOCAB_LIMITS, axis, min, max);
 }
@@ -2026,7 +2234,7 @@ bool DinRailControlBoardNWCYarp::setVelLimits(int axis, double min, double max)
     return set1V1I2D(VOCAB_VEL_LIMITS, axis, min, max);
 }
 
-bool DinRailControlBoardNWCYarp::getVelLimits(int axis, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getVelLimits(int axis, double* min, double* max)
 {
     return get1V1I2D(VOCAB_VEL_LIMITS, axis, min, max);
 }
@@ -2068,7 +2276,8 @@ bool DinRailControlBoardNWCYarp::park(bool wait)
     return send1V(VOCAB_PARK);
 }
 
-bool DinRailControlBoardNWCYarp::calibrateAxisWithParams(int j, unsigned int ui, double v1, double v2, double v3)
+bool DinRailControlBoardNWCYarp::calibrateAxisWithParams(
+    int j, unsigned int ui, double v1, double v2, double v3)
 {
     Bottle cmd, response;
 
@@ -2081,13 +2290,15 @@ bool DinRailControlBoardNWCYarp::calibrateAxisWithParams(int j, unsigned int ui,
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::setCalibrationParameters(int j, const CalibrationParameters& params)
+bool DinRailControlBoardNWCYarp::setCalibrationParameters(int j,
+                                                          const CalibrationParameters& params)
 {
     Bottle cmd, response;
 
@@ -2101,7 +2312,8 @@ bool DinRailControlBoardNWCYarp::setCalibrationParameters(int j, const Calibrati
 
     bool ok = rpc_p.write(cmd, response);
 
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         return true;
     }
     return false;
@@ -2116,21 +2328,22 @@ bool DinRailControlBoardNWCYarp::calibrationDone(int j)
 
 // BEGIN ITorqueControl
 
-bool DinRailControlBoardNWCYarp::getRefTorque(int j, double *t)
+bool DinRailControlBoardNWCYarp::getRefTorque(int j, double* t)
 {
     return get2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, t);
 }
 
-bool DinRailControlBoardNWCYarp::getRefTorques(double *t)
+bool DinRailControlBoardNWCYarp::getRefTorques(double* t)
 {
     return get2V1DA(VOCAB_TORQUE, VOCAB_REFS, t);
 }
 
-bool DinRailControlBoardNWCYarp::setRefTorques(const double *t)
+bool DinRailControlBoardNWCYarp::setRefTorques(const double* t)
 {
-    //Now we use streaming instead of rpc
-    //return set2V1DA(VOCAB_TORQUE, VOCAB_REFS, t);
-    if (!isLive()) {
+    // Now we use streaming instead of rpc
+    // return set2V1DA(VOCAB_TORQUE, VOCAB_REFS, t);
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -2147,9 +2360,10 @@ bool DinRailControlBoardNWCYarp::setRefTorques(const double *t)
 
 bool DinRailControlBoardNWCYarp::setRefTorque(int j, double v)
 {
-    //return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
-    // use the streaming port!
-    if (!isLive()) {
+    // return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
+    //  use the streaming port!
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -2165,11 +2379,14 @@ bool DinRailControlBoardNWCYarp::setRefTorque(int j, double v)
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setRefTorques(const int n_joint, const int *joints, const double *t)
+bool DinRailControlBoardNWCYarp::setRefTorques(const int n_joint,
+                                               const int* joints,
+                                               const double* t)
 {
-    //return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
-    // use the streaming port!
-    if (!isLive()) {
+    // return set2V1I1D(VOCAB_TORQUE, VOCAB_REF, j, v);
+    //  use the streaming port!
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -2177,12 +2394,13 @@ bool DinRailControlBoardNWCYarp::setRefTorques(const int n_joint, const int *joi
     // in streaming port only SET command can be sent, so it is implicit
     c.head.addVocab32(VOCAB_TORQUES_DIRECT_GROUP);
     c.head.addInt32(n_joint);
-    Bottle &jointList = c.head.addList();
-    for (int i = 0; i < n_joint; i++) {
+    Bottle& jointList = c.head.addList();
+    for (int i = 0; i < n_joint; i++)
+    {
         jointList.addInt32(joints[i]);
     }
     c.body.resize(n_joint);
-    memcpy(&(c.body[0]), t, sizeof(double)*n_joint);
+    memcpy(&(c.body[0]), t, sizeof(double) * n_joint);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
@@ -2208,7 +2426,7 @@ bool DinRailControlBoardNWCYarp::setMotorTorqueParams(int j, const MotorTorquePa
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParameters *params)
+bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParameters* params)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2216,24 +2434,27 @@ bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParamete
     cmd.addVocab32(VOCAB_MOTOR_PARAMS);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         if (l.size() != 9)
         {
-            yCError(REMOTECONTROLBOARD, "getMotorTorqueParams return value not understood, size != 9");
+            yCError(REMOTECONTROLBOARD,
+                    "getMotorTorqueParams return value not understood, size != 9");
             return false;
         }
-        params->bemf        = l.get(0).asFloat64();
-        params->bemf_scale  = l.get(1).asFloat64();
-        params->ktau        = l.get(2).asFloat64();
-        params->ktau_scale  = l.get(3).asFloat64();
-        params->viscousPos   = l.get(4).asFloat64();
+        params->bemf = l.get(0).asFloat64();
+        params->bemf_scale = l.get(1).asFloat64();
+        params->ktau = l.get(2).asFloat64();
+        params->ktau_scale = l.get(3).asFloat64();
+        params->viscousPos = l.get(4).asFloat64();
         params->viscousNeg = l.get(5).asFloat64();
-        params->coulombPos   = l.get(6).asFloat64();
+        params->coulombPos = l.get(6).asFloat64();
         params->coulombNeg = l.get(7).asFloat64();
         params->velocityThres = l.get(8).asFloat64();
         return true;
@@ -2241,30 +2462,30 @@ bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParamete
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getTorque(int j, double *t)
+bool DinRailControlBoardNWCYarp::getTorque(int j, double* t)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
     bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_TRQ, t, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getTorques(double *t)
+bool DinRailControlBoardNWCYarp::getTorques(double* t)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
     bool ret = extendedIntputStatePort.getLastVector(VOCAB_TRQS, t, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getTorqueRange(int j, double *min, double* max)
+bool DinRailControlBoardNWCYarp::getTorqueRange(int j, double* min, double* max)
 {
     return get2V1I2D(VOCAB_TORQUE, VOCAB_RANGE, j, min, max);
 }
 
-bool DinRailControlBoardNWCYarp::getTorqueRanges(double *min, double *max)
+bool DinRailControlBoardNWCYarp::getTorqueRanges(double* min, double* max)
 {
     return get2V2DA(VOCAB_TORQUE, VOCAB_RANGES, min, max);
 }
@@ -2273,7 +2494,7 @@ bool DinRailControlBoardNWCYarp::getTorqueRanges(double *min, double *max)
 
 // BEGIN IImpedanceControl
 
-bool DinRailControlBoardNWCYarp::getImpedance(int j, double *stiffness, double *damping)
+bool DinRailControlBoardNWCYarp::getImpedance(int j, double* stiffness, double* damping)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2281,20 +2502,22 @@ bool DinRailControlBoardNWCYarp::getImpedance(int j, double *stiffness, double *
     cmd.addVocab32(VOCAB_IMP_PARAM);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
         *stiffness = l.get(0).asFloat64();
-        *damping   = l.get(1).asFloat64();
+        *damping = l.get(1).asFloat64();
         return true;
     }
     return false;
 }
 
-bool DinRailControlBoardNWCYarp::getImpedanceOffset(int j, double *offset)
+bool DinRailControlBoardNWCYarp::getImpedanceOffset(int j, double* offset)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2302,13 +2525,15 @@ bool DinRailControlBoardNWCYarp::getImpedanceOffset(int j, double *offset)
     cmd.addVocab32(VOCAB_IMP_OFFSET);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
-        *offset    = l.get(0).asFloat64();
+        *offset = l.get(0).asFloat64();
         return true;
     }
     return false;
@@ -2345,7 +2570,8 @@ bool DinRailControlBoardNWCYarp::setImpedanceOffset(int j, double offset)
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp)
+bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(
+    int j, double* min_stiff, double* max_stiff, double* min_damp, double* max_damp)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2353,16 +2579,18 @@ bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(int j, double *min_sti
     cmd.addVocab32(VOCAB_LIMITS);
     cmd.addInt32(j);
     bool ok = rpc_p.write(cmd, response);
-    if (CHECK_FAIL(ok, response)) {
+    if (CHECK_FAIL(ok, response))
+    {
         Bottle* lp = response.get(2).asList();
-        if (lp == nullptr) {
+        if (lp == nullptr)
+        {
             return false;
         }
         Bottle& l = *lp;
-        *min_stiff    = l.get(0).asFloat64();
-        *max_stiff    = l.get(1).asFloat64();
-        *min_damp     = l.get(2).asFloat64();
-        *max_damp     = l.get(3).asFloat64();
+        *min_stiff = l.get(0).asFloat64();
+        *max_stiff = l.get(1).asFloat64();
+        *min_damp = l.get(2).asFloat64();
+        *max_damp = l.get(3).asFloat64();
         return true;
     }
     return false;
@@ -2372,14 +2600,11 @@ bool DinRailControlBoardNWCYarp::getCurrentImpedanceLimit(int j, double *min_sti
 
 // BEGIN dinrail::IImpedanceAllSetPointsControl
 
-bool DinRailControlBoardNWCYarp::setSetPoint(int j,
-                                             double pos,
-                                             double vel,
-                                             double torque,
-                                             double stiffness,
-                                             double damping)
+bool DinRailControlBoardNWCYarp::setSetPoint(
+    int j, double pos, double vel, double torque, double stiffness, double damping)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -2400,19 +2625,23 @@ bool DinRailControlBoardNWCYarp::setSetPoint(int j,
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
-                                              const dinrail::VectorProxy<const double>::Ref pos,
-                                              const dinrail::VectorProxy<const double>::Ref vel,
-                                              const dinrail::VectorProxy<const double>::Ref torque,
-                                              const dinrail::VectorProxy<const double>::Ref stiffness,
-                                              const dinrail::VectorProxy<const double>::Ref damping)
+bool DinRailControlBoardNWCYarp::setSetPoints(
+    const dinrail::VectorProxy<const int>::Ref jointIndeces,
+    const dinrail::VectorProxy<const double>::Ref pos,
+    const dinrail::VectorProxy<const double>::Ref vel,
+    const dinrail::VectorProxy<const double>::Ref torque,
+    const dinrail::VectorProxy<const double>::Ref stiffness,
+    const dinrail::VectorProxy<const double>::Ref damping)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
     const auto n = jointIndeces.size();
-    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size()
+        || n != damping.size())
+    {
         return false;
     }
 
@@ -2423,7 +2652,8 @@ bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const i
     c.head.addInt32(static_cast<int>(n));
 
     Bottle& jointList = c.head.addList();
-    for (std::ptrdiff_t i = 0; i < n; ++i) {
+    for (std::ptrdiff_t i = 0; i < n; ++i)
+    {
         jointList.addInt32(jointIndeces[i]);
     }
 
@@ -2439,19 +2669,22 @@ bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const i
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const double>::Ref pos,
-                                              const dinrail::VectorProxy<const double>::Ref vel,
-                                              const dinrail::VectorProxy<const double>::Ref torque,
-                                              const dinrail::VectorProxy<const double>::Ref stiffness,
-                                              const dinrail::VectorProxy<const double>::Ref damping)
+bool DinRailControlBoardNWCYarp::setSetPoints(
+    const dinrail::VectorProxy<const double>::Ref pos,
+    const dinrail::VectorProxy<const double>::Ref vel,
+    const dinrail::VectorProxy<const double>::Ref torque,
+    const dinrail::VectorProxy<const double>::Ref stiffness,
+    const dinrail::VectorProxy<const double>::Ref damping)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
     const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(nj);
     if (pos.size() != expected || vel.size() != expected || torque.size() != expected
-        || stiffness.size() != expected || damping.size() != expected) {
+        || stiffness.size() != expected || damping.size() != expected)
+    {
         return false;
     }
 
@@ -2471,12 +2704,8 @@ bool DinRailControlBoardNWCYarp::setSetPoints(const dinrail::VectorProxy<const d
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::getSetPoint(int j,
-                                             double& pos,
-                                             double& vel,
-                                             double& torque,
-                                             double& stiffness,
-                                             double& damping)
+bool DinRailControlBoardNWCYarp::getSetPoint(
+    int j, double& pos, double& vel, double& torque, double& stiffness, double& damping)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -2485,12 +2714,14 @@ bool DinRailControlBoardNWCYarp::getSetPoint(int j,
     cmd.addInt32(j);
 
     const bool ok = rpc_p.write(cmd, response);
-    if (!CHECK_FAIL(ok, response)) {
+    if (!CHECK_FAIL(ok, response))
+    {
         return false;
     }
 
     Bottle* b = response.get(2).asList();
-    if (b == nullptr || b->size() < 5) {
+    if (b == nullptr || b->size() < 5)
+    {
         return false;
     }
 
@@ -2502,15 +2733,18 @@ bool DinRailControlBoardNWCYarp::getSetPoint(int j,
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::getSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
-                                              dinrail::VectorProxy<double>::Ref pos,
-                                              dinrail::VectorProxy<double>::Ref vel,
-                                              dinrail::VectorProxy<double>::Ref torque,
-                                              dinrail::VectorProxy<double>::Ref stiffness,
-                                              dinrail::VectorProxy<double>::Ref damping)
+bool DinRailControlBoardNWCYarp::getSetPoints(
+    const dinrail::VectorProxy<const int>::Ref jointIndeces,
+    dinrail::VectorProxy<double>::Ref pos,
+    dinrail::VectorProxy<double>::Ref vel,
+    dinrail::VectorProxy<double>::Ref torque,
+    dinrail::VectorProxy<double>::Ref stiffness,
+    dinrail::VectorProxy<double>::Ref damping)
 {
     const auto n = jointIndeces.size();
-    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size()
+        || n != damping.size())
+    {
         return false;
     }
 
@@ -2520,22 +2754,26 @@ bool DinRailControlBoardNWCYarp::getSetPoints(const dinrail::VectorProxy<const i
     cmd.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
     cmd.addInt32(static_cast<int>(n));
     Bottle& joints = cmd.addList();
-    for (std::ptrdiff_t i = 0; i < n; ++i) {
+    for (std::ptrdiff_t i = 0; i < n; ++i)
+    {
         joints.addInt32(jointIndeces[i]);
     }
 
     const bool ok = rpc_p.write(cmd, response);
-    if (!CHECK_FAIL(ok, response)) {
+    if (!CHECK_FAIL(ok, response))
+    {
         return false;
     }
 
     Bottle* b = response.get(2).asList();
-    if (b == nullptr || b->size() != static_cast<size_t>(5 * n)) {
+    if (b == nullptr || b->size() != static_cast<size_t>(5 * n))
+    {
         return false;
     }
 
     const std::size_t nsz = static_cast<std::size_t>(n);
-    for (std::size_t i = 0; i < nsz; ++i) {
+    for (std::size_t i = 0; i < nsz; ++i)
+    {
         pos[i] = b->get(i).asFloat64();
         vel[i] = b->get(nsz + i).asFloat64();
         torque[i] = b->get(2 * nsz + i).asFloat64();
@@ -2552,13 +2790,15 @@ bool DinRailControlBoardNWCYarp::getSetPoints(dinrail::VectorProxy<double>::Ref 
                                               dinrail::VectorProxy<double>::Ref stiffness,
                                               dinrail::VectorProxy<double>::Ref damping)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
     const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(nj);
     if (pos.size() != expected || vel.size() != expected || torque.size() != expected
-        || stiffness.size() != expected || damping.size() != expected) {
+        || stiffness.size() != expected || damping.size() != expected)
+    {
         return false;
     }
 
@@ -2568,17 +2808,20 @@ bool DinRailControlBoardNWCYarp::getSetPoints(dinrail::VectorProxy<double>::Ref 
     cmd.addVocab32(dinrail::VOCAB_DINRAIL_SETPOINT);
 
     const bool ok = rpc_p.write(cmd, response);
-    if (!CHECK_FAIL(ok, response)) {
+    if (!CHECK_FAIL(ok, response))
+    {
         return false;
     }
 
     Bottle* b = response.get(2).asList();
-    if (b == nullptr || b->size() != static_cast<size_t>(5 * expected)) {
+    if (b == nullptr || b->size() != static_cast<size_t>(5 * expected))
+    {
         return false;
     }
 
     const std::size_t nsz = static_cast<std::size_t>(expected);
-    for (std::size_t i = 0; i < nsz; ++i) {
+    for (std::size_t i = 0; i < nsz; ++i)
+    {
         pos[i] = b->get(i).asFloat64();
         vel[i] = b->get(nsz + i).asFloat64();
         torque[i] = b->get(2 * nsz + i).asFloat64();
@@ -2593,36 +2836,48 @@ bool DinRailControlBoardNWCYarp::getSetPoints(dinrail::VectorProxy<double>::Ref 
 
 // BEGIN IControlMode
 
-bool DinRailControlBoardNWCYarp::getControlMode(int j, int *mode)
+bool DinRailControlBoardNWCYarp::getControlMode(int j, int* mode)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_CM_CONTROL_MODE, mode, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_CM_CONTROL_MODE,
+                                                     mode,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getControlModes(int *modes)
+bool DinRailControlBoardNWCYarp::getControlModes(int* modes)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES, modes, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
+                                                     modes,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getControlModes(const int n_joint, const int *joints, int *modes)
+bool DinRailControlBoardNWCYarp::getControlModes(const int n_joint, const int* joints, int* modes)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES, last_wholePart.controlMode.data(), lastStamp, localArrivalTime);
-    if(ret)
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
+                                                     last_wholePart.controlMode.data(),
+                                                     lastStamp,
+                                                     localArrivalTime);
+    if (ret)
     {
-        for (int i = 0; i < n_joint; i++) {
+        for (int i = 0; i < n_joint; i++)
+        {
             modes[i] = last_wholePart.controlMode[joints[i]];
         }
-    } else {
+    } else
+    {
         ret = false;
     }
 
@@ -2632,7 +2887,8 @@ bool DinRailControlBoardNWCYarp::getControlModes(const int n_joint, const int *j
 
 bool DinRailControlBoardNWCYarp::setControlMode(const int j, const int mode)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -2646,9 +2902,10 @@ bool DinRailControlBoardNWCYarp::setControlMode(const int j, const int mode)
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setControlModes(const int n_joint, const int *joints, int *modes)
+bool DinRailControlBoardNWCYarp::setControlModes(const int n_joint, const int* joints, int* modes)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -2658,12 +2915,14 @@ bool DinRailControlBoardNWCYarp::setControlModes(const int n_joint, const int *j
     cmd.addInt32(n_joint);
     int i;
     Bottle& l1 = cmd.addList();
-    for (i = 0; i < n_joint; i++) {
+    for (i = 0; i < n_joint; i++)
+    {
         l1.addInt32(joints[i]);
     }
 
     Bottle& l2 = cmd.addList();
-    for (i = 0; i < n_joint; i++) {
+    for (i = 0; i < n_joint; i++)
+    {
         l2.addVocab32(modes[i]);
     }
 
@@ -2671,9 +2930,10 @@ bool DinRailControlBoardNWCYarp::setControlModes(const int n_joint, const int *j
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setControlModes(int *modes)
+bool DinRailControlBoardNWCYarp::setControlModes(int* modes)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     Bottle cmd, response;
@@ -2682,7 +2942,8 @@ bool DinRailControlBoardNWCYarp::setControlModes(int *modes)
     cmd.addVocab32(VOCAB_CM_CONTROL_MODES);
 
     Bottle& l2 = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l2.addVocab32(modes[i]);
     }
 
@@ -2696,7 +2957,8 @@ bool DinRailControlBoardNWCYarp::setControlModes(int *modes)
 
 bool DinRailControlBoardNWCYarp::setPosition(int j, double ref)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -2709,35 +2971,40 @@ bool DinRailControlBoardNWCYarp::setPosition(int j, double ref)
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setPositions(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::setPositions(const int n_joint,
+                                              const int* joints,
+                                              const double* refs)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_POSITION_DIRECT_GROUP);
     c.head.addInt32(n_joint);
-    Bottle &jointList = c.head.addList();
-    for (int i = 0; i < n_joint; i++) {
+    Bottle& jointList = c.head.addList();
+    for (int i = 0; i < n_joint; i++)
+    {
         jointList.addInt32(joints[i]);
     }
     c.body.resize(n_joint);
-    memcpy(&(c.body[0]), refs, sizeof(double)*n_joint);
+    memcpy(&(c.body[0]), refs, sizeof(double) * n_joint);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setPositions(const double *refs)
+bool DinRailControlBoardNWCYarp::setPositions(const double* refs)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_POSITION_DIRECTS);
     c.body.resize(nj);
-    memcpy(&(c.body[0]), refs, sizeof(double)*nj);
+    memcpy(&(c.body[0]), refs, sizeof(double) * nj);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
@@ -2761,22 +3028,26 @@ bool DinRailControlBoardNWCYarp::getRefPositions(const int n_joint, const int* j
 
 // BEGIN IVelocityControl
 
-bool DinRailControlBoardNWCYarp::velocityMove(const int n_joint, const int *joints, const double *spds)
+bool DinRailControlBoardNWCYarp::velocityMove(const int n_joint,
+                                              const int* joints,
+                                              const double* spds)
 {
     // streaming port
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVE_GROUP);
     c.head.addInt32(n_joint);
-    Bottle &jointList = c.head.addList();
-    for (int i = 0; i < n_joint; i++) {
+    Bottle& jointList = c.head.addList();
+    for (int i = 0; i < n_joint; i++)
+    {
         jointList.addInt32(joints[i]);
     }
     c.body.resize(n_joint);
-    memcpy(&(c.body[0]), spds, sizeof(double)*n_joint);
+    memcpy(&(c.body[0]), spds, sizeof(double) * n_joint);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
@@ -2791,7 +3062,9 @@ bool DinRailControlBoardNWCYarp::getRefVelocities(double* vels)
     return get1VDA(VOCAB_VELOCITY_MOVES, vels);
 }
 
-bool DinRailControlBoardNWCYarp::getRefVelocities(const int n_joint, const int* joints, double* vels)
+bool DinRailControlBoardNWCYarp::getRefVelocities(const int n_joint,
+                                                  const int* joints,
+                                                  double* vels)
 {
     return get1V1I1IA1DA(VOCAB_VELOCITY_MOVE_GROUP, n_joint, joints, vels);
 }
@@ -2802,25 +3075,36 @@ bool DinRailControlBoardNWCYarp::getRefVelocities(const int n_joint, const int* 
 
 bool DinRailControlBoardNWCYarp::getInteractionMode(int axis, yarp::dev::InteractionModeEnum* mode)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(axis, VOCAB_INTERACTION_MODE, (int*) mode, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(axis,
+                                                     VOCAB_INTERACTION_MODE,
+                                                     (int*)mode,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::getInteractionModes(int n_joints,
+                                                     int* joints,
+                                                     yarp::dev::InteractionModeEnum* modes)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES, last_wholePart.interactionMode.data(), lastStamp, localArrivalTime);
-    if(ret)
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
+                                                     last_wholePart.interactionMode.data(),
+                                                     lastStamp,
+                                                     localArrivalTime);
+    if (ret)
     {
-        for (int i = 0; i < n_joints; i++) {
+        for (int i = 0; i < n_joints; i++)
+        {
             modes[i] = (yarp::dev::InteractionModeEnum)last_wholePart.interactionMode[joints[i]];
         }
-    } else {
+    } else
+    {
         ret = false;
     }
 
@@ -2830,9 +3114,12 @@ bool DinRailControlBoardNWCYarp::getInteractionModes(int n_joints, int *joints, 
 
 bool DinRailControlBoardNWCYarp::getInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES, (int*) modes, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
+                                                     (int*)modes,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -2840,7 +3127,8 @@ bool DinRailControlBoardNWCYarp::getInteractionModes(yarp::dev::InteractionModeE
 bool DinRailControlBoardNWCYarp::setInteractionMode(int axis, yarp::dev::InteractionModeEnum mode)
 {
     Bottle cmd, response;
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -2854,10 +3142,13 @@ bool DinRailControlBoardNWCYarp::setInteractionMode(int axis, yarp::dev::Interac
     return CHECK_FAIL(ok, response);
 }
 
-bool DinRailControlBoardNWCYarp::setInteractionModes(int n_joints, int *joints, yarp::dev::InteractionModeEnum* modes)
+bool DinRailControlBoardNWCYarp::setInteractionModes(int n_joints,
+                                                     int* joints,
+                                                     yarp::dev::InteractionModeEnum* modes)
 {
     Bottle cmd, response;
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -2867,7 +3158,8 @@ bool DinRailControlBoardNWCYarp::setInteractionModes(int n_joints, int *joints, 
     cmd.addInt32(n_joints);
 
     Bottle& l1 = cmd.addList();
-    for (int i = 0; i < n_joints; i++) {
+    for (int i = 0; i < n_joints; i++)
+    {
         l1.addInt32(joints[i]);
     }
 
@@ -2883,7 +3175,8 @@ bool DinRailControlBoardNWCYarp::setInteractionModes(int n_joints, int *joints, 
 bool DinRailControlBoardNWCYarp::setInteractionModes(yarp::dev::InteractionModeEnum* modes)
 {
     Bottle cmd, response;
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
 
@@ -2892,7 +3185,8 @@ bool DinRailControlBoardNWCYarp::setInteractionModes(yarp::dev::InteractionModeE
     cmd.addVocab32(VOCAB_INTERACTION_MODES);
 
     Bottle& l1 = cmd.addList();
-    for (size_t i = 0; i < nj; i++) {
+    for (size_t i = 0; i < nj; i++)
+    {
         l1.addVocab32(modes[i]);
     }
 
@@ -2904,16 +3198,18 @@ bool DinRailControlBoardNWCYarp::setInteractionModes(yarp::dev::InteractionModeE
 
 // BEGIN IRemoteCalibrator
 
-bool DinRailControlBoardNWCYarp::isCalibratorDevicePresent(bool *isCalib)
+bool DinRailControlBoardNWCYarp::isCalibratorDevicePresent(bool* isCalib)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(VOCAB_REMOTE_CALIBRATOR_INTERFACE);
     cmd.addVocab32(VOCAB_IS_CALIBRATOR_PRESENT);
     bool ok = rpc_p.write(cmd, response);
-    if(ok) {
-        *isCalib = response.get(2).asInt32()!=0;
-    } else {
+    if (ok)
+    {
+        *isCalib = response.get(2).asInt32() != 0;
+    } else
+    {
         *isCalib = false;
     }
     return CHECK_FAIL(ok, response);
@@ -2989,19 +3285,20 @@ bool DinRailControlBoardNWCYarp::quitPark()
 
 // BEGIN ICurrentControl
 
-bool DinRailControlBoardNWCYarp::getRefCurrents(double *t)
+bool DinRailControlBoardNWCYarp::getRefCurrents(double* t)
 {
     return get2V1DA(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_REFS, t);
 }
 
-bool DinRailControlBoardNWCYarp::getRefCurrent(int j, double *t)
+bool DinRailControlBoardNWCYarp::getRefCurrent(int j, double* t)
 {
     return get2V1I1D(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_REF, j, t);
 }
 
-bool DinRailControlBoardNWCYarp::setRefCurrents(const double *refs)
+bool DinRailControlBoardNWCYarp::setRefCurrents(const double* refs)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -3009,14 +3306,15 @@ bool DinRailControlBoardNWCYarp::setRefCurrents(const double *refs)
     c.head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
     c.head.addVocab32(VOCAB_CURRENT_REFS);
     c.body.resize(nj);
-    memcpy(&(c.body[0]), refs, sizeof(double)*nj);
+    memcpy(&(c.body[0]), refs, sizeof(double) * nj);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
 
 bool DinRailControlBoardNWCYarp::setRefCurrent(int j, double ref)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -3030,9 +3328,12 @@ bool DinRailControlBoardNWCYarp::setRefCurrent(int j, double ref)
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setRefCurrents(const int n_joint, const int *joints, const double *refs)
+bool DinRailControlBoardNWCYarp::setRefCurrents(const int n_joint,
+                                                const int* joints,
+                                                const double* refs)
 {
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -3040,40 +3341,48 @@ bool DinRailControlBoardNWCYarp::setRefCurrents(const int n_joint, const int *jo
     c.head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
     c.head.addVocab32(VOCAB_CURRENT_REF_GROUP);
     c.head.addInt32(n_joint);
-    Bottle &jointList = c.head.addList();
-    for (int i = 0; i < n_joint; i++) {
+    Bottle& jointList = c.head.addList();
+    for (int i = 0; i < n_joint; i++)
+    {
         jointList.addInt32(joints[i]);
     }
     c.body.resize(n_joint);
-    memcpy(&(c.body[0]), refs, sizeof(double)*n_joint);
+    memcpy(&(c.body[0]), refs, sizeof(double) * n_joint);
     command_buffer.write(writeStrict_moreJoints);
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::getCurrents(double *vals)
+bool DinRailControlBoardNWCYarp::getCurrents(double* vals)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_AMP_CURRENTS, vals, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_AMP_CURRENTS,
+                                                     vals,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getCurrent(int j, double *val)
+bool DinRailControlBoardNWCYarp::getCurrent(int j, double* val)
 {
-    double localArrivalTime=0.0;
+    double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_AMP_CURRENT, val, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_AMP_CURRENT,
+                                                     val,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getCurrentRange(int j, double *min, double *max)
+bool DinRailControlBoardNWCYarp::getCurrentRange(int j, double* min, double* max)
 {
     return get2V1I2D(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_RANGE, j, min, max);
 }
 
-bool DinRailControlBoardNWCYarp::getCurrentRanges(double *min, double *max)
+bool DinRailControlBoardNWCYarp::getCurrentRanges(double* min, double* max)
 {
     return get2V2DA(VOCAB_CURRENTCONTROL_INTERFACE, VOCAB_CURRENT_RANGES, min, max);
 }
@@ -3084,7 +3393,8 @@ bool DinRailControlBoardNWCYarp::getCurrentRanges(double *min, double *max)
 bool DinRailControlBoardNWCYarp::setRefDutyCycle(int j, double v)
 {
     // using the streaming port
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -3101,10 +3411,11 @@ bool DinRailControlBoardNWCYarp::setRefDutyCycle(int j, double v)
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::setRefDutyCycles(const double *v)
+bool DinRailControlBoardNWCYarp::setRefDutyCycles(const double* v)
 {
     // using the streaming port
-    if (!isLive()) {
+    if (!isLive())
+    {
         return false;
     }
     CommandMessage& c = command_buffer.get();
@@ -3114,14 +3425,14 @@ bool DinRailControlBoardNWCYarp::setRefDutyCycles(const double *v)
 
     c.body.resize(nj);
 
-    memcpy(&(c.body[0]), v, sizeof(double)*nj);
+    memcpy(&(c.body[0]), v, sizeof(double) * nj);
 
     command_buffer.write(writeStrict_moreJoints);
 
     return true;
 }
 
-bool DinRailControlBoardNWCYarp::getRefDutyCycle(int j, double *ref)
+bool DinRailControlBoardNWCYarp::getRefDutyCycle(int j, double* ref)
 {
     Bottle cmd, response;
     cmd.addVocab32(VOCAB_GET);
@@ -3139,30 +3450,38 @@ bool DinRailControlBoardNWCYarp::getRefDutyCycle(int j, double *ref)
 
         getTimeStamp(response, lastStamp);
         return true;
-    } else {
+    } else
+    {
         return false;
     }
 }
 
-bool DinRailControlBoardNWCYarp::getRefDutyCycles(double *refs)
+bool DinRailControlBoardNWCYarp::getRefDutyCycles(double* refs)
 {
     return get2V1DA(VOCAB_PWMCONTROL_INTERFACE, VOCAB_PWMCONTROL_REF_PWMS, refs);
 }
 
-bool DinRailControlBoardNWCYarp::getDutyCycle(int j, double *out)
+bool DinRailControlBoardNWCYarp::getDutyCycle(int j, double* out)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_PWMCONTROL_PWM_OUTPUT, out, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastSingle(j,
+                                                     VOCAB_PWMCONTROL_PWM_OUTPUT,
+                                                     out,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
 
-bool DinRailControlBoardNWCYarp::getDutyCycles(double *outs)
+bool DinRailControlBoardNWCYarp::getDutyCycles(double* outs)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_PWMCONTROL_PWM_OUTPUTS, outs, lastStamp, localArrivalTime);
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_PWMCONTROL_PWM_OUTPUTS,
+                                                     outs,
+                                                     lastStamp,
+                                                     localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }

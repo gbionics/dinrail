@@ -29,12 +29,8 @@ public:
     bool getAxisName(int axis, std::string& name) override;
     bool getJointType(int axis, JointType& type) override;
 
-    bool setSetPoint(int j,
-                     double pos,
-                     double vel,
-                     double torque,
-                     double stiffness,
-                     double damping) override;
+    bool setSetPoint(
+        int j, double pos, double vel, double torque, double stiffness, double damping) override;
     bool setSetPoints(const VectorProxy<const int>::Ref jointIndeces,
                       const VectorProxy<const double>::Ref pos,
                       const VectorProxy<const double>::Ref vel,
@@ -46,12 +42,9 @@ public:
                       const VectorProxy<const double>::Ref torque,
                       const VectorProxy<const double>::Ref stiffness,
                       const VectorProxy<const double>::Ref damping) override;
-    bool getSetPoint(int j,
-                     double& pos,
-                     double& vel,
-                     double& torque,
-                     double& stiffness,
-                     double& damping) override;
+    bool
+    getSetPoint(int j, double& pos, double& vel, double& torque, double& stiffness, double& damping)
+        override;
     bool getSetPoints(const VectorProxy<const int>::Ref jointIndeces,
                       VectorProxy<double>::Ref pos,
                       VectorProxy<double>::Ref vel,

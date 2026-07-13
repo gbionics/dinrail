@@ -3,42 +3,42 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <yarp/dev/IPositionControl.h>
-#include <yarp/dev/IVelocityControl.h>
-#include <yarp/dev/ITorqueControl.h>
-#include <yarp/dev/IControlMode.h>
-#include <yarp/dev/IEncodersTimed.h>
-#include <yarp/dev/IAxisInfo.h>
-#include <yarp/dev/IInteractionMode.h>
-#include <yarp/dev/IMotorEncoders.h>
-#include <yarp/dev/IMotor.h>
-#include <yarp/dev/IPidControl.h>
-#include <yarp/dev/IPWMControl.h>
-#include <yarp/dev/ICurrentControl.h>
-#include <yarp/dev/IImpedanceControl.h>
-#include <yarp/dev/IRemoteCalibrator.h>
-#include <yarp/dev/IControlLimits.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
-#include <yarp/os/Network.h>
-#include <yarp/dev/PolyDriver.h>
-#include <yarp/dev/WrapperSingle.h>
-#include <dinrail/yarp/dev/tests/IPositionControlTest.h>
-#include <dinrail/yarp/dev/tests/ITorqueControlTest.h>
-#include <dinrail/yarp/dev/tests/IEncodersTimedTest.h>
-#include <dinrail/yarp/dev/tests/IVelocityControlTest.h>
 #include <dinrail/yarp/dev/tests/IAxisInfoTest.h>
+#include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
 #include <dinrail/yarp/dev/tests/IControlModeTest.h>
-#include <dinrail/yarp/dev/tests/IInteractionModeTest.h>
 #include <dinrail/yarp/dev/tests/ICurrentControlTest.h>
+#include <dinrail/yarp/dev/tests/IEncodersTimedTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceAllSetPointsControlTest.h>
 #include <dinrail/yarp/dev/tests/IImpedanceControlTest.h>
+#include <dinrail/yarp/dev/tests/IInteractionModeTest.h>
+#include <dinrail/yarp/dev/tests/IJointFaultTest.h>
+#include <dinrail/yarp/dev/tests/IMotorEncodersTest.h>
+#include <dinrail/yarp/dev/tests/IMotorTest.h>
 #include <dinrail/yarp/dev/tests/IPWMControlTest.h>
 #include <dinrail/yarp/dev/tests/IPidControlTest.h>
-#include <dinrail/yarp/dev/tests/IMotorTest.h>
-#include <dinrail/yarp/dev/tests/IMotorEncodersTest.h>
+#include <dinrail/yarp/dev/tests/IPositionControlTest.h>
 #include <dinrail/yarp/dev/tests/IRemoteCalibratorTest.h>
-#include <dinrail/yarp/dev/tests/IJointFaultTest.h>
-#include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
-#include <dinrail/yarp/dev/tests/IImpedanceAllSetPointsControlTest.h>
+#include <dinrail/yarp/dev/tests/ITorqueControlTest.h>
+#include <dinrail/yarp/dev/tests/IVelocityControlTest.h>
+#include <yarp/dev/IAxisInfo.h>
+#include <yarp/dev/IControlLimits.h>
+#include <yarp/dev/IControlMode.h>
+#include <yarp/dev/ICurrentControl.h>
+#include <yarp/dev/IEncodersTimed.h>
+#include <yarp/dev/IImpedanceControl.h>
+#include <yarp/dev/IInteractionMode.h>
+#include <yarp/dev/IMotor.h>
+#include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IPWMControl.h>
+#include <yarp/dev/IPidControl.h>
+#include <yarp/dev/IPositionControl.h>
+#include <yarp/dev/IRemoteCalibrator.h>
+#include <yarp/dev/ITorqueControl.h>
+#include <yarp/dev/IVelocityControl.h>
+#include <yarp/dev/PolyDriver.h>
+#include <yarp/dev/WrapperSingle.h>
+#include <yarp/os/Network.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -75,7 +75,7 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         IControlLimits* ilims = nullptr;
         IImpedanceControl* iimp = nullptr;
         dinrail::IImpedanceAllSetPointsControl* iimpAll = nullptr;
-        //IRemoteCalibrator* iremotecalib = nullptr;
+        // IRemoteCalibrator* iremotecalib = nullptr;
 
         ////////"Checking opening fakeMotionControl and controlBoard_nws_yarp polydrivers"
         {
@@ -93,15 +93,16 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
             REQUIRE(ddnws.open(p_cfg));
         }
 
-        //attach nws and fake
+        // attach nws and fake
         {
-            yarp::dev::WrapperSingle* ww_nws=nullptr; ddnws.view(ww_nws);
+            yarp::dev::WrapperSingle* ww_nws = nullptr;
+            ddnws.view(ww_nws);
             REQUIRE(ww_nws);
             bool result_att = ww_nws->attach(&ddmc);
             REQUIRE(result_att);
         }
 
-        //open the nwc
+        // open the nwc
         {
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nwc_yarp");
@@ -110,29 +111,45 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
             REQUIRE(ddnwc.open(p_cfg));
         }
 
-        //test
-        ddnwc.view(ipos);    REQUIRE(ipos);
-        ddnwc.view(ivel);    REQUIRE(ivel);
-        ddnwc.view(itrq);    REQUIRE(itrq);
-        ddnwc.view(iinfo);   REQUIRE(iinfo);
-        ddnwc.view(ienc);    REQUIRE(ienc);
-        ddnwc.view(icmd);    REQUIRE(icmd);
-        ddnwc.view(iint);    REQUIRE(iint);
-        ddnwc.view(imot);    REQUIRE(imot);
-        ddnwc.view(imotenc); REQUIRE(imotenc);
-        ddnwc.view(ipid);    REQUIRE(ipid);
-        ddnwc.view(ipwm);    REQUIRE(ipwm);
-        ddnwc.view(icurr);   REQUIRE(icurr);
-        ddnwc.view(ifault);  REQUIRE(ifault);
-        ddnwc.view(ilims);   REQUIRE(ilims);
-        ddnwc.view(iimp);    REQUIRE(iimp);
-        ddnwc.view(iimpAll); REQUIRE(iimpAll);
+        // test
+        ddnwc.view(ipos);
+        REQUIRE(ipos);
+        ddnwc.view(ivel);
+        REQUIRE(ivel);
+        ddnwc.view(itrq);
+        REQUIRE(itrq);
+        ddnwc.view(iinfo);
+        REQUIRE(iinfo);
+        ddnwc.view(ienc);
+        REQUIRE(ienc);
+        ddnwc.view(icmd);
+        REQUIRE(icmd);
+        ddnwc.view(iint);
+        REQUIRE(iint);
+        ddnwc.view(imot);
+        REQUIRE(imot);
+        ddnwc.view(imotenc);
+        REQUIRE(imotenc);
+        ddnwc.view(ipid);
+        REQUIRE(ipid);
+        ddnwc.view(ipwm);
+        REQUIRE(ipwm);
+        ddnwc.view(icurr);
+        REQUIRE(icurr);
+        ddnwc.view(ifault);
+        REQUIRE(ifault);
+        ddnwc.view(ilims);
+        REQUIRE(ilims);
+        ddnwc.view(iimp);
         REQUIRE(iimp);
-        //ddnwc.view(icalib);  REQUIRE(iremotecalib);
+        ddnwc.view(iimpAll);
+        REQUIRE(iimpAll);
+        REQUIRE(iimp);
+        // ddnwc.view(icalib);  REQUIRE(iremotecalib);
 
-        yarp::dev::tests::exec_iPositionControl_test_1(ipos,icmd);
-        yarp::dev::tests::exec_iVelocityControl_test_1(ivel,icmd);
-        yarp::dev::tests::exec_iTorqueControl_test_1(itrq,icmd);
+        yarp::dev::tests::exec_iPositionControl_test_1(ipos, icmd);
+        yarp::dev::tests::exec_iVelocityControl_test_1(ivel, icmd);
+        yarp::dev::tests::exec_iTorqueControl_test_1(itrq, icmd);
         yarp::dev::tests::exec_iAxisInfo_test_1(iinfo);
         yarp::dev::tests::exec_iEncodersTimed_test_1(ienc);
         yarp::dev::tests::exec_iControlMode_test_1(icmd, iinfo);
@@ -141,9 +158,9 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
         yarp::dev::tests::exec_iMotorEncoders_test_1(imotenc);
         yarp::dev::tests::exec_iPidControl_test_1(ipid, iinfo);
         yarp::dev::tests::exec_iPidControl_test_2(ipid);
-        yarp::dev::tests::exec_iPwmControl_test_1(ipwm,icmd);
-        yarp::dev::tests::exec_iCurrentControl_test_1(icurr,icmd);
-        //yarp::dev::tests::exec_iRemoteCalibrator_test_1(icalib);
+        yarp::dev::tests::exec_iPwmControl_test_1(ipwm, icmd);
+        yarp::dev::tests::exec_iCurrentControl_test_1(icurr, icmd);
+        // yarp::dev::tests::exec_iRemoteCalibrator_test_1(icalib);
         yarp::dev::tests::exec_iJointFault_test_1(ifault);
         yarp::dev::tests::exec_iControlLimits_test1(ilims, iinfo);
         yarp::dev::tests::exec_iImpedanceControl_test_1(iimp);
@@ -185,15 +202,16 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
             REQUIRE(ddnws.open(p_cfg));
         }
 
-        //attach nws and fake
+        // attach nws and fake
         {
-            yarp::dev::WrapperSingle* ww_nws=nullptr; ddnws.view(ww_nws);
+            yarp::dev::WrapperSingle* ww_nws = nullptr;
+            ddnws.view(ww_nws);
             REQUIRE(ww_nws);
             bool result_att = ww_nws->attach(&ddmc);
             REQUIRE(result_att);
         }
 
-        //open the nwc
+        // open the nwc
         {
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nwc_yarp");
@@ -202,13 +220,19 @@ TEST_CASE("dev::DinRailControlBoardNWCYarpTest", "[yarp::dev]")
             REQUIRE(ddnwc.open(p_cfg));
         }
 
-        //test
-        ddnwc.view(ipos);  REQUIRE(ipos);
-        ddnwc.view(ivel);  REQUIRE(ivel);
-        ddnwc.view(itrq);  REQUIRE(itrq);
-        ddnwc.view(iinfo); REQUIRE(iinfo);
-        ddnwc.view(ienc);  REQUIRE(ienc);
-        ddnwc.view(icmd);  REQUIRE(icmd);
+        // test
+        ddnwc.view(ipos);
+        REQUIRE(ipos);
+        ddnwc.view(ivel);
+        REQUIRE(ivel);
+        ddnwc.view(itrq);
+        REQUIRE(itrq);
+        ddnwc.view(iinfo);
+        REQUIRE(iinfo);
+        ddnwc.view(ienc);
+        REQUIRE(ienc);
+        ddnwc.view(icmd);
+        REQUIRE(icmd);
         yarp::dev::tests::exec_iPositionControl_test_unimplemented_interface(ipos, icmd);
         yarp::dev::tests::exec_iVelocityControl_test_unimplemented_interface(ivel, icmd);
         yarp::dev::tests::exec_iTorqueControl_test_unimplemented_interface(itrq, icmd);

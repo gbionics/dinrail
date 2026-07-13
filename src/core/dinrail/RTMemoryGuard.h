@@ -48,7 +48,8 @@ public:
      * @param stackPrefaultBytes
      *        Stack size to touch for the calling thread during activation.
      *        Must stay below the actual thread stack size, or the prefault
-     *        itself will overflow the stack. Default: 0. Later, each RT thread should call prefaultCurrentThreadStack() with a safe value.
+     *        itself will overflow the stack. Default: 0. Later, each RT thread should call
+     * prefaultCurrentThreadStack() with a safe value.
      *
      * @param heapReserveBytes
      *        Heap pages to fault in and return to allocator arena.
@@ -58,16 +59,16 @@ public:
      *        If true, activate immediately.
      */
     explicit RTMemoryGuard(std::size_t stackPrefaultBytes = 0,
-                            std::size_t heapReserveBytes = 128 * 1024 * 1024,
-                            bool activateNow = false);
+                           std::size_t heapReserveBytes = 128 * 1024 * 1024,
+                           bool activateNow = false);
 
     ~RTMemoryGuard();
 
-    RTMemoryGuard(const RTMemoryGuard &) = delete;
-    RTMemoryGuard &operator=(const RTMemoryGuard &) = delete;
+    RTMemoryGuard(const RTMemoryGuard&) = delete;
+    RTMemoryGuard& operator=(const RTMemoryGuard&) = delete;
 
-    RTMemoryGuard(RTMemoryGuard &&other) noexcept;
-    RTMemoryGuard &operator=(RTMemoryGuard &&other) noexcept;
+    RTMemoryGuard(RTMemoryGuard&& other) noexcept;
+    RTMemoryGuard& operator=(RTMemoryGuard&& other) noexcept;
 
     /**
      * @brief Apply the RT-safe memory settings.
@@ -80,8 +81,7 @@ public:
 
     bool isLocked() const noexcept;
     bool isHeapReserved() const noexcept;
-    const std::optional<std::string> &
-    lastError() const noexcept;
+    const std::optional<std::string>& lastError() const noexcept;
 
     /**
      * @brief Prefault stack pages of the calling thread.
@@ -107,8 +107,8 @@ private:
 #endif
 
 private:
-    void setError(const char *what, int errorCode) noexcept;
-    void setError(const char *what) noexcept;
+    void setError(const char* what, int errorCode) noexcept;
+    void setError(const char* what) noexcept;
     bool lockProcessMemory() noexcept;
     void disableMallocPageFaults() noexcept;
     void disableTransparentHugePages() noexcept;

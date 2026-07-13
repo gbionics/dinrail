@@ -94,8 +94,8 @@ TEST_CASE("FakeMotionControl exposes IImpedanceAllSetPointsControl",
         std::vector<double> torqueOut{0.0, 0.0};
         std::vector<double> stiffnessOut{0.0, 0.0};
         std::vector<double> dampingOut{0.0, 0.0};
-        REQUIRE(impedanceAllSetPoints->getSetPoints(
-            joints, posOut, velOut, torqueOut, stiffnessOut, dampingOut));
+        REQUIRE(impedanceAllSetPoints
+                    ->getSetPoints(joints, posOut, velOut, torqueOut, stiffnessOut, dampingOut));
         REQUIRE(posOut == pos);
         REQUIRE(velOut == vel);
         REQUIRE(torqueOut == torque);
@@ -106,14 +106,16 @@ TEST_CASE("FakeMotionControl exposes IImpedanceAllSetPointsControl",
         REQUIRE_FALSE(
             impedanceAllSetPoints->setSetPoints(joints, shortVec, vel, torque, stiffness, damping));
         std::vector<double> shortOut{0.0};
-        REQUIRE_FALSE(impedanceAllSetPoints->getSetPoints(
-            joints, posOut, shortOut, torqueOut, stiffnessOut, dampingOut));
+        REQUIRE_FALSE(
+            impedanceAllSetPoints
+                ->getSetPoints(joints, posOut, shortOut, torqueOut, stiffnessOut, dampingOut));
 
         const std::vector<int> invalidJoints{0, 3};
+        REQUIRE_FALSE(impedanceAllSetPoints
+                          ->setSetPoints(invalidJoints, pos, vel, torque, stiffness, damping));
         REQUIRE_FALSE(
-            impedanceAllSetPoints->setSetPoints(invalidJoints, pos, vel, torque, stiffness, damping));
-        REQUIRE_FALSE(impedanceAllSetPoints->getSetPoints(
-            invalidJoints, posOut, velOut, torqueOut, stiffnessOut, dampingOut));
+            impedanceAllSetPoints
+                ->getSetPoints(invalidJoints, posOut, velOut, torqueOut, stiffnessOut, dampingOut));
     }
 
     SECTION("all joints setpoints")
@@ -131,7 +133,8 @@ TEST_CASE("FakeMotionControl exposes IImpedanceAllSetPointsControl",
         std::vector<double> torqueOut{0.0, 0.0, 0.0};
         std::vector<double> stiffnessOut{0.0, 0.0, 0.0};
         std::vector<double> dampingOut{0.0, 0.0, 0.0};
-        REQUIRE(impedanceAllSetPoints->getSetPoints(posOut, velOut, torqueOut, stiffnessOut, dampingOut));
+        REQUIRE(impedanceAllSetPoints
+                    ->getSetPoints(posOut, velOut, torqueOut, stiffnessOut, dampingOut));
         REQUIRE(posOut == pos);
         REQUIRE(velOut == vel);
         REQUIRE(torqueOut == torque);
@@ -139,11 +142,14 @@ TEST_CASE("FakeMotionControl exposes IImpedanceAllSetPointsControl",
         REQUIRE(dampingOut == damping);
 
         const std::vector<double> wrongSize{1.0, 2.0};
-        REQUIRE_FALSE(impedanceAllSetPoints->setSetPoints(
-            wrongSize, vel, torque, stiffness, damping));
+        REQUIRE_FALSE(
+            impedanceAllSetPoints->setSetPoints(wrongSize, vel, torque, stiffness, damping));
         std::vector<double> wrongSizeOut{0.0, 0.0};
-        REQUIRE_FALSE(impedanceAllSetPoints->getSetPoints(
-            wrongSizeOut, velOut, torqueOut, stiffnessOut, dampingOut));
+        REQUIRE_FALSE(impedanceAllSetPoints->getSetPoints(wrongSizeOut,
+                                                          velOut,
+                                                          torqueOut,
+                                                          stiffnessOut,
+                                                          dampingOut));
     }
 
     REQUIRE(device.close());

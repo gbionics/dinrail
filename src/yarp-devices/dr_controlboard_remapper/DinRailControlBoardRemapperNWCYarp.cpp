@@ -10,24 +10,24 @@
 #include <yarp/os/LogStream.h>
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <map>
-#include <cassert>
 
 using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 
-namespace {
+namespace
+{
 YARP_LOG_COMPONENT(REMOTECONTROLBOARDREMAPPER, "yarp.device.remotecontrolboardremapper")
 }
 
-
 void DinRailControlBoardRemapperNWCYarp::closeAllRemoteControlBoards()
 {
-    for(auto& m_remoteControlBoardDevice : m_remoteControlBoardDevices)
+    for (auto& m_remoteControlBoardDevice : m_remoteControlBoardDevices)
     {
-        if( m_remoteControlBoardDevice )
+        if (m_remoteControlBoardDevice)
         {
             m_remoteControlBoardDevice->close();
             delete m_remoteControlBoardDevice;
@@ -37,7 +37,6 @@ void DinRailControlBoardRemapperNWCYarp::closeAllRemoteControlBoards()
 
     m_remoteControlBoardDevices.resize(0);
 }
-
 
 bool DinRailControlBoardRemapperNWCYarp::close()
 {
@@ -65,49 +64,51 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
     std::vector<std::string> remoteControlBoardsPorts;
 
     // Check if the required parameters  are found
-    if( prop.check("localPortPrefix") && prop.find("localPortPrefix").isString() )
+    if (prop.check("localPortPrefix") && prop.find("localPortPrefix").isString())
     {
         localPortPrefix = prop.find("localPortPrefix").asString();
-    }
-    else
+    } else
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"localPortPrefix\" should be a string.";
+        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"localPortPrefix\" should be "
+                                               "a string.";
         return false;
     }
 
-    Bottle *remoteControlBoards=prop.find("remoteControlBoards").asList();
-    if(remoteControlBoards==nullptr)
+    Bottle* remoteControlBoards = prop.find("remoteControlBoards").asList();
+    if (remoteControlBoards == nullptr)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"remoteControlBoards\" should be followed by a list.";
+        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"remoteControlBoards\" should "
+                                               "be followed by a list.";
         return false;
     }
 
     remoteControlBoardsPorts.resize(remoteControlBoards->size());
-    for(size_t ax=0; ax < remoteControlBoards->size(); ax++)
+    for (size_t ax = 0; ax < remoteControlBoards->size(); ax++)
     {
         remoteControlBoardsPorts[ax] = remoteControlBoards->get(ax).asString();
     }
 
-    // Load the REMOTE_CONTROLBOARD_OPTIONS, containing any additional option to pass to the remote control boards
+    // Load the REMOTE_CONTROLBOARD_OPTIONS, containing any additional option to pass to the remote
+    // control boards
     Property remoteControlBoardsOptions;
 
-    Bottle & optionsGroupBot = prop.findGroup("REMOTE_CONTROLBOARD_OPTIONS");
-    if( !(optionsGroupBot.isNull()) )
+    Bottle& optionsGroupBot = prop.findGroup("REMOTE_CONTROLBOARD_OPTIONS");
+    if (!(optionsGroupBot.isNull()))
     {
         remoteControlBoardsOptions.fromString(optionsGroupBot.toString());
     }
 
     // Parameters loaded, open all the remote controlboards
 
-    m_remoteControlBoardDevices.resize(remoteControlBoardsPorts.size(),nullptr);
+    m_remoteControlBoardDevices.resize(remoteControlBoardsPorts.size(), nullptr);
 
     PolyDriverList remoteControlBoardsList;
 
-    for(size_t ctrlBrd=0; ctrlBrd < remoteControlBoardsPorts.size(); ctrlBrd++ )
+    for (size_t ctrlBrd = 0; ctrlBrd < remoteControlBoardsPorts.size(); ctrlBrd++)
     {
         std::string remote = remoteControlBoardsPorts[ctrlBrd];
         // Note: as local parameter we use localPortPrefix+remoteOfTheReportControlBoard
-        std::string local = localPortPrefix+remote;
+        std::string local = localPortPrefix + remote;
 
         Property options = remoteControlBoardsOptions;
         options.put("device", "dr_controlboard_nwc_yarp");
@@ -118,23 +119,26 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
 
         bool ok = m_remoteControlBoardDevices[ctrlBrd]->open(options);
 
-        if( !ok || !(m_remoteControlBoardDevices[ctrlBrd]->isValid()) )
+        if (!ok || !(m_remoteControlBoardDevices[ctrlBrd]->isValid()))
         {
-            yCError(REMOTECONTROLBOARDREMAPPER) << "Opening remote_controlboard with remote \"" << remote << "\", opening the device failed.";
+            yCError(REMOTECONTROLBOARDREMAPPER) << "Opening remote_controlboard with remote \""
+                                                << remote << "\", opening the device failed.";
             closeAllRemoteControlBoards();
             return false;
         }
 
-        // We use the remote name of the remote_controlboard as the key for it, in absence of anything better
-        remoteControlBoardsList.push((m_remoteControlBoardDevices[ctrlBrd]),remote.c_str());
+        // We use the remote name of the remote_controlboard as the key for it, in absence of
+        // anything better
+        remoteControlBoardsList.push((m_remoteControlBoardDevices[ctrlBrd]), remote.c_str());
     }
 
     // Device opened, now we open the DinRailControlBoardRemapper and then we call attachAll
     bool ok = DinRailControlBoardRemapper::open(prop);
 
-    if( !ok )
+    if (!ok)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Opening the controlboardremapper device, opening the device failed.";
+        yCError(REMOTECONTROLBOARDREMAPPER) << "Opening the controlboardremapper device, opening "
+                                               "the device failed.";
         DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;
@@ -143,9 +147,10 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
     // If open went ok, we now call attachAll
     ok = DinRailControlBoardRemapper::attachAll(remoteControlBoardsList);
 
-    if( !ok )
+    if (!ok)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Calling attachAll in the controlboardremapper device, opening the device failed.";
+        yCError(REMOTECONTROLBOARDREMAPPER) << "Calling attachAll in the controlboardremapper "
+                                               "device, opening the device failed.";
         DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;

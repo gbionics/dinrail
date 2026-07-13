@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-#include <yarp/os/Network.h>
+#include <yarp/dev/IAxisInfo.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/dev/WrapperSingle.h>
-#include <yarp/dev/IAxisInfo.h>
+#include <yarp/os/Network.h>
 
 #include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <dinrail/yarp/dev/tests/IImpedanceAllSetPointsControlTest.h>
@@ -47,22 +47,23 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_fake;
         Property p_nws;
 
-        //open
+        // open
         p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControl");
         REQUIRE(dd_fake.open(p_fake));
         REQUIRE(dd_nws.open(p_nws));
 
-        //attach
+        // attach
         {
-            yarp::dev::WrapperSingle* ww_nws; dd_nws.view(ww_nws);
+            yarp::dev::WrapperSingle* ww_nws;
+            dd_nws.view(ww_nws);
             REQUIRE(ww_nws);
             bool result_att = ww_nws->attach(&dd_fake);
             REQUIRE(result_att);
         }
 
-        //Close all polydrivers and check
+        // Close all polydrivers and check
         {
             CHECK(dd_nws.close());
             CHECK(dd_fake.close());
@@ -76,51 +77,54 @@ TEST_CASE("dev::controlBoard_nws_yarp", "[yarp::dev]")
         Property p_fake2;
         Property p_nws;
 
-        //open
+        // open
         p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake2.put("device", "fakeSpeaker");
         REQUIRE(dd_fake2.open(p_fake2));
         REQUIRE(dd_nws.open(p_nws));
 
-        //attach
+        // attach
         {
-            yarp::dev::WrapperSingle* ww_nws; dd_nws.view(ww_nws);
+            yarp::dev::WrapperSingle* ww_nws;
+            dd_nws.view(ww_nws);
             REQUIRE(ww_nws);
             bool result_att = ww_nws->attach(&dd_fake2);
             REQUIRE(!result_att);
         }
 
-        //Close all polydrivers and check
+        // Close all polydrivers and check
         {
             CHECK(dd_nws.close());
             CHECK(dd_fake2.close());
         }
     }
 
-    SECTION("Test the controlBoard_nws_yarp device with a device attached which does not implement motion control interfaces")
+    SECTION("Test the controlBoard_nws_yarp device with a device attached which does not implement "
+            "motion control interfaces")
     {
         PolyDriver dd_fake;
         PolyDriver dd_nws;
         Property p_fake;
         Property p_nws;
 
-        //open
+        // open
         p_nws.put("device", "dr_controlboard_nws_yarp");
         p_nws.put("name", "/controlboard");
         p_fake.put("device", "fakeMotionControlMicro");
         REQUIRE(dd_fake.open(p_fake));
         REQUIRE(dd_nws.open(p_nws));
 
-        //attach
+        // attach
         {
-            yarp::dev::WrapperSingle* ww_nws; dd_nws.view(ww_nws);
+            yarp::dev::WrapperSingle* ww_nws;
+            dd_nws.view(ww_nws);
             REQUIRE(ww_nws);
             bool result_att = ww_nws->attach(&dd_fake);
             REQUIRE(result_att);
         }
 
-        //Close all polydrivers and check
+        // Close all polydrivers and check
         {
             CHECK(dd_nws.close());
             CHECK(dd_fake.close());

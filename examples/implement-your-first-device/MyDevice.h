@@ -16,7 +16,9 @@
 ///
 /// This class is the entry point for implementing your own device.
 /// It inherits from dinrail::IDevice (required) and from any dinrail
-/// interface that the device supports. In this example, we also implement IAxisInfo to provide metadata about the device axes. You can implement as many interfaces as needed, and they will be automatically exposed by the plugin system.
+/// interface that the device supports. In this example, we also implement IAxisInfo to provide
+/// metadata about the device axes. You can implement as many interfaces as needed, and they will be
+/// automatically exposed by the plugin system.
 class MyDevice : public dinrail::IDevice, public dinrail::IAxisInfo, public myexample::MyInterface
 {
 public:

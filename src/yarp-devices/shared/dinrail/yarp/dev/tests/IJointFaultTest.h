@@ -6,22 +6,21 @@
 #ifndef IJOINTFAULTTEST_H
 #define IJOINTFAULTTEST_H
 
-#include <yarp/dev/IJointFault.h>
 #include <catch2/catch_test_macros.hpp>
-
+#include <yarp/dev/IJointFault.h>
 
 namespace yarp::dev::tests
 {
-    inline void exec_iJointFault_test_1(IJointFault* ifault)
-    {
-        REQUIRE(ifault != nullptr);
+inline void exec_iJointFault_test_1(IJointFault* ifault)
+{
+    REQUIRE(ifault != nullptr);
 
-        bool b =false;
-        int fault;
-        std::string message;
-        b = ifault->getLastJointFault(0,fault,message);
-        CHECK(b);
-    }
+    bool b = false;
+    int fault;
+    std::string message;
+    b = ifault->getLastJointFault(0, fault, message);
+    CHECK(b);
 }
+} // namespace yarp::dev::tests
 
 #endif

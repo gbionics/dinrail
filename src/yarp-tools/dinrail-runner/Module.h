@@ -22,11 +22,11 @@ public:
     bool updateModule() override;
     bool close() override;
     bool interruptModule() override;
-    bool configure(yarp::os::ResourceFinder &rf) override;
+    bool configure(yarp::os::ResourceFinder& rf) override;
 
 private:
     class Private;
-    Private * const mPriv;
+    Private* const mPriv;
 }; // class Module
 
 } // namespace dinrail::runner

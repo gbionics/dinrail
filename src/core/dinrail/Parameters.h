@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <dinrail/VectorProxy.h>
 #include <dinrail/Value.h>
+#include <dinrail/VectorProxy.h>
 
 namespace dinrail
 {
@@ -33,17 +33,17 @@ namespace dinrail
  *
  * Furthermore, dinrail::Parameters can also contain other nested dinrail::Parameters instances,
  * which can be accessed with the `addGroup` and `findGroup` methods.
- * 
+ *
  * In general, `dinrail::Parameters` is designed as a way to share settings (such as encoder offset)
- * and should not be used to share hot data like joint state, as all values are copied and, in 
+ * and should not be used to share hot data like joint state, as all values are copied and, in
  * some cases, dynamic memory is allocated (for example, if a resize of a vector is triggered by a
  * getParameter call).
  *
- * For this reason no multithread synchronization is implemented inside the dinrail::Parameters class,
- * so if you really have a use case for reading and writing from the same `dinrail::Parameters` instance 
- * in different threads, make sure that the reads and writes are protected by a mutually exclusive access
- * mechanism such as the C++ `std::mutex` class.
- * 
+ * For this reason no multithread synchronization is implemented inside the dinrail::Parameters
+ * class, so if you really have a use case for reading and writing from the same
+ * `dinrail::Parameters` instance in different threads, make sure that the reads and writes are
+ * protected by a mutually exclusive access mechanism such as the C++ `std::mutex` class.
+ *
  * For more details on the dinrail::Parameters class, check the
  * docs/parameters.md
  */
@@ -78,8 +78,7 @@ public:
     /** @brief Insert or replace a string vector value. */
     void put(std::string_view key, const VectorProxy<const std::string>::Ref value);
     /** @brief Insert or replace a duration vector value. */
-    void put(std::string_view key,
-             const VectorProxy<const std::chrono::nanoseconds>::Ref value);
+    void put(std::string_view key, const VectorProxy<const std::chrono::nanoseconds>::Ref value);
 
     /**
      * @brief Check if a key exists either as value or as group.
@@ -95,8 +94,7 @@ public:
      * @param comment Optional compatibility comment (currently ignored).
      * @return Stored value if present, otherwise @p fallback.
      */
-    Value
-    check(std::string_view key, const Value& fallback, const std::string& comment = "") const;
+    Value check(std::string_view key, const Value& fallback, const std::string& comment = "") const;
 
     /**
      * @brief Check if a key exists and stores the requested type.
@@ -142,8 +140,8 @@ public:
     /** @brief Retrieve a string vector value by key. */
     bool getParameter(std::string_view key, VectorProxy<std::string>::Ref parameter) const;
     /** @brief Retrieve a duration vector value by key. */
-    bool getParameter(std::string_view key,
-                      VectorProxy<std::chrono::nanoseconds>::Ref parameter) const;
+    bool
+    getParameter(std::string_view key, VectorProxy<std::chrono::nanoseconds>::Ref parameter) const;
 
     /** @brief Store an integer value by key. */
     void setParameter(std::string_view key, const int& parameter);
@@ -164,8 +162,7 @@ public:
     /** @brief Store a double vector value by key. */
     void setParameter(std::string_view key, const VectorProxy<const double>::Ref parameter);
     /** @brief Store a string vector value by key. */
-    void
-    setParameter(std::string_view key, const VectorProxy<const std::string>::Ref parameter);
+    void setParameter(std::string_view key, const VectorProxy<const std::string>::Ref parameter);
     /** @brief Store a duration vector value by key. */
     void setParameter(std::string_view key,
                       const VectorProxy<const std::chrono::nanoseconds>::Ref parameter);

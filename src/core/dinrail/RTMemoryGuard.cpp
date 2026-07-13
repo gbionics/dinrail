@@ -36,59 +36,61 @@ namespace dinrail
 namespace
 {
 
-    constexpr std::size_t kDefaultPageSize = 4096;
+constexpr std::size_t kDefaultPageSize = 4096;
 
 #if defined(__linux__)
 
-    // RLIMIT_MEMLOCK only bounds the heap reserve, not the full mlockall()
-    // footprint (stack, code, all future mappings). It is a cheap early-out,
-    // not a guarantee that mlockall() will succeed.
-    bool checkMemoryLimit(std::size_t bytes)
+// RLIMIT_MEMLOCK only bounds the heap reserve, not the full mlockall()
+// footprint (stack, code, all future mappings). It is a cheap early-out,
+// not a guarantee that mlockall() will succeed.
+bool checkMemoryLimit(std::size_t bytes)
+{
+    struct rlimit limit{};
+
+    if (getrlimit(RLIMIT_MEMLOCK, &limit) != 0)
     {
-        struct rlimit limit{};
-
-        if (getrlimit(RLIMIT_MEMLOCK, &limit) != 0) {
-            return true;
-        }
-
-        if (limit.rlim_cur == RLIM_INFINITY){
-            return true;
-        }
-
-        return bytes <= limit.rlim_cur;
+        return true;
     }
+
+    if (limit.rlim_cur == RLIM_INFINITY)
+    {
+        return true;
+    }
+
+    return bytes <= limit.rlim_cur;
+}
 
 #endif
 
 #if defined(__linux__) || defined(__APPLE__)
 
-    // Hard ceiling on a single prefault request. Guards against a bad
-    // caller-supplied byte count silently overflowing the thread stack.
-    constexpr std::size_t kMaxStackPrefaultBytes = 8 * 1024 * 1024;
+// Hard ceiling on a single prefault request. Guards against a bad
+// caller-supplied byte count silently overflowing the thread stack.
+constexpr std::size_t kMaxStackPrefaultBytes = 8 * 1024 * 1024;
 
-    // alloca() allocations inside a loop persist until the enclosing
-    // function returns, so a loop grows the same stack region a
-    // recursive version would, without recursion depth or call overhead.
-    void touchStackIterative(std::size_t bytes, std::size_t pageSize)
+// alloca() allocations inside a loop persist until the enclosing
+// function returns, so a loop grows the same stack region a
+// recursive version would, without recursion depth or call overhead.
+void touchStackIterative(std::size_t bytes, std::size_t pageSize)
+{
+    bytes = bytes < kMaxStackPrefaultBytes ? bytes : kMaxStackPrefaultBytes;
+
+    for (std::size_t touched = 0; touched < bytes; touched += pageSize)
     {
-        bytes = bytes < kMaxStackPrefaultBytes ? bytes : kMaxStackPrefaultBytes;
-
-        for (std::size_t touched = 0; touched < bytes; touched += pageSize)
-        {
-            volatile std::uint8_t *page =
-                static_cast<volatile std::uint8_t *>(alloca(pageSize));
-            page[0] = 0;
-        }
+        volatile std::uint8_t* page = static_cast<volatile std::uint8_t*>(alloca(pageSize));
+        page[0] = 0;
     }
+}
 
 #endif
 
-}
+} // namespace
 
 RTMemoryGuard::RTMemoryGuard(std::size_t stackPrefaultBytes,
-                             std::size_t heapReserveBytes, bool activateNow)
-                            : m_stackPrefaultBytes(stackPrefaultBytes),
-                              m_heapReserveBytes(heapReserveBytes)
+                             std::size_t heapReserveBytes,
+                             bool activateNow)
+    : m_stackPrefaultBytes(stackPrefaultBytes)
+    , m_heapReserveBytes(heapReserveBytes)
 {
     if (activateNow)
         activate();
@@ -99,13 +101,13 @@ RTMemoryGuard::~RTMemoryGuard()
     unlock();
 }
 
-RTMemoryGuard::RTMemoryGuard(RTMemoryGuard &&other) noexcept
-    : m_stackPrefaultBytes(other.m_stackPrefaultBytes),
-      m_heapReserveBytes(other.m_heapReserveBytes),
-      m_isActive(other.m_isActive),
-      m_locked(other.m_locked),
-      m_heapReserved(other.m_heapReserved),
-      m_lastError(std::move(other.m_lastError))
+RTMemoryGuard::RTMemoryGuard(RTMemoryGuard&& other) noexcept
+    : m_stackPrefaultBytes(other.m_stackPrefaultBytes)
+    , m_heapReserveBytes(other.m_heapReserveBytes)
+    , m_isActive(other.m_isActive)
+    , m_locked(other.m_locked)
+    , m_heapReserved(other.m_heapReserved)
+    , m_lastError(std::move(other.m_lastError))
 {
 #if defined(__linux__)
     m_dmaLatencyFd = other.m_dmaLatencyFd;
@@ -116,7 +118,7 @@ RTMemoryGuard::RTMemoryGuard(RTMemoryGuard &&other) noexcept
     other.m_heapReserved = false;
 }
 
-RTMemoryGuard &RTMemoryGuard::operator=(RTMemoryGuard &&other) noexcept
+RTMemoryGuard& RTMemoryGuard::operator=(RTMemoryGuard&& other) noexcept
 {
     if (this == &other)
         return *this;
@@ -150,14 +152,15 @@ bool RTMemoryGuard::isHeapReserved() const noexcept
     return m_heapReserved;
 }
 
-const std::optional<std::string> &RTMemoryGuard::lastError() const noexcept
+const std::optional<std::string>& RTMemoryGuard::lastError() const noexcept
 {
     return m_lastError;
 }
 
 bool RTMemoryGuard::activate() noexcept
 {
-    if (m_isActive) {
+    if (m_isActive)
+    {
         return m_locked;
     }
 
@@ -165,7 +168,8 @@ bool RTMemoryGuard::activate() noexcept
     disableTransparentHugePages();
     requestZeroLatency();
 
-    if (!lockProcessMemory()) {
+    if (!lockProcessMemory())
+    {
         // Release anything already acquired above (e.g. the latency fd)
         // so a failed activation does not leak resources or pin the
         // zero-latency constraint for the process lifetime.
@@ -173,10 +177,12 @@ bool RTMemoryGuard::activate() noexcept
         return false;
     }
 
-    if (m_heapReserveBytes > 0) {
+    if (m_heapReserveBytes > 0)
+    {
         m_heapReserved = reserveHeap(m_heapReserveBytes);
     }
-    if (m_stackPrefaultBytes > 0) {
+    if (m_stackPrefaultBytes > 0)
+    {
         prefaultCurrentThreadStack(m_stackPrefaultBytes);
     }
 
@@ -186,12 +192,12 @@ bool RTMemoryGuard::activate() noexcept
     return true;
 }
 
-void RTMemoryGuard::setError(const char *what, int errorCode) noexcept
+void RTMemoryGuard::setError(const char* what, int errorCode) noexcept
 {
     m_lastError = std::string(what) + ": " + std::strerror(errorCode);
 }
 
-void RTMemoryGuard::setError(const char *what) noexcept
+void RTMemoryGuard::setError(const char* what) noexcept
 {
     m_lastError = what;
 }
@@ -244,7 +250,8 @@ void RTMemoryGuard::disableTransparentHugePages() noexcept
 {
 #if defined(__linux__) && defined(PR_SET_THP_DISABLE)
 
-    if (prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0) != 0) {
+    if (prctl(PR_SET_THP_DISABLE, 1, 0, 0, 0) != 0)
+    {
         setError("prctl(PR_SET_THP_DISABLE)", errno);
     }
 
@@ -261,12 +268,14 @@ void RTMemoryGuard::requestZeroLatency() noexcept
 
     m_dmaLatencyFd = open("/dev/cpu_dma_latency", O_RDWR);
 
-    if (m_dmaLatencyFd < 0) {
+    if (m_dmaLatencyFd < 0)
+    {
         return;
-}
+    }
     const int latency = 0;
 
-    if (write(m_dmaLatencyFd, &latency, sizeof(latency)) < 0) {
+    if (write(m_dmaLatencyFd, &latency, sizeof(latency)) < 0)
+    {
         setError("cpu_dma_latency write", errno);
     }
 #endif
@@ -285,8 +294,7 @@ void RTMemoryGuard::prefaultCurrentThreadStack(std::size_t bytes) noexcept
 
 #elif defined(_WIN32)
 
-    volatile std::uint8_t *page =
-        static_cast<volatile std::uint8_t *>(_alloca(bytes));
+    volatile std::uint8_t* page = static_cast<volatile std::uint8_t*>(_alloca(bytes));
     page[0] = 0;
 
 #endif
@@ -313,7 +321,7 @@ bool RTMemoryGuard::reserveHeap(std::size_t bytes) noexcept
     const std::size_t pageSize = queryPageSize();
     bytes = (bytes + pageSize - 1) & ~(pageSize - 1);
 
-    void *memory = nullptr;
+    void* memory = nullptr;
 
 #if defined(_WIN32)
 
@@ -335,7 +343,7 @@ bool RTMemoryGuard::reserveHeap(std::size_t bytes) noexcept
 
 #endif
 
-    volatile std::uint8_t *ptr = static_cast<volatile std::uint8_t *>(memory);
+    volatile std::uint8_t* ptr = static_cast<volatile std::uint8_t*>(memory);
 
     for (std::size_t offset = 0; offset < bytes; offset += pageSize)
         ptr[offset] = 0;
