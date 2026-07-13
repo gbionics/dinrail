@@ -22,6 +22,7 @@
 #include <yarp/dev/IControlCalibration.h>
 #include <yarp/dev/ITorqueControl.h>
 #include <yarp/dev/IImpedanceControl.h>
+#include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <yarp/dev/IControlMode.h>
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IPositionDirect.h>
@@ -81,6 +82,7 @@ class DinRailControlBoardNWCYarp :
         public yarp::dev::IPWMControl,
         public yarp::dev::ICurrentControl,
         public yarp::dev::IJointFault,
+        public dinrail::IImpedanceAllSetPointsControl,
         public DinRailControlBoardNWCYarp_ParamsParser
 {
 protected:
@@ -439,6 +441,42 @@ public:
     bool setImpedance(int j, double stiffness, double damping) override;
     bool setImpedanceOffset(int j, double offset) override;
     bool getCurrentImpedanceLimit(int j, double *min_stiff, double *max_stiff, double *min_damp, double *max_damp) override;
+
+    // dinrail::IImpedanceAllSetPointsControl
+    bool setSetPoint(int j,
+                     double pos,
+                     double vel,
+                     double torque,
+                     double stiffness,
+                     double damping) override;
+    bool setSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                      const dinrail::VectorProxy<const double>::Ref pos,
+                      const dinrail::VectorProxy<const double>::Ref vel,
+                      const dinrail::VectorProxy<const double>::Ref torque,
+                      const dinrail::VectorProxy<const double>::Ref stiffness,
+                      const dinrail::VectorProxy<const double>::Ref damping) override;
+    bool setSetPoints(const dinrail::VectorProxy<const double>::Ref pos,
+                      const dinrail::VectorProxy<const double>::Ref vel,
+                      const dinrail::VectorProxy<const double>::Ref torque,
+                      const dinrail::VectorProxy<const double>::Ref stiffness,
+                      const dinrail::VectorProxy<const double>::Ref damping) override;
+    bool getSetPoint(int j,
+                     double& pos,
+                     double& vel,
+                     double& torque,
+                     double& stiffness,
+                     double& damping) override;
+    bool getSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                      dinrail::VectorProxy<double>::Ref pos,
+                      dinrail::VectorProxy<double>::Ref vel,
+                      dinrail::VectorProxy<double>::Ref torque,
+                      dinrail::VectorProxy<double>::Ref stiffness,
+                      dinrail::VectorProxy<double>::Ref damping) override;
+    bool getSetPoints(dinrail::VectorProxy<double>::Ref pos,
+                      dinrail::VectorProxy<double>::Ref vel,
+                      dinrail::VectorProxy<double>::Ref torque,
+                      dinrail::VectorProxy<double>::Ref stiffness,
+                      dinrail::VectorProxy<double>::Ref damping) override;
 
     // IControlMode
     bool getControlMode(int j, int *mode) override;

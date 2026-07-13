@@ -6,6 +6,7 @@ add_executable(harness_device_controlBoardRemapper_t1
 )
 target_link_libraries(harness_device_controlBoardRemapper_t1
 	PRIVATE
+		dinrail::dinrail
 		YARP::YARP_os
 		YARP::YARP_sig
 		YARP::YARP_dev
@@ -26,6 +27,7 @@ add_executable(harness_device_controlBoardRemapper_t2
 )
 target_link_libraries(harness_device_controlBoardRemapper_t2
 	PRIVATE
+		dinrail::dinrail
 		YARP::YARP_os
 		YARP::YARP_sig
 		YARP::YARP_dev
@@ -46,6 +48,7 @@ add_executable(harness_device_controlBoardRemapper_t3
 )
 target_link_libraries(harness_device_controlBoardRemapper_t3
 	PRIVATE
+		dinrail::dinrail
 		YARP::YARP_os
 		YARP::YARP_sig
 		YARP::YARP_dev

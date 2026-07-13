@@ -37,6 +37,7 @@
 #include <yarp/sig/Vector.h>
 
 #include <dinrail/ControlBoardYARPJointData.h>
+#include <dinrail/IImpedanceAllSetPointsControl.h>
 
 #include <string>
 
@@ -97,6 +98,7 @@ private:
     yarp::dev::IControlCalibration* iControlCalibration{nullptr};
     yarp::dev::ITorqueControl* iTorqueControl{nullptr};
     yarp::dev::IImpedanceControl* iImpedanceControl{nullptr};
+    dinrail::IImpedanceAllSetPointsControl* iImpedanceAllSetPointsControl{nullptr};
     yarp::dev::IControlMode* iControlMode{nullptr};
     yarp::dev::IAxisInfo* iAxisInfo{nullptr};
     yarp::dev::IPreciselyTimed* iPreciselyTimed{nullptr};

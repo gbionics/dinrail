@@ -7,6 +7,7 @@ add_executable(harness_device_DinRailControlBoardNWCYarp
 
 target_link_libraries(harness_device_DinRailControlBoardNWCYarp
 	PRIVATE
+		dinrail::dinrail
 		YARP::YARP_os
 		YARP::YARP_sig
 		YARP::YARP_dev

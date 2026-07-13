@@ -21,6 +21,8 @@
 #include <yarp/dev/IPreciselyTimed.h>
 #include <yarp/dev/IControlMode.h>
 
+#include <dinrail/IImpedanceAllSetPointsControl.h>
+
 
 #include <yarp/sig/Vector.h>
 
@@ -56,6 +58,7 @@ public:
     yarp::dev::IPreciselyTimed       *iTimed;
     yarp::dev::ITorqueControl        *iTorque;
     yarp::dev::IImpedanceControl     *iImpedance;
+    dinrail::IImpedanceAllSetPointsControl* iImpedanceAllSetPointsControl;
     yarp::dev::IControlMode          *iMode;
     yarp::dev::IAxisInfo             *info;
     yarp::dev::IPositionDirect       *posDir;
@@ -211,6 +214,28 @@ public:
     void fillCompleteJointVectorFromSubControlBoardBuffers(yarp::dev::InteractionModeEnum * full,
                                                            const RemappedControlBoards & remappedControlBoards);
 
+    /**
+     * Fill dedicated impedance-all-setpoints buffers for subcontrolboards from
+     * complete remapped joints vectors.
+     */
+    void fillSubControlBoardSetPointBuffersFromCompleteJointVectors(const double* pos,
+                                                                    const double* vel,
+                                                                    const double* torque,
+                                                                    const double* stiffness,
+                                                                    const double* damping,
+                                                                    const RemappedControlBoards& remappedControlBoards);
+
+    /**
+     * Fill complete remapped joints vectors from dedicated impedance-all-setpoints
+     * subcontrolboards buffers.
+     */
+    void fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
+                                                                    double* vel,
+                                                                    double* torque,
+                                                                    double* stiffness,
+                                                                    double* damping,
+                                                                    const RemappedControlBoards& remappedControlBoards);
+
 
     /**
      * Mutex to grab to use this class.
@@ -226,6 +251,13 @@ public:
     std::vector< std::vector<double> > m_bufferForSubControlBoard;
     std::vector< std::vector<int>    > m_bufferForSubControlBoardControlModes;
     std::vector< std::vector<yarp::dev::InteractionModeEnum>  > m_bufferForSubControlBoardInteractionModes;
+
+    // Dedicated buffers for impedance-all-setpoints operations.
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointPos;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointVel;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointTorque;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointStiffness;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointDamping;
 
     std::vector<int> m_counterForControlBoard;
 };
@@ -325,6 +357,39 @@ public:
                                                             const RemappedControlBoards & remappedControlBoards);
 
     /**
+     * Fill dedicated impedance-all-setpoints buffers for subcontrolboards from
+     * arbitrary remapped joints vectors.
+     */
+    void fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(const double* pos,
+                                                                     const double* vel,
+                                                                     const double* torque,
+                                                                     const double* stiffness,
+                                                                     const double* damping,
+                                                                     const int n_joints,
+                                                                     const int* joints,
+                                                                     const RemappedControlBoards& remappedControlBoards);
+
+    /**
+     * Resize dedicated impedance-all-setpoints buffers for subcontrolboards.
+     */
+    void resizeSubControlBoardSetPointBuffers(const int n_joints,
+                                              const int* joints,
+                                              const RemappedControlBoards& remappedControlBoards);
+
+    /**
+     * Fill arbitrary remapped joints vectors from dedicated impedance-all-setpoints
+     * subcontrolboards buffers.
+     */
+    void fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
+                                                                     double* vel,
+                                                                     double* torque,
+                                                                     double* stiffness,
+                                                                     double* damping,
+                                                                     const int n_joints,
+                                                                     const int* joints,
+                                                                     const RemappedControlBoards& remappedControlBoards);
+
+    /**
      * Mutex to grab to use this class.
      */
     std::mutex mutex;
@@ -342,6 +407,13 @@ public:
     std::vector< std::vector<double> > m_bufferForSubControlBoard;
     std::vector< std::vector<int>    > m_bufferForSubControlBoardControlModes;
     std::vector< std::vector<yarp::dev::InteractionModeEnum>  > m_bufferForSubControlBoardInteractionModes;
+
+    // Dedicated buffers for impedance-all-setpoints operations.
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointPos;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointVel;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointTorque;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointStiffness;
+    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointDamping;
 
 
     // Counter used when converting a full vector to

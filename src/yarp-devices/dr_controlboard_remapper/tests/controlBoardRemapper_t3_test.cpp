@@ -37,6 +37,8 @@
 #include <dinrail/yarp/dev/tests/IJointFaultTest.h>
 #include <dinrail/yarp/dev/tests/IControlLimitsTest.h>
 #include <dinrail/yarp/dev/tests/IImpedanceControlTest.h>
+#include <dinrail/yarp/dev/tests/IImpedanceAllSetPointsControlTest.h>
+#include <dinrail/IImpedanceAllSetPointsControl.h>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -76,6 +78,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         IJointFault* ifault = nullptr;
         IControlLimits* ilims = nullptr;
         IImpedanceControl* iimp = nullptr;
+        dinrail::IImpedanceAllSetPointsControl* iimpAll = nullptr;
         //IRemoteCalibrator* iremotecalib = nullptr;
 
         ////////"Test a controlboardremapper attached to a controlBoard_nwc_yarp"
@@ -90,6 +93,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints");
+            p_cfg.put("emulate_impedance_all_setpoints_control", true);
             REQUIRE(ddnws.open(p_cfg));
         }
         {
@@ -139,6 +143,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         ddremapper.view(ifault);  REQUIRE(ifault);
         ddremapper.view(ilims);   REQUIRE(ilims);
         ddremapper.view(iimp);   REQUIRE(iimp);
+        ddremapper.view(iimpAll); REQUIRE(iimpAll);
         //ddremapper.view(iremotecalib);  REQUIRE(iremotecalib);
 
         yarp::dev::tests::exec_iPositionControl_test_1(ipos, icmd);
@@ -158,6 +163,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         yarp::dev::tests::exec_iJointFault_test_1(ifault);
         yarp::dev::tests::exec_iControlLimits_test1(ilims, iinfo);
         yarp::dev::tests::exec_iImpedanceControl_test_1(iimp);
+        yarp::dev::tests::exec_iImpedanceAllSetPointsControl_test_1(iimpAll, iinfo);
 
         //"Close all polydrivers and check"
         {
@@ -194,6 +200,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         IJointFault* ifault = nullptr;
         IControlLimits* ilims = nullptr;
         IImpedanceControl* iimp = nullptr;
+        dinrail::IImpedanceAllSetPointsControl* iimpAll = nullptr;
         //IRemoteCalibrator* iremotecalib = nullptr;
 
         ////////"Test a controlboardremapper attached to a controlBoard_nwc_yarp"
@@ -219,12 +226,14 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints1");
+            p_cfg.put("emulate_impedance_all_setpoints_control", true);
             REQUIRE(ddnws1.open(p_cfg));
         }
         {
             Property p_cfg;
             p_cfg.put("device", "dr_controlboard_nws_yarp");
             p_cfg.put("name", "/alljoints2");
+            p_cfg.put("emulate_impedance_all_setpoints_control", true);
             REQUIRE(ddnws2.open(p_cfg));
         }
         {
@@ -291,6 +300,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         ddremapper.view(ifault);  REQUIRE(ifault);
         ddremapper.view(ilims);   REQUIRE(ilims);
         ddremapper.view(iimp);   REQUIRE(iimp);
+        ddremapper.view(iimpAll); REQUIRE(iimpAll);
         //ddremapper.view(iremotecalib);  REQUIRE(iremotecalib);
 
         yarp::dev::tests::exec_iPositionControl_test_1(ipos, icmd);
@@ -310,6 +320,7 @@ TEST_CASE("dev::ControlBoardRemapperTest3", "[yarp::dev]")
         yarp::dev::tests::exec_iJointFault_test_1(ifault);
         yarp::dev::tests::exec_iControlLimits_test1(ilims, iinfo);
         yarp::dev::tests::exec_iImpedanceControl_test_1(iimp);
+        yarp::dev::tests::exec_iImpedanceAllSetPointsControl_test_1(iimpAll, iinfo);
 
         //"Close all polydrivers and check"
         {

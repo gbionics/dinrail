@@ -3621,6 +3621,254 @@ bool DinRailControlBoardRemapper::getCurrentImpedanceLimit(int j, double *min_st
     return false;
 }
 
+bool DinRailControlBoardRemapper::setSetPoint(int j,
+                                              double pos,
+                                              double vel,
+                                              double torque,
+                                              double stiffness,
+                                              double damping)
+{
+    const int off = static_cast<int>(remappedControlBoards.lut[j].axisIndexInSubControlBoard);
+    const size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+
+    RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(subIndex);
+    if (!p) {
+        return false;
+    }
+
+    if (p->iImpedanceAllSetPointsControl) {
+        return p->iImpedanceAllSetPointsControl->setSetPoint(off,
+                                                             pos,
+                                                             vel,
+                                                             torque,
+                                                             stiffness,
+                                                             damping);
+    }
+
+    return false;
+}
+
+bool DinRailControlBoardRemapper::setSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                                               const dinrail::VectorProxy<const double>::Ref pos,
+                                               const dinrail::VectorProxy<const double>::Ref vel,
+                                               const dinrail::VectorProxy<const double>::Ref torque,
+                                               const dinrail::VectorProxy<const double>::Ref stiffness,
+                                               const dinrail::VectorProxy<const double>::Ref damping)
+{
+    const auto n = jointIndeces.size();
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+        return false;
+    }
+
+    bool ret = true;
+    std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
+
+    selectedJointsBuffers.fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(pos.data(),
+                                                                                      vel.data(),
+                                                                                      torque.data(),
+                                                                                      stiffness.data(),
+                                                                                      damping.data(),
+                                                                                      static_cast<int>(n),
+                                                                                      jointIndeces.data(),
+                                                                                      remappedControlBoards);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++) {
+        if (selectedJointsBuffers.m_nJointsInSubControlBoard[ctrlBrd] == 0) {
+            continue;
+        }
+
+        RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(ctrlBrd);
+        if (!p || !p->iImpedanceAllSetPointsControl) {
+            ret = false;
+            continue;
+        }
+
+        const bool ok = p->iImpedanceAllSetPointsControl->setSetPoints(
+            selectedJointsBuffers.m_jointsInSubControlBoard[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointPos[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointVel[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointTorque[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointStiffness[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointDamping[ctrlBrd]);
+        ret = ret && ok;
+    }
+
+    return ret;
+}
+
+bool DinRailControlBoardRemapper::setSetPoints(const dinrail::VectorProxy<const double>::Ref pos,
+                                               const dinrail::VectorProxy<const double>::Ref vel,
+                                               const dinrail::VectorProxy<const double>::Ref torque,
+                                               const dinrail::VectorProxy<const double>::Ref stiffness,
+                                               const dinrail::VectorProxy<const double>::Ref damping)
+{
+    const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(controlledJoints);
+    if (pos.size() != expected || vel.size() != expected || torque.size() != expected
+        || stiffness.size() != expected || damping.size() != expected) {
+        return false;
+    }
+
+    bool ret = true;
+    std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
+
+    allJointsBuffers.fillSubControlBoardSetPointBuffersFromCompleteJointVectors(pos.data(),
+                                                                                vel.data(),
+                                                                                torque.data(),
+                                                                                stiffness.data(),
+                                                                                damping.data(),
+                                                                                remappedControlBoards);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++) {
+        if (allJointsBuffers.m_nJointsInSubControlBoard[ctrlBrd] == 0) {
+            continue;
+        }
+
+        RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(ctrlBrd);
+        if (!p || !p->iImpedanceAllSetPointsControl) {
+            ret = false;
+            continue;
+        }
+
+        const bool ok = p->iImpedanceAllSetPointsControl->setSetPoints(
+            allJointsBuffers.m_jointsInSubControlBoard[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointPos[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointVel[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointTorque[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointStiffness[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointDamping[ctrlBrd]);
+        ret = ret && ok;
+    }
+
+    return ret;
+}
+
+bool DinRailControlBoardRemapper::getSetPoint(int j,
+                                              double& pos,
+                                              double& vel,
+                                              double& torque,
+                                              double& stiffness,
+                                              double& damping)
+{
+    const int off = static_cast<int>(remappedControlBoards.lut[j].axisIndexInSubControlBoard);
+    const size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+
+    RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(subIndex);
+    if (!p) {
+        return false;
+    }
+
+    if (p->iImpedanceAllSetPointsControl) {
+        return p->iImpedanceAllSetPointsControl->getSetPoint(off,
+                                                             pos,
+                                                             vel,
+                                                             torque,
+                                                             stiffness,
+                                                             damping);
+    }
+
+    return false;
+}
+
+bool DinRailControlBoardRemapper::getSetPoints(const dinrail::VectorProxy<const int>::Ref jointIndeces,
+                                               dinrail::VectorProxy<double>::Ref pos,
+                                               dinrail::VectorProxy<double>::Ref vel,
+                                               dinrail::VectorProxy<double>::Ref torque,
+                                               dinrail::VectorProxy<double>::Ref stiffness,
+                                               dinrail::VectorProxy<double>::Ref damping)
+{
+    const auto n = jointIndeces.size();
+    if (n != pos.size() || n != vel.size() || n != torque.size() || n != stiffness.size() || n != damping.size()) {
+        return false;
+    }
+
+    bool ret = true;
+    std::lock_guard<std::mutex> lock(selectedJointsBuffers.mutex);
+
+    selectedJointsBuffers.resizeSubControlBoardSetPointBuffers(static_cast<int>(n),
+                                                               jointIndeces.data(),
+                                                               remappedControlBoards);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++) {
+        const int njSub = selectedJointsBuffers.m_nJointsInSubControlBoard[ctrlBrd];
+        if (njSub == 0) {
+            continue;
+        }
+
+        RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(ctrlBrd);
+        if (!p || !p->iImpedanceAllSetPointsControl) {
+            ret = false;
+            continue;
+        }
+
+        const bool ok = p->iImpedanceAllSetPointsControl->getSetPoints(
+            selectedJointsBuffers.m_jointsInSubControlBoard[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointPos[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointVel[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointTorque[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointStiffness[ctrlBrd],
+            selectedJointsBuffers.m_bufferForSubControlBoardSetPointDamping[ctrlBrd]);
+        ret = ret && ok;
+    }
+
+    selectedJointsBuffers.fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(pos.data(),
+                                                                                      vel.data(),
+                                                                                      torque.data(),
+                                                                                      stiffness.data(),
+                                                                                      damping.data(),
+                                                                                      static_cast<int>(n),
+                                                                                      jointIndeces.data(),
+                                                                                      remappedControlBoards);
+
+    return ret;
+}
+
+bool DinRailControlBoardRemapper::getSetPoints(dinrail::VectorProxy<double>::Ref pos,
+                                               dinrail::VectorProxy<double>::Ref vel,
+                                               dinrail::VectorProxy<double>::Ref torque,
+                                               dinrail::VectorProxy<double>::Ref stiffness,
+                                               dinrail::VectorProxy<double>::Ref damping)
+{
+    const std::ptrdiff_t expected = static_cast<std::ptrdiff_t>(controlledJoints);
+    if (pos.size() != expected || vel.size() != expected || torque.size() != expected
+        || stiffness.size() != expected || damping.size() != expected) {
+        return false;
+    }
+
+    bool ret = true;
+    std::lock_guard<std::mutex> lock(allJointsBuffers.mutex);
+
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++) {
+        const int njSub = allJointsBuffers.m_nJointsInSubControlBoard[ctrlBrd];
+        if (njSub == 0) {
+            continue;
+        }
+
+        RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(ctrlBrd);
+        if (!p || !p->iImpedanceAllSetPointsControl) {
+            ret = false;
+            continue;
+        }
+
+        const bool ok = p->iImpedanceAllSetPointsControl->getSetPoints(
+            allJointsBuffers.m_jointsInSubControlBoard[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointPos[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointVel[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointTorque[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointStiffness[ctrlBrd],
+            allJointsBuffers.m_bufferForSubControlBoardSetPointDamping[ctrlBrd]);
+        ret = ret && ok;
+    }
+
+    allJointsBuffers.fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(pos.data(),
+                                                                                vel.data(),
+                                                                                torque.data(),
+                                                                                stiffness.data(),
+                                                                                damping.data(),
+                                                                                remappedControlBoards);
+
+    return ret;
+}
+
 bool DinRailControlBoardRemapper::getControlMode(int j, int *mode)
 {
     int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;

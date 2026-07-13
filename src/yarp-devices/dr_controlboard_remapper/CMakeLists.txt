@@ -35,6 +35,7 @@ if(NOT SKIP_dr_controlboard_remapper OR NOT SKIP_dr_controlboard_remapper_nwc_ya
 
   target_link_libraries(dr_controlboard_remapper
     PRIVATE
+      dinrail::dinrail
       YARP::YARP_os
       YARP::YARP_sig
       YARP::YARP_dev
