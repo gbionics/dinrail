@@ -10,39 +10,38 @@
 #include <numeric>
 #include <vector>
 
+#include <catch2/catch_test_macros.hpp>
 #include <yarp/dev/IAxisInfo.h>
 #include <yarp/dev/IControlLimits.h>
-#include <catch2/catch_test_macros.hpp>
-
 
 namespace yarp::dev::tests
 {
-    inline void exec_iControlLimits_test1(IControlLimits* ilims, IAxisInfo* iinfo)
-    {
-        REQUIRE(ilims != nullptr);
-        REQUIRE(iinfo != nullptr);
+inline void exec_iControlLimits_test1(IControlLimits* ilims, IAxisInfo* iinfo)
+{
+    REQUIRE(ilims != nullptr);
+    REQUIRE(iinfo != nullptr);
 
-        bool b;
-        int ax;
+    bool b;
+    int ax;
 
-        b = iinfo->getAxes(&ax);
-        CHECK(b);
-        REQUIRE(ax > 0);
+    b = iinfo->getAxes(&ax);
+    CHECK(b);
+    REQUIRE(ax > 0);
 
-        double min=0;
-        double max=0;
-        b = ilims->getLimits (0, &min, &max);
-        CHECK(b);
+    double min = 0;
+    double max = 0;
+    b = ilims->getLimits(0, &min, &max);
+    CHECK(b);
 
-        b = ilims->getVelLimits(0, &min, &max);
-        CHECK(b);
+    b = ilims->getVelLimits(0, &min, &max);
+    CHECK(b);
 
-        b = ilims->setLimits(0, min, max);
-        CHECK(b);
+    b = ilims->setLimits(0, min, max);
+    CHECK(b);
 
-        b = ilims->setVelLimits(0, min, max);
-        CHECK(b);
-    }
+    b = ilims->setVelLimits(0, min, max);
+    CHECK(b);
 }
+} // namespace yarp::dev::tests
 
 #endif

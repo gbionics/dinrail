@@ -24,7 +24,8 @@ int main()
     std::cout << "YARP property: " << yarpProperty.toString() << "\n";
 
     // Convert yarp::os::Property -> dinrail::Parameters.
-    dinrail::Parameters roundTrip = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProperty);
+    dinrail::Parameters roundTrip
+        = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProperty);
 
     std::string device;
     int periodMs = 0;

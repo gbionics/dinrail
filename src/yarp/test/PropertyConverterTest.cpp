@@ -3,8 +3,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <dinrail/YarpPropertyConverter.h>
 #include <dinrail/Parameters.h>
+#include <dinrail/YarpPropertyConverter.h>
 
 #include <yarp/os/Property.h>
 
@@ -523,7 +523,8 @@ TEST_CASE("YarpPropertyConverter promotes mixed numeric list to vector<double>",
     list->addFloat64(3.5);
     group.put("fingersScaling", listValue);
 
-    dinrail::Parameters dinrailParams = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProp);
+    dinrail::Parameters dinrailParams
+        = dinrail::YarpPropertyConverter::toDinrailParameters(yarpProp);
     const dinrail::Parameters& fingersGroup = dinrailParams.findGroup("LEFT_FINGERS_RETARGETING");
 
     REQUIRE_FALSE(fingersGroup.isNull());

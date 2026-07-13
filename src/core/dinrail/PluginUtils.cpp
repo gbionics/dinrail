@@ -69,19 +69,18 @@ std::optional<std::string> getPathOfDinrailSharedLibrary()
     return libraryLocation.parent_path().string();
 }
 
-std::vector<std::filesystem::path>
-getPluginSearchPaths()
+std::vector<std::filesystem::path> getPluginSearchPaths()
 {
     std::vector<std::filesystem::path> searchPaths;
 
     const std::optional<std::string> libPath = getPathOfDinrailSharedLibrary();
     if (libPath.has_value())
     {
-         std::filesystem::path p(libPath.value());
-         if (std::filesystem::exists(p))
-         {
-             searchPaths.emplace_back(libPath.value());
-         }
+        std::filesystem::path p(libPath.value());
+        if (std::filesystem::exists(p))
+        {
+            searchPaths.emplace_back(libPath.value());
+        }
     }
 
     if (const char* extra = std::getenv("DINRAIL_PLUGIN_PATH"))

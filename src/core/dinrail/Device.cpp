@@ -14,8 +14,7 @@ namespace dinrail
 namespace
 {
 
-template <class T>
-struct FactoryDeleter
+template <class T> struct FactoryDeleter
 {
     const sharedlibpp::SharedLibraryClassFactory<T>* factory = nullptr;
 
@@ -28,8 +27,7 @@ struct FactoryDeleter
     }
 };
 
-template <class T>
-using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
+template <class T> using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
 
 template <class T>
 FactoryUniquePtr<T> make_factory_unique(const sharedlibpp::SharedLibraryClassFactory<T>& factory)
@@ -63,7 +61,7 @@ bool Device::open(const Parameters& config)
 
     if (!config.check<std::string>("device"))
     {
-        // TODO(traversaro): avoid to call std::cerr here, and 
+        // TODO(traversaro): avoid to call std::cerr here, and
         // implement a way for users to configure the logging system
         std::cerr << "dinrail::Device: missing required parameter 'device'" << std::endl;
         return false;
@@ -71,16 +69,15 @@ bool Device::open(const Parameters& config)
 
     const std::string deviceName = config.find("device").as<std::string>();
 
-
     const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
     const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
     const auto pluginSearchPaths = getPluginSearchPaths();
 
     m_pimpl->deviceFactory = std::make_unique<
         sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>>(SHLIBPP_DEFAULT_START_CHECK,
-                                                                   SHLIBPP_DEFAULT_END_CHECK,
-                                                                   SHLIBPP_DEFAULT_SYSTEM_VERSION,
-                                                                   factoryName.c_str());
+                                                                  SHLIBPP_DEFAULT_END_CHECK,
+                                                                  SHLIBPP_DEFAULT_SYSTEM_VERSION,
+                                                                  factoryName.c_str());
 
     for (const auto& path : pluginSearchPaths)
     {
@@ -92,10 +89,9 @@ bool Device::open(const Parameters& config)
 
     if (!ok)
     {
-        std::cerr << "dinrail::Device: impossible to find library for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
+        std::cerr << "dinrail::Device: impossible to find library for " << deviceName
+                  << " device. Searched library name: " << libraryName
+                  << ", factory name: " << factoryName << std::endl;
         return false;
     }
 
@@ -103,10 +99,9 @@ bool Device::open(const Parameters& config)
 
     if (!device)
     {
-        std::cerr << "dinrail::Device: impossible to create factory for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
+        std::cerr << "dinrail::Device: impossible to create factory for " << deviceName
+                  << " device. Searched library name: " << libraryName
+                  << ", factory name: " << factoryName << std::endl;
         return false;
     }
 
@@ -114,10 +109,9 @@ bool Device::open(const Parameters& config)
 
     if (!ok)
     {
-        std::cerr << "dinrail::Device: open return false for " 
-                  << deviceName << " device. Searched library name: " << libraryName 
-                  << ", factory name: " << factoryName
-                  << std::endl;
+        std::cerr << "dinrail::Device: open return false for " << deviceName
+                  << " device. Searched library name: " << libraryName
+                  << ", factory name: " << factoryName << std::endl;
         return false;
     }
 

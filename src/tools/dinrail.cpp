@@ -15,8 +15,8 @@
 namespace
 {
 
-std::string extractPluginNameFromLibrary(const std::string& fileName,
-                                         const std::string& pluginPrefix)
+std::string
+extractPluginNameFromLibrary(const std::string& fileName, const std::string& pluginPrefix)
 {
 #if defined(_WIN32)
     const std::string prefix = pluginPrefix + "-";
@@ -81,8 +81,8 @@ std::vector<std::string> findAvailableDevices()
                 continue;
             }
 
-            const auto deviceName = extractPluginNameFromLibrary(
-                entry.path().filename().string(), devicePluginPrefix);
+            const auto deviceName = extractPluginNameFromLibrary(entry.path().filename().string(),
+                                                                 devicePluginPrefix);
             if (!deviceName.empty())
             {
                 devices.insert(deviceName);
@@ -124,8 +124,7 @@ int main(int argc, char** argv)
         if (searchPaths.empty())
         {
             std::cout << "No search paths found.\n";
-        }
-        else
+        } else
         {
             for (const auto& path : searchPaths)
             {

@@ -10,11 +10,11 @@
 
 namespace yarp::dev::tests
 {
-    inline bool YARP_dev_API exec_dummy_test()
-    {
-        bool b = true;
-        return b;
-    }
+inline bool YARP_dev_API exec_dummy_test()
+{
+    bool b = true;
+    return b;
 }
+} // namespace yarp::dev::tests
 
 #endif

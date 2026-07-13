@@ -10,137 +10,164 @@
 
 #include <dinrail/ControlBoardYARPJointData.h>
 
-namespace dinrail {
+namespace dinrail
+{
 
 // Constructor with field values
-ControlBoardYARPJointData::ControlBoardYARPJointData(const yarp::sig::VectorOf<double>& jointPosition,
-                                                     const bool jointPosition_isValid,
-                                                     const yarp::sig::VectorOf<double>& jointVelocity,
-                                                     const bool jointVelocity_isValid,
-                                                     const yarp::sig::VectorOf<double>& jointAcceleration,
-                                                     const bool jointAcceleration_isValid,
-                                                     const yarp::sig::VectorOf<double>& motorPosition,
-                                                     const bool motorPosition_isValid,
-                                                     const yarp::sig::VectorOf<double>& motorVelocity,
-                                                     const bool motorVelocity_isValid,
-                                                     const yarp::sig::VectorOf<double>& motorAcceleration,
-                                                     const bool motorAcceleration_isValid,
-                                                     const yarp::sig::VectorOf<double>& torque,
-                                                     const bool torque_isValid,
-                                                     const yarp::sig::VectorOf<double>& pwmDutycycle,
-                                                     const bool pwmDutycycle_isValid,
-                                                     const yarp::sig::VectorOf<double>& current,
-                                                     const bool current_isValid,
-                                                     const yarp::sig::VectorOf<int>& controlMode,
-                                                     const bool controlMode_isValid,
-                                                     const yarp::sig::VectorOf<int>& interactionMode,
-                                                     const bool interactionMode_isValid,
-                                                     const yarp::sig::VectorOf<double>& temperature,
-                                                     const bool temperature_isValid) :
-        WirePortable(),
-        jointPosition(jointPosition),
-        jointPosition_isValid(jointPosition_isValid),
-        jointVelocity(jointVelocity),
-        jointVelocity_isValid(jointVelocity_isValid),
-        jointAcceleration(jointAcceleration),
-        jointAcceleration_isValid(jointAcceleration_isValid),
-        motorPosition(motorPosition),
-        motorPosition_isValid(motorPosition_isValid),
-        motorVelocity(motorVelocity),
-        motorVelocity_isValid(motorVelocity_isValid),
-        motorAcceleration(motorAcceleration),
-        motorAcceleration_isValid(motorAcceleration_isValid),
-        torque(torque),
-        torque_isValid(torque_isValid),
-        pwmDutycycle(pwmDutycycle),
-        pwmDutycycle_isValid(pwmDutycycle_isValid),
-        current(current),
-        current_isValid(current_isValid),
-        controlMode(controlMode),
-        controlMode_isValid(controlMode_isValid),
-        interactionMode(interactionMode),
-        interactionMode_isValid(interactionMode_isValid),
-        temperature(temperature),
-        temperature_isValid(temperature_isValid)
+ControlBoardYARPJointData::ControlBoardYARPJointData(
+    const yarp::sig::VectorOf<double>& jointPosition,
+    const bool jointPosition_isValid,
+    const yarp::sig::VectorOf<double>& jointVelocity,
+    const bool jointVelocity_isValid,
+    const yarp::sig::VectorOf<double>& jointAcceleration,
+    const bool jointAcceleration_isValid,
+    const yarp::sig::VectorOf<double>& motorPosition,
+    const bool motorPosition_isValid,
+    const yarp::sig::VectorOf<double>& motorVelocity,
+    const bool motorVelocity_isValid,
+    const yarp::sig::VectorOf<double>& motorAcceleration,
+    const bool motorAcceleration_isValid,
+    const yarp::sig::VectorOf<double>& torque,
+    const bool torque_isValid,
+    const yarp::sig::VectorOf<double>& pwmDutycycle,
+    const bool pwmDutycycle_isValid,
+    const yarp::sig::VectorOf<double>& current,
+    const bool current_isValid,
+    const yarp::sig::VectorOf<int>& controlMode,
+    const bool controlMode_isValid,
+    const yarp::sig::VectorOf<int>& interactionMode,
+    const bool interactionMode_isValid,
+    const yarp::sig::VectorOf<double>& temperature,
+    const bool temperature_isValid)
+    : WirePortable()
+    , jointPosition(jointPosition)
+    , jointPosition_isValid(jointPosition_isValid)
+    , jointVelocity(jointVelocity)
+    , jointVelocity_isValid(jointVelocity_isValid)
+    , jointAcceleration(jointAcceleration)
+    , jointAcceleration_isValid(jointAcceleration_isValid)
+    , motorPosition(motorPosition)
+    , motorPosition_isValid(motorPosition_isValid)
+    , motorVelocity(motorVelocity)
+    , motorVelocity_isValid(motorVelocity_isValid)
+    , motorAcceleration(motorAcceleration)
+    , motorAcceleration_isValid(motorAcceleration_isValid)
+    , torque(torque)
+    , torque_isValid(torque_isValid)
+    , pwmDutycycle(pwmDutycycle)
+    , pwmDutycycle_isValid(pwmDutycycle_isValid)
+    , current(current)
+    , current_isValid(current_isValid)
+    , controlMode(controlMode)
+    , controlMode_isValid(controlMode_isValid)
+    , interactionMode(interactionMode)
+    , interactionMode_isValid(interactionMode_isValid)
+    , temperature(temperature)
+    , temperature_isValid(temperature_isValid)
 {
 }
 
 // Read structure on a Wire
 bool ControlBoardYARPJointData::read(yarp::os::idl::WireReader& reader)
 {
-    if (!nested_read_jointPosition(reader)) {
+    if (!nested_read_jointPosition(reader))
+    {
         return false;
     }
-    if (!read_jointPosition_isValid(reader)) {
+    if (!read_jointPosition_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_jointVelocity(reader)) {
+    if (!nested_read_jointVelocity(reader))
+    {
         return false;
     }
-    if (!read_jointVelocity_isValid(reader)) {
+    if (!read_jointVelocity_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_jointAcceleration(reader)) {
+    if (!nested_read_jointAcceleration(reader))
+    {
         return false;
     }
-    if (!read_jointAcceleration_isValid(reader)) {
+    if (!read_jointAcceleration_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_motorPosition(reader)) {
+    if (!nested_read_motorPosition(reader))
+    {
         return false;
     }
-    if (!read_motorPosition_isValid(reader)) {
+    if (!read_motorPosition_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_motorVelocity(reader)) {
+    if (!nested_read_motorVelocity(reader))
+    {
         return false;
     }
-    if (!read_motorVelocity_isValid(reader)) {
+    if (!read_motorVelocity_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_motorAcceleration(reader)) {
+    if (!nested_read_motorAcceleration(reader))
+    {
         return false;
     }
-    if (!read_motorAcceleration_isValid(reader)) {
+    if (!read_motorAcceleration_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_torque(reader)) {
+    if (!nested_read_torque(reader))
+    {
         return false;
     }
-    if (!read_torque_isValid(reader)) {
+    if (!read_torque_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_pwmDutycycle(reader)) {
+    if (!nested_read_pwmDutycycle(reader))
+    {
         return false;
     }
-    if (!read_pwmDutycycle_isValid(reader)) {
+    if (!read_pwmDutycycle_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_current(reader)) {
+    if (!nested_read_current(reader))
+    {
         return false;
     }
-    if (!read_current_isValid(reader)) {
+    if (!read_current_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_controlMode(reader)) {
+    if (!nested_read_controlMode(reader))
+    {
         return false;
     }
-    if (!read_controlMode_isValid(reader)) {
+    if (!read_controlMode_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_interactionMode(reader)) {
+    if (!nested_read_interactionMode(reader))
+    {
         return false;
     }
-    if (!read_interactionMode_isValid(reader)) {
+    if (!read_interactionMode_isValid(reader))
+    {
         return false;
     }
-    if (!nested_read_temperature(reader)) {
+    if (!nested_read_temperature(reader))
+    {
         return false;
     }
-    if (!read_temperature_isValid(reader)) {
+    if (!read_temperature_isValid(reader))
+    {
         return false;
     }
-    if (reader.isError()) {
+    if (reader.isError())
+    {
         return false;
     }
     return true;
@@ -150,10 +177,12 @@ bool ControlBoardYARPJointData::read(yarp::os::idl::WireReader& reader)
 bool ControlBoardYARPJointData::read(yarp::os::ConnectionReader& connection)
 {
     yarp::os::idl::WireReader reader(connection);
-    if (!reader.readListHeader(24)) {
+    if (!reader.readListHeader(24))
+    {
         return false;
     }
-    if (!read(reader)) {
+    if (!read(reader))
+    {
         return false;
     }
     return true;
@@ -162,79 +191,104 @@ bool ControlBoardYARPJointData::read(yarp::os::ConnectionReader& connection)
 // Write structure on a Wire
 bool ControlBoardYARPJointData::write(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!nested_write_jointPosition(writer)) {
+    if (!nested_write_jointPosition(writer))
+    {
         return false;
     }
-    if (!write_jointPosition_isValid(writer)) {
+    if (!write_jointPosition_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_jointVelocity(writer)) {
+    if (!nested_write_jointVelocity(writer))
+    {
         return false;
     }
-    if (!write_jointVelocity_isValid(writer)) {
+    if (!write_jointVelocity_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_jointAcceleration(writer)) {
+    if (!nested_write_jointAcceleration(writer))
+    {
         return false;
     }
-    if (!write_jointAcceleration_isValid(writer)) {
+    if (!write_jointAcceleration_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_motorPosition(writer)) {
+    if (!nested_write_motorPosition(writer))
+    {
         return false;
     }
-    if (!write_motorPosition_isValid(writer)) {
+    if (!write_motorPosition_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_motorVelocity(writer)) {
+    if (!nested_write_motorVelocity(writer))
+    {
         return false;
     }
-    if (!write_motorVelocity_isValid(writer)) {
+    if (!write_motorVelocity_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_motorAcceleration(writer)) {
+    if (!nested_write_motorAcceleration(writer))
+    {
         return false;
     }
-    if (!write_motorAcceleration_isValid(writer)) {
+    if (!write_motorAcceleration_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_torque(writer)) {
+    if (!nested_write_torque(writer))
+    {
         return false;
     }
-    if (!write_torque_isValid(writer)) {
+    if (!write_torque_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_pwmDutycycle(writer)) {
+    if (!nested_write_pwmDutycycle(writer))
+    {
         return false;
     }
-    if (!write_pwmDutycycle_isValid(writer)) {
+    if (!write_pwmDutycycle_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_current(writer)) {
+    if (!nested_write_current(writer))
+    {
         return false;
     }
-    if (!write_current_isValid(writer)) {
+    if (!write_current_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_controlMode(writer)) {
+    if (!nested_write_controlMode(writer))
+    {
         return false;
     }
-    if (!write_controlMode_isValid(writer)) {
+    if (!write_controlMode_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_interactionMode(writer)) {
+    if (!nested_write_interactionMode(writer))
+    {
         return false;
     }
-    if (!write_interactionMode_isValid(writer)) {
+    if (!write_interactionMode_isValid(writer))
+    {
         return false;
     }
-    if (!nested_write_temperature(writer)) {
+    if (!nested_write_temperature(writer))
+    {
         return false;
     }
-    if (!write_temperature_isValid(writer)) {
+    if (!write_temperature_isValid(writer))
+    {
         return false;
     }
-    if (writer.isError()) {
+    if (writer.isError())
+    {
         return false;
     }
     return true;
@@ -244,10 +298,12 @@ bool ControlBoardYARPJointData::write(const yarp::os::idl::WireWriter& writer) c
 bool ControlBoardYARPJointData::write(yarp::os::ConnectionWriter& connection) const
 {
     yarp::os::idl::WireWriter writer(connection);
-    if (!writer.writeListHeader(24)) {
+    if (!writer.writeListHeader(24))
+    {
         return false;
     }
-    if (!write(writer)) {
+    if (!write(writer))
+    {
         return false;
     }
     return true;
@@ -257,7 +313,8 @@ bool ControlBoardYARPJointData::write(yarp::os::ConnectionWriter& connection) co
 std::string ControlBoardYARPJointData::toString() const
 {
     yarp::os::Bottle b;
-    if (!yarp::os::Portable::copyPortable(*this, b)) {
+    if (!yarp::os::Portable::copyPortable(*this, b))
+    {
         return {};
     }
     return b.toString();
@@ -266,11 +323,13 @@ std::string ControlBoardYARPJointData::toString() const
 // read jointPosition field
 bool ControlBoardYARPJointData::read_jointPosition(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(jointPosition)) {
+    if (!reader.read(jointPosition))
+    {
         reader.fail();
         return false;
     }
@@ -280,7 +339,8 @@ bool ControlBoardYARPJointData::read_jointPosition(yarp::os::idl::WireReader& re
 // write jointPosition field
 bool ControlBoardYARPJointData::write_jointPosition(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(jointPosition)) {
+    if (!writer.write(jointPosition))
+    {
         return false;
     }
     return true;
@@ -289,11 +349,13 @@ bool ControlBoardYARPJointData::write_jointPosition(const yarp::os::idl::WireWri
 // read (nested) jointPosition field
 bool ControlBoardYARPJointData::nested_read_jointPosition(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(jointPosition)) {
+    if (!reader.readNested(jointPosition))
+    {
         reader.fail();
         return false;
     }
@@ -301,9 +363,11 @@ bool ControlBoardYARPJointData::nested_read_jointPosition(yarp::os::idl::WireRea
 }
 
 // write (nested) jointPosition field
-bool ControlBoardYARPJointData::nested_write_jointPosition(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointPosition(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(jointPosition)) {
+    if (!writer.writeNested(jointPosition))
+    {
         return false;
     }
     return true;
@@ -312,11 +376,13 @@ bool ControlBoardYARPJointData::nested_write_jointPosition(const yarp::os::idl::
 // read jointPosition_isValid field
 bool ControlBoardYARPJointData::read_jointPosition_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointPosition_isValid)) {
+    if (!reader.readBool(jointPosition_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -324,9 +390,11 @@ bool ControlBoardYARPJointData::read_jointPosition_isValid(yarp::os::idl::WireRe
 }
 
 // write jointPosition_isValid field
-bool ControlBoardYARPJointData::write_jointPosition_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_jointPosition_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointPosition_isValid)) {
+    if (!writer.writeBool(jointPosition_isValid))
+    {
         return false;
     }
     return true;
@@ -335,11 +403,13 @@ bool ControlBoardYARPJointData::write_jointPosition_isValid(const yarp::os::idl:
 // read (nested) jointPosition_isValid field
 bool ControlBoardYARPJointData::nested_read_jointPosition_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointPosition_isValid)) {
+    if (!reader.readBool(jointPosition_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -347,9 +417,11 @@ bool ControlBoardYARPJointData::nested_read_jointPosition_isValid(yarp::os::idl:
 }
 
 // write (nested) jointPosition_isValid field
-bool ControlBoardYARPJointData::nested_write_jointPosition_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointPosition_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointPosition_isValid)) {
+    if (!writer.writeBool(jointPosition_isValid))
+    {
         return false;
     }
     return true;
@@ -358,11 +430,13 @@ bool ControlBoardYARPJointData::nested_write_jointPosition_isValid(const yarp::o
 // read jointVelocity field
 bool ControlBoardYARPJointData::read_jointVelocity(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(jointVelocity)) {
+    if (!reader.read(jointVelocity))
+    {
         reader.fail();
         return false;
     }
@@ -372,7 +446,8 @@ bool ControlBoardYARPJointData::read_jointVelocity(yarp::os::idl::WireReader& re
 // write jointVelocity field
 bool ControlBoardYARPJointData::write_jointVelocity(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(jointVelocity)) {
+    if (!writer.write(jointVelocity))
+    {
         return false;
     }
     return true;
@@ -381,11 +456,13 @@ bool ControlBoardYARPJointData::write_jointVelocity(const yarp::os::idl::WireWri
 // read (nested) jointVelocity field
 bool ControlBoardYARPJointData::nested_read_jointVelocity(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(jointVelocity)) {
+    if (!reader.readNested(jointVelocity))
+    {
         reader.fail();
         return false;
     }
@@ -393,9 +470,11 @@ bool ControlBoardYARPJointData::nested_read_jointVelocity(yarp::os::idl::WireRea
 }
 
 // write (nested) jointVelocity field
-bool ControlBoardYARPJointData::nested_write_jointVelocity(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointVelocity(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(jointVelocity)) {
+    if (!writer.writeNested(jointVelocity))
+    {
         return false;
     }
     return true;
@@ -404,11 +483,13 @@ bool ControlBoardYARPJointData::nested_write_jointVelocity(const yarp::os::idl::
 // read jointVelocity_isValid field
 bool ControlBoardYARPJointData::read_jointVelocity_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointVelocity_isValid)) {
+    if (!reader.readBool(jointVelocity_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -416,9 +497,11 @@ bool ControlBoardYARPJointData::read_jointVelocity_isValid(yarp::os::idl::WireRe
 }
 
 // write jointVelocity_isValid field
-bool ControlBoardYARPJointData::write_jointVelocity_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_jointVelocity_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointVelocity_isValid)) {
+    if (!writer.writeBool(jointVelocity_isValid))
+    {
         return false;
     }
     return true;
@@ -427,11 +510,13 @@ bool ControlBoardYARPJointData::write_jointVelocity_isValid(const yarp::os::idl:
 // read (nested) jointVelocity_isValid field
 bool ControlBoardYARPJointData::nested_read_jointVelocity_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointVelocity_isValid)) {
+    if (!reader.readBool(jointVelocity_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -439,9 +524,11 @@ bool ControlBoardYARPJointData::nested_read_jointVelocity_isValid(yarp::os::idl:
 }
 
 // write (nested) jointVelocity_isValid field
-bool ControlBoardYARPJointData::nested_write_jointVelocity_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointVelocity_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointVelocity_isValid)) {
+    if (!writer.writeBool(jointVelocity_isValid))
+    {
         return false;
     }
     return true;
@@ -450,11 +537,13 @@ bool ControlBoardYARPJointData::nested_write_jointVelocity_isValid(const yarp::o
 // read jointAcceleration field
 bool ControlBoardYARPJointData::read_jointAcceleration(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(jointAcceleration)) {
+    if (!reader.read(jointAcceleration))
+    {
         reader.fail();
         return false;
     }
@@ -462,9 +551,11 @@ bool ControlBoardYARPJointData::read_jointAcceleration(yarp::os::idl::WireReader
 }
 
 // write jointAcceleration field
-bool ControlBoardYARPJointData::write_jointAcceleration(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_jointAcceleration(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(jointAcceleration)) {
+    if (!writer.write(jointAcceleration))
+    {
         return false;
     }
     return true;
@@ -473,11 +564,13 @@ bool ControlBoardYARPJointData::write_jointAcceleration(const yarp::os::idl::Wir
 // read (nested) jointAcceleration field
 bool ControlBoardYARPJointData::nested_read_jointAcceleration(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(jointAcceleration)) {
+    if (!reader.readNested(jointAcceleration))
+    {
         reader.fail();
         return false;
     }
@@ -485,9 +578,11 @@ bool ControlBoardYARPJointData::nested_read_jointAcceleration(yarp::os::idl::Wir
 }
 
 // write (nested) jointAcceleration field
-bool ControlBoardYARPJointData::nested_write_jointAcceleration(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointAcceleration(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(jointAcceleration)) {
+    if (!writer.writeNested(jointAcceleration))
+    {
         return false;
     }
     return true;
@@ -496,11 +591,13 @@ bool ControlBoardYARPJointData::nested_write_jointAcceleration(const yarp::os::i
 // read jointAcceleration_isValid field
 bool ControlBoardYARPJointData::read_jointAcceleration_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointAcceleration_isValid)) {
+    if (!reader.readBool(jointAcceleration_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -508,22 +605,27 @@ bool ControlBoardYARPJointData::read_jointAcceleration_isValid(yarp::os::idl::Wi
 }
 
 // write jointAcceleration_isValid field
-bool ControlBoardYARPJointData::write_jointAcceleration_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_jointAcceleration_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointAcceleration_isValid)) {
+    if (!writer.writeBool(jointAcceleration_isValid))
+    {
         return false;
     }
     return true;
 }
 
 // read (nested) jointAcceleration_isValid field
-bool ControlBoardYARPJointData::nested_read_jointAcceleration_isValid(yarp::os::idl::WireReader& reader)
+bool ControlBoardYARPJointData::nested_read_jointAcceleration_isValid(
+    yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(jointAcceleration_isValid)) {
+    if (!reader.readBool(jointAcceleration_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -531,9 +633,11 @@ bool ControlBoardYARPJointData::nested_read_jointAcceleration_isValid(yarp::os::
 }
 
 // write (nested) jointAcceleration_isValid field
-bool ControlBoardYARPJointData::nested_write_jointAcceleration_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_jointAcceleration_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(jointAcceleration_isValid)) {
+    if (!writer.writeBool(jointAcceleration_isValid))
+    {
         return false;
     }
     return true;
@@ -542,11 +646,13 @@ bool ControlBoardYARPJointData::nested_write_jointAcceleration_isValid(const yar
 // read motorPosition field
 bool ControlBoardYARPJointData::read_motorPosition(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(motorPosition)) {
+    if (!reader.read(motorPosition))
+    {
         reader.fail();
         return false;
     }
@@ -556,7 +662,8 @@ bool ControlBoardYARPJointData::read_motorPosition(yarp::os::idl::WireReader& re
 // write motorPosition field
 bool ControlBoardYARPJointData::write_motorPosition(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(motorPosition)) {
+    if (!writer.write(motorPosition))
+    {
         return false;
     }
     return true;
@@ -565,11 +672,13 @@ bool ControlBoardYARPJointData::write_motorPosition(const yarp::os::idl::WireWri
 // read (nested) motorPosition field
 bool ControlBoardYARPJointData::nested_read_motorPosition(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(motorPosition)) {
+    if (!reader.readNested(motorPosition))
+    {
         reader.fail();
         return false;
     }
@@ -577,9 +686,11 @@ bool ControlBoardYARPJointData::nested_read_motorPosition(yarp::os::idl::WireRea
 }
 
 // write (nested) motorPosition field
-bool ControlBoardYARPJointData::nested_write_motorPosition(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorPosition(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(motorPosition)) {
+    if (!writer.writeNested(motorPosition))
+    {
         return false;
     }
     return true;
@@ -588,11 +699,13 @@ bool ControlBoardYARPJointData::nested_write_motorPosition(const yarp::os::idl::
 // read motorPosition_isValid field
 bool ControlBoardYARPJointData::read_motorPosition_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorPosition_isValid)) {
+    if (!reader.readBool(motorPosition_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -600,9 +713,11 @@ bool ControlBoardYARPJointData::read_motorPosition_isValid(yarp::os::idl::WireRe
 }
 
 // write motorPosition_isValid field
-bool ControlBoardYARPJointData::write_motorPosition_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_motorPosition_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorPosition_isValid)) {
+    if (!writer.writeBool(motorPosition_isValid))
+    {
         return false;
     }
     return true;
@@ -611,11 +726,13 @@ bool ControlBoardYARPJointData::write_motorPosition_isValid(const yarp::os::idl:
 // read (nested) motorPosition_isValid field
 bool ControlBoardYARPJointData::nested_read_motorPosition_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorPosition_isValid)) {
+    if (!reader.readBool(motorPosition_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -623,9 +740,11 @@ bool ControlBoardYARPJointData::nested_read_motorPosition_isValid(yarp::os::idl:
 }
 
 // write (nested) motorPosition_isValid field
-bool ControlBoardYARPJointData::nested_write_motorPosition_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorPosition_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorPosition_isValid)) {
+    if (!writer.writeBool(motorPosition_isValid))
+    {
         return false;
     }
     return true;
@@ -634,11 +753,13 @@ bool ControlBoardYARPJointData::nested_write_motorPosition_isValid(const yarp::o
 // read motorVelocity field
 bool ControlBoardYARPJointData::read_motorVelocity(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(motorVelocity)) {
+    if (!reader.read(motorVelocity))
+    {
         reader.fail();
         return false;
     }
@@ -648,7 +769,8 @@ bool ControlBoardYARPJointData::read_motorVelocity(yarp::os::idl::WireReader& re
 // write motorVelocity field
 bool ControlBoardYARPJointData::write_motorVelocity(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(motorVelocity)) {
+    if (!writer.write(motorVelocity))
+    {
         return false;
     }
     return true;
@@ -657,11 +779,13 @@ bool ControlBoardYARPJointData::write_motorVelocity(const yarp::os::idl::WireWri
 // read (nested) motorVelocity field
 bool ControlBoardYARPJointData::nested_read_motorVelocity(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(motorVelocity)) {
+    if (!reader.readNested(motorVelocity))
+    {
         reader.fail();
         return false;
     }
@@ -669,9 +793,11 @@ bool ControlBoardYARPJointData::nested_read_motorVelocity(yarp::os::idl::WireRea
 }
 
 // write (nested) motorVelocity field
-bool ControlBoardYARPJointData::nested_write_motorVelocity(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorVelocity(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(motorVelocity)) {
+    if (!writer.writeNested(motorVelocity))
+    {
         return false;
     }
     return true;
@@ -680,11 +806,13 @@ bool ControlBoardYARPJointData::nested_write_motorVelocity(const yarp::os::idl::
 // read motorVelocity_isValid field
 bool ControlBoardYARPJointData::read_motorVelocity_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorVelocity_isValid)) {
+    if (!reader.readBool(motorVelocity_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -692,9 +820,11 @@ bool ControlBoardYARPJointData::read_motorVelocity_isValid(yarp::os::idl::WireRe
 }
 
 // write motorVelocity_isValid field
-bool ControlBoardYARPJointData::write_motorVelocity_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_motorVelocity_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorVelocity_isValid)) {
+    if (!writer.writeBool(motorVelocity_isValid))
+    {
         return false;
     }
     return true;
@@ -703,11 +833,13 @@ bool ControlBoardYARPJointData::write_motorVelocity_isValid(const yarp::os::idl:
 // read (nested) motorVelocity_isValid field
 bool ControlBoardYARPJointData::nested_read_motorVelocity_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorVelocity_isValid)) {
+    if (!reader.readBool(motorVelocity_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -715,9 +847,11 @@ bool ControlBoardYARPJointData::nested_read_motorVelocity_isValid(yarp::os::idl:
 }
 
 // write (nested) motorVelocity_isValid field
-bool ControlBoardYARPJointData::nested_write_motorVelocity_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorVelocity_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorVelocity_isValid)) {
+    if (!writer.writeBool(motorVelocity_isValid))
+    {
         return false;
     }
     return true;
@@ -726,11 +860,13 @@ bool ControlBoardYARPJointData::nested_write_motorVelocity_isValid(const yarp::o
 // read motorAcceleration field
 bool ControlBoardYARPJointData::read_motorAcceleration(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(motorAcceleration)) {
+    if (!reader.read(motorAcceleration))
+    {
         reader.fail();
         return false;
     }
@@ -738,9 +874,11 @@ bool ControlBoardYARPJointData::read_motorAcceleration(yarp::os::idl::WireReader
 }
 
 // write motorAcceleration field
-bool ControlBoardYARPJointData::write_motorAcceleration(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_motorAcceleration(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(motorAcceleration)) {
+    if (!writer.write(motorAcceleration))
+    {
         return false;
     }
     return true;
@@ -749,11 +887,13 @@ bool ControlBoardYARPJointData::write_motorAcceleration(const yarp::os::idl::Wir
 // read (nested) motorAcceleration field
 bool ControlBoardYARPJointData::nested_read_motorAcceleration(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(motorAcceleration)) {
+    if (!reader.readNested(motorAcceleration))
+    {
         reader.fail();
         return false;
     }
@@ -761,9 +901,11 @@ bool ControlBoardYARPJointData::nested_read_motorAcceleration(yarp::os::idl::Wir
 }
 
 // write (nested) motorAcceleration field
-bool ControlBoardYARPJointData::nested_write_motorAcceleration(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorAcceleration(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(motorAcceleration)) {
+    if (!writer.writeNested(motorAcceleration))
+    {
         return false;
     }
     return true;
@@ -772,11 +914,13 @@ bool ControlBoardYARPJointData::nested_write_motorAcceleration(const yarp::os::i
 // read motorAcceleration_isValid field
 bool ControlBoardYARPJointData::read_motorAcceleration_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorAcceleration_isValid)) {
+    if (!reader.readBool(motorAcceleration_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -784,22 +928,27 @@ bool ControlBoardYARPJointData::read_motorAcceleration_isValid(yarp::os::idl::Wi
 }
 
 // write motorAcceleration_isValid field
-bool ControlBoardYARPJointData::write_motorAcceleration_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_motorAcceleration_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorAcceleration_isValid)) {
+    if (!writer.writeBool(motorAcceleration_isValid))
+    {
         return false;
     }
     return true;
 }
 
 // read (nested) motorAcceleration_isValid field
-bool ControlBoardYARPJointData::nested_read_motorAcceleration_isValid(yarp::os::idl::WireReader& reader)
+bool ControlBoardYARPJointData::nested_read_motorAcceleration_isValid(
+    yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(motorAcceleration_isValid)) {
+    if (!reader.readBool(motorAcceleration_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -807,9 +956,11 @@ bool ControlBoardYARPJointData::nested_read_motorAcceleration_isValid(yarp::os::
 }
 
 // write (nested) motorAcceleration_isValid field
-bool ControlBoardYARPJointData::nested_write_motorAcceleration_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_motorAcceleration_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(motorAcceleration_isValid)) {
+    if (!writer.writeBool(motorAcceleration_isValid))
+    {
         return false;
     }
     return true;
@@ -818,11 +969,13 @@ bool ControlBoardYARPJointData::nested_write_motorAcceleration_isValid(const yar
 // read torque field
 bool ControlBoardYARPJointData::read_torque(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(torque)) {
+    if (!reader.read(torque))
+    {
         reader.fail();
         return false;
     }
@@ -832,7 +985,8 @@ bool ControlBoardYARPJointData::read_torque(yarp::os::idl::WireReader& reader)
 // write torque field
 bool ControlBoardYARPJointData::write_torque(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(torque)) {
+    if (!writer.write(torque))
+    {
         return false;
     }
     return true;
@@ -841,11 +995,13 @@ bool ControlBoardYARPJointData::write_torque(const yarp::os::idl::WireWriter& wr
 // read (nested) torque field
 bool ControlBoardYARPJointData::nested_read_torque(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(torque)) {
+    if (!reader.readNested(torque))
+    {
         reader.fail();
         return false;
     }
@@ -855,7 +1011,8 @@ bool ControlBoardYARPJointData::nested_read_torque(yarp::os::idl::WireReader& re
 // write (nested) torque field
 bool ControlBoardYARPJointData::nested_write_torque(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(torque)) {
+    if (!writer.writeNested(torque))
+    {
         return false;
     }
     return true;
@@ -864,11 +1021,13 @@ bool ControlBoardYARPJointData::nested_write_torque(const yarp::os::idl::WireWri
 // read torque_isValid field
 bool ControlBoardYARPJointData::read_torque_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(torque_isValid)) {
+    if (!reader.readBool(torque_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -878,7 +1037,8 @@ bool ControlBoardYARPJointData::read_torque_isValid(yarp::os::idl::WireReader& r
 // write torque_isValid field
 bool ControlBoardYARPJointData::write_torque_isValid(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(torque_isValid)) {
+    if (!writer.writeBool(torque_isValid))
+    {
         return false;
     }
     return true;
@@ -887,11 +1047,13 @@ bool ControlBoardYARPJointData::write_torque_isValid(const yarp::os::idl::WireWr
 // read (nested) torque_isValid field
 bool ControlBoardYARPJointData::nested_read_torque_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(torque_isValid)) {
+    if (!reader.readBool(torque_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -899,9 +1061,11 @@ bool ControlBoardYARPJointData::nested_read_torque_isValid(yarp::os::idl::WireRe
 }
 
 // write (nested) torque_isValid field
-bool ControlBoardYARPJointData::nested_write_torque_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_torque_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(torque_isValid)) {
+    if (!writer.writeBool(torque_isValid))
+    {
         return false;
     }
     return true;
@@ -910,11 +1074,13 @@ bool ControlBoardYARPJointData::nested_write_torque_isValid(const yarp::os::idl:
 // read pwmDutycycle field
 bool ControlBoardYARPJointData::read_pwmDutycycle(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(pwmDutycycle)) {
+    if (!reader.read(pwmDutycycle))
+    {
         reader.fail();
         return false;
     }
@@ -924,7 +1090,8 @@ bool ControlBoardYARPJointData::read_pwmDutycycle(yarp::os::idl::WireReader& rea
 // write pwmDutycycle field
 bool ControlBoardYARPJointData::write_pwmDutycycle(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(pwmDutycycle)) {
+    if (!writer.write(pwmDutycycle))
+    {
         return false;
     }
     return true;
@@ -933,11 +1100,13 @@ bool ControlBoardYARPJointData::write_pwmDutycycle(const yarp::os::idl::WireWrit
 // read (nested) pwmDutycycle field
 bool ControlBoardYARPJointData::nested_read_pwmDutycycle(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(pwmDutycycle)) {
+    if (!reader.readNested(pwmDutycycle))
+    {
         reader.fail();
         return false;
     }
@@ -945,9 +1114,11 @@ bool ControlBoardYARPJointData::nested_read_pwmDutycycle(yarp::os::idl::WireRead
 }
 
 // write (nested) pwmDutycycle field
-bool ControlBoardYARPJointData::nested_write_pwmDutycycle(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_pwmDutycycle(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(pwmDutycycle)) {
+    if (!writer.writeNested(pwmDutycycle))
+    {
         return false;
     }
     return true;
@@ -956,11 +1127,13 @@ bool ControlBoardYARPJointData::nested_write_pwmDutycycle(const yarp::os::idl::W
 // read pwmDutycycle_isValid field
 bool ControlBoardYARPJointData::read_pwmDutycycle_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(pwmDutycycle_isValid)) {
+    if (!reader.readBool(pwmDutycycle_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -968,9 +1141,11 @@ bool ControlBoardYARPJointData::read_pwmDutycycle_isValid(yarp::os::idl::WireRea
 }
 
 // write pwmDutycycle_isValid field
-bool ControlBoardYARPJointData::write_pwmDutycycle_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_pwmDutycycle_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(pwmDutycycle_isValid)) {
+    if (!writer.writeBool(pwmDutycycle_isValid))
+    {
         return false;
     }
     return true;
@@ -979,11 +1154,13 @@ bool ControlBoardYARPJointData::write_pwmDutycycle_isValid(const yarp::os::idl::
 // read (nested) pwmDutycycle_isValid field
 bool ControlBoardYARPJointData::nested_read_pwmDutycycle_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(pwmDutycycle_isValid)) {
+    if (!reader.readBool(pwmDutycycle_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -991,9 +1168,11 @@ bool ControlBoardYARPJointData::nested_read_pwmDutycycle_isValid(yarp::os::idl::
 }
 
 // write (nested) pwmDutycycle_isValid field
-bool ControlBoardYARPJointData::nested_write_pwmDutycycle_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_pwmDutycycle_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(pwmDutycycle_isValid)) {
+    if (!writer.writeBool(pwmDutycycle_isValid))
+    {
         return false;
     }
     return true;
@@ -1002,11 +1181,13 @@ bool ControlBoardYARPJointData::nested_write_pwmDutycycle_isValid(const yarp::os
 // read current field
 bool ControlBoardYARPJointData::read_current(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(current)) {
+    if (!reader.read(current))
+    {
         reader.fail();
         return false;
     }
@@ -1016,7 +1197,8 @@ bool ControlBoardYARPJointData::read_current(yarp::os::idl::WireReader& reader)
 // write current field
 bool ControlBoardYARPJointData::write_current(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(current)) {
+    if (!writer.write(current))
+    {
         return false;
     }
     return true;
@@ -1025,11 +1207,13 @@ bool ControlBoardYARPJointData::write_current(const yarp::os::idl::WireWriter& w
 // read (nested) current field
 bool ControlBoardYARPJointData::nested_read_current(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(current)) {
+    if (!reader.readNested(current))
+    {
         reader.fail();
         return false;
     }
@@ -1039,7 +1223,8 @@ bool ControlBoardYARPJointData::nested_read_current(yarp::os::idl::WireReader& r
 // write (nested) current field
 bool ControlBoardYARPJointData::nested_write_current(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(current)) {
+    if (!writer.writeNested(current))
+    {
         return false;
     }
     return true;
@@ -1048,11 +1233,13 @@ bool ControlBoardYARPJointData::nested_write_current(const yarp::os::idl::WireWr
 // read current_isValid field
 bool ControlBoardYARPJointData::read_current_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(current_isValid)) {
+    if (!reader.readBool(current_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1062,7 +1249,8 @@ bool ControlBoardYARPJointData::read_current_isValid(yarp::os::idl::WireReader& 
 // write current_isValid field
 bool ControlBoardYARPJointData::write_current_isValid(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(current_isValid)) {
+    if (!writer.writeBool(current_isValid))
+    {
         return false;
     }
     return true;
@@ -1071,11 +1259,13 @@ bool ControlBoardYARPJointData::write_current_isValid(const yarp::os::idl::WireW
 // read (nested) current_isValid field
 bool ControlBoardYARPJointData::nested_read_current_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(current_isValid)) {
+    if (!reader.readBool(current_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1083,9 +1273,11 @@ bool ControlBoardYARPJointData::nested_read_current_isValid(yarp::os::idl::WireR
 }
 
 // write (nested) current_isValid field
-bool ControlBoardYARPJointData::nested_write_current_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_current_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(current_isValid)) {
+    if (!writer.writeBool(current_isValid))
+    {
         return false;
     }
     return true;
@@ -1094,11 +1286,13 @@ bool ControlBoardYARPJointData::nested_write_current_isValid(const yarp::os::idl
 // read controlMode field
 bool ControlBoardYARPJointData::read_controlMode(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(controlMode)) {
+    if (!reader.read(controlMode))
+    {
         reader.fail();
         return false;
     }
@@ -1108,7 +1302,8 @@ bool ControlBoardYARPJointData::read_controlMode(yarp::os::idl::WireReader& read
 // write controlMode field
 bool ControlBoardYARPJointData::write_controlMode(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(controlMode)) {
+    if (!writer.write(controlMode))
+    {
         return false;
     }
     return true;
@@ -1117,11 +1312,13 @@ bool ControlBoardYARPJointData::write_controlMode(const yarp::os::idl::WireWrite
 // read (nested) controlMode field
 bool ControlBoardYARPJointData::nested_read_controlMode(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(controlMode)) {
+    if (!reader.readNested(controlMode))
+    {
         reader.fail();
         return false;
     }
@@ -1129,9 +1326,11 @@ bool ControlBoardYARPJointData::nested_read_controlMode(yarp::os::idl::WireReade
 }
 
 // write (nested) controlMode field
-bool ControlBoardYARPJointData::nested_write_controlMode(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_controlMode(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(controlMode)) {
+    if (!writer.writeNested(controlMode))
+    {
         return false;
     }
     return true;
@@ -1140,11 +1339,13 @@ bool ControlBoardYARPJointData::nested_write_controlMode(const yarp::os::idl::Wi
 // read controlMode_isValid field
 bool ControlBoardYARPJointData::read_controlMode_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(controlMode_isValid)) {
+    if (!reader.readBool(controlMode_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1152,9 +1353,11 @@ bool ControlBoardYARPJointData::read_controlMode_isValid(yarp::os::idl::WireRead
 }
 
 // write controlMode_isValid field
-bool ControlBoardYARPJointData::write_controlMode_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_controlMode_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(controlMode_isValid)) {
+    if (!writer.writeBool(controlMode_isValid))
+    {
         return false;
     }
     return true;
@@ -1163,11 +1366,13 @@ bool ControlBoardYARPJointData::write_controlMode_isValid(const yarp::os::idl::W
 // read (nested) controlMode_isValid field
 bool ControlBoardYARPJointData::nested_read_controlMode_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(controlMode_isValid)) {
+    if (!reader.readBool(controlMode_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1175,9 +1380,11 @@ bool ControlBoardYARPJointData::nested_read_controlMode_isValid(yarp::os::idl::W
 }
 
 // write (nested) controlMode_isValid field
-bool ControlBoardYARPJointData::nested_write_controlMode_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_controlMode_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(controlMode_isValid)) {
+    if (!writer.writeBool(controlMode_isValid))
+    {
         return false;
     }
     return true;
@@ -1186,11 +1393,13 @@ bool ControlBoardYARPJointData::nested_write_controlMode_isValid(const yarp::os:
 // read interactionMode field
 bool ControlBoardYARPJointData::read_interactionMode(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(interactionMode)) {
+    if (!reader.read(interactionMode))
+    {
         reader.fail();
         return false;
     }
@@ -1200,7 +1409,8 @@ bool ControlBoardYARPJointData::read_interactionMode(yarp::os::idl::WireReader& 
 // write interactionMode field
 bool ControlBoardYARPJointData::write_interactionMode(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(interactionMode)) {
+    if (!writer.write(interactionMode))
+    {
         return false;
     }
     return true;
@@ -1209,11 +1419,13 @@ bool ControlBoardYARPJointData::write_interactionMode(const yarp::os::idl::WireW
 // read (nested) interactionMode field
 bool ControlBoardYARPJointData::nested_read_interactionMode(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(interactionMode)) {
+    if (!reader.readNested(interactionMode))
+    {
         reader.fail();
         return false;
     }
@@ -1221,9 +1433,11 @@ bool ControlBoardYARPJointData::nested_read_interactionMode(yarp::os::idl::WireR
 }
 
 // write (nested) interactionMode field
-bool ControlBoardYARPJointData::nested_write_interactionMode(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_interactionMode(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(interactionMode)) {
+    if (!writer.writeNested(interactionMode))
+    {
         return false;
     }
     return true;
@@ -1232,11 +1446,13 @@ bool ControlBoardYARPJointData::nested_write_interactionMode(const yarp::os::idl
 // read interactionMode_isValid field
 bool ControlBoardYARPJointData::read_interactionMode_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(interactionMode_isValid)) {
+    if (!reader.readBool(interactionMode_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1244,22 +1460,27 @@ bool ControlBoardYARPJointData::read_interactionMode_isValid(yarp::os::idl::Wire
 }
 
 // write interactionMode_isValid field
-bool ControlBoardYARPJointData::write_interactionMode_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_interactionMode_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(interactionMode_isValid)) {
+    if (!writer.writeBool(interactionMode_isValid))
+    {
         return false;
     }
     return true;
 }
 
 // read (nested) interactionMode_isValid field
-bool ControlBoardYARPJointData::nested_read_interactionMode_isValid(yarp::os::idl::WireReader& reader)
+bool ControlBoardYARPJointData::nested_read_interactionMode_isValid(
+    yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(interactionMode_isValid)) {
+    if (!reader.readBool(interactionMode_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1267,9 +1488,11 @@ bool ControlBoardYARPJointData::nested_read_interactionMode_isValid(yarp::os::id
 }
 
 // write (nested) interactionMode_isValid field
-bool ControlBoardYARPJointData::nested_write_interactionMode_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_interactionMode_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(interactionMode_isValid)) {
+    if (!writer.writeBool(interactionMode_isValid))
+    {
         return false;
     }
     return true;
@@ -1278,11 +1501,13 @@ bool ControlBoardYARPJointData::nested_write_interactionMode_isValid(const yarp:
 // read temperature field
 bool ControlBoardYARPJointData::read_temperature(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.read(temperature)) {
+    if (!reader.read(temperature))
+    {
         reader.fail();
         return false;
     }
@@ -1292,7 +1517,8 @@ bool ControlBoardYARPJointData::read_temperature(yarp::os::idl::WireReader& read
 // write temperature field
 bool ControlBoardYARPJointData::write_temperature(const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.write(temperature)) {
+    if (!writer.write(temperature))
+    {
         return false;
     }
     return true;
@@ -1301,11 +1527,13 @@ bool ControlBoardYARPJointData::write_temperature(const yarp::os::idl::WireWrite
 // read (nested) temperature field
 bool ControlBoardYARPJointData::nested_read_temperature(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readNested(temperature)) {
+    if (!reader.readNested(temperature))
+    {
         reader.fail();
         return false;
     }
@@ -1313,9 +1541,11 @@ bool ControlBoardYARPJointData::nested_read_temperature(yarp::os::idl::WireReade
 }
 
 // write (nested) temperature field
-bool ControlBoardYARPJointData::nested_write_temperature(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_temperature(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeNested(temperature)) {
+    if (!writer.writeNested(temperature))
+    {
         return false;
     }
     return true;
@@ -1324,11 +1554,13 @@ bool ControlBoardYARPJointData::nested_write_temperature(const yarp::os::idl::Wi
 // read temperature_isValid field
 bool ControlBoardYARPJointData::read_temperature_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(temperature_isValid)) {
+    if (!reader.readBool(temperature_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1336,9 +1568,11 @@ bool ControlBoardYARPJointData::read_temperature_isValid(yarp::os::idl::WireRead
 }
 
 // write temperature_isValid field
-bool ControlBoardYARPJointData::write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::write_temperature_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(temperature_isValid)) {
+    if (!writer.writeBool(temperature_isValid))
+    {
         return false;
     }
     return true;
@@ -1347,11 +1581,13 @@ bool ControlBoardYARPJointData::write_temperature_isValid(const yarp::os::idl::W
 // read (nested) temperature_isValid field
 bool ControlBoardYARPJointData::nested_read_temperature_isValid(yarp::os::idl::WireReader& reader)
 {
-    if (reader.noMore()) {
+    if (reader.noMore())
+    {
         reader.fail();
         return false;
     }
-    if (!reader.readBool(temperature_isValid)) {
+    if (!reader.readBool(temperature_isValid))
+    {
         reader.fail();
         return false;
     }
@@ -1359,9 +1595,11 @@ bool ControlBoardYARPJointData::nested_read_temperature_isValid(yarp::os::idl::W
 }
 
 // write (nested) temperature_isValid field
-bool ControlBoardYARPJointData::nested_write_temperature_isValid(const yarp::os::idl::WireWriter& writer) const
+bool ControlBoardYARPJointData::nested_write_temperature_isValid(
+    const yarp::os::idl::WireWriter& writer) const
 {
-    if (!writer.writeBool(temperature_isValid)) {
+    if (!writer.writeBool(temperature_isValid))
+    {
         return false;
     }
     return true;

@@ -66,10 +66,9 @@ int main()
         axisInfo->getAxisName(j, name);
         axisInfo->getJointType(j, type);
 
-        const char* typeStr =
-            (type == dinrail::JointType::REVOLUTE) ? "revolute"
-            : (type == dinrail::JointType::PRISMATIC) ? "prismatic"
-                                                      : "unknown";
+        const char* typeStr = (type == dinrail::JointType::REVOLUTE)    ? "revolute"
+                              : (type == dinrail::JointType::PRISMATIC) ? "prismatic"
+                                                                        : "unknown";
         std::cout << "  [" << j << "] " << name << " (" << typeStr << ")\n";
     }
 

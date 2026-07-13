@@ -13,10 +13,12 @@
 
 int main(int argc, char* argv[])
 {
-    yarp::os::Network yarp; //initialize network, this goes before everything
+    yarp::os::Network yarp; // initialize network, this goes before everything
 
-    if (!yarp.checkNetwork()) {
-        yFatal() << "Sorry YARP network does not seem to be available, is the yarp server available?";
+    if (!yarp.checkNetwork())
+    {
+        yFatal() << "Sorry YARP network does not seem to be available, is the yarp server "
+                    "available?";
     }
 
     yarp::os::ResourceFinder& rf(yarp::os::ResourceFinder::getResourceFinderSingleton());

@@ -10,27 +10,26 @@
 #include <yarp/dev/WrapperSingle.h>
 #include <yarp/os/PeriodicThread.h>
 
+#include <yarp/dev/IAmplifierControl.h>
+#include <yarp/dev/IAxisInfo.h>
+#include <yarp/dev/IControlCalibration.h>
+#include <yarp/dev/IControlLimits.h>
+#include <yarp/dev/IControlMode.h>
+#include <yarp/dev/ICurrentControl.h>
+#include <yarp/dev/IEncodersTimed.h>
+#include <yarp/dev/IImpedanceControl.h>
+#include <yarp/dev/IInteractionMode.h>
+#include <yarp/dev/IMotor.h>
+#include <yarp/dev/IMotorEncoders.h>
+#include <yarp/dev/IPWMControl.h>
 #include <yarp/dev/IPidControl.h>
 #include <yarp/dev/IPositionControl.h>
 #include <yarp/dev/IPositionDirect.h>
-#include <yarp/dev/IVelocityControl.h>
-#include <yarp/dev/IEncodersTimed.h>
-#include <yarp/dev/IMotor.h>
-#include <yarp/dev/IMotorEncoders.h>
-#include <yarp/dev/IAmplifierControl.h>
-#include <yarp/dev/IControlLimits.h>
-#include <yarp/dev/IRemoteCalibrator.h>
-#include <yarp/dev/IControlCalibration.h>
-#include <yarp/dev/ITorqueControl.h>
-#include <yarp/dev/IImpedanceControl.h>
-#include <yarp/dev/IControlMode.h>
-#include <yarp/dev/IAxisInfo.h>
-#include <yarp/dev/IInteractionMode.h>
-#include <yarp/dev/IRemoteVariables.h>
-#include <yarp/dev/IPWMControl.h>
-#include <yarp/dev/ICurrentControl.h>
 #include <yarp/dev/IPreciselyTimed.h>
-#include <yarp/dev/IMotor.h>
+#include <yarp/dev/IRemoteCalibrator.h>
+#include <yarp/dev/IRemoteVariables.h>
+#include <yarp/dev/ITorqueControl.h>
+#include <yarp/dev/IVelocityControl.h>
 
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Stamp.h>
@@ -41,10 +40,11 @@
 
 #include <string>
 
-#include "StreamingMessagesParser.h"
-#include "RPCMessagesParser.h"
 #include "DinRailControlBoardNWSYarp_ParamsParser.h"
+#include "RPCMessagesParser.h"
+#include "StreamingMessagesParser.h"
 
+// clang-format off
 /**
  * @ingroup dev_impl_nws_yarp
  *
@@ -55,35 +55,41 @@
  * Parameters required by this device are shown in class: DinRailControlBoardNWSYarp_ParamsParser
  *
  *  Parameters required by this device are:
- * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required                    | Description                                                       | Notes |
- * |:--------------:|:--------------:|:-------:|:--------------:|:-------------:|:--------------------------: |:-----------------------------------------------------------------:|:-----:|
- * | name           |      -         | string  | -              |   -           | Yes                         | full name of the port opened by the device, like /robotName/part/ | MUST start with a '/' character |
- * | period         |      -         | double  | s              |   0.02        | No                          | refresh period of the broadcasted values in s                     | optional, default 0.02s period|
+ * | Parameter name | SubParameter | Type   | Units | Default Value | Required | Description                                                  | Notes                            |
+ * |:--------------:|:------------:|:------:|:-----:|:-------------:|:--------:|:------------------------------------------------------------:|:--------------------------------:|
+ * | name           | -            | string | -     | -             | Yes      | full name of the port opened by the device, like /robot/part/ | MUST start with a '/' character |
+ * | period         | -            | double | s     | 0.02          | No       | refresh period of the broadcasted values in seconds          | optional, default 0.02s          |
  */
+// clang-format on
 
-class DinRailControlBoardNWSYarp :
-        public yarp::dev::DeviceDriver,
-        public yarp::os::PeriodicThread,
-        public yarp::dev::WrapperSingle,
-        public DinRailControlBoardNWSYarp_ParamsParser
+class DinRailControlBoardNWSYarp : public yarp::dev::DeviceDriver,
+                                   public yarp::os::PeriodicThread,
+                                   public yarp::dev::WrapperSingle,
+                                   public DinRailControlBoardNWSYarp_ParamsParser
 {
 private:
-    yarp::os::BufferedPort<yarp::sig::Vector> outputPositionStatePort; // Port /state:o streaming out the encoder positions
-    yarp::os::BufferedPort<CommandMessage> inputStreamingPort;         // Input streaming port for high frequency commands
-    yarp::os::Port inputRPCPort;                                       // Input RPC port for set/get remote calls
-    yarp::os::Port extendedOutputStatePort;                            // Port /stateExt:o streaming out the struct with the robot data
+    yarp::os::BufferedPort<yarp::sig::Vector> outputPositionStatePort; // Port /state:o streaming
+                                                                       // out the encoder positions
+    yarp::os::BufferedPort<CommandMessage> inputStreamingPort; // Input streaming port for high
+                                                               // frequency commands
+    yarp::os::Port inputRPCPort; // Input RPC port for set/get remote calls
+    yarp::os::Port extendedOutputStatePort; // Port /stateExt:o streaming out the struct with the
+                                            // robot data
 
-    yarp::os::PortWriterBuffer<dinrail::ControlBoardYARPJointData> extendedOutputState_buffer; // Buffer associated to the extendedOutputStatePort port
-    yarp::os::PortReaderBuffer<yarp::os::Bottle> inputRPC_buffer;                      // Buffer associated to the inputRPCPort port
+    yarp::os::PortWriterBuffer<dinrail::ControlBoardYARPJointData>
+        extendedOutputState_buffer; // Buffer associated to the extendedOutputStatePort port
+    yarp::os::PortReaderBuffer<yarp::os::Bottle> inputRPC_buffer; // Buffer associated to the
+                                                                  // inputRPCPort port
 
-    RPCMessagesParser RPC_parser;             // Message parser associated to the inputRPCPort port
-    StreamingMessagesParser streaming_parser; // Message parser associated to the inputStreamingPort port
+    RPCMessagesParser RPC_parser; // Message parser associated to the inputRPCPort port
+    StreamingMessagesParser streaming_parser; // Message parser associated to the inputStreamingPort
+                                              // port
 
     std::string partName; // to open ports and print more detailed debug messages
     yarp::sig::Vector times; // time for each joint
     yarp::os::Stamp time; // envelope to attach to the state port
 
-    size_t subdevice_joints {0};
+    size_t subdevice_joints{0};
     bool subdevice_ready = false;
 
     yarp::dev::IPidControl* iPidControl{nullptr};
@@ -106,7 +112,7 @@ private:
     yarp::dev::IRemoteVariables* iRemoteVariables{nullptr};
     yarp::dev::IPWMControl* iPWMControl{nullptr};
     yarp::dev::ICurrentControl* iCurrentControl{nullptr};
-    yarp::dev::IJointFault* iJointFault{ nullptr };
+    yarp::dev::IJointFault* iJointFault{nullptr};
 
     bool setDevice(yarp::dev::DeviceDriver* device, bool owned);
     bool openAndAttachSubDevice(yarp::os::Property& prop);
@@ -133,6 +139,5 @@ public:
     // yarp::os::PeriodicThread
     void run() override;
 };
-
 
 #endif // YARP_DEV_CONTROLBOARD_NWS_YARP_H

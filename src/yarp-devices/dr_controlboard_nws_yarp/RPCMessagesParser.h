@@ -6,7 +6,6 @@
 #ifndef YARP_DEV_CONTROLBOARDWRAPPER_RPCMESSAGESPARSER_H
 #define YARP_DEV_CONTROLBOARDWRAPPER_RPCMESSAGESPARSER_H
 
-
 // This file contains helper functions for the ControlBoardWrapper
 
 #include <yarp/os/BufferedPort.h>
@@ -31,7 +30,7 @@
 #include <dinrail/IImpedanceAllSetPointsControl.h>
 
 #ifdef MSVC
-#    pragma warning(disable : 4355)
+#pragma warning(disable : 4355)
 #endif
 
 /*
@@ -43,72 +42,68 @@
 class ControlBoardWrapperCommon;
 
 /* the control command message type
-* head is a Bottle which contains the specification of the message type
-* body is a Vector which move the robot accordingly
-*/
+ * head is a Bottle which contains the specification of the message type
+ * body is a Vector which move the robot accordingly
+ */
 typedef yarp::os::PortablePair<yarp::os::Bottle, yarp::sig::Vector> CommandMessage;
 
-
 /**
-* Helper object for parsing RPC port messages
-*/
-class RPCMessagesParser :
-        public yarp::dev::DeviceResponder
+ * Helper object for parsing RPC port messages
+ */
+class RPCMessagesParser : public yarp::dev::DeviceResponder
 {
 protected:
-    yarp::dev::IPidControl* rpc_IPid {nullptr};
-    yarp::dev::IPositionControl* rpc_IPosCtrl {nullptr};
-    yarp::dev::IPositionDirect* rpc_IPosDirect {nullptr};
-    yarp::dev::IVelocityControl* rpc_IVelCtrl {nullptr};
-    yarp::dev::IEncodersTimed* rpc_IEncTimed {nullptr};
-    yarp::dev::IMotorEncoders* rpc_IMotEnc {nullptr};
-    yarp::dev::IAmplifierControl* rcp_IAmp {nullptr};
-    yarp::dev::IControlLimits* rcp_Ilim {nullptr};
-    yarp::dev::ITorqueControl* rpc_ITorque {nullptr};
-    yarp::dev::IControlMode* rpc_iCtrlMode {nullptr};
-    yarp::dev::IAxisInfo* rpc_AxisInfo {nullptr};
-    yarp::dev::IRemoteCalibrator* rpc_IRemoteCalibrator {nullptr};
-    yarp::dev::IControlCalibration* rpc_Icalib {nullptr};
-    yarp::dev::IImpedanceControl* rpc_IImpedance {nullptr};
-    dinrail::IImpedanceAllSetPointsControl* rpc_IImpedanceAllSetPointsControl {nullptr};
-    yarp::dev::IInteractionMode* rpc_IInteract {nullptr};
-    yarp::dev::IMotor* rpc_IMotor {nullptr};
-    yarp::dev::IRemoteVariables* rpc_IVar {nullptr};
-    yarp::dev::ICurrentControl* rpc_ICurrent {nullptr};
-    yarp::dev::IPWMControl* rpc_IPWM {nullptr};
-    yarp::dev::IJointFault* rpc_IJointFault{ nullptr };
+    yarp::dev::IPidControl* rpc_IPid{nullptr};
+    yarp::dev::IPositionControl* rpc_IPosCtrl{nullptr};
+    yarp::dev::IPositionDirect* rpc_IPosDirect{nullptr};
+    yarp::dev::IVelocityControl* rpc_IVelCtrl{nullptr};
+    yarp::dev::IEncodersTimed* rpc_IEncTimed{nullptr};
+    yarp::dev::IMotorEncoders* rpc_IMotEnc{nullptr};
+    yarp::dev::IAmplifierControl* rcp_IAmp{nullptr};
+    yarp::dev::IControlLimits* rcp_Ilim{nullptr};
+    yarp::dev::ITorqueControl* rpc_ITorque{nullptr};
+    yarp::dev::IControlMode* rpc_iCtrlMode{nullptr};
+    yarp::dev::IAxisInfo* rpc_AxisInfo{nullptr};
+    yarp::dev::IRemoteCalibrator* rpc_IRemoteCalibrator{nullptr};
+    yarp::dev::IControlCalibration* rpc_Icalib{nullptr};
+    yarp::dev::IImpedanceControl* rpc_IImpedance{nullptr};
+    dinrail::IImpedanceAllSetPointsControl* rpc_IImpedanceAllSetPointsControl{nullptr};
+    yarp::dev::IInteractionMode* rpc_IInteract{nullptr};
+    yarp::dev::IMotor* rpc_IMotor{nullptr};
+    yarp::dev::IRemoteVariables* rpc_IVar{nullptr};
+    yarp::dev::ICurrentControl* rpc_ICurrent{nullptr};
+    yarp::dev::IPWMControl* rpc_IPWM{nullptr};
+    yarp::dev::IJointFault* rpc_IJointFault{nullptr};
     yarp::sig::Vector tmpVect;
     yarp::os::Stamp lastRpcStamp;
     std::mutex mutex;
-    size_t controlledJoints {0};
-    bool emulateImpedanceAllSetPointsControl {false};
+    size_t controlledJoints{0};
+    bool emulateImpedanceAllSetPointsControl{false};
 
 public:
     /**
-    * Constructor.
-    */
+     * Constructor.
+     */
     RPCMessagesParser() = default;
 
     /**
-    * Initialization.
-    * @param x is the pointer to the instance of the object that uses the RPCMessagesParser.
-    * This is required to recover the pointers to the interfaces that implement the responses
-    * to the commands.
-    */
+     * Initialization.
+     * @param x is the pointer to the instance of the object that uses the RPCMessagesParser.
+     * This is required to recover the pointers to the interfaces that implement the responses
+     * to the commands.
+     */
     void init(yarp::dev::DeviceDriver* x);
     void reset();
 
     bool respond(const yarp::os::Bottle& cmd, yarp::os::Bottle& response) override;
 
-    void handleTorqueMsg(const yarp::os::Bottle& cmd,
-                         yarp::os::Bottle& response,
-                         bool* rec,
-                         bool* ok);
+    void
+    handleTorqueMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
 
     void handleJointFaultMsg(const yarp::os::Bottle& cmd,
-                              yarp::os::Bottle& response,
-                              bool* rec,
-                              bool* ok);
+                             yarp::os::Bottle& response,
+                             bool* rec,
+                             bool* ok);
 
     void handleControlModeMsg(const yarp::os::Bottle& cmd,
                               yarp::os::Bottle& response,
@@ -135,20 +130,27 @@ public:
                                       bool* rec,
                                       bool* ok);
 
-    void handleRemoteCalibratorMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
+    void handleRemoteCalibratorMsg(const yarp::os::Bottle& cmd,
+                                   yarp::os::Bottle& response,
+                                   bool* rec,
+                                   bool* ok);
 
-    void handleRemoteVariablesMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
+    void handleRemoteVariablesMsg(const yarp::os::Bottle& cmd,
+                                  yarp::os::Bottle& response,
+                                  bool* rec,
+                                  bool* ok);
 
-    void handleCurrentMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
+    void
+    handleCurrentMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
 
     void handlePWMMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
 
     void handlePidMsg(const yarp::os::Bottle& cmd, yarp::os::Bottle& response, bool* rec, bool* ok);
 
     /**
-    * Initialize the internal data.
-    * @return true/false on success/failure
-    */
+     * Initialize the internal data.
+     * @return true/false on success/failure
+     */
     virtual bool initialize();
 
     void setImpedanceAllSetPointsControlEmulation(bool enable)

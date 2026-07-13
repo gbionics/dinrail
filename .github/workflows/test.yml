@@ -20,6 +20,10 @@ jobs:
       - name: Setup Pixi
         uses: prefix-dev/setup-pixi@v0
 
+      - name: Check clang-format consistency
+        if: matrix.os == 'ubuntu-latest'
+        run: pixi run format-check
+
       - name: Run test suite
         run: pixi run test
 

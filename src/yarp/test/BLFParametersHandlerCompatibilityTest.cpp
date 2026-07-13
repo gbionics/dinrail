@@ -22,8 +22,8 @@
 #include <vector>
 
 #include <yarp/os/Bottle.h>
-#include <yarp/os/Time.h>
 #include <yarp/os/Property.h>
+#include <yarp/os/Time.h>
 #include <yarp/os/Value.h>
 
 #include <yarp/robotinterface/Types.h>
@@ -530,7 +530,6 @@ void compareEntry(const yarp::os::Bottle& entry,
         std::vector<bool> lhsValues;
         std::vector<bool> rhsValues;
 
-
         const bool lhsOk = yarpHandler.getParameter(key, lhsValues);
         const bool rhsOk = dinrailHandler.getParameter(key, rhsValues);
         REQUIRE(lhsOk == rhsOk);
@@ -555,11 +554,12 @@ void compareEntry(const yarp::os::Bottle& entry,
 
     if (allNumeric)
     {
-        // This is a workaround as BLF parameters handler as of blf 0.24.0 does 
+        // This is a workaround as BLF parameters handler as of blf 0.24.0 does
         // not support loading "fingersScaling          (1, 2.0, 3.5, 3.5, 3.5)"
         // as std::vector<double>, while other YARP-using codes supports it
-        // (see https://github.com/gbionics/walking-teleoperation/blob/v1.3.9/modules/Utils/src/Utils.cpp#L134)
-        
+        // (see
+        // https://github.com/gbionics/walking-teleoperation/blob/v1.3.9/modules/Utils/src/Utils.cpp#L134)
+
         // so only in this case we do not test against BLF
         std::vector<double> expectedValues;
         expectedValues.reserve(static_cast<std::size_t>(list->size()));

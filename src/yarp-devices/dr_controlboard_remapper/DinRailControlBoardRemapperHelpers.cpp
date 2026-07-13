@@ -8,11 +8,9 @@
 
 #include <yarp/os/LogStream.h>
 
-
 using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
-
 
 RemappedSubControlBoard::RemappedSubControlBoard()
 {
@@ -28,69 +26,67 @@ RemappedSubControlBoard::RemappedSubControlBoard()
     lim = nullptr;
     calib = nullptr;
     remcalib = nullptr;
-    iTimed= nullptr;
+    iTimed = nullptr;
     info = nullptr;
-    iTorque=nullptr;
-    iImpedance=nullptr;
-    iImpedanceAllSetPointsControl=nullptr;
-    iMode=nullptr;
-    iInteract=nullptr;
-    imotor=nullptr;
+    iTorque = nullptr;
+    iImpedance = nullptr;
+    iImpedanceAllSetPointsControl = nullptr;
+    iMode = nullptr;
+    iInteract = nullptr;
+    imotor = nullptr;
     iVar = nullptr;
     iPwm = nullptr;
     iCurr = nullptr;
 
-    subdevice=nullptr;
+    subdevice = nullptr;
 
-
-    attachedF=false;
+    attachedF = false;
     _subDevVerbose = false;
 }
 
-
 void RemappedSubControlBoard::detach()
 {
-    subdevice=nullptr;
+    subdevice = nullptr;
 
-    pid=nullptr;
-    pos=nullptr;
-    posDir=nullptr;
-    vel=nullptr;
+    pid = nullptr;
+    pos = nullptr;
+    posDir = nullptr;
+    vel = nullptr;
     amp = nullptr;
-    iJntEnc=nullptr;
-    iMotEnc=nullptr;
-    lim=nullptr;
-    calib=nullptr;
-    info=nullptr;
-    iTorque=nullptr;
-    iImpedance=nullptr;
-    iImpedanceAllSetPointsControl=nullptr;
-    iMode=nullptr;
-    iTimed=nullptr;
-    iInteract=nullptr;
-    imotor=nullptr;
+    iJntEnc = nullptr;
+    iMotEnc = nullptr;
+    lim = nullptr;
+    calib = nullptr;
+    info = nullptr;
+    iTorque = nullptr;
+    iImpedance = nullptr;
+    iImpedanceAllSetPointsControl = nullptr;
+    iMode = nullptr;
+    iTimed = nullptr;
+    iInteract = nullptr;
+    imotor = nullptr;
     iVar = nullptr;
     iPwm = nullptr;
     iCurr = nullptr;
 
-    attachedF=false;
+    attachedF = false;
 }
 
-bool RemappedSubControlBoard::attach(yarp::dev::PolyDriver *d, const std::string &k)
+bool RemappedSubControlBoard::attach(yarp::dev::PolyDriver* d, const std::string& k)
 {
-    if (id!=k)
+    if (id != k)
     {
         yCError(CONTROLBOARDREMAPPER) << "Wrong device" << k.c_str();
         return false;
     }
 
-    if (d==nullptr)
+    if (d == nullptr)
     {
         yCError(CONTROLBOARDREMAPPER) << "Invalid device (null pointer)";
         return false;
     }
 
-    subdevice=d;
+    subdevice = d;
 
     if (subdevice->isValid())
     {
@@ -116,34 +112,33 @@ bool RemappedSubControlBoard::attach(yarp::dev::PolyDriver *d, const std::string
         subdevice->view(iPwm);
         subdevice->view(iCurr);
         subdevice->view(iFault);
-    }
-    else
+    } else
     {
         yCError(CONTROLBOARDREMAPPER) << "Invalid device" << k << "(isValid() returned false)";
         return false;
     }
 
-    if ((iTorque==nullptr) && (_subDevVerbose))
+    if ((iTorque == nullptr) && (_subDevVerbose))
     {
         yCWarning(CONTROLBOARDREMAPPER) << "iTorque not valid interface";
     }
 
-    if ((iImpedance==nullptr) && (_subDevVerbose))
+    if ((iImpedance == nullptr) && (_subDevVerbose))
     {
         yCWarning(CONTROLBOARDREMAPPER) << "iImpedance not valid interface";
     }
 
-    if ((iInteract==nullptr) && (_subDevVerbose))
+    if ((iInteract == nullptr) && (_subDevVerbose))
     {
         yCWarning(CONTROLBOARDREMAPPER) << "iInteractionMode not valid interface";
     }
 
-    if ((iMotEnc==nullptr) && (_subDevVerbose))
+    if ((iMotEnc == nullptr) && (_subDevVerbose))
     {
         yCWarning(CONTROLBOARDREMAPPER) << "IMotorEncoders not valid interface";
     }
 
-    if ((imotor==nullptr) && (_subDevVerbose))
+    if ((imotor == nullptr) && (_subDevVerbose))
     {
         yCWarning(CONTROLBOARDREMAPPER) << "IMotor not valid interface";
     }
@@ -173,73 +168,76 @@ bool RemappedSubControlBoard::attach(yarp::dev::PolyDriver *d, const std::string
         yCWarning(CONTROLBOARDREMAPPER) << "IJointFault not valid interface";
     }
 
-
     // checking minimum set of interfaces required
-    if( !(pos) )
+    if (!(pos))
     {
         yCWarning(CONTROLBOARDREMAPPER, "IPositionControl interface was not found in subdevice");
     }
 
-    if( ! (vel) )
+    if (!(vel))
     {
         yCWarning(CONTROLBOARDREMAPPER, "IVelocityControl interface was not found in subdevice");
     }
 
-    if(!iJntEnc)
+    if (!iJntEnc)
     {
         yCWarning(CONTROLBOARDREMAPPER, "IEncoderTimed interface was not found in subdevice");
     }
 
-    if(!iMode)
+    if (!iMode)
     {
         yCWarning(CONTROLBOARDREMAPPER, "IControlMode interface was not found in subdevice");
     }
 
-    int deviceJoints=0;
-    if (pos!=nullptr)
+    int deviceJoints = 0;
+    if (pos != nullptr)
     {
         if (!pos->getAxes(&deviceJoints))
         {
             yCError(CONTROLBOARDREMAPPER) << "failed to get axes number for subdevice" << k.c_str();
             return false;
         }
-        if(deviceJoints <= 0)
+        if (deviceJoints <= 0)
         {
-            yCError(CONTROLBOARDREMAPPER, "attached device has an invalid number of joints (%d)", deviceJoints);
+            yCError(CONTROLBOARDREMAPPER,
+                    "attached device has an invalid number of joints (%d)",
+                    deviceJoints);
             return false;
         }
-    }
-    else if(info!=nullptr)
+    } else if (info != nullptr)
     {
         if (!info->getAxes(&deviceJoints))
         {
             yCError(CONTROLBOARDREMAPPER) << "failed to get axes number for subdevice" << k.c_str();
             return false;
         }
-        if(deviceJoints <= 0)
+        if (deviceJoints <= 0)
         {
-            yCError(CONTROLBOARDREMAPPER, "attached device has an invalid number of joints (%d)", deviceJoints);
+            yCError(CONTROLBOARDREMAPPER,
+                    "attached device has an invalid number of joints (%d)",
+                    deviceJoints);
             return false;
         }
-    }
-    else
+    } else
     {
-        yCError(CONTROLBOARDREMAPPER, "attached device has no IPositionControl nor IAxisInfo interface");
+        yCError(CONTROLBOARDREMAPPER,
+                "attached device has no IPositionControl nor IAxisInfo interface");
         return false;
     }
 
-    attachedF=true;
+    attachedF = true;
     return true;
 }
 
-bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedControlBoards& remappedControlBoards)
+bool ControlBoardSubControlBoardAxesDecomposition::configure(
+    const RemappedControlBoards& remappedControlBoards)
 {
     // Resize buffers
     m_nrOfControlledAxesInRemappedCtrlBrd = remappedControlBoards.getNrOfRemappedAxes();
 
     size_t nrOfSubControlBoards = remappedControlBoards.getNrOfSubControlBoards();
 
-    m_nJointsInSubControlBoard.resize(nrOfSubControlBoards,0);
+    m_nJointsInSubControlBoard.resize(nrOfSubControlBoards, 0);
     m_jointsInSubControlBoard.resize(nrOfSubControlBoards);
 
     m_bufferForSubControlBoard.resize(nrOfSubControlBoards);
@@ -253,7 +251,7 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
 
     m_counterForControlBoard.resize(nrOfSubControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
     {
         m_nJointsInSubControlBoard[ctrlBrd] = 0;
         m_jointsInSubControlBoard[ctrlBrd].clear();
@@ -268,26 +266,30 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
     }
 
     // Fill buffers
-    for(size_t j=0; j < remappedControlBoards.getNrOfRemappedAxes(); j++)
+    for (size_t j = 0; j < remappedControlBoards.getNrOfRemappedAxes(); j++)
     {
-        int off=(int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        int off = (int)remappedControlBoards.lut[j].axisIndexInSubControlBoard;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
 
         m_nJointsInSubControlBoard[subIndex]++;
         m_jointsInSubControlBoard[subIndex].push_back(off);
     }
 
     // Allocate enough space in buffers
-    for(size_t ctrlBrd=0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
     {
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardControlModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
 
         m_counterForControlBoard[ctrlBrd] = 0;
     }
@@ -295,104 +297,112 @@ bool ControlBoardSubControlBoardAxesDecomposition::configure(const RemappedContr
     return true;
 }
 
-
-
-void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(const double* full, const RemappedControlBoards & remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(
+    const double* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoard[ctrlBrd].clear();
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
 
         m_bufferForSubControlBoard[subIndex].push_back(full[j]);
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(double* full, const RemappedControlBoards& remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(
+    double* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
         full[j] = m_bufferForSubControlBoard[subIndex][m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(const int* full, const RemappedControlBoards & remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(
+    const int* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoardControlModes[ctrlBrd].clear();
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
 
         m_bufferForSubControlBoardControlModes[subIndex].push_back(full[j]);
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(int* full, const RemappedControlBoards& remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(
+    int* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
-        full[j] = m_bufferForSubControlBoardControlModes[subIndex][m_counterForControlBoard[subIndex]];
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+        full[j]
+            = m_bufferForSubControlBoardControlModes[subIndex][m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(const InteractionModeEnum* full, const RemappedControlBoards & remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardBuffersFromCompleteJointVector(
+    const InteractionModeEnum* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].clear();
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
 
         m_bufferForSubControlBoardInteractionModes[subIndex].push_back(full[j]);
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(InteractionModeEnum* full, const RemappedControlBoards& remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorFromSubControlBoardBuffers(
+    InteractionModeEnum* full, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
+    for (int j = 0; j < m_nrOfControlledAxesInRemappedCtrlBrd; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
-        full[j] = m_bufferForSubControlBoardInteractionModes[subIndex][m_counterForControlBoard[subIndex]];
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
+        full[j] = m_bufferForSubControlBoardInteractionModes[subIndex]
+                                                            [m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardSetPointBuffersFromCompleteJointVectors(const double* pos,
-                                                                                                              const double* vel,
-                                                                                                              const double* torque,
-                                                                                                              const double* stiffness,
-                                                                                                              const double* damping,
-                                                                                                              const RemappedControlBoards& remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::
+    fillSubControlBoardSetPointBuffersFromCompleteJointVectors(
+        const double* pos,
+        const double* vel,
+        const double* torque,
+        const double* stiffness,
+        const double* damping,
+        const RemappedControlBoards& remappedControlBoards)
 {
     for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
@@ -412,12 +422,14 @@ void ControlBoardSubControlBoardAxesDecomposition::fillSubControlBoardSetPointBu
     }
 }
 
-void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
-                                                                                                              double* vel,
-                                                                                                              double* torque,
-                                                                                                              double* stiffness,
-                                                                                                              double* damping,
-                                                                                                              const RemappedControlBoards& remappedControlBoards)
+void ControlBoardSubControlBoardAxesDecomposition::
+    fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(
+        double* pos,
+        double* vel,
+        double* torque,
+        double* stiffness,
+        double* damping,
+        const RemappedControlBoards& remappedControlBoards)
 {
     for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
@@ -437,12 +449,13 @@ void ControlBoardSubControlBoardAxesDecomposition::fillCompleteJointVectorsFromS
     }
 }
 
-bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoards& remappedControlBoards)
+bool ControlBoardArbitraryAxesDecomposition::configure(
+    const RemappedControlBoards& remappedControlBoards)
 {
     // Resize buffers
     size_t nrOfSubControlBoards = remappedControlBoards.getNrOfSubControlBoards();
 
-    m_nJointsInSubControlBoard.resize(nrOfSubControlBoards,0);
+    m_nJointsInSubControlBoard.resize(nrOfSubControlBoards, 0);
     m_jointsInSubControlBoard.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoard.resize(nrOfSubControlBoards);
     m_bufferForSubControlBoardControlModes.resize(nrOfSubControlBoards);
@@ -455,7 +468,7 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
 
     m_counterForControlBoard.resize(nrOfSubControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
     {
         m_jointsInSubControlBoard[ctrlBrd].clear();
         m_bufferForSubControlBoard[ctrlBrd].clear();
@@ -466,28 +479,31 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
         m_bufferForSubControlBoardSetPointTorque[ctrlBrd].clear();
         m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].clear();
         m_bufferForSubControlBoardSetPointDamping[ctrlBrd].clear();
-
     }
 
     // Count the maximum number of joints
-    for(size_t j=0; j < remappedControlBoards.getNrOfRemappedAxes(); j++)
+    for (size_t j = 0; j < remappedControlBoards.getNrOfRemappedAxes(); j++)
     {
-        size_t subIndex=remappedControlBoards.lut[j].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[j].subControlBoardIndex;
 
         m_nJointsInSubControlBoard[subIndex]++;
     }
 
     // Allocate enough space in buffers
-    for(size_t ctrlBrd=0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < nrOfSubControlBoards; ctrlBrd++)
     {
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardControlModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardInteractionModes[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
 
         m_counterForControlBoard[ctrlBrd] = 0;
         m_jointsInSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
@@ -496,178 +512,189 @@ bool ControlBoardArbitraryAxesDecomposition::configure(const RemappedControlBoar
     return true;
 }
 
-
-
-void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(double* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(
+    double* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
         arbitraryVec[j] = m_bufferForSubControlBoard[subIndex][m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(const double* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(
+    const double* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    this->createListOfJointsDecomposition(n_joints,joints,remappedControlBoards);
+    this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoard[ctrlBrd].clear();
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
         m_bufferForSubControlBoard[subIndex].push_back(arbitraryVec[j]);
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(int* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(
+    int* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
-        arbitraryVec[j] = m_bufferForSubControlBoardControlModes[subIndex][m_counterForControlBoard[subIndex]];
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        arbitraryVec[j]
+            = m_bufferForSubControlBoardControlModes[subIndex][m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(const int* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(
+    const int* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    this->createListOfJointsDecomposition(n_joints,joints,remappedControlBoards);
+    this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoardControlModes[ctrlBrd].clear();
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
         m_bufferForSubControlBoardControlModes[subIndex].push_back(arbitraryVec[j]);
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(InteractionModeEnum* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorFromSubControlBoardBuffers(
+    InteractionModeEnum* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_counterForControlBoard[ctrlBrd] = 0;
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
-        arbitraryVec[j] = m_bufferForSubControlBoardInteractionModes[subIndex][m_counterForControlBoard[subIndex]];
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        arbitraryVec[j]
+            = m_bufferForSubControlBoardInteractionModes[subIndex]
+                                                        [m_counterForControlBoard[subIndex]];
         m_counterForControlBoard[subIndex]++;
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(const InteractionModeEnum* arbitraryVec,
-                                                                                                const int n_joints,
-                                                                                                const int *joints,
-                                                                                                const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardBuffersFromArbitraryJointVector(
+    const InteractionModeEnum* arbitraryVec,
+    const int n_joints,
+    const int* joints,
+    const RemappedControlBoards& remappedControlBoards)
 {
-    this->createListOfJointsDecomposition(n_joints,joints,remappedControlBoards);
+    this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_bufferForSubControlBoardInteractionModes[ctrlBrd].clear();
     }
 
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
         m_bufferForSubControlBoardInteractionModes[subIndex].push_back(arbitraryVec[j]);
     }
 }
 
-
-void ControlBoardArbitraryAxesDecomposition::createListOfJointsDecomposition(const int n_joints, const int* joints, const RemappedControlBoards & remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::createListOfJointsDecomposition(
+    const int n_joints, const int* joints, const RemappedControlBoards& remappedControlBoards)
 {
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
         m_nJointsInSubControlBoard[ctrlBrd] = 0;
         m_jointsInSubControlBoard[ctrlBrd].clear();
     }
 
     // Fill buffers
-    for(int j=0; j < n_joints; j++)
+    for (int j = 0; j < n_joints; j++)
     {
-        int off=(int)remappedControlBoards.lut[joints[j]].axisIndexInSubControlBoard;
-        size_t subIndex=remappedControlBoards.lut[joints[j]].subControlBoardIndex;
+        int off = (int)remappedControlBoards.lut[joints[j]].axisIndexInSubControlBoard;
+        size_t subIndex = remappedControlBoards.lut[joints[j]].subControlBoardIndex;
 
         m_nJointsInSubControlBoard[subIndex]++;
         m_jointsInSubControlBoard[subIndex].push_back(off);
     }
-
 }
 
-void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardBuffers(const int n_joints, const int *joints, const RemappedControlBoards & remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardBuffers(
+    const int n_joints, const int* joints, const RemappedControlBoards& remappedControlBoards)
 {
     // Properly populate the m_nJointsInSubControlBoard and m_jointsInSubControlBoard methods
-    createListOfJointsDecomposition(n_joints,joints,remappedControlBoards);
+    createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
-    for(size_t ctrlBrd=0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
+    for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
-        yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
+        yCAssert(CONTROLBOARDREMAPPER,
+                 (unsigned)m_nJointsInSubControlBoard[ctrlBrd]
+                     == m_jointsInSubControlBoard[ctrlBrd].size());
         m_bufferForSubControlBoard[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
     }
 }
 
-void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(const double* pos,
-                                                                                                          const double* vel,
-                                                                                                          const double* torque,
-                                                                                                          const double* stiffness,
-                                                                                                          const double* damping,
-                                                                                                          const int n_joints,
-                                                                                                          const int* joints,
-                                                                                                          const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::
+    fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(
+        const double* pos,
+        const double* vel,
+        const double* torque,
+        const double* stiffness,
+        const double* damping,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards)
 {
     this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
     for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
-        yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
+        yCAssert(CONTROLBOARDREMAPPER,
+                 (unsigned)m_nJointsInSubControlBoard[ctrlBrd]
+                     == m_jointsInSubControlBoard[ctrlBrd].size());
 
         m_counterForControlBoard[ctrlBrd] = 0;
         m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
     }
 
     for (int j = 0; j < n_joints; j++)
@@ -683,32 +710,38 @@ void ControlBoardArbitraryAxesDecomposition::fillSubControlBoardSetPointBuffersF
     }
 }
 
-void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardSetPointBuffers(const int n_joints,
-                                                                                   const int* joints,
-                                                                                   const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::resizeSubControlBoardSetPointBuffers(
+    const int n_joints, const int* joints, const RemappedControlBoards& remappedControlBoards)
 {
     this->createListOfJointsDecomposition(n_joints, joints, remappedControlBoards);
 
     for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {
-        yCAssert(CONTROLBOARDREMAPPER, (unsigned)m_nJointsInSubControlBoard[ctrlBrd] == m_jointsInSubControlBoard[ctrlBrd].size());
+        yCAssert(CONTROLBOARDREMAPPER,
+                 (unsigned)m_nJointsInSubControlBoard[ctrlBrd]
+                     == m_jointsInSubControlBoard[ctrlBrd].size());
 
         m_bufferForSubControlBoardSetPointPos[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
         m_bufferForSubControlBoardSetPointVel[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
-        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointTorque[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointStiffness[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
+        m_bufferForSubControlBoardSetPointDamping[ctrlBrd].resize(
+            m_nJointsInSubControlBoard[ctrlBrd]);
     }
 }
 
-void ControlBoardArbitraryAxesDecomposition::fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
-                                                                                                          double* vel,
-                                                                                                          double* torque,
-                                                                                                          double* stiffness,
-                                                                                                          double* damping,
-                                                                                                          const int n_joints,
-                                                                                                          const int* joints,
-                                                                                                          const RemappedControlBoards& remappedControlBoards)
+void ControlBoardArbitraryAxesDecomposition::
+    fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(
+        double* pos,
+        double* vel,
+        double* torque,
+        double* stiffness,
+        double* damping,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards)
 {
     for (size_t ctrlBrd = 0; ctrlBrd < remappedControlBoards.getNrOfSubControlBoards(); ctrlBrd++)
     {

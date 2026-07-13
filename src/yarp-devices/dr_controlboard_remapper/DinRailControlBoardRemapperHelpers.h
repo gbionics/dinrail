@@ -6,23 +6,21 @@
 #ifndef YARP_DEV_CONTROLBOARDREMAPPER_CONTROLBOARDREMAPPERHELPERS_H
 #define YARP_DEV_CONTROLBOARDREMAPPER_CONTROLBOARDREMAPPERHELPERS_H
 
-
-#include <yarp/os/PortablePair.h>
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/Time.h>
 #include <yarp/os/Network.h>
+#include <yarp/os/PortablePair.h>
 #include <yarp/os/Stamp.h>
+#include <yarp/os/Time.h>
 #include <yarp/os/Vocab.h>
 
 #include <yarp/dev/ControlBoardInterfaces.h>
-#include <yarp/dev/IInteractionMode.h>
 #include <yarp/dev/IControlLimits.h>
-#include <yarp/dev/PolyDriver.h>
-#include <yarp/dev/IPreciselyTimed.h>
 #include <yarp/dev/IControlMode.h>
+#include <yarp/dev/IInteractionMode.h>
+#include <yarp/dev/IPreciselyTimed.h>
+#include <yarp/dev/PolyDriver.h>
 
 #include <dinrail/IImpedanceAllSetPointsControl.h>
-
 
 #include <yarp/sig/Vector.h>
 
@@ -30,9 +28,8 @@
 #include <string>
 #include <vector>
 
-
 #ifdef MSVC
-    #pragma warning(disable:4355)
+#pragma warning(disable : 4355)
 #endif
 
 /*
@@ -45,39 +42,44 @@ class RemappedSubControlBoard
 public:
     std::string id;
 
-    yarp::dev::PolyDriver            *subdevice;
-    yarp::dev::IPidControl           *pid;
-    yarp::dev::IPositionControl      *pos;
-    yarp::dev::IVelocityControl      *vel;
-    yarp::dev::IEncodersTimed        *iJntEnc;
-    yarp::dev::IMotorEncoders        *iMotEnc;
-    yarp::dev::IAmplifierControl     *amp;
-    yarp::dev::IControlLimits        *lim;
-    yarp::dev::IControlCalibration   *calib;
-    yarp::dev::IRemoteCalibrator     *remcalib;
-    yarp::dev::IPreciselyTimed       *iTimed;
-    yarp::dev::ITorqueControl        *iTorque;
-    yarp::dev::IImpedanceControl     *iImpedance;
+    yarp::dev::PolyDriver* subdevice;
+    yarp::dev::IPidControl* pid;
+    yarp::dev::IPositionControl* pos;
+    yarp::dev::IVelocityControl* vel;
+    yarp::dev::IEncodersTimed* iJntEnc;
+    yarp::dev::IMotorEncoders* iMotEnc;
+    yarp::dev::IAmplifierControl* amp;
+    yarp::dev::IControlLimits* lim;
+    yarp::dev::IControlCalibration* calib;
+    yarp::dev::IRemoteCalibrator* remcalib;
+    yarp::dev::IPreciselyTimed* iTimed;
+    yarp::dev::ITorqueControl* iTorque;
+    yarp::dev::IImpedanceControl* iImpedance;
     dinrail::IImpedanceAllSetPointsControl* iImpedanceAllSetPointsControl;
-    yarp::dev::IControlMode          *iMode;
-    yarp::dev::IAxisInfo             *info;
-    yarp::dev::IPositionDirect       *posDir;
-    yarp::dev::IInteractionMode      *iInteract;
-    yarp::dev::IMotor                *imotor;
-    yarp::dev::IRemoteVariables      *iVar;
-    yarp::dev::IPWMControl           *iPwm;
-    yarp::dev::ICurrentControl       *iCurr;
-    yarp::dev::IJointFault           *iFault;
+    yarp::dev::IControlMode* iMode;
+    yarp::dev::IAxisInfo* info;
+    yarp::dev::IPositionDirect* posDir;
+    yarp::dev::IInteractionMode* iInteract;
+    yarp::dev::IMotor* imotor;
+    yarp::dev::IRemoteVariables* iVar;
+    yarp::dev::IPWMControl* iPwm;
+    yarp::dev::ICurrentControl* iCurr;
+    yarp::dev::IJointFault* iFault;
 
     RemappedSubControlBoard();
 
-    bool attach(yarp::dev::PolyDriver *d, const std::string &id);
+    bool attach(yarp::dev::PolyDriver* d, const std::string& id);
     void detach();
 
-    inline void setVerbose(bool _verbose) {_subDevVerbose = _verbose; }
+    inline void setVerbose(bool _verbose)
+    {
+        _subDevVerbose = _verbose;
+    }
 
     bool isAttached()
-    { return attachedF; }
+    {
+        return attachedF;
+    }
 
 private:
     bool _subDevVerbose;
@@ -145,7 +147,6 @@ public:
     std::vector<int> controlBoardModes;
     std::vector<double> dummyBuffer;
     yarp::os::Stamp stamp;
-
 };
 
 /**
@@ -162,22 +163,22 @@ public:
      * Resize the buffers using the information in
      * the RemappedControlBoards
      */
-    bool configure(const RemappedControlBoards & remappedControlBoards);
+    bool configure(const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill buffers for the SubControlBoard from
      * a vector of joints of the RemappedControlBoards
      */
-    void fillSubControlBoardBuffersFromCompleteJointVector(const double * full, const RemappedControlBoards & remappedControlBoards);
-
+    void fillSubControlBoardBuffersFromCompleteJointVector(
+        const double* full, const RemappedControlBoards& remappedControlBoards);
 
     /**
-      * Fill buffers for the SubControlBoard from
-      * a vector of joints of the RemappedControlBoard
-      * (Version for ControlModes methods)
-      */
-    void fillSubControlBoardBuffersFromCompleteJointVector(const int * full,
-                                                            const RemappedControlBoards & remappedControlBoards);
+     * Fill buffers for the SubControlBoard from
+     * a vector of joints of the RemappedControlBoard
+     * (Version for ControlModes methods)
+     */
+    void fillSubControlBoardBuffersFromCompleteJointVector(
+        const int* full, const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill buffers for the SubControlBoard from
@@ -185,14 +186,16 @@ public:
      *
      * (Version for InteractionModes methods)
      */
-    void fillSubControlBoardBuffersFromCompleteJointVector(const yarp::dev::InteractionModeEnum * full,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillSubControlBoardBuffersFromCompleteJointVector(
+        const yarp::dev::InteractionModeEnum* full,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill a vector of joints of the DinRailControlBoardRemapper from
      * the buffers of the SubControlBoard .
      */
-    void fillCompleteJointVectorFromSubControlBoardBuffers(double * full, const RemappedControlBoards & remappedControlBoards);
+    void fillCompleteJointVectorFromSubControlBoardBuffers(
+        double* full, const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill a vector of joints of the DinRailControlBoardRemapper from
@@ -201,8 +204,8 @@ public:
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
      * (Version for ControlModes methods)
      */
-    void fillCompleteJointVectorFromSubControlBoardBuffers(int * full,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillCompleteJointVectorFromSubControlBoardBuffers(
+        int* full, const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill a vector of joints of the DinRailControlBoardRemapper from
@@ -211,31 +214,32 @@ public:
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
      * (Version for InteractionModes methods)
      */
-    void fillCompleteJointVectorFromSubControlBoardBuffers(yarp::dev::InteractionModeEnum * full,
-                                                           const RemappedControlBoards & remappedControlBoards);
+    void fillCompleteJointVectorFromSubControlBoardBuffers(
+        yarp::dev::InteractionModeEnum* full, const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill dedicated impedance-all-setpoints buffers for subcontrolboards from
      * complete remapped joints vectors.
      */
-    void fillSubControlBoardSetPointBuffersFromCompleteJointVectors(const double* pos,
-                                                                    const double* vel,
-                                                                    const double* torque,
-                                                                    const double* stiffness,
-                                                                    const double* damping,
-                                                                    const RemappedControlBoards& remappedControlBoards);
+    void fillSubControlBoardSetPointBuffersFromCompleteJointVectors(
+        const double* pos,
+        const double* vel,
+        const double* torque,
+        const double* stiffness,
+        const double* damping,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill complete remapped joints vectors from dedicated impedance-all-setpoints
      * subcontrolboards buffers.
      */
-    void fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
-                                                                    double* vel,
-                                                                    double* torque,
-                                                                    double* stiffness,
-                                                                    double* damping,
-                                                                    const RemappedControlBoards& remappedControlBoards);
-
+    void fillCompleteJointVectorsFromSubControlBoardSetPointBuffers(
+        double* pos,
+        double* vel,
+        double* torque,
+        double* stiffness,
+        double* damping,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Mutex to grab to use this class.
@@ -245,19 +249,19 @@ public:
     // Buffer to be used in MultiJoint version of the
     int m_nrOfControlledAxesInRemappedCtrlBrd;
     std::vector<int> m_nJointsInSubControlBoard;
-    std::vector< std::vector<int> > m_jointsInSubControlBoard;
+    std::vector<std::vector<int>> m_jointsInSubControlBoard;
 
-
-    std::vector< std::vector<double> > m_bufferForSubControlBoard;
-    std::vector< std::vector<int>    > m_bufferForSubControlBoardControlModes;
-    std::vector< std::vector<yarp::dev::InteractionModeEnum>  > m_bufferForSubControlBoardInteractionModes;
+    std::vector<std::vector<double>> m_bufferForSubControlBoard;
+    std::vector<std::vector<int>> m_bufferForSubControlBoardControlModes;
+    std::vector<std::vector<yarp::dev::InteractionModeEnum>>
+        m_bufferForSubControlBoardInteractionModes;
 
     // Dedicated buffers for impedance-all-setpoints operations.
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointPos;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointVel;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointTorque;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointStiffness;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointDamping;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointPos;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointVel;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointTorque;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointStiffness;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointDamping;
 
     std::vector<int> m_counterForControlBoard;
 };
@@ -277,62 +281,68 @@ class ControlBoardArbitraryAxesDecomposition
      * Fill the buffer containing the structure of the decomposition between the
      * desired list of joints and their mapping in the subControlboards.
      */
-    void createListOfJointsDecomposition(const int n_joints, const int *joints, const RemappedControlBoards & remappedControlBoards);
+    void createListOfJointsDecomposition(const int n_joints,
+                                         const int* joints,
+                                         const RemappedControlBoards& remappedControlBoards);
 
 public:
     /**
      * Resize the buffers using the information in
      * the RemappedControlBoards
      */
-    bool configure(const RemappedControlBoards & remappedControlBoards);
-
+    bool configure(const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill buffers for the SubControlBoard from
      * a vector of joints of the RemappedControlBoards
      */
-    void fillSubControlBoardBuffersFromArbitraryJointVector(const double * arbitraryVec,
-                                                            const int n_joints,
-                                                            const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillSubControlBoardBuffersFromArbitraryJointVector(
+        const double* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill buffers for the SubControlBoard from
      * a vector of joints of the RemappedControlBoards
      * (Version for ControlModes methods)
      */
-    void fillSubControlBoardBuffersFromArbitraryJointVector(const int * arbitraryVec,
-                                                            const int n_joints,
-                                                            const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillSubControlBoardBuffersFromArbitraryJointVector(
+        const int* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill buffers for the SubControlBoard from
      * a vector of joints of the RemappedControlBoards
      * (Version for InteractionModes methods)
      */
-    void fillSubControlBoardBuffersFromArbitraryJointVector(const yarp::dev::InteractionModeEnum * arbitraryVec,
-                                                            const int n_joints,
-                                                            const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillSubControlBoardBuffersFromArbitraryJointVector(
+        const yarp::dev::InteractionModeEnum* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Resize buffers to have the dimension of specified by the method
      * (used for multi joint methods that read the data from the subcontrolboards).
      */
     void resizeSubControlBoardBuffers(const int n_joints,
-                                      const int *joints,
-                                      const RemappedControlBoards & remappedControlBoards);
+                                      const int* joints,
+                                      const RemappedControlBoards& remappedControlBoards);
 
     /**
-    * Fill a vector of joints of the DinRailControlBoardRemapper from
-    * the buffers of the SubControlBoard .
-    *
-    * Before calling this method you should have called the resizeSubControlBoardBuffers method.
-    */
-    void fillArbitraryJointVectorFromSubControlBoardBuffers(double * arbitraryVec,
-                                                            const int n_joints, const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+     * Fill a vector of joints of the DinRailControlBoardRemapper from
+     * the buffers of the SubControlBoard .
+     *
+     * Before calling this method you should have called the resizeSubControlBoardBuffers method.
+     */
+    void fillArbitraryJointVectorFromSubControlBoardBuffers(
+        double* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill a vector of joints of the DinRailControlBoardRemapper from
@@ -341,9 +351,11 @@ public:
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
      * (Version for ControlModes methods)
      */
-    void fillArbitraryJointVectorFromSubControlBoardBuffers(int * arbitraryVec,
-                                                            const int n_joints, const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillArbitraryJointVectorFromSubControlBoardBuffers(
+        int* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill a vector of joints of the DinRailControlBoardRemapper from
@@ -352,22 +364,25 @@ public:
      * Before calling this method you should have called the resizeSubControlBoardBuffers method.
      * (Version for InteractionModes methods)
      */
-    void fillArbitraryJointVectorFromSubControlBoardBuffers(yarp::dev::InteractionModeEnum * arbitraryVec,
-                                                            const int n_joints, const int *joints,
-                                                            const RemappedControlBoards & remappedControlBoards);
+    void fillArbitraryJointVectorFromSubControlBoardBuffers(
+        yarp::dev::InteractionModeEnum* arbitraryVec,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Fill dedicated impedance-all-setpoints buffers for subcontrolboards from
      * arbitrary remapped joints vectors.
      */
-    void fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(const double* pos,
-                                                                     const double* vel,
-                                                                     const double* torque,
-                                                                     const double* stiffness,
-                                                                     const double* damping,
-                                                                     const int n_joints,
-                                                                     const int* joints,
-                                                                     const RemappedControlBoards& remappedControlBoards);
+    void fillSubControlBoardSetPointBuffersFromArbitraryJointVectors(
+        const double* pos,
+        const double* vel,
+        const double* torque,
+        const double* stiffness,
+        const double* damping,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Resize dedicated impedance-all-setpoints buffers for subcontrolboards.
@@ -380,14 +395,15 @@ public:
      * Fill arbitrary remapped joints vectors from dedicated impedance-all-setpoints
      * subcontrolboards buffers.
      */
-    void fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(double* pos,
-                                                                     double* vel,
-                                                                     double* torque,
-                                                                     double* stiffness,
-                                                                     double* damping,
-                                                                     const int n_joints,
-                                                                     const int* joints,
-                                                                     const RemappedControlBoards& remappedControlBoards);
+    void fillArbitraryJointVectorsFromSubControlBoardSetPointBuffers(
+        double* pos,
+        double* vel,
+        double* torque,
+        double* stiffness,
+        double* damping,
+        const int n_joints,
+        const int* joints,
+        const RemappedControlBoards& remappedControlBoards);
 
     /**
      * Mutex to grab to use this class.
@@ -399,26 +415,26 @@ public:
 
     // Vector of size getNrOfSubControlBoards
     std::vector<int> m_nJointsInSubControlBoard;
-    std::vector< std::vector<int> > m_jointsInSubControlBoard;
+    std::vector<std::vector<int>> m_jointsInSubControlBoard;
 
     // Buffers for the control board (the size of each one should
     // match the size of m_nJointsInSubControlBoard[ctrlBoard] and
     // the size of m_jointsInSubControlBoard[ctrlBoard].size()
-    std::vector< std::vector<double> > m_bufferForSubControlBoard;
-    std::vector< std::vector<int>    > m_bufferForSubControlBoardControlModes;
-    std::vector< std::vector<yarp::dev::InteractionModeEnum>  > m_bufferForSubControlBoardInteractionModes;
+    std::vector<std::vector<double>> m_bufferForSubControlBoard;
+    std::vector<std::vector<int>> m_bufferForSubControlBoardControlModes;
+    std::vector<std::vector<yarp::dev::InteractionModeEnum>>
+        m_bufferForSubControlBoardInteractionModes;
 
     // Dedicated buffers for impedance-all-setpoints operations.
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointPos;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointVel;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointTorque;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointStiffness;
-    std::vector< std::vector<double> > m_bufferForSubControlBoardSetPointDamping;
-
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointPos;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointVel;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointTorque;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointStiffness;
+    std::vector<std::vector<double>> m_bufferForSubControlBoardSetPointDamping;
 
     // Counter used when converting a full vector to
     // the subcontrolboard buffers
     std::vector<int> m_counterForControlBoard;
 };
 
-#endif  // YARP_DEV_CONTROLBOARDREMAPPER_CONTROLBOARDREMAPPERHELPERS_H
+#endif // YARP_DEV_CONTROLBOARDREMAPPER_CONTROLBOARDREMAPPERHELPERS_H

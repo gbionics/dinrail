@@ -6,9 +6,7 @@
 #ifndef YARP_DEV_CONTROLBOARDWRAPPER_STREAMINGMESSAGESPARSER_H
 #define YARP_DEV_CONTROLBOARDWRAPPER_STREAMINGMESSAGESPARSER_H
 
-
 // This file contains helper functions for the ControlBoardWrapper
-
 
 #include <yarp/os/BufferedPort.h>
 #include <yarp/os/Network.h>
@@ -31,7 +29,7 @@
 #include <vector>
 
 #ifdef MSVC
-#    pragma warning(disable : 4355)
+#pragma warning(disable : 4355)
 #endif
 
 /*
@@ -40,35 +38,34 @@
  * (we could also use the actual joint number for each subdevice using a for loop). TODO
  */
 
-
 /* the control command message type
-* head is a Bottle which contains the specification of the message type
-* body is a Vector which move the robot accordingly
-*/
+ * head is a Bottle which contains the specification of the message type
+ * body is a Vector which move the robot accordingly
+ */
 typedef yarp::os::PortablePair<yarp::os::Bottle, yarp::sig::Vector> CommandMessage;
 
 /**
-* Callback implementation after buffered input.
-*/
+ * Callback implementation after buffered input.
+ */
 class StreamingMessagesParser : public yarp::os::TypedReaderCallback<CommandMessage>
 {
 protected:
-    yarp::dev::IPositionControl* stream_IPosCtrl {nullptr};
-    yarp::dev::IPositionDirect* stream_IPosDirect {nullptr};
-    yarp::dev::IVelocityControl* stream_IVel {nullptr};
-    yarp::dev::ITorqueControl* stream_ITorque {nullptr};
-    yarp::dev::IImpedanceControl* stream_IImpedance {nullptr};
-    dinrail::IImpedanceAllSetPointsControl* stream_IImpedanceAllSetPointsControl {nullptr};
-    yarp::dev::IPWMControl* stream_IPWM {nullptr};
-    yarp::dev::ICurrentControl* stream_ICurrent {nullptr};
-    yarp::dev::IAxisInfo* stream_IAxis{ nullptr };
-    bool stream_emulateImpedanceAllSetPointsControl {false};
-    int stream_nJoints {0};
+    yarp::dev::IPositionControl* stream_IPosCtrl{nullptr};
+    yarp::dev::IPositionDirect* stream_IPosDirect{nullptr};
+    yarp::dev::IVelocityControl* stream_IVel{nullptr};
+    yarp::dev::ITorqueControl* stream_ITorque{nullptr};
+    yarp::dev::IImpedanceControl* stream_IImpedance{nullptr};
+    dinrail::IImpedanceAllSetPointsControl* stream_IImpedanceAllSetPointsControl{nullptr};
+    yarp::dev::IPWMControl* stream_IPWM{nullptr};
+    yarp::dev::ICurrentControl* stream_ICurrent{nullptr};
+    yarp::dev::IAxisInfo* stream_IAxis{nullptr};
+    bool stream_emulateImpedanceAllSetPointsControl{false};
+    int stream_nJoints{0};
 
 public:
     /**
-    * Constructor.
-    */
+     * Constructor.
+     */
     StreamingMessagesParser() = default;
 
     /**
