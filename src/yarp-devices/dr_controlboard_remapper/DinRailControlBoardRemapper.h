@@ -26,6 +26,7 @@
 #pragma warning(disable : 4355)
 #endif
 
+// clang-format off
 /**
  * @ingroup dev_impl_remappers
  *
@@ -38,12 +39,9 @@
  *
  *
  *  Parameters required by this device are:
- * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required |
- * Description                                                       | Notes |
- * |:--------------:|:--------------:|:-------:|:--------------:|:-------------:|:--------------------------:
- * |:-----------------------------------------------------------------:|:-----:| | axesNames     |
- * -         | vector of strings  | -      |   -           | Yes     | Ordered list of the axes that
- * are part of the remapped device. |  |
+ * | Parameter name | SubParameter | Type              | Units | Default Value | Required | Description                                          | Notes |
+ * |:--------------:|:------------:|:-----------------:|:-----:|:-------------:|:--------:|:----------------------------------------------------:|:-----:|
+ * | axesNames      | -            | vector of strings | -     | -             | Yes      | Ordered list of the axes that are part of the remapped device. | - |
  *
  * The axes are then mapped to the wrapped controlboard in the attachAll method, using the
  * values returned by the getAxisName method of the controlboard. If different axes
@@ -71,6 +69,7 @@
  * \endcode
  *
  */
+// clang-format on
 
 class DinRailControlBoardRemapper : public yarp::dev::DeviceDriver,
                                     public yarp::dev::IPidControl,

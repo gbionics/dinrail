@@ -17,21 +17,17 @@
 #include <yarp/dev/IDeviceDriverParams.h>
 #include <yarp/os/Searchable.h>
 
+// clang-format off
 /**
  * This class is the parameters parser for class DinRailControlBoardNWSYarp.
  *
  * These are the used parameters:
  * | Group name | Parameter name | Type   | Units | Default Value | Required | Description | Notes |
  * |:----------:|:--------------:|:------:|:-----:|:-------------:|:--------:|:---------------------------------------------:|:------------------------------------------------------------------------:|
- * | -          | period         | double | s     | 0.02          | 0        | period of the main
- * thread                     | - | | -          | name           | string | -     | /robot/part   |
- * 1        | Prefix name of the ports opened by the device | opened ports will be: xxx/rpc:i
- * xxx/command:i xxx/state:o xxx/stateExt:o | | -          | namesuffix     | string | -     |
- * /dinrail      | 0        | Suffix appended to the base port prefix       | default keeps DinRail
- * ports separated from stock YARP ports              | | -          |
- * emulate_impedance_all_setpoints_control | bool | - | false | 0 | Emulate dinrail
- * IImpedanceAllSetPointsControl if subdevice does not expose it | uses existing YARP interfaces,
- * disabled by default to avoid confusion |
+ * | -          | period         | double | s     | 0.02          | 0        | period of the main thread                     | -                                                                        |
+ * | -          | name           | string | -     | /robot/part   | 1        | Prefix name of the ports opened by the device | opened ports will be: xxx/rpc:i xxx/command:i xxx/state:o xxx/stateExt:o |
+ * | -          | namesuffix     | string | -     | /dinrail      | 0        | Suffix appended to the base port prefix       | default keeps DinRail ports separated from stock YARP ports              |
+ * | -          | emulate_impedance_all_setpoints_control | bool | - | false | 0 | Emulate dinrail IImpedanceAllSetPointsControl if subdevice does not expose it | uses existing YARP interfaces, disabled by default to avoid confusion |
  *
  * The device can be launched by yarpdev using one of the following examples (with and without all
  * optional parameters):
@@ -44,6 +40,7 @@
  * \endcode
  *
  */
+// clang-format on
 
 class DinRailControlBoardNWSYarp_ParamsParser : public yarp::dev::IDeviceDriverParams
 {

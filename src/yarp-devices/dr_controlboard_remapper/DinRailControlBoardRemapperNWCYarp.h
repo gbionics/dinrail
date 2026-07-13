@@ -10,6 +10,7 @@
 
 #include "DinRailControlBoardRemapper.h"
 
+// clang-format off
 /**
  *  @ingroup dev_impl_network_clients
  *
@@ -20,18 +21,14 @@
  * \section DinRailControlBoardRemapperNWCYarp
  *
  *  Parameters required by this device are:
- * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required     |
- * Description                                                       | Notes |
- * |:--------------:|:--------------:|:-------:|:--------------:|:-------------:|:-----------:
- * |:-----------------------------------------------------------------:|:-----:| | axesNames      |
- * -         | vector of strings  | -   |   -           | Yes          | Ordered list of the axes
- * that are part of the remapped device.    |       | | remoteControlBoards |     -     | vector of
- * strings  | -   |   -           | Yes          | List of remote prefix used by the remote
- * controlboards.           | The element of this list are then passed as "remote" parameter to the
- * RemoteControlBoard device. | | localPortPrefix |     -         | string             | -   |   -
- * | Yes          | All ports opened by this device will start with this prefix       |       | |
- * REMOTE_CONTROLBOARD_OPTIONS | - | group              | -   |   -           | No           |
- * Options that will be passed directly to the remote_controlboard devices | | All the passed remote
+ * | Parameter name               | SubParameter | Type              | Units | Default Value | Required | Description                                                      | Notes |
+ * |:----------------------------:|:------------:|:-----------------:|:-----:|:-------------:|:--------:|:----------------------------------------------------------------:|:-----:|
+ * | axesNames                    | -            | vector of strings | -     | -             | Yes      | Ordered list of the axes that are part of the remapped device. | - |
+ * | remoteControlBoards          | -            | vector of strings | -     | -             | Yes      | List of remote prefixes used by the remote controlboards.       | Each element is passed as `remote` to RemoteControlBoard. |
+ * | localPortPrefix              | -            | string            | -     | -             | Yes      | All ports opened by this device will start with this prefix.   | - |
+ * | REMOTE_CONTROLBOARD_OPTIONS  | -            | group             | -     | -             | No       | Options passed directly to the remote_controlboard devices.     | - |
+ *
+ * All the passed remote
  * controlboards are opened, and then the axesNames and the opened device are passed to the
  * DinRailControlBoardRemapper device. If different axes in two attached controlboard have the same
  * name, the behaviour of this device is undefined.
@@ -98,6 +95,7 @@
  * DinRailControlBoardRemapperNWCYarp .
  *
  */
+// clang-format on
 
 class DinRailControlBoardRemapperNWCYarp : public DinRailControlBoardRemapper
 {

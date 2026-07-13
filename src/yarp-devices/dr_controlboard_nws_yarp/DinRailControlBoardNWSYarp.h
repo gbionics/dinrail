@@ -44,6 +44,7 @@
 #include "RPCMessagesParser.h"
 #include "StreamingMessagesParser.h"
 
+// clang-format off
 /**
  * @ingroup dev_impl_nws_yarp
  *
@@ -54,16 +55,12 @@
  * Parameters required by this device are shown in class: DinRailControlBoardNWSYarp_ParamsParser
  *
  *  Parameters required by this device are:
- * | Parameter name | SubParameter   | Type    | Units          | Default Value | Required |
- * Description                                                       | Notes |
- * |:--------------:|:--------------:|:-------:|:--------------:|:-------------:|:--------------------------:
- * |:-----------------------------------------------------------------:|:-----:| | name           |
- * -         | string  | -              |   -           | Yes                         | full name of
- * the port opened by the device, like /robotName/part/ | MUST start with a '/' character | | period
- * |      -         | double  | s              |   0.02        | No                          |
- * refresh period of the broadcasted values in s                     | optional, default 0.02s
- * period|
+ * | Parameter name | SubParameter | Type   | Units | Default Value | Required | Description                                                  | Notes                            |
+ * |:--------------:|:------------:|:------:|:-----:|:-------------:|:--------:|:------------------------------------------------------------:|:--------------------------------:|
+ * | name           | -            | string | -     | -             | Yes      | full name of the port opened by the device, like /robot/part/ | MUST start with a '/' character |
+ * | period         | -            | double | s     | 0.02          | No       | refresh period of the broadcasted values in seconds          | optional, default 0.02s          |
  */
+// clang-format on
 
 class DinRailControlBoardNWSYarp : public yarp::dev::DeviceDriver,
                                    public yarp::os::PeriodicThread,
