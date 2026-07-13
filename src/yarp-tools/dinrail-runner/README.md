@@ -2,7 +2,11 @@
 
 The `dinrail-runner` is a command line tool that is useful to launch multiple YARP devices at once. 
 
-At the moment, it is just a drop-in replacement for `yarprobotinterface` (without the hardcoded  `/yarprobotinterface` rpc port) that uses `libYARP_robotinterface` and is only able to run YARP devices (and not `dinrail` devices), but in the future will be evolved in a tool that will be able to run both YARP devices and dinrail device.
+At the moment, it is just a drop-in replacement for `yarprobotinterface`, that uses `libYARP_robotinterface` and is only able to run YARP devices (and not `dinrail` devices), but in the future will be evolved in a tool that will be able to run both YARP devices and dinrail device.
+
+While the tool is almost a `yarprobotinterface`  the following differences:
+* the hardcoded  `/yarprobotinterface` rpc port has been removed from `dinrail-runner`, if you need it please [open an issue](https://github.com/gbionics/dinrail/issues/new)
+* the default loaded configuration files is called `dinrail_runner.ini` instead of `yarprobotinterface.ini`
 
 By default, `dinrail-runner` does **not** enable RT-safe memory settings, while `dinrail-runner-rt` enables them by default.
 

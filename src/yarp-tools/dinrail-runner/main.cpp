@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     }
 
     yarp::os::ResourceFinder& rf(yarp::os::ResourceFinder::getResourceFinderSingleton());
-    rf.setDefaultConfigFile("yarprobotinterface.ini");
+    rf.setDefaultConfigFile("dinrail_runner.ini");
     rf.configure(argc, argv);
 
     // Create and run our module
