@@ -7,6 +7,5 @@
   "test-dependencies": [
     "YARP",
     "iDynTree",
-    "BipedalLocomotionFramework",
   ],
 }
