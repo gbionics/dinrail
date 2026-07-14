@@ -49,6 +49,7 @@ configure = { cmd = [
     "-DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX",
     "-DDINRAIL_BUILD_EXAMPLES:BOOL=OFF",
     "-DDINRAIL_USES_YARP:BOOL=ON",
+    "-DDINRAIL_USES_BipedalLocomotionFramework:BOOL=ON",
     "-DBUILD_TESTING:BOOL=ON",
     # Workaround for slow PCL find in BLF
     "-DCMAKE_DISABLE_FIND_PACKAGE_VTK:BOOL=ON",
