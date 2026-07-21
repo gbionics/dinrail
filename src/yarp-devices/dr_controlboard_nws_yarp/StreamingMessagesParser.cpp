@@ -181,12 +181,21 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             {
                 int n_joints = b.get(2).asInt32();
                 Bottle* jlut = b.get(3).asList();
+                if (jlut == nullptr)
+                {
+                    yCError(CONTROLBOARD,
+                            "Received malformed VOCAB_CURRENT_REF_GROUP: joint selection is not a "
+                            "list (%s)\n",
+                            b.toString().c_str());
+                    break;
+                }
                 if ((static_cast<int>(jlut->size()) != n_joints)
-                    && (static_cast<int>(cmdVector.size()) != n_joints))
+                    || (static_cast<int>(cmdVector.size()) != n_joints))
                 {
                     yCError(CONTROLBOARD,
                             "Received VOCAB_CURRENT_REF_GROUP size of joints vector or currents "
                             "vector does not match the selected joint number\n");
+                    break;
                 }
 
                 int* joint_list = new int[n_joints];
@@ -316,12 +325,21 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             int n_joints = b.get(1).asInt32();
             Bottle* jlut = b.get(2).asList();
+            if (jlut == nullptr)
+            {
+                yCError(CONTROLBOARD,
+                        "Received malformed VOCAB_TORQUES_DIRECT_GROUP: joint selection is not a "
+                        "list (%s)\n",
+                        b.toString().c_str());
+                break;
+            }
             if ((static_cast<int>(jlut->size()) != n_joints)
-                && (static_cast<int>(cmdVector.size()) != n_joints))
+                || (static_cast<int>(cmdVector.size()) != n_joints))
             {
                 yCError(CONTROLBOARD,
                         "Received VOCAB_TORQUES_DIRECT_GROUP size of joints vector or torques "
                         "vector does not match the selected joint number\n");
+                break;
             }
 
             int* joint_list = new int[n_joints];
@@ -539,12 +557,21 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             int n_joints = b.get(1).asInt32();
             Bottle* jlut = b.get(2).asList();
+            if (jlut == nullptr)
+            {
+                yCError(CONTROLBOARD,
+                        "Received malformed VOCAB_POSITION_DIRECT_GROUP: joint selection is not a "
+                        "list (%s)\n",
+                        b.toString().c_str());
+                break;
+            }
             if ((static_cast<int>(jlut->size()) != n_joints)
-                && (static_cast<int>(cmdVector.size()) != n_joints))
+                || (static_cast<int>(cmdVector.size()) != n_joints))
             {
                 yCError(CONTROLBOARD,
                         "Received VOCAB_POSITION_DIRECT_GROUP size of joints vector or positions "
                         "vector does not match the selected joint number\n");
+                break;
             }
 
             int* joint_list = new int[n_joints];
@@ -585,12 +612,21 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             int n_joints = b.get(1).asInt32();
             Bottle* jlut = b.get(2).asList();
+            if (jlut == nullptr)
+            {
+                yCError(CONTROLBOARD,
+                        "Received malformed VOCAB_VELOCITY_MOVE_GROUP: joint selection is not a "
+                        "list (%s)\n",
+                        b.toString().c_str());
+                break;
+            }
             if ((static_cast<int>(jlut->size()) != n_joints)
-                && (static_cast<int>(cmdVector.size()) != n_joints))
+                || (static_cast<int>(cmdVector.size()) != n_joints))
             {
                 yCError(CONTROLBOARD,
                         "Received VOCAB_VELOCITY_MOVE_GROUP size of joints vector or positions "
                         "vector does not match the selected joint number\n");
+                break;
             }
 
             int* joint_list = new int[n_joints];
