@@ -40,3 +40,19 @@ target_link_libraries(dinrail-yarp-dev-idl
         YARP::YARP_sig
         YARP::YARP_dev
 )
+
+# RT-safe shared-memory transport library (Linux/libc only, no YARP dependency).
+add_library(dinrail-rtshm STATIC
+    rtshm/RtShmTransport.cpp
+    rtshm/RtShmTransport.h
+    rtshm/RtShmProtocol.h
+    rtshm/RtShmLayout.h
+)
+
+target_include_directories(dinrail-rtshm
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/rtshm>
+)
+
+target_compile_features(dinrail-rtshm PUBLIC cxx_std_17)
+set_target_properties(dinrail-rtshm PROPERTIES POSITION_INDEPENDENT_CODE ON)

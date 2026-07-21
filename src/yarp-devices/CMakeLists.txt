@@ -24,4 +24,6 @@ add_subdirectory(shared)
 
 add_subdirectory(dr_controlboard_nwc_yarp)
 add_subdirectory(dr_controlboard_nws_yarp)
+add_subdirectory(dr_controlboard_nwc_rtshm)
+add_subdirectory(dr_controlboard_nws_rtshm)
 add_subdirectory(dr_controlboard_remapper)
