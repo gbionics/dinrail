@@ -400,12 +400,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                     = stream_IImpedance->setImpedance(joint, cmdVector[3], cmdVector[4]);
                 ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
             }
-            if (!ok)
-            {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command single-joint impedance-all-setpoints "
-                        "message\n");
-            }
             break;
         }
 
@@ -473,11 +467,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                                                              dampingRef[static_cast<size_t>(i)]);
                 }
                 ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
-            }
-            if (!ok)
-            {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command group impedance-all-setpoints message\n");
             }
             break;
         }
