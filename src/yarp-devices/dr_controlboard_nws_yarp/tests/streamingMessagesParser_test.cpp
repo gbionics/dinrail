@@ -257,6 +257,82 @@ TEST_CASE("dev::controlBoard_nws_yarp::StreamingMessagesParser", "[yarp::dev]")
         CHECK(true);
     }
 
+    SECTION("All-joints commands with a payload shorter than the joint count")
+    {
+        // The device reads exactly stream_nJoints values from cmdVector.data(); a shorter
+        // payload used to slip through (only oversized payloads were rejected) and cause an
+        // out-of-bounds read inside the driver.
+        const int shortVocabs[] = {VOCAB_POSITION_MOVES,
+                                   VOCAB_VELOCITY_MOVES,
+                                   VOCAB_POSITION_DIRECTS,
+                                   VOCAB_TORQUES_DIRECTS};
+        for (int vocab : shortVocabs)
+        {
+            feed(parser, [vocab](Bottle& head, yarp::sig::Vector& body) {
+                head.addVocab32(vocab);
+                fillBody(body, 1); // device controls 2 joints
+            });
+        }
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_PWMCONTROL_INTERFACE);
+            head.addVocab32(VOCAB_PWMCONTROL_REF_PWMS);
+            fillBody(body, 1);
+        });
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
+            head.addVocab32(VOCAB_CURRENT_REFS);
+            fillBody(body, 1);
+        });
+        CHECK(true);
+    }
+
+    SECTION("Commands with out-of-range joint indices")
+    {
+        // Single-joint commands with an out-of-range index.
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_VELOCITY_MOVE);
+            head.addInt32(99);
+            fillBody(body, 1);
+        });
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_POSITION_DIRECT);
+            head.addInt32(-1);
+            fillBody(body, 1);
+        });
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_TORQUES_DIRECT);
+            head.addInt32(99);
+            fillBody(body, 1);
+        });
+        feed(parser, [](Bottle& head, yarp::sig::Vector& body) {
+            head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
+            head.addVocab32(VOCAB_CURRENT_REF);
+            head.addInt32(99);
+            fillBody(body, 1);
+        });
+
+        // Group commands whose (size-consistent) joint list references invalid joints.
+        auto badGroup = [](int vocab, bool currentInterface) {
+            return [=](Bottle& head, yarp::sig::Vector& body) {
+                if (currentInterface)
+                {
+                    head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
+                }
+                head.addVocab32(vocab);
+                head.addInt32(2);
+                Bottle& jl = head.addList();
+                jl.addInt32(0);
+                jl.addInt32(99); // out of range
+                fillBody(body, 2);
+            };
+        };
+        feed(parser, badGroup(VOCAB_TORQUES_DIRECT_GROUP, false));
+        feed(parser, badGroup(VOCAB_POSITION_DIRECT_GROUP, false));
+        feed(parser, badGroup(VOCAB_VELOCITY_MOVE_GROUP, false));
+        feed(parser, badGroup(VOCAB_CURRENT_REF_GROUP, true));
+        CHECK(true);
+    }
+
     parser.reset();
     CHECK(dd_fake.close());
 

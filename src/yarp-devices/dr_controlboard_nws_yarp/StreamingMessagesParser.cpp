@@ -109,6 +109,24 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         return;
     }
 
+    // Streaming messages come from an untrusted port: validate joint indices and the
+    // size of "all joints" payloads before forwarding them to the device, to avoid
+    // out-of-bounds reads inside the underlying control-board driver.
+    auto jointIndexValid = [this](int joint) { return joint >= 0 && joint < stream_nJoints; };
+    auto fullCommandSizeValid = [this, &b, &cmdVector]() {
+        if (static_cast<int>(cmdVector.size()) != stream_nJoints)
+        {
+            yCError(CONTROLBOARD,
+                    "Received streaming command %s carrying %zu values, but the device controls "
+                    "%d joints; ignoring the command\n",
+                    yarp::os::Vocab32::decode(b.get(0).asVocab32()).c_str(),
+                    cmdVector.size(),
+                    stream_nJoints);
+            return false;
+        }
+        return true;
+    };
+
     switch (b.get(0).asVocab32())
     {
     // manage commands with interface name as first
@@ -118,7 +136,13 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         case VOCAB_PWMCONTROL_REF_PWM: {
             if (stream_IPWM)
             {
-                bool ok = stream_IPWM->setRefDutyCycle(b.get(2).asInt32(), cmdVector[0]);
+                const int joint = b.get(2).asInt32();
+                if (!jointIndexValid(joint))
+                {
+                    yCError(CONTROLBOARD, "Received PWM command with invalid joint index %d", joint);
+                    break;
+                }
+                bool ok = stream_IPWM->setRefDutyCycle(joint, cmdVector[0]);
                 if (!ok)
                 {
                     yCError(CONTROLBOARD, "Errors while trying to command an pwm message");
@@ -132,6 +156,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         case VOCAB_PWMCONTROL_REF_PWMS: {
             if (stream_IPWM)
             {
+                if (!fullCommandSizeValid())
+                {
+                    break;
+                }
                 bool ok = stream_IPWM->setRefDutyCycles(cmdVector.data());
                 if (!ok)
                 {
@@ -153,7 +181,15 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         case VOCAB_CURRENT_REF: {
             if (stream_ICurrent)
             {
-                bool ok = stream_ICurrent->setRefCurrent(b.get(2).asInt32(), cmdVector[0]);
+                const int joint = b.get(2).asInt32();
+                if (!jointIndexValid(joint))
+                {
+                    yCError(CONTROLBOARD,
+                            "Received current command with invalid joint index %d",
+                            joint);
+                    break;
+                }
+                bool ok = stream_ICurrent->setRefCurrent(joint, cmdVector[0]);
                 if (!ok)
                 {
                     yCError(CONTROLBOARD,
@@ -166,6 +202,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         case VOCAB_CURRENT_REFS: {
             if (stream_ICurrent)
             {
+                if (!fullCommandSizeValid())
+                {
+                    break;
+                }
                 bool ok = stream_ICurrent->setRefCurrents(cmdVector.data());
                 if (!ok)
                 {
@@ -199,9 +239,23 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 }
 
                 int* joint_list = new int[n_joints];
+                bool validJoints = true;
                 for (int i = 0; i < n_joints; i++)
                 {
                     joint_list[i] = jlut->get(i).asInt32();
+                    if (!jointIndexValid(joint_list[i]))
+                    {
+                        yCError(CONTROLBOARD,
+                                "Received VOCAB_CURRENT_REF_GROUP with invalid joint index %d",
+                                joint_list[i]);
+                        validJoints = false;
+                        break;
+                    }
+                }
+                if (!validJoints)
+                {
+                    delete[] joint_list;
+                    break;
                 }
 
                 bool ok = stream_ICurrent->setRefCurrents(n_joints, joint_list, cmdVector.data());
@@ -237,6 +291,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_POSITION_MOVES: {
         if (stream_IPosCtrl)
         {
+            if (!fullCommandSizeValid())
+            {
+                break;
+            }
             bool ok = stream_IPosCtrl->positionMove(cmdVector.data());
             if (!ok)
             {
@@ -255,7 +313,13 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_VELOCITY_MOVE: {
         if (stream_IVel)
         {
-            bool ok = stream_IVel->velocityMove(b.get(1).asInt32(), cmdVector[0]);
+            const int joint = b.get(1).asInt32();
+            if (!jointIndexValid(joint))
+            {
+                yCError(CONTROLBOARD, "Received velocity move with invalid joint index %d", joint);
+                break;
+            }
+            bool ok = stream_IVel->velocityMove(joint, cmdVector[0]);
             if (!ok)
             {
                 yCError(CONTROLBOARD, "Errors while trying to start a velocity move");
@@ -267,6 +331,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_VELOCITY_MOVES: {
         if (stream_IVel)
         {
+            if (!fullCommandSizeValid())
+            {
+                break;
+            }
             bool ok = stream_IVel->velocityMove(cmdVector.data());
             if (!ok)
             {
@@ -279,14 +347,21 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_POSITION_DIRECT: {
         if (stream_IPosDirect)
         {
-            bool ok = stream_IPosDirect->setPosition(b.get(1).asInt32(),
-                                                     cmdVector[0]); // cmdVector.data());
+            const int joint = b.get(1).asInt32();
+            if (!jointIndexValid(joint))
+            {
+                yCError(CONTROLBOARD,
+                        "Received position direct command with invalid joint index %d",
+                        joint);
+                break;
+            }
+            bool ok = stream_IPosDirect->setPosition(joint, cmdVector[0]);
             if (!ok)
             {
                 yCError(CONTROLBOARD,
                         "Errors while trying to command an streaming position direct message on "
                         "joint %d\n",
-                        b.get(1).asInt32());
+                        joint);
             }
         }
     }
@@ -295,7 +370,15 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_TORQUES_DIRECT: {
         if (stream_ITorque)
         {
-            bool ok = stream_ITorque->setRefTorque(b.get(1).asInt32(), cmdVector[0]);
+            const int joint = b.get(1).asInt32();
+            if (!jointIndexValid(joint))
+            {
+                yCError(CONTROLBOARD,
+                        "Received torque direct command with invalid joint index %d",
+                        joint);
+                break;
+            }
+            bool ok = stream_ITorque->setRefTorque(joint, cmdVector[0]);
             if (!ok)
             {
                 yCError(CONTROLBOARD,
@@ -309,6 +392,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_TORQUES_DIRECTS: {
         if (stream_ITorque)
         {
+            if (!fullCommandSizeValid())
+            {
+                break;
+            }
             bool ok = stream_ITorque->setRefTorques(cmdVector.data());
             if (!ok)
             {
@@ -343,9 +430,23 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             int* joint_list = new int[n_joints];
+            bool validJoints = true;
             for (int i = 0; i < n_joints; i++)
             {
                 joint_list[i] = jlut->get(i).asInt32();
+                if (!jointIndexValid(joint_list[i]))
+                {
+                    yCError(CONTROLBOARD,
+                            "Received VOCAB_TORQUES_DIRECT_GROUP with invalid joint index %d",
+                            joint_list[i]);
+                    validJoints = false;
+                    break;
+                }
+            }
+            if (!validJoints)
+            {
+                delete[] joint_list;
+                break;
             }
 
             bool ok = stream_ITorque->setRefTorques(n_joints, joint_list, cmdVector.data());
@@ -381,6 +482,13 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             const int joint = b.get(2).asInt32();
+            if (!jointIndexValid(joint))
+            {
+                yCError(CONTROLBOARD,
+                        "Received single-joint impedance-all-setpoints with invalid joint index %d",
+                        joint);
+                break;
+            }
             bool ok = false;
             if (stream_IImpedanceAllSetPointsControl)
             {
@@ -406,6 +514,13 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         if (b.size() == 4)
         {
             const int n_joints = b.get(2).asInt32();
+            if (n_joints < 0 || n_joints > stream_nJoints)
+            {
+                yCError(CONTROLBOARD,
+                        "Received impedance-all-setpoints group with invalid joint count %d",
+                        n_joints);
+                break;
+            }
             Bottle* jlut = b.get(3).asList();
             if (jlut == nullptr || static_cast<int>(jlut->size()) != n_joints
                 || static_cast<int>(cmdVector.size()) != 5 * n_joints)
@@ -415,9 +530,22 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             std::vector<int> jointList(static_cast<size_t>(n_joints));
+            bool validJoints = true;
             for (int i = 0; i < n_joints; i++)
             {
                 jointList[static_cast<size_t>(i)] = jlut->get(i).asInt32();
+                if (!jointIndexValid(jointList[static_cast<size_t>(i)]))
+                {
+                    yCError(CONTROLBOARD,
+                            "Received impedance-all-setpoints group with invalid joint index %d",
+                            jointList[static_cast<size_t>(i)]);
+                    validJoints = false;
+                    break;
+                }
+            }
+            if (!validJoints)
+            {
+                break;
             }
 
             const double* raw = cmdVector.data();
@@ -564,9 +692,23 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             int* joint_list = new int[n_joints];
+            bool validJoints = true;
             for (int i = 0; i < n_joints; i++)
             {
                 joint_list[i] = jlut->get(i).asInt32();
+                if (!jointIndexValid(joint_list[i]))
+                {
+                    yCError(CONTROLBOARD,
+                            "Received VOCAB_POSITION_DIRECT_GROUP with invalid joint index %d",
+                            joint_list[i]);
+                    validJoints = false;
+                    break;
+                }
+            }
+            if (!validJoints)
+            {
+                delete[] joint_list;
+                break;
             }
 
             bool ok = stream_IPosDirect->setPositions(n_joints, joint_list, cmdVector.data());
@@ -585,6 +727,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case VOCAB_POSITION_DIRECTS: {
         if (stream_IPosDirect)
         {
+            if (!fullCommandSizeValid())
+            {
+                break;
+            }
             bool ok = stream_IPosDirect->setPositions(cmdVector.data());
             if (!ok)
             {
@@ -619,9 +765,23 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             int* joint_list = new int[n_joints];
+            bool validJoints = true;
             for (int i = 0; i < n_joints; i++)
             {
                 joint_list[i] = jlut->get(i).asInt32();
+                if (!jointIndexValid(joint_list[i]))
+                {
+                    yCError(CONTROLBOARD,
+                            "Received VOCAB_VELOCITY_MOVE_GROUP with invalid joint index %d",
+                            joint_list[i]);
+                    validJoints = false;
+                    break;
+                }
+            }
+            if (!validJoints)
+            {
+                delete[] joint_list;
+                break;
             }
 
             bool ok = stream_IVel->velocityMove(n_joints, joint_list, cmdVector.data());
