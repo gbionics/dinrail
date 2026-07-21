@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 # SPDX-License-Identifier: BSD-3-Clause
 
+find_package(Threads REQUIRED)
+
 add_executable(harness_device_DinRailControlBoardNWCYarp
 	DinRailControlBoardNWCYarp_test.cpp
 )
@@ -13,6 +15,7 @@ target_link_libraries(harness_device_DinRailControlBoardNWCYarp
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
+		Threads::Threads
 )
 target_link_options(harness_device_DinRailControlBoardNWCYarp
 	PRIVATE
