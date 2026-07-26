@@ -10,14 +10,9 @@
 // Generated on: Thu May 22 11:32:44 2025
 
 #include "DinRailControlBoardNWSYarp_ParamsParser.h"
-#include <yarp/os/LogStream.h>
-#include <yarp/os/Value.h>
+#include "ControlBoardLogComponent.h"
 
-namespace
-{
-YARP_LOG_COMPONENT(DinRailControlBoardNWSYarpParamsCOMPONENT,
-                   "yarp.device.DinRailControlBoardNWSYarp")
-}
+#include <yarp/os/Value.h>
 
 DinRailControlBoardNWSYarp_ParamsParser::DinRailControlBoardNWSYarp_ParamsParser()
 {
@@ -36,6 +31,8 @@ std::vector<std::string> DinRailControlBoardNWSYarp_ParamsParser::getListOfParam
 bool DinRailControlBoardNWSYarp_ParamsParser::getParamValue(const std::string& paramName,
                                                             std::string& paramValue) const
 {
+    auto& logger = controlBoardLogger();
+
     if (paramName == "period")
     {
         paramValue = std::to_string(m_period);
@@ -57,7 +54,7 @@ bool DinRailControlBoardNWSYarp_ParamsParser::getParamValue(const std::string& p
         return true;
     }
 
-    yError() << "parameter '" << paramName << "' was not found";
+    logger.error("parameter '{}' was not found", paramName);
     return false;
 }
 
@@ -73,10 +70,12 @@ std::string DinRailControlBoardNWSYarp_ParamsParser::getConfiguration() const
 
 bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Searchable& config)
 {
+    auto& logger = controlBoardLogger();
+
     // Check for --help option
     if (config.check("help"))
     {
-        yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT) << getDocumentationOfDeviceParams();
+        logger.info("{}", getDocumentationOfDeviceParams());
     }
 
     m_provided_configuration = config.toString();
@@ -86,12 +85,10 @@ bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("period"))
         {
             m_period = config.find("period").asFloat64();
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'period' using value:" << m_period;
+            logger.info("Parameter 'period' using value: {}", m_period);
         } else
         {
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'period' using DEFAULT value:" << m_period;
+            logger.info("Parameter 'period' using DEFAULT value: {}", m_period);
         }
         prop_check.unput("period");
     }
@@ -101,15 +98,12 @@ bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("name"))
         {
             m_name = config.find("name").asString();
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'name' using value:" << m_name;
+            logger.info("Parameter 'name' using value: {}", m_name);
         } else
         {
-            yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Mandatory parameter 'name' not "
-                                                                  "found!";
-            yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "Description of the parameter: "
-                                                                  "Prefix name of the ports opened "
-                                                                  "by the device";
+            logger.error("Mandatory parameter 'name' not found!");
+            logger.error("Description of the parameter: Prefix name of the ports opened by the "
+                         "device");
             return false;
         }
         prop_check.unput("name");
@@ -120,12 +114,10 @@ bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("namesuffix"))
         {
             m_namesuffix = config.find("namesuffix").asString();
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'namesuffix' using value:" << m_namesuffix;
+            logger.info("Parameter 'namesuffix' using value: {}", m_namesuffix);
         } else
         {
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+            logger.info("Parameter 'namesuffix' using DEFAULT value: {}", m_namesuffix);
         }
         prop_check.unput("namesuffix");
     }
@@ -136,14 +128,13 @@ bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Search
         {
             m_emulate_impedance_all_setpoints_control
                 = config.find("emulate_impedance_all_setpoints_control").asBool();
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'emulate_impedance_all_setpoints_control' using value:"
-                << m_emulate_impedance_all_setpoints_control;
+            logger.info("Parameter 'emulate_impedance_all_setpoints_control' using value: {}",
+                        m_emulate_impedance_all_setpoints_control);
         } else
         {
-            yCInfo(DinRailControlBoardNWSYarpParamsCOMPONENT)
-                << "Parameter 'emulate_impedance_all_setpoints_control' using DEFAULT value:"
-                << m_emulate_impedance_all_setpoints_control;
+            logger.info("Parameter 'emulate_impedance_all_setpoints_control' using DEFAULT value: "
+                        "{}",
+                        m_emulate_impedance_all_setpoints_control);
         }
         prop_check.unput("emulate_impedance_all_setpoints_control");
     }
@@ -158,13 +149,13 @@ bool DinRailControlBoardNWSYarp_ParamsParser::parseParams(const yarp::os::Search
         {
             if (m_parser_is_strict)
             {
-                yCError(DinRailControlBoardNWSYarpParamsCOMPONENT) << "User asking for parameter:
-    "<<it->name <<" which is unknown to this parser!"; extra_params_found = true;
+                logger.error("User asking for parameter: {} which is unknown to this parser!",
+    it->name); extra_params_found = true;
             }
             else
             {
-                yCWarning(DinRailControlBoardNWSYarpParamsCOMPONENT) << "User asking for parameter:
-    "<< it->name <<" which is unknown to this parser!";
+                logger.warn("User asking for parameter: {} which is unknown to this parser!",
+    it->name);
             }
         }
 
