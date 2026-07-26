@@ -6,8 +6,14 @@
 #ifndef YARP_CONTROLBOARDREMAPPERLOGCOMPONENT_H
 #define YARP_CONTROLBOARDREMAPPERLOGCOMPONENT_H
 
-#include <yarp/os/LogComponent.h>
+#include <spdlog/spdlog.h>
 
-YARP_DECLARE_LOG_COMPONENT(CONTROLBOARDREMAPPER)
+namespace dinrail::yarp_devices::remapper
+{
+spdlog::logger& controlBoardRemapperLogger();
+
+spdlog::logger& remoteControlBoardRemapperLogger();
+
+} // namespace dinrail::yarp_devices::remapper
 
 #endif // YARP_CONTROLBOARDREMAPPERLOGCOMPONENT_H

@@ -1,8 +1,25 @@
 /*
- * SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
+ * SPDX-FileCopyrightText: Generative Bionics S.R.L.
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "DinRailControlBoardRemapperLogComponent.h"
 
-YARP_LOG_COMPONENT(CONTROLBOARDREMAPPER, "yarp.device.controlboardremapper")
+#include <dinrail/SpdlogHelpers.h>
+
+namespace dinrail::yarp_devices::remapper
+{
+spdlog::logger& controlBoardRemapperLogger()
+{
+    static const auto logger = dinrail::createOrGetLogger("dinrail.dr_controlboard_remapper");
+    return *logger;
+}
+
+spdlog::logger& remoteControlBoardRemapperLogger()
+{
+    static const auto logger = dinrail::createOrGetLogger("dinrail.dr_controlboard_remapper_nwc_"
+                                                          "yarp");
+    return *logger;
+}
+
+} // namespace dinrail::yarp_devices::remapper
