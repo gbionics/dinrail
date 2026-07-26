@@ -7,7 +7,6 @@
 #define YARP_DEV_REMOTECONTROLBOARD_STATEEXTENDEDREADER_H
 
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/Log.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/PortablePair.h>
 #include <yarp/os/Stamp.h>

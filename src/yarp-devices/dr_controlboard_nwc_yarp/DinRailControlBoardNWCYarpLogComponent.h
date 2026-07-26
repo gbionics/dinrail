@@ -6,8 +6,8 @@
 #ifndef YARP_REMOTECONTROLBOARDLOGCOMPONENT_H
 #define YARP_REMOTECONTROLBOARDLOGCOMPONENT_H
 
-#include <yarp/os/LogComponent.h>
+#include <spdlog/spdlog.h>
 
-YARP_DECLARE_LOG_COMPONENT(REMOTECONTROLBOARD)
+spdlog::logger& remoteControlBoardLogger();
 
 #endif // YARP_REMOTECONTROLBOARDLOGCOMPONENT_H

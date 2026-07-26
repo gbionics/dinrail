@@ -10,14 +10,9 @@
 // Generated on: Thu May 22 11:32:44 2025
 
 #include "DinRailControlBoardNWCYarp_ParamsParser.h"
-#include <yarp/os/LogStream.h>
-#include <yarp/os/Value.h>
+#include "DinRailControlBoardNWCYarpLogComponent.h"
 
-namespace
-{
-YARP_LOG_COMPONENT(DinRailControlBoardNWCYarpParamsCOMPONENT,
-                   "yarp.device.DinRailControlBoardNWCYarp")
-}
+#include <yarp/os/Value.h>
 
 DinRailControlBoardNWCYarp_ParamsParser::DinRailControlBoardNWCYarp_ParamsParser()
 {
@@ -48,6 +43,8 @@ std::vector<std::string> DinRailControlBoardNWCYarp_ParamsParser::getListOfParam
 bool DinRailControlBoardNWCYarp_ParamsParser::getParamValue(const std::string& paramName,
                                                             std::string& paramValue) const
 {
+    auto& logger = remoteControlBoardLogger();
+
     if (paramName == "remote")
     {
         paramValue = m_remote;
@@ -141,7 +138,7 @@ bool DinRailControlBoardNWCYarp_ParamsParser::getParamValue(const std::string& p
         return true;
     }
 
-    yError() << "parameter '" << paramName << "' was not found";
+    logger.error("parameter '{}' was not found", paramName);
     return false;
 }
 
@@ -157,10 +154,12 @@ std::string DinRailControlBoardNWCYarp_ParamsParser::getConfiguration() const
 
 bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Searchable& config)
 {
+    auto& logger = remoteControlBoardLogger();
+
     // Check for --help option
     if (config.check("help"))
     {
-        yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << getDocumentationOfDeviceParams();
+        logger.info("{}", getDocumentationOfDeviceParams());
     }
 
     m_provided_configuration = config.toString();
@@ -170,15 +169,11 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("remote"))
         {
             m_remote = config.find("remote").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'remote' using value:" << m_remote;
+            logger.info("Parameter 'remote' using value: {}", m_remote);
         } else
         {
-            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Mandatory parameter 'remote' "
-                                                                  "not found!";
-            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Description of the parameter: "
-                                                                  "Prefix of the port to which to "
-                                                                  "connect.";
+            logger.error("Mandatory parameter 'remote' not found!");
+            logger.error("Description of the parameter: Prefix of the port to which to connect.");
             return false;
         }
         prop_check.unput("remote");
@@ -189,15 +184,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("local"))
         {
             m_local = config.find("local").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'local' using value:" << m_local;
+            logger.info("Parameter 'local' using value: {}", m_local);
         } else
         {
-            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Mandatory parameter 'local' not "
-                                                                  "found!";
-            yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Description of the parameter: "
-                                                                  "Port prefix of the port opened "
-                                                                  "by this device.";
+            logger.error("Mandatory parameter 'local' not found!");
+            logger.error("Description of the parameter: Port prefix of the port opened by this "
+                         "device.");
             return false;
         }
         prop_check.unput("local");
@@ -208,12 +200,10 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("namesuffix"))
         {
             m_namesuffix = config.find("namesuffix").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'namesuffix' using value:" << m_namesuffix;
+            logger.info("Parameter 'namesuffix' using value: {}", m_namesuffix);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'namesuffix' using DEFAULT value:" << m_namesuffix;
+            logger.info("Parameter 'namesuffix' using DEFAULT value: {}", m_namesuffix);
         }
         prop_check.unput("namesuffix");
     }
@@ -223,12 +213,10 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("writeStrict"))
         {
             m_writeStrict = config.find("writeStrict").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'writeStrict' using value:" << m_writeStrict;
+            logger.info("Parameter 'writeStrict' using value: {}", m_writeStrict);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'writeStrict' using DEFAULT value:" << m_writeStrict;
+            logger.info("Parameter 'writeStrict' using DEFAULT value: {}", m_writeStrict);
         }
         prop_check.unput("writeStrict");
     }
@@ -238,12 +226,10 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("carrier"))
         {
             m_carrier = config.find("carrier").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'carrier' using value:" << m_carrier;
+            logger.info("Parameter 'carrier' using value: {}", m_carrier);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'carrier' using DEFAULT value:" << m_carrier;
+            logger.info("Parameter 'carrier' using DEFAULT value: {}", m_carrier);
         }
         prop_check.unput("carrier");
     }
@@ -253,12 +239,10 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("timeout"))
         {
             m_timeout = config.find("timeout").asFloat32();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'timeout' using value:" << m_timeout;
+            logger.info("Parameter 'timeout' using value: {}", m_timeout);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'timeout' using DEFAULT value:" << m_timeout;
+            logger.info("Parameter 'timeout' using DEFAULT value: {}", m_timeout);
         }
         prop_check.unput("timeout");
     }
@@ -270,12 +254,11 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("enable"))
         {
             m_local_qos_enable = sectionp.find("enable").asBool();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'local_qos::enable' using value:" << m_local_qos_enable;
+            logger.info("Parameter 'local_qos::enable' using value: {}", m_local_qos_enable);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'local_qos::enable' using DEFAULT value:" << m_local_qos_enable;
+            logger.info("Parameter 'local_qos::enable' using DEFAULT value: {}",
+                        m_local_qos_enable);
         }
         prop_check.unput("local_qos::enable");
     }
@@ -287,16 +270,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("thread_priority"))
         {
             m_local_qos_thread_priority = sectionp.find("thread_priority").asInt64();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'local_qos::thread_priority' "
-                                                                 "using value:"
-                                                              << m_local_qos_thread_priority;
+            logger.info("Parameter 'local_qos::thread_priority' using value: {}",
+                        m_local_qos_thread_priority);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'local_qos::thread_priority' "
-                                                                 "using DEFAULT value:"
-                                                              << m_local_qos_thread_priority;
+            logger.info("Parameter 'local_qos::thread_priority' using DEFAULT value: {}",
+                        m_local_qos_thread_priority);
         }
         prop_check.unput("local_qos::thread_priority");
     }
@@ -308,14 +287,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("thread_policy"))
         {
             m_local_qos_thread_policy = sectionp.find("thread_policy").asInt64();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'local_qos::thread_policy' using value:" << m_local_qos_thread_policy;
+            logger.info("Parameter 'local_qos::thread_policy' using value: {}",
+                        m_local_qos_thread_policy);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'local_qos::thread_policy' using "
-                                                                 "DEFAULT value:"
-                                                              << m_local_qos_thread_policy;
+            logger.info("Parameter 'local_qos::thread_policy' using DEFAULT value: {}",
+                        m_local_qos_thread_policy);
         }
         prop_check.unput("local_qos::thread_policy");
     }
@@ -327,16 +304,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("packet_priority"))
         {
             m_local_qos_packet_priority = sectionp.find("packet_priority").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'local_qos::packet_priority' "
-                                                                 "using value:"
-                                                              << m_local_qos_packet_priority;
+            logger.info("Parameter 'local_qos::packet_priority' using value: {}",
+                        m_local_qos_packet_priority);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'local_qos::packet_priority' "
-                                                                 "using DEFAULT value:"
-                                                              << m_local_qos_packet_priority;
+            logger.info("Parameter 'local_qos::packet_priority' using DEFAULT value: {}",
+                        m_local_qos_packet_priority);
         }
         prop_check.unput("local_qos::packet_priority");
     }
@@ -348,12 +321,11 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("enable"))
         {
             m_remote_qos_enable = sectionp.find("enable").asBool();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'remote_qos::enable' using value:" << m_remote_qos_enable;
+            logger.info("Parameter 'remote_qos::enable' using value: {}", m_remote_qos_enable);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'remote_qos::enable' using DEFAULT value:" << m_remote_qos_enable;
+            logger.info("Parameter 'remote_qos::enable' using DEFAULT value: {}",
+                        m_remote_qos_enable);
         }
         prop_check.unput("remote_qos::enable");
     }
@@ -365,16 +337,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("thread_priority"))
         {
             m_remote_qos_thread_priority = sectionp.find("thread_priority").asInt64();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::thread_priority' "
-                                                                 "using value:"
-                                                              << m_remote_qos_thread_priority;
+            logger.info("Parameter 'remote_qos::thread_priority' using value: {}",
+                        m_remote_qos_thread_priority);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::thread_priority' "
-                                                                 "using DEFAULT value:"
-                                                              << m_remote_qos_thread_priority;
+            logger.info("Parameter 'remote_qos::thread_priority' using DEFAULT value: {}",
+                        m_remote_qos_thread_priority);
         }
         prop_check.unput("remote_qos::thread_priority");
     }
@@ -386,16 +354,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("thread_policy"))
         {
             m_remote_qos_thread_policy = sectionp.find("thread_policy").asInt64();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::thread_policy' "
-                                                                 "using value:"
-                                                              << m_remote_qos_thread_policy;
+            logger.info("Parameter 'remote_qos::thread_policy' using value: {}",
+                        m_remote_qos_thread_policy);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::thread_policy' "
-                                                                 "using DEFAULT value:"
-                                                              << m_remote_qos_thread_policy;
+            logger.info("Parameter 'remote_qos::thread_policy' using DEFAULT value: {}",
+                        m_remote_qos_thread_policy);
         }
         prop_check.unput("remote_qos::thread_policy");
     }
@@ -407,16 +371,12 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (sectionp.check("packet_priority"))
         {
             m_remote_qos_packet_priority = sectionp.find("packet_priority").asString();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::packet_priority' "
-                                                                 "using value:"
-                                                              << m_remote_qos_packet_priority;
+            logger.info("Parameter 'remote_qos::packet_priority' using value: {}",
+                        m_remote_qos_packet_priority);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT) << "Parameter "
-                                                                 "'remote_qos::packet_priority' "
-                                                                 "using DEFAULT value:"
-                                                              << m_remote_qos_packet_priority;
+            logger.info("Parameter 'remote_qos::packet_priority' using DEFAULT value: {}",
+                        m_remote_qos_packet_priority);
         }
         prop_check.unput("remote_qos::packet_priority");
     }
@@ -426,12 +386,11 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("ignoreProtocolCheck"))
         {
             m_ignoreProtocolCheck = config.find("ignoreProtocolCheck").asBool();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'ignoreProtocolCheck' using value:" << m_ignoreProtocolCheck;
+            logger.info("Parameter 'ignoreProtocolCheck' using value: {}", m_ignoreProtocolCheck);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'ignoreProtocolCheck' using DEFAULT value:" << m_ignoreProtocolCheck;
+            logger.info("Parameter 'ignoreProtocolCheck' using DEFAULT value: {}",
+                        m_ignoreProtocolCheck);
         }
         prop_check.unput("ignoreProtocolCheck");
     }
@@ -441,12 +400,10 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         if (config.check("diagnostic"))
         {
             m_diagnostic = config.find("diagnostic").asBool();
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'diagnostic' using value:" << m_diagnostic;
+            logger.info("Parameter 'diagnostic' using value: {}", m_diagnostic);
         } else
         {
-            yCInfo(DinRailControlBoardNWCYarpParamsCOMPONENT)
-                << "Parameter 'diagnostic' using DEFAULT value:" << m_diagnostic;
+            logger.info("Parameter 'diagnostic' using DEFAULT value: {}", m_diagnostic);
         }
         prop_check.unput("diagnostic");
     }
@@ -461,13 +418,13 @@ bool DinRailControlBoardNWCYarp_ParamsParser::parseParams(const yarp::os::Search
         {
             if (m_parser_is_strict)
             {
-                yCError(DinRailControlBoardNWCYarpParamsCOMPONENT) << "User asking for parameter:
-    "<<it->name <<" which is unknown to this parser!"; extra_params_found = true;
+                logger.error("User asking for parameter: {} which is unknown to this parser!",
+    it->name); extra_params_found = true;
             }
             else
             {
-                yCWarning(DinRailControlBoardNWCYarpParamsCOMPONENT) << "User asking for parameter:
-    "<< it->name <<" which is unknown to this parser!";
+                logger.warn("User asking for parameter: {} which is unknown to this parser!",
+    it->name);
             }
         }
 

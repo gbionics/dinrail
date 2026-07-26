@@ -10,10 +10,11 @@
 
 #include <dinrail/ControlBoardYARPProtocolSharedDefinitions.h>
 
+#include <cassert>
+
 #include <cstring>
 
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/LogStream.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/PeriodicThread.h>
 #include <yarp/os/PortablePair.h>
@@ -37,7 +38,6 @@ using namespace yarp::sig;
 
 namespace
 {
-
 constexpr double DIAGNOSTIC_THREAD_PERIOD = 1.000;
 
 inline bool getTimeStamp(Bottle& bot, Stamp& st)
@@ -81,13 +81,12 @@ public:
                 double min;
                 owner->getEstFrequency(it, av, min, max);
                 owner->resetStat();
-                yCDebug(REMOTECONTROLBOARD,
-                        "%s: %d msgs av:%.2lf min:%.2lf max:%.2lf [ms]",
-                        ownerName.c_str(),
-                        it,
-                        av,
-                        min,
-                        max);
+                remoteControlBoardLogger().debug("{}: {} msgs av:{:.2f} min:{:.2f} max:{:.2f} [ms]",
+                                                 ownerName,
+                                                 it,
+                                                 av,
+                                                 min,
+                                                 max);
             }
         }
     }
@@ -152,27 +151,25 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
     }
 
     // protocol did not match
-    yCError(REMOTECONTROLBOARD,
-            "Expecting protocol %d %d %d, but the device we are connecting to has protocol version "
-            "%d %d %d",
-            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR,
-            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR,
-            dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK,
-            protocolVersion.major,
-            protocolVersion.minor,
-            protocolVersion.tweak);
+    remoteControlBoardLogger().error("Expecting protocol {} {} {}, but the device we are "
+                                     "connecting to has protocol version {} {} {}",
+                                     dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MAJOR,
+                                     dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_MINOR,
+                                     dinrail::CONTROLBOARD_YARP_PROTOCOL_VERSION_TWEAK,
+                                     protocolVersion.major,
+                                     protocolVersion.minor,
+                                     protocolVersion.tweak);
 
     bool ret;
     if (ignore)
     {
-        yCWarning(REMOTECONTROLBOARD,
-                  "Ignoring error but please ensure that nws and nwc use compatible version of "
-                  "dinrail-yarp");
+        remoteControlBoardLogger().warn("Ignoring error but please ensure that nws and nwc use "
+                                        "compatible version of dinrail-yarp");
         ret = true;
     } else
     {
-        yCError(REMOTECONTROLBOARD,
-                "Please ensure that nws and nwc use compatible version of dinrail-yarp");
+        remoteControlBoardLogger().error("Please ensure that nws and nwc use compatible version of "
+                                         "dinrail-yarp");
         ret = false;
     }
 
@@ -181,6 +178,8 @@ bool DinRailControlBoardNWCYarp::checkProtocolVersion(bool ignore)
 
 bool DinRailControlBoardNWCYarp::open(Searchable& config)
 {
+    auto& logger = remoteControlBoardLogger();
+
     if (!parseParams(config))
     {
         return false;
@@ -214,21 +213,21 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
     {
         writeStrict_singleJoint = true;
         writeStrict_moreJoints = true;
-        yCInfo(REMOTECONTROLBOARD,
-               "DinRailControlBoardNWCYarp is ENABLING the writeStrict option for all commands");
+        logger.info("DinRailControlBoardNWCYarp is ENABLING the writeStrict option for all "
+                    "commands");
     } else if (m_writeStrict == "off")
     {
         writeStrict_singleJoint = false;
         writeStrict_moreJoints = false;
-        yCInfo(REMOTECONTROLBOARD,
-               "DinRailControlBoardNWCYarp is DISABLING the writeStrict option for all commands");
+        logger.info("DinRailControlBoardNWCYarp is DISABLING the writeStrict option for all "
+                    "commands");
     } else if (m_writeStrict.empty())
     {
         // leave the default values
     } else
     {
-        yCError(REMOTECONTROLBOARD,
-                "Found writeStrict option with wrong value. Accepted options are 'on' or 'off'");
+        logger.error("Found writeStrict option with wrong value. Accepted options are 'on' or "
+                     "'off'");
         return false;
     }
 
@@ -277,9 +276,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
                                   // yarp handle the local side
         if (!ok)
         {
-            yCError(REMOTECONTROLBOARD,
-                    "Problem connecting to %s, is the remote device available?",
-                    s1.c_str());
+            logger.error("Problem connecting to {}, is the remote device available?", s1);
             connectionProblem = true;
         }
 
@@ -293,9 +290,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         ok = command_p.addOutput(s1, m_carrier);
         if (!ok)
         {
-            yCError(REMOTECONTROLBOARD,
-                    "Problem connecting to %s, is the remote device available?",
-                    s1.c_str());
+            logger.error("Problem connecting to {}, is the remote device available?", s1);
             connectionProblem = true;
         }
         // set the QoS preferences for the 'command' port
@@ -324,9 +319,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
             }
         } else
         {
-            yCError(REMOTECONTROLBOARD,
-                    "Problem connecting to %s, is the remote device available?",
-                    s1.c_str());
+            logger.error("Problem connecting to {}, is the remote device available?", s1);
             connectionProblem = true;
         }
     }
@@ -345,7 +338,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
 
     if (!checkProtocolVersion(m_ignoreProtocolCheck))
     {
-        yCError(REMOTECONTROLBOARD) << "checkProtocolVersion failed";
+        logger.error("checkProtocolVersion failed");
         command_buffer.detach();
         rpc_p.close();
         command_p.close();
@@ -357,7 +350,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
     {
         if (m_remote != "")
         {
-            yCError(REMOTECONTROLBOARD, "Problems with obtaining the number of controlled axes");
+            logger.error("Problems with obtaining the number of controlled axes");
             command_buffer.detach();
             rpc_p.close();
             command_p.close();
@@ -774,7 +767,7 @@ bool DinRailControlBoardNWCYarp::getValWithPidType(int voc, PidControlTypeEnum t
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             val[i] = l.get(i).asFloat64();
@@ -960,18 +953,17 @@ bool DinRailControlBoardNWCYarp::get2V1I1IA1DA(int v1,
     {
         int i;
         Bottle& list = *(response.get(0).asList());
-        yCAssert(REMOTECONTROLBOARD, list.size() >= (size_t)n_joints)
+        assert(list.size() >= static_cast<size_t>(n_joints));
 
-            if (list.size() != (size_t)n_joints)
+        if (list.size() != (size_t)n_joints)
         {
-            yCError(REMOTECONTROLBOARD,
-                    "%s length of response does not match: expected %d, received %zu\n ",
-                    functionName.c_str(),
-                    n_joints,
-                    list.size());
+            remoteControlBoardLogger().error("{} length of response does not match: expected {}, "
+                                             "received {}",
+                                             functionName,
+                                             n_joints,
+                                             list.size());
             return false;
-        }
-        else
+        } else
         {
             for (i = 0; i < n_joints; i++)
             {
@@ -1016,7 +1008,7 @@ bool DinRailControlBoardNWCYarp::get1VIA(int v, int* val)
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             val[i] = l.get(i).asInt32();
@@ -1047,7 +1039,7 @@ bool DinRailControlBoardNWCYarp::get1VDA(int v, double* val)
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             val[i] = l.get(i).asFloat64();
@@ -1079,7 +1071,7 @@ bool DinRailControlBoardNWCYarp::get1V1DA(int v1, double* val)
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             val[i] = l.get(i).asFloat64();
@@ -1111,7 +1103,7 @@ bool DinRailControlBoardNWCYarp::get2V1DA(int v1, int v2, double* val)
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             val[i] = l.get(i).asFloat64();
@@ -1151,8 +1143,7 @@ bool DinRailControlBoardNWCYarp::get2V2DA(int v1, int v2, double* val1, double* 
 
         size_t nj1 = l1.size();
         size_t nj2 = l2.size();
-        // yCAssert(REMOTECONTROLBOARD, nj == nj1);
-        // yCAssert(REMOTECONTROLBOARD, nj == nj2);
+        // Expected response sizes: nj == nj1 and nj == nj2.
 
         for (size_t i = 0; i < nj1; i++)
         {
@@ -1216,7 +1207,8 @@ bool DinRailControlBoardNWCYarp::get1V1I1IA1DA(int v, const int len, const int* 
         size_t nj2 = l2.size();
         if (nj2 != (unsigned)len)
         {
-            yCError(REMOTECONTROLBOARD, "received an answer with an unexpected number of entries!");
+            remoteControlBoardLogger().error("received an answer with an unexpected number of "
+                                             "entries!");
             return false;
         }
         for (size_t i = 0; i < nj2; i++)
@@ -1381,7 +1373,7 @@ bool DinRailControlBoardNWCYarp::getPids(const PidControlTypeEnum& pidtype, Pid*
             return false;
         }
         Bottle& l = *lp;
-        yCAssert(REMOTECONTROLBOARD, nj == l.size());
+        assert(nj == l.size());
         for (size_t i = 0; i < nj; i++)
         {
             Bottle* mp = l.get(i).asList();
@@ -2449,8 +2441,8 @@ bool DinRailControlBoardNWCYarp::getMotorTorqueParams(int j, MotorTorqueParamete
         Bottle& l = *lp;
         if (l.size() != 9)
         {
-            yCError(REMOTECONTROLBOARD,
-                    "getMotorTorqueParams return value not understood, size != 9");
+            remoteControlBoardLogger().error("getMotorTorqueParams return value not understood, "
+                                             "size != 9");
             return false;
         }
         params->bemf = l.get(0).asFloat64();
@@ -3254,7 +3246,7 @@ bool DinRailControlBoardNWCYarp::homingWholePart()
     cmd.addVocab32(VOCAB_REMOTE_CALIBRATOR_INTERFACE);
     cmd.addVocab32(VOCAB_HOMING_WHOLE_PART);
     bool ok = rpc_p.write(cmd, response);
-    yCDebug(REMOTECONTROLBOARD) << "Sent homing whole part message";
+    remoteControlBoardLogger().debug("Sent homing whole part message");
     return CHECK_FAIL(ok, response);
 }
 
