@@ -4,8 +4,9 @@
  */
 
 #include "Module.h"
+#include "RunnerLog.h"
 
-#include <yarp/os/LogStream.h>
+#include <cstdlib>
 #include <yarp/os/Network.h>
 #include <yarp/os/Time.h>
 
@@ -17,8 +18,9 @@ int main(int argc, char* argv[])
 
     if (!yarp.checkNetwork())
     {
-        yFatal() << "Sorry YARP network does not seem to be available, is the yarp server "
-                    "available?";
+        dinrail::runner::logger().critical("Sorry YARP network does not seem to be available, is "
+                                           "the yarp server available?");
+        return EXIT_FAILURE;
     }
 
     yarp::os::ResourceFinder& rf(yarp::os::ResourceFinder::getResourceFinderSingleton());
