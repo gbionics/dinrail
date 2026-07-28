@@ -14,10 +14,7 @@ target_link_libraries(harness_device_DinRailControlBoardNWCYarp
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
 )
-target_link_options(harness_device_DinRailControlBoardNWCYarp
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
-)
+
 target_include_directories(harness_device_DinRailControlBoardNWCYarp
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/src/yarp-devices

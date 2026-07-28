@@ -13,10 +13,6 @@ target_link_libraries(harness_device_controlBoardRemapper_t1
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
 )
-target_link_options(harness_device_controlBoardRemapper_t1
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
-)
 target_include_directories(harness_device_controlBoardRemapper_t1
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/src/yarp-devices
@@ -34,10 +30,6 @@ target_link_libraries(harness_device_controlBoardRemapper_t2
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
 )
-target_link_options(harness_device_controlBoardRemapper_t2
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
-)
 target_include_directories(harness_device_controlBoardRemapper_t2
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/src/yarp-devices
@@ -54,10 +46,6 @@ target_link_libraries(harness_device_controlBoardRemapper_t3
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
-)
-target_link_options(harness_device_controlBoardRemapper_t3
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
 )
 target_include_directories(harness_device_controlBoardRemapper_t3
 	PRIVATE

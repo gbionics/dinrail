@@ -14,10 +14,7 @@ target_link_libraries(harness_device_controlBoard_nws_yarp
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
 )
-target_link_options(harness_device_controlBoard_nws_yarp
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
-)
+
 target_include_directories(harness_device_controlBoard_nws_yarp
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/src/yarp-devices
@@ -39,10 +36,7 @@ target_link_libraries(harness_device_streamingMessagesParser
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
 )
-target_link_options(harness_device_streamingMessagesParser
-	PRIVATE
-		-Wl,--no-as-needed,-lCatch2,-lCatch2Main,--as-needed
-)
+
 target_include_directories(harness_device_streamingMessagesParser
 	PRIVATE
 		${PROJECT_SOURCE_DIR}/src/yarp-devices
