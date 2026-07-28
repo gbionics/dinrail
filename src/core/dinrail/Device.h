@@ -7,6 +7,7 @@
 
 #include <dinrail/IDevice.h>
 #include <dinrail/Parameters.h>
+#include <dinrail/RuntimeContext.h>
 
 #include <memory>
 #include <string>
@@ -21,9 +22,16 @@ class Device final
 {
 public:
     /**
-     * @brief Construct an empty device handle.
+     * @brief Construct an empty device handle using the process-wide default runtime context.
+     * @see RuntimeContext::getDefault()
      */
     Device();
+
+    /**
+     * @brief Construct an empty device handle using the provided runtime context.
+     * @param context Runtime context owning the plug-in cache used to open devices.
+     */
+    explicit Device(const RuntimeContext& context);
 
     /**
      * @brief Destroy the device handle and release owned resources.
