@@ -20,7 +20,7 @@ struct Device::Impl
 
     RuntimeContext context;
     bool isValid{false};
-    std::unique_ptr<dinrail::IDevice> driver;
+    FactoryUniquePtr<dinrail::IDevice> driver;
 };
 
 Device::Device()

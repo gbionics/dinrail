@@ -4,6 +4,7 @@
 #ifndef DINRAIL_CONTEXT_H
 #define DINRAIL_CONTEXT_H
 
+#include <functional>
 #include <memory>
 
 namespace dinrail
@@ -12,6 +13,25 @@ namespace dinrail
 class Device;
 class IDevice;
 class Parameters;
+
+// Deleter for unique_ptr that calls a stored destroy function instead of delete.
+// This is used to manage the lifetime of devices created via plugin factories.
+template <class T>
+struct FactoryDeleter
+{
+    std::function<void(T*)> destroy_fn;
+
+    void operator()(T* p) const noexcept
+    {
+        if (p != nullptr && destroy_fn)
+        {
+            destroy_fn(p);
+        }
+    }
+};
+
+template <class T>
+using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
 
 /**
  * Shared runtime state used to load device plug-ins.
@@ -47,7 +67,7 @@ private:
      * `config["device"]`, creates an instance, and calls `IDevice::open()`.
      * Returns nullptr on any failure.
      */
-    std::unique_ptr<IDevice> createDevice(const Parameters& config);
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config);
 
     friend class Device;
 };

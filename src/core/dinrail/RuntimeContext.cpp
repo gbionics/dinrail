@@ -10,6 +10,7 @@
 #include <sharedlibpp/SharedLibraryClass.h>
 #include <sharedlibpp/SharedLibraryClassFactory.h>
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -29,6 +30,20 @@ std::string pluginKey(const std::string& libraryName, const std::string& factory
     return libraryName + '\n' + factoryName;
 }
 
+template <class T>
+FactoryUniquePtr<T> make_factory_unique(const sharedlibpp::SharedLibraryClassFactory<T>& factory)
+{
+    auto* factory_ptr = &factory;
+    FactoryDeleter<T> deleter;
+    deleter.destroy_fn = [factory_ptr](T* p) {
+        if (factory_ptr != nullptr)
+        {
+            factory_ptr->destroy(p);
+        }
+    };
+    return FactoryUniquePtr<T>(factory.create(), std::move(deleter));
+}
+
 } // namespace
 
 struct RuntimeContext::Impl
@@ -40,32 +55,16 @@ struct RuntimeContext::Impl
     // calls on the *same* plugin are serialised). A plain value in the map
     // would not work because std::mutex is not movable, hence the
     // shared_ptr wrapping in devicePlugins below.
-    struct DevicePlugin : std::enable_shared_from_this<DevicePlugin>
+    struct DevicePlugin
     {
         std::unique_ptr<DeviceFactory> factory;
         std::mutex factoryCreateMutex; // protects concurrent factory->create() calls for a specific
                                        // plugin
 
-        std::unique_ptr<IDevice> allocate()
+        FactoryUniquePtr<IDevice> allocate()
         {
             std::lock_guard<std::mutex> lock(factoryCreateMutex);
-            auto instance = factory->create();
-            if (!instance)
-            {
-                return nullptr;
-            }
-
-            // Custom deleter that captures a weak_ptr to this plugin.
-            // When the device is destroyed, it calls factory->destroy() instead of delete.
-            // The weak_ptr keeps the factory alive as long as the device exists.
-            auto plugin_weak = std::weak_ptr<DevicePlugin>(shared_from_this());
-            auto deleter = [plugin_weak](IDevice* p) {
-                if (auto plugin = plugin_weak.lock())
-                {
-                    plugin->factory->destroy(p);
-                }
-            };
-            return std::unique_ptr<IDevice, decltype(deleter)>(instance, std::move(deleter));
+            return make_factory_unique<IDevice>(*factory);
         }
     };
 
@@ -128,7 +127,7 @@ struct RuntimeContext::Impl
         return plugin;
     }
 
-    std::unique_ptr<IDevice> createDevice(const Parameters& config)
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config)
     {
         if (!config.check<std::string>("device"))
         {
@@ -185,7 +184,7 @@ const RuntimeContext& RuntimeContext::getDefault()
     return context;
 }
 
-std::unique_ptr<IDevice> RuntimeContext::createDevice(const Parameters& config)
+FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
     return m_pimpl->createDevice(config);
 }
