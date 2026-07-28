@@ -33,7 +33,10 @@ Device::Device(const RuntimeContext& context)
 {
 }
 
-Device::~Device() = default;
+Device::~Device()
+{
+    close();
+}
 
 bool Device::open(const Parameters& config)
 {
