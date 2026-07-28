@@ -50,6 +50,11 @@ bool Device::open(const Parameters& config)
 
 bool Device::close()
 {
+    if (!m_pimpl)
+    {
+        return true;
+    }
+
     bool result = true;
     if (m_pimpl->driver)
     {
