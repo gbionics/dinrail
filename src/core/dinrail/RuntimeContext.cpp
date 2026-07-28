@@ -13,6 +13,8 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <memory>
+#include <iostream>
 
 namespace dinrail
 {
@@ -38,7 +40,7 @@ struct RuntimeContext::Impl
     // calls on the *same* plugin are serialised). A plain value in the map
     // would not work because std::mutex is not movable, hence the
     // shared_ptr wrapping in devicePlugins below.
-    struct DevicePlugin
+    struct DevicePlugin : std::enable_shared_from_this<DevicePlugin>
     {
         std::unique_ptr<DeviceFactory> factory;
         std::mutex factoryCreateMutex; // protects concurrent factory->create() calls for a specific
@@ -47,12 +49,27 @@ struct RuntimeContext::Impl
         std::unique_ptr<IDevice> allocate()
         {
             std::lock_guard<std::mutex> lock(factoryCreateMutex);
-            return std::unique_ptr<IDevice>(factory->create());
+            auto instance = factory->create();
+            if (!instance)
+            {
+                return nullptr;
+            }
+
+            // Custom deleter that captures a weak_ptr to this plugin.
+            // When the device is destroyed, it calls factory->destroy() instead of delete.
+            // The weak_ptr keeps the factory alive as long as the device exists.
+            auto plugin_weak = std::weak_ptr<DevicePlugin>(shared_from_this());
+            auto deleter = [plugin_weak](IDevice* p) {
+                if (auto plugin = plugin_weak.lock())
+                {
+                    plugin->factory->destroy(p);
+                }
+            };
+            return std::unique_ptr<IDevice, decltype(deleter)>(instance, std::move(deleter));
         }
     };
 
     Impl()
-        : searchPath(getPathOfDinrailSharedLibrary())
     {
     }
 
@@ -60,23 +77,29 @@ struct RuntimeContext::Impl
     getDevicePlugin(const std::string& libraryName, const std::string& factoryName)
     {
         const std::string key = pluginKey(libraryName, factoryName);
-        std::lock_guard<std::mutex> lock(devicePluginsCacheMutex);
 
-        auto existing = devicePlugins.find(key);
-        if (existing != devicePlugins.end())
+        // First lookup: check if already cached
         {
-            return existing->second;
+            std::lock_guard<std::mutex> lock(devicePluginsCacheMutex);
+            auto existing = devicePlugins.find(key);
+            if (existing != devicePlugins.end())
+            {
+                return existing->second;
+            }
         }
 
+        // Load plugin outside the lock to allow concurrent loads of different plugins
         auto plugin = std::make_shared<DevicePlugin>();
         plugin->factory = std::make_unique<DeviceFactory>(SHLIBPP_DEFAULT_START_CHECK,
                                                           SHLIBPP_DEFAULT_END_CHECK,
                                                           SHLIBPP_DEFAULT_SYSTEM_VERSION,
                                                           factoryName.c_str());
 
-        if (searchPath.has_value())
+        // Extend search path with all configured plugin directories (dinrail lib dir + DINRAIL_PLUGIN_PATH)
+        const auto pluginSearchPaths = getPluginSearchPaths();
+        for (const auto& path : pluginSearchPaths)
         {
-            plugin->factory->extendSearchPath(searchPath.value());
+            plugin->factory->extendSearchPath(path.string());
         }
 
         bool ok = plugin->factory->open(libraryName.c_str(), factoryName.c_str());
@@ -86,10 +109,21 @@ struct RuntimeContext::Impl
             return nullptr;
         }
 
-        // Only cache successful loads; failures are not cached so that a
-        // subsequent open() call can retry (e.g. after the library becomes
-        // available on the search path).
-        devicePlugins.emplace(key, plugin);
+        // Second lookup and insert: re-check cache in case another thread loaded it first
+        {
+            std::lock_guard<std::mutex> lock(devicePluginsCacheMutex);
+            auto existing = devicePlugins.find(key);
+            if (existing != devicePlugins.end())
+            {
+                // Another thread loaded it first, return theirs
+                return existing->second;
+            }
+            // Only cache successful loads; failures are not cached so that a
+            // subsequent open() call can retry (e.g. after the library becomes
+            // available on the search path).
+            devicePlugins.emplace(key, plugin);
+        }
+
         return plugin;
     }
 
@@ -97,6 +131,7 @@ struct RuntimeContext::Impl
     {
         if (!config.check<std::string>("device"))
         {
+            std::cerr << "dinrail::Device: missing required parameter 'device'" << std::endl;
             return nullptr;
         }
 
@@ -113,6 +148,22 @@ struct RuntimeContext::Impl
             {
                 return driver;
             }
+            if (!driver)
+            {
+                std::cerr << "dinrail::Device: impossible to create instance for device '" << deviceName
+                          << "' from library '" << libraryName << "'" << std::endl;
+            }
+            else
+            {
+                std::cerr << "dinrail::Device: device '" << deviceName
+                          << "' failed to open with provided config" << std::endl;
+            }
+        }
+        else
+        {
+            std::cerr << "dinrail::Device: impossible to find library '" << libraryName
+                      << "' for device '" << deviceName << "' (factory symbol: '" << factoryName
+                      << "')" << std::endl;
         }
 
         return nullptr;
@@ -120,7 +171,6 @@ struct RuntimeContext::Impl
 
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<DevicePlugin>> devicePlugins;
-    std::optional<std::string> searchPath;
 };
 
 RuntimeContext::RuntimeContext()
