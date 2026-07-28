@@ -37,6 +37,8 @@
 #include "DinRailControlBoardNWCYarp_ParamsParser.h"
 #include "stateExtendedReader.h"
 
+#include <mutex>
+
 struct ProtocolVersion
 {
     int major{0};
@@ -91,6 +93,11 @@ protected:
 
     yarp::os::PortReaderBuffer<yarp::sig::Vector> state_buffer;
     yarp::os::PortWriterBuffer<CommandMessage> command_buffer;
+    // Serializes access to command_buffer: yarp::os::PortWriterBuffer is not safe for
+    // concurrent get()/write() calls, and streaming setpoint methods may be invoked from
+    // several threads at once. Without this lock the Bottle being serialized by the port
+    // writer thread could be mutated concurrently, crashing in BottleImpl::synch().
+    std::mutex command_buffer_mutex;
     bool writeStrict_singleJoint{true};
     bool writeStrict_moreJoints{false};
 

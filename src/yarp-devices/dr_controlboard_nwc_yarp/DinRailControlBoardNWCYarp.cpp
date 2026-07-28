@@ -2108,6 +2108,7 @@ bool DinRailControlBoardNWCYarp::velocityMove(int j, double v)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVE);
@@ -2124,6 +2125,7 @@ bool DinRailControlBoardNWCYarp::velocityMove(const double* v)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVES);
@@ -2346,6 +2348,7 @@ bool DinRailControlBoardNWCYarp::setRefTorques(const double* t)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_TORQUES_DIRECTS);
@@ -2366,6 +2369,7 @@ bool DinRailControlBoardNWCYarp::setRefTorque(int j, double v)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     // in streaming port only SET command can be sent, so it is implicit
@@ -2389,6 +2393,7 @@ bool DinRailControlBoardNWCYarp::setRefTorques(const int n_joint,
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     // in streaming port only SET command can be sent, so it is implicit
@@ -2608,6 +2613,7 @@ bool DinRailControlBoardNWCYarp::setSetPoint(
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
@@ -2645,6 +2651,7 @@ bool DinRailControlBoardNWCYarp::setSetPoints(
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
@@ -2688,6 +2695,7 @@ bool DinRailControlBoardNWCYarp::setSetPoints(
         return false;
     }
 
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS);
@@ -2961,6 +2969,7 @@ bool DinRailControlBoardNWCYarp::setPosition(int j, double ref)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_POSITION_DIRECT);
@@ -2979,6 +2988,7 @@ bool DinRailControlBoardNWCYarp::setPositions(const int n_joint,
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_POSITION_DIRECT_GROUP);
@@ -3000,6 +3010,7 @@ bool DinRailControlBoardNWCYarp::setPositions(const double* refs)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_POSITION_DIRECTS);
@@ -3037,6 +3048,7 @@ bool DinRailControlBoardNWCYarp::velocityMove(const int n_joint,
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_VELOCITY_MOVE_GROUP);
@@ -3301,6 +3313,7 @@ bool DinRailControlBoardNWCYarp::setRefCurrents(const double* refs)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
@@ -3317,6 +3330,7 @@ bool DinRailControlBoardNWCYarp::setRefCurrent(int j, double ref)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
@@ -3336,6 +3350,7 @@ bool DinRailControlBoardNWCYarp::setRefCurrents(const int n_joint,
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_CURRENTCONTROL_INTERFACE);
@@ -3397,6 +3412,7 @@ bool DinRailControlBoardNWCYarp::setRefDutyCycle(int j, double v)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     // in streaming port only SET command can be sent, so it is implicit
@@ -3418,6 +3434,7 @@ bool DinRailControlBoardNWCYarp::setRefDutyCycles(const double* v)
     {
         return false;
     }
+    std::lock_guard<std::mutex> lock(command_buffer_mutex);
     CommandMessage& c = command_buffer.get();
     c.head.clear();
     c.head.addVocab32(VOCAB_PWMCONTROL_INTERFACE);
