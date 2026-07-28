@@ -27,6 +27,8 @@ target_sources(dinrail
     dinrail/Placeholder.cpp
     dinrail/RTMemoryGuard.h
     dinrail/RTMemoryGuard.cpp
+    dinrail/RuntimeContext.cpp
+    dinrail/RuntimeContext.h
     dinrail/Value.cpp
 )
 
