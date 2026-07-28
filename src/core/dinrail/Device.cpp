@@ -40,6 +40,11 @@ Device::~Device()
 
 bool Device::open(const Parameters& config)
 {
+    if (!m_pimpl)
+    {
+        return false;
+    }
+
     m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
@@ -68,12 +73,12 @@ bool Device::close()
 
 bool Device::isValid() const
 {
-    return m_pimpl->isValid;
+    return m_pimpl && m_pimpl->isValid;
 }
 
 IDevice* Device::getImplementation()
 {
-    return m_pimpl->driver.get();
+    return m_pimpl ? m_pimpl->driver.get() : nullptr;
 }
 
 } // namespace dinrail

@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef DINRAIL_CONTEXT_H
-#define DINRAIL_CONTEXT_H
+#ifndef DINRAIL_RUNTIMECONTEXT_H
+#define DINRAIL_RUNTIMECONTEXT_H
 
 #include <functional>
 #include <memory>
@@ -72,4 +72,4 @@ private:
 
 } // namespace dinrail
 
-#endif // DINRAIL_CONTEXT_H
+#endif // DINRAIL_RUNTIMECONTEXT_H

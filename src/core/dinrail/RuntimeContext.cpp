@@ -7,7 +7,6 @@
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
 
-#include <sharedlibpp/SharedLibraryClass.h>
 #include <sharedlibpp/SharedLibraryClassFactory.h>
 
 #include <functional>
