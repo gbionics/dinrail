@@ -16,8 +16,7 @@ class Parameters;
 
 // Deleter for unique_ptr that calls a stored destroy function instead of delete.
 // This is used to manage the lifetime of devices created via plugin factories.
-template <class T>
-struct FactoryDeleter
+template <class T> struct FactoryDeleter
 {
     std::function<void(T*)> destroy_fn;
 
@@ -30,8 +29,7 @@ struct FactoryDeleter
     }
 };
 
-template <class T>
-using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
+template <class T> using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
 
 /**
  * Shared runtime state used to load device plug-ins.
