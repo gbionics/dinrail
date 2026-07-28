@@ -127,6 +127,21 @@ Use the following mapping:
 - `yCDebug(COMP, ...)` -> `controlBoardLogger().debug(...)`
 - `yCAssert(COMP, cond)` -> `if (!(cond)) { controlBoardLogger().error(...); assert(cond); }`
 
+#### Throttle macros
+
+For throttled logging (at most once every `period` seconds), use:
+
+- `yErrorThrottle(period, ...)` -> `DINRAIL_ERROR_THROTTLE(period, spdlog::default_logger(), ...)`
+- `yWarningThrottle(period, ...)` -> `DINRAIL_WARN_THROTTLE(period, spdlog::default_logger(), ...)`
+- `yInfoThrottle(period, ...)` -> `DINRAIL_INFO_THROTTLE(period, spdlog::default_logger(), ...)`
+- `yDebugThrottle(period, ...)` -> `DINRAIL_DEBUG_THROTTLE(period, spdlog::default_logger(), ...)`
+- `yCErrorThrottle(COMP, period, ...)` -> `DINRAIL_ERROR_THROTTLE(period, controlBoardLogger(), ...)`
+- `yCWarningThrottle(COMP, period, ...)` -> `DINRAIL_WARN_THROTTLE(period, controlBoardLogger(), ...)`
+- `yCInfoThrottle(COMP, period, ...)` -> `DINRAIL_INFO_THROTTLE(period, controlBoardLogger(), ...)`
+- `yCDebugThrottle(COMP, period, ...)` -> `DINRAIL_DEBUG_THROTTLE(period, controlBoardLogger(), ...)`
+
+These throttle macros are defined in `dinrail/SpdlogHelpers.h` and ensure that a message is logged at most once every `period` seconds.
+
 ### Examples
 
 Format-style message:
@@ -147,6 +162,16 @@ yCError(CONTROLBOARDREMAPPER) << "Attach failed for device " << deviceKey;
 
 // spdlog
 controlBoardLogger().error("Attach failed for device {}", deviceKey);
+```
+
+Throttled logging (at most once every 1.0 second):
+
+```cpp
+// YARP
+yCWarningThrottle(CONTROLBOARD, 1.0, "Sensor reading out of range: %f", reading);
+
+// spdlog (include dinrail/SpdlogHelpers.h)
+DINRAIL_WARN_THROTTLE(1.0, controlBoardLogger(), "Sensor reading out of range: {}", reading);
 ```
 
 ### Notes

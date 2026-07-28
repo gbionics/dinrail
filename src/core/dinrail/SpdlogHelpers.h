@@ -9,6 +9,7 @@
 #include <spdlog/cfg/env.h>
 #include <spdlog/spdlog.h>
 
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -139,5 +140,40 @@ inline std::shared_ptr<spdlog::logger> createOrGetLogger(std::string_view logger
 }
 
 } // namespace dinrail
+
+// Throttle logging macros
+//
+// These macros allow logging at most once every `period` seconds.
+// Useful for high-frequency events to avoid spamming the logs.
+//
+// Usage:
+//   DINRAIL_WARN_THROTTLE(1.0, my_logger, "Event occurred {} times", count);
+//
+// Maps to YARP's throttle macros:
+//   yWarningThrottle(period, ...) -> DINRAIL_WARN_THROTTLE(period, spdlog::default_logger(), ...)
+//   yCWarningThrottle(comp, period, ...) -> DINRAIL_WARN_THROTTLE(period, my_logger, ...)
+
+#define DINRAIL_LOG_THROTTLE_IMPL(level, period, logger, ...)                   \
+    do                                                                          \
+    {                                                                           \
+        static auto last_time = std::chrono::steady_clock::now();               \
+        auto now = std::chrono::steady_clock::now();                            \
+        if (std::chrono::duration<double>(now - last_time).count() >= (period)) \
+        {                                                                       \
+            last_time = now;                                                    \
+            (logger)->level(__VA_ARGS__);                                       \
+        }                                                                       \
+    } while (0)
+
+#define DINRAIL_ERROR_THROTTLE(period, logger, ...) \
+    DINRAIL_LOG_THROTTLE_IMPL(error, period, logger, __VA_ARGS__)
+#define DINRAIL_WARN_THROTTLE(period, logger, ...) \
+    DINRAIL_LOG_THROTTLE_IMPL(warn, period, logger, __VA_ARGS__)
+#define DINRAIL_INFO_THROTTLE(period, logger, ...) \
+    DINRAIL_LOG_THROTTLE_IMPL(info, period, logger, __VA_ARGS__)
+#define DINRAIL_DEBUG_THROTTLE(period, logger, ...) \
+    DINRAIL_LOG_THROTTLE_IMPL(debug, period, logger, __VA_ARGS__)
+#define DINRAIL_TRACE_THROTTLE(period, logger, ...) \
+    DINRAIL_LOG_THROTTLE_IMPL(trace, period, logger, __VA_ARGS__)
 
 #endif // DINRAIL_SPDLOGHELPERS_H
