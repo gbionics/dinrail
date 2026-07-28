@@ -10,11 +10,11 @@
 #include <sharedlibpp/SharedLibraryClass.h>
 #include <sharedlibpp/SharedLibraryClassFactory.h>
 
+#include <iostream>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <unordered_map>
-#include <memory>
-#include <iostream>
 
 namespace dinrail
 {
@@ -95,7 +95,8 @@ struct RuntimeContext::Impl
                                                           SHLIBPP_DEFAULT_SYSTEM_VERSION,
                                                           factoryName.c_str());
 
-        // Extend search path with all configured plugin directories (dinrail lib dir + DINRAIL_PLUGIN_PATH)
+        // Extend search path with all configured plugin directories (dinrail lib dir +
+        // DINRAIL_PLUGIN_PATH)
         const auto pluginSearchPaths = getPluginSearchPaths();
         for (const auto& path : pluginSearchPaths)
         {
@@ -150,16 +151,14 @@ struct RuntimeContext::Impl
             }
             if (!driver)
             {
-                std::cerr << "dinrail::Device: impossible to create instance for device '" << deviceName
-                          << "' from library '" << libraryName << "'" << std::endl;
-            }
-            else
+                std::cerr << "dinrail::Device: impossible to create instance for device '"
+                          << deviceName << "' from library '" << libraryName << "'" << std::endl;
+            } else
             {
                 std::cerr << "dinrail::Device: device '" << deviceName
                           << "' failed to open with provided config" << std::endl;
             }
-        }
-        else
+        } else
         {
             std::cerr << "dinrail::Device: impossible to find library '" << libraryName
                       << "' for device '" << deviceName << "' (factory symbol: '" << factoryName
