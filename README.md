@@ -32,7 +32,7 @@ Configure and open a fake device, then query it through a typed interface:
 #include <dinrail/Parameters.h>
 
 dinrail::Parameters opts;
-opts.put("device", "fakeMotionControl");
+opts.put("device", "dr_controlboard_fake");
 opts.put("number_of_joints", 3);
 opts.put("joint_names", std::vector<std::string>{"shoulder", "elbow", "wrist"});
 opts.put("joint_type", std::vector<std::string>{"revolute", "prismatic", "revolute"});
@@ -76,7 +76,7 @@ Examples documentation (including Pixi commands) is available at:
 
 ## Built-in device documentation
 
-* [fakeMotionControl README](src/devices/fake/fakeMotionControl/README.md) — parameters accepted by the `fakeMotionControl` plugin
+* [dr_controlboard_fake README](src/devices/fake/dr_controlboard_fake/README.md) — parameters accepted by the `dr_controlboard_fake` plugin
 
 ## Versioning policy
 

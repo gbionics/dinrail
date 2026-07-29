@@ -13,12 +13,12 @@
 TEST_CASE("YarpPropertyConverter converts device name", "[YarpPropertyConverter]")
 {
     dinrail::Parameters dinrailProp;
-    dinrailProp.put("device", "fakeMotionControl");
+    dinrailProp.put("device", "dr_controlboard_fake");
 
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
 
     REQUIRE(yarpProp.check("device"));
-    REQUIRE(yarpProp.find("device").asString() == "fakeMotionControl");
+    REQUIRE(yarpProp.find("device").asString() == "dr_controlboard_fake");
 }
 
 TEST_CASE("YarpPropertyConverter handles missing device name", "[YarpPropertyConverter]")
@@ -35,7 +35,7 @@ TEST_CASE("YarpPropertyConverter converts GENERAL group with Joints parameter",
           "[YarpPropertyConverter]")
 {
     dinrail::Parameters dinrailProp;
-    dinrailProp.put("device", "fakeMotionControl");
+    dinrailProp.put("device", "dr_controlboard_fake");
 
     dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     general.put("Joints", 6);
@@ -43,7 +43,7 @@ TEST_CASE("YarpPropertyConverter converts GENERAL group with Joints parameter",
     yarp::os::Property yarpProp = dinrail::YarpPropertyConverter::toYarpProperty(dinrailProp);
 
     REQUIRE(yarpProp.check("device"));
-    REQUIRE(yarpProp.find("device").asString() == "fakeMotionControl");
+    REQUIRE(yarpProp.find("device").asString() == "dr_controlboard_fake");
 
     REQUIRE(yarpProp.check("GENERAL"));
     yarp::os::Bottle* generalGroup = yarpProp.find("GENERAL").asList();
@@ -106,7 +106,7 @@ TEST_CASE("YarpPropertyConverter full configuration example", "[YarpPropertyConv
 {
     // Create a typical device configuration
     dinrail::Parameters dinrailProp;
-    dinrailProp.put("device", "fakeMotionControl");
+    dinrailProp.put("device", "dr_controlboard_fake");
 
     dinrail::Parameters& general = dinrailProp.addGroup("GENERAL");
     general.put("Joints", 4);
@@ -116,7 +116,7 @@ TEST_CASE("YarpPropertyConverter full configuration example", "[YarpPropertyConv
 
     // Verify device name
     REQUIRE(yarpProp.check("device"));
-    REQUIRE(yarpProp.find("device").asString() == "fakeMotionControl");
+    REQUIRE(yarpProp.find("device").asString() == "dr_controlboard_fake");
 
     // Verify GENERAL group
     REQUIRE(yarpProp.check("GENERAL"));

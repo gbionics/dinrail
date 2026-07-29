@@ -13,7 +13,7 @@ int main()
 {
     // Build a minimal dinrail::Parameters object.
     dinrail::Parameters dinrailParams;
-    dinrailParams.put("device", "fakeMotionControl");
+    dinrailParams.put("device", "dr_controlboard_fake");
     dinrailParams.put("period_ms", 10);
 
     dinrail::Parameters& general = dinrailParams.addGroup("GENERAL");

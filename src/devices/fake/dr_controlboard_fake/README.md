@@ -1,11 +1,11 @@
-# fakeMotionControl Parameters
+# dr_controlboard_fake Parameters
 
-This document describes the parameters currently accepted by the `fakeMotionControl` dinrail device.
+This document describes the parameters currently accepted by the `dr_controlboard_fake` dinrail device.
 
 ## Required Parameter
 
 - `device` (string)
-  - Must be `"fakeMotionControl"`.
+  - Must be `"dr_controlboard_fake"`.
 
 ## Optional Parameters
 
@@ -28,7 +28,7 @@ This document describes the parameters currently accepted by the `fakeMotionCont
   - Default type for all joints: `revolute`.
 
 - `GENERAL.Joints` (int)
-  - Deprecated compatibility parameter for YARP's `fakeMotionControl`.
+  - Deprecated compatibility parameter for YARP's `dr_controlboard_fake`.
   - Supported only for compatibility.
   - Used only when `number_of_joints` is not provided.
 
@@ -46,7 +46,7 @@ The project currently configures devices programmatically through `dinrail::Para
 #include <dinrail/Parameters.h>
 
 dinrail::Parameters opts;
-opts.put("device", "fakeMotionControl");
+opts.put("device", "dr_controlboard_fake");
 opts.put("number_of_joints", 3);
 opts.put("joint_names", std::vector<std::string>{"shoulder", "elbow", "wrist"});
 opts.put("joint_type", std::vector<std::string>{"revolute", "prismatic", "revolute"});

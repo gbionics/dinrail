@@ -13,7 +13,7 @@ TEST_CASE("Parameters stores and retrieves scalar values", "[Parameters]")
 {
     dinrail::Parameters params;
 
-    params.put("device", std::string("fakeMotionControl"));
+    params.put("device", std::string("dr_controlboard_fake"));
     params.put("joints", 6);
     params.put("period", 0.01);
     params.put("enabled", true);
@@ -23,7 +23,7 @@ TEST_CASE("Parameters stores and retrieves scalar values", "[Parameters]")
     REQUIRE(params.check("period"));
     REQUIRE(params.check("enabled"));
 
-    REQUIRE(params.find("device").as<std::string>() == "fakeMotionControl");
+    REQUIRE(params.find("device").as<std::string>() == "dr_controlboard_fake");
     REQUIRE(params.find("joints").as<int>() == 6);
     REQUIRE(params.find("period").as<double>() == 0.01);
     REQUIRE(params.find("enabled").as<bool>());
@@ -37,7 +37,7 @@ TEST_CASE("Parameters stores and retrieves scalar values", "[Parameters]")
     REQUIRE(params.find("enabled").asBool());
     REQUIRE(params.find("enabled").asInt() == static_cast<int>('1'));
     REQUIRE(params.find("enabled").asDouble() == static_cast<double>('1'));
-    REQUIRE(params.find("device").asString() == "fakeMotionControl");
+    REQUIRE(params.find("device").asString() == "dr_controlboard_fake");
 
     REQUIRE(params.find("device").asBool() == false);
     REQUIRE(params.find("device").asInt() == 0);
@@ -104,7 +104,7 @@ TEST_CASE("Parameters copy is deep for groups", "[Parameters]")
 TEST_CASE("Parameters clear removes values and groups", "[Parameters]")
 {
     dinrail::Parameters params;
-    params.put("device", std::string("fakeMotionControl"));
+    params.put("device", std::string("dr_controlboard_fake"));
     params.addGroup("GENERAL").put("Joints", 6);
 
     params.clear();

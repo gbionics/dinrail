@@ -10,4 +10,4 @@ if(PROJECT_IS_TOP_LEVEL)
     find_package(dinrail REQUIRED)
 endif()
 
-add_subdirectory(fake/fakeMotionControl)
+add_subdirectory(fake/dr_controlboard_fake)
