@@ -14,6 +14,6 @@ add_test(NAME FakeMotionControlInterfacesTest COMMAND FakeMotionControlInterface
 # Tests must find plugins from the build tree even when the project is not installed.
 set_tests_properties(FakeMotionControlInterfacesTest
     PROPERTIES
-        ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-fakeMotionControl>"
+        ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-dr_controlboard_fake>"
 )
 

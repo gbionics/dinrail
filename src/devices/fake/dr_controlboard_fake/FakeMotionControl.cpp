@@ -55,7 +55,7 @@ bool FakeMotionControl::open(const Parameters& config)
     if (!config.check<int>("number_of_joints") && !general.isNull()
         && general.find("Joints").isInt())
     {
-        // Deprecated compatibility path with YARP fakeMotionControl.
+        // Deprecated compatibility path with YARP dr_controlboard_fake.
         m_njoints = general.find("Joints").as<int>();
     }
 

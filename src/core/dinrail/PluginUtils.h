@@ -14,14 +14,14 @@ namespace dinrail
 
 /**
  * @brief Build the shared library name for a dinrail device plugin.
- * @param deviceName Device identifier (for example, "fakeMotionControl").
+ * @param deviceName Device identifier (for example, "dr_controlboard_fake").
  * @return Library stem in the form "dinrail-device-<deviceName>".
  */
 std::string getSharedlibppLibraryNameFromDeviceName(const std::string& deviceName);
 
 /**
  * @brief Build the sharedlibpp factory symbol name for a dinrail device plugin.
- * @param deviceName Device identifier (for example, "fakeMotionControl").
+ * @param deviceName Device identifier (for example, "dr_controlboard_fake").
  * @return Factory symbol in the form "dinrail_device_<deviceName>", with dashes converted to
  * underscores.
  */
