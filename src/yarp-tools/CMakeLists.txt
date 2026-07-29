@@ -11,5 +11,6 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 find_package(YARP REQUIRED COMPONENTS os dev robotinterface)
+find_package(spdlog REQUIRED)
 
 add_subdirectory(dinrail-runner)

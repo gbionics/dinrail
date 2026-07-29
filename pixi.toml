@@ -33,6 +33,7 @@ ycm-cmake-modules = "*"
 [package.host-dependencies]
 libsharedlibpp = "*"
 cli11 = "*"
+spdlog = "*"
 libyarp = "*"
 
 
@@ -87,6 +88,9 @@ libsharedlibpp = "*"
 
 # Cli deps
 cli11 = "*"
+
+# Device and tools deps
+spdlog = "*"
 
 # Optional deps
 libyarp = "*"

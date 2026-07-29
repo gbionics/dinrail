@@ -7,8 +7,7 @@
 #include "DinRailControlBoardRemapperHelpers.h"
 #include "DinRailControlBoardRemapperLogComponent.h"
 
-#include <yarp/os/Log.h>
-#include <yarp/os/LogStream.h>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <cassert>
@@ -19,6 +18,8 @@
 using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
+
+using dinrail::yarp_devices::remapper::controlBoardRemapperLogger;
 
 bool DinRailControlBoardRemapper::close()
 {
@@ -33,7 +34,7 @@ bool DinRailControlBoardRemapper::open(Searchable& config)
     _verb = (prop.check("verbose", "if present, give detailed output"));
     if (_verb)
     {
-        yCInfo(CONTROLBOARDREMAPPER, "running with verbose output");
+        controlBoardRemapperLogger().info("running with verbose output");
     }
 
     if (!parseOptions(prop))
@@ -53,14 +54,14 @@ bool DinRailControlBoardRemapper::parseOptions(Property& prop)
 
     if (usingAxesNamesForAttachAll && usingNetworksForAttachAll)
     {
-        yCError(CONTROLBOARDREMAPPER) << "Both axesNames and networks option present, this is not "
-                                         "supported.";
+        controlBoardRemapperLogger().error("Both axesNames and networks option present, this is "
+                                           "not supported.");
         return false;
     }
 
     if (!usingAxesNamesForAttachAll && !usingNetworksForAttachAll)
     {
-        yCError(CONTROLBOARDREMAPPER) << "axesNames option not found";
+        controlBoardRemapperLogger().error("axesNames option not found");
         return false;
     }
 
@@ -82,8 +83,8 @@ bool DinRailControlBoardRemapper::parseAxesNames(const Property& prop)
     Bottle* propAxesNames = prop.find("axesNames").asList();
     if (propAxesNames == nullptr)
     {
-        yCError(CONTROLBOARDREMAPPER) << "Parsing parameters: \"axesNames\" should be followed by "
-                                         "a list";
+        controlBoardRemapperLogger().error("Parsing parameters: \"axesNames\" should be followed "
+                                           "by a list");
         return false;
     }
 
@@ -103,14 +104,14 @@ bool DinRailControlBoardRemapper::parseNetworks(const Property& prop)
     Bottle* nets = prop.find("networks").asList();
     if (nets == nullptr)
     {
-        yCError(CONTROLBOARDREMAPPER) << "Parsing parameters: \"networks\" should be followed by a "
-                                         "list";
+        controlBoardRemapperLogger().error("Parsing parameters: \"networks\" should be followed by "
+                                           "a list");
         return false;
     }
 
     if (!prop.check("joints", "number of joints of the part"))
     {
-        yCError(CONTROLBOARDREMAPPER) << "joints options not found when reading networks option";
+        controlBoardRemapperLogger().error("joints options not found when reading networks option");
         return false;
     }
 
@@ -143,11 +144,12 @@ bool DinRailControlBoardRemapper::parseNetworks(const Property& prop)
 
                 if (tmpBot.size() != 4)
                 {
-                    yCError(CONTROLBOARDREMAPPER)
-                        << "Check network parameters in part description"
-                        << "--> I was expecting" << nets->get(k).asString()
-                        << "followed by a list of four integers in parenthesis"
-                        << "Got:" << parameters.toString();
+                    controlBoardRemapperLogger().error("Check network parameters in part "
+                                                       "description --> I was expecting {} "
+                                                       "followed by a list of four integers in "
+                                                       "parenthesis Got: {}",
+                                                       nets->get(k).asString(),
+                                                       parameters.toString());
                     return false;
                 } else
                 {
@@ -162,17 +164,18 @@ bool DinRailControlBoardRemapper::parseNetworks(const Property& prop)
             top = bot->get(3).asInt32();
         } else if (parameters.size() == 5)
         {
-            // yCError(CONTROLBOARDREMAPPER) << "Parameter networks use deprecated syntax";
+            // Parameter networks uses a deprecated syntax.
             wBase = parameters.get(1).asInt32();
             wTop = parameters.get(2).asInt32();
             base = parameters.get(3).asInt32();
             top = parameters.get(4).asInt32();
         } else
         {
-            yCError(CONTROLBOARDREMAPPER) << "Check network parameters in part description"
-                                          << "--> I was expecting" << nets->get(k).asString()
-                                          << "followed by a list of four integers in parenthesis"
-                                          << "Got:" << parameters.toString();
+            controlBoardRemapperLogger().error("Check network parameters in part description --> I "
+                                               "was expecting {} followed "
+                                               "by a list of four integers in parenthesis Got: {}",
+                                               nets->get(k).asString(),
+                                               parameters.toString());
             return false;
         }
 
@@ -181,10 +184,11 @@ bool DinRailControlBoardRemapper::parseNetworks(const Property& prop)
 
         if ((wTop - wBase) != (top - base))
         {
-            yCError(CONTROLBOARDREMAPPER)
-                << "Check network parameters in network " << nets->get(k).asString().c_str()
-                << "I was expecting a well form quadruple of numbers, got instead: "
-                << parameters.toString().c_str();
+            controlBoardRemapperLogger().error("Check network parameters in network {} I was "
+                                               "expecting a well form quadruple "
+                                               "of numbers, got instead: {}",
+                                               nets->get(k).asString(),
+                                               parameters.toString());
         }
 
         tmpDevice->id = nets->get(k).asString();
@@ -255,8 +259,8 @@ bool DinRailControlBoardRemapper::attachAll(const PolyDriverList& polylist)
 
     if (!ready)
     {
-        yCError(CONTROLBOARDREMAPPER,
-                "AttachAll failed, some subdevice was not found or its attach failed");
+        controlBoardRemapperLogger().error("AttachAll failed, some subdevice was not found or its "
+                                           "attach failed");
         return false;
     }
 
@@ -305,9 +309,10 @@ bool DinRailControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& 
 
         if (!iencs || !iaxinfos)
         {
-            yCError(CONTROLBOARDREMAPPER) << "sub-device" << deviceKey
-                                          << "does not implemented the required IAxisInfo or "
-                                             "IEncoders interfaces";
+            controlBoardRemapperLogger().error("sub-device {} does not implemented the required "
+                                               "IAxisInfo or IEncoders "
+                                               "interfaces",
+                                               deviceKey);
             return false;
         }
 
@@ -316,8 +321,9 @@ bool DinRailControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& 
 
         if (!ok)
         {
-            yCError(CONTROLBOARDREMAPPER)
-                << "sub-device" << deviceKey << "does not implemented the required getAxes method";
+            controlBoardRemapperLogger().error("sub-device {} does not implemented the required "
+                                               "getAxes method",
+                                               deviceKey);
             return false;
         }
 
@@ -330,19 +336,23 @@ bool DinRailControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& 
 
             if (!ok)
             {
-                yCError(CONTROLBOARDREMAPPER) << "sub-device" << deviceKey
-                                              << "does not implemented the required getAxisName "
-                                                 "method";
+                controlBoardRemapperLogger().error("sub-device {} does not implemented the "
+                                                   "required getAxisName method",
+                                                   deviceKey);
                 return false;
             }
 
             auto it = axesLocationMap.find(axName);
             if (it != axesLocationMap.end())
             {
-                yCError(CONTROLBOARDREMAPPER)
-                    << "multiple axes have the same name" << axName << "on on device "
-                    << polylist[p]->key << "with index" << axInSubDevice << "and another on device"
-                    << it->second.subDeviceKey << "with index" << it->second.indexInSubDevice;
+                controlBoardRemapperLogger().error("multiple axes have the same name {} on on "
+                                                   "device {} with index {} and "
+                                                   "another on device {} with index {}",
+                                                   axName,
+                                                   polylist[p]->key,
+                                                   axInSubDevice,
+                                                   it->second.subDeviceKey,
+                                                   it->second.indexInSubDevice);
                 return false;
             }
 
@@ -366,10 +376,10 @@ bool DinRailControlBoardRemapper::attachAllUsingAxesNames(const PolyDriverList& 
         auto it = axesLocationMap.find(axesName);
         if (it == axesLocationMap.end())
         {
-            yCError(CONTROLBOARDREMAPPER) << "axis " << axesName
-                                          << "specified in axesNames was not found in the axes of "
-                                             "the controlboards passed to attachAll, attachAll "
-                                             "failed.";
+            controlBoardRemapperLogger().error("axis {} specified in axesNames was not found in "
+                                               "the axes of the controlboards "
+                                               "passed to attachAll, attachAll failed.",
+                                               axesName);
             return false;
         }
 
@@ -443,9 +453,8 @@ bool DinRailControlBoardRemapper::attachAllUsingNetworks(const PolyDriverList& p
             {
                 if (!remappedControlBoards.subdevices[k].attach(polylist[p]->poly, subDeviceKey))
                 {
-                    yCError(CONTROLBOARDREMAPPER,
-                            "attach to subdevice %s failed",
-                            polylist[p]->key.c_str());
+                    controlBoardRemapperLogger().error("attach to subdevice {} failed",
+                                                       polylist[p]->key.c_str());
                     return false;
                 }
             }
@@ -456,7 +465,7 @@ bool DinRailControlBoardRemapper::attachAllUsingNetworks(const PolyDriverList& p
 
     if (!ok)
     {
-        yCWarning(CONTROLBOARDREMAPPER) << "unable to update axesNames";
+        controlBoardRemapperLogger().warn("unable to update axesNames");
     }
 
     return true;
@@ -2338,8 +2347,8 @@ bool DinRailControlBoardRemapper::setGearboxRatio(int m, const double val)
 /* IRemoteVariables */
 bool DinRailControlBoardRemapper::getRemoteVariable(std::string key, yarp::os::Bottle& val)
 {
-    yCWarning(CONTROLBOARDREMAPPER,
-              "getRemoteVariable is not properly implemented, use at your own risk.");
+    controlBoardRemapperLogger().warn("getRemoteVariable is not properly implemented, use at your "
+                                      "own risk.");
 
     bool b = true;
 
@@ -2373,16 +2382,15 @@ bool DinRailControlBoardRemapper::getRemoteVariable(std::string key, yarp::os::B
 
 bool DinRailControlBoardRemapper::setRemoteVariable(std::string key, const yarp::os::Bottle& val)
 {
-    yCWarning(CONTROLBOARDREMAPPER,
-              "setRemoteVariable is not properly implemented, use at your own risk.");
+    controlBoardRemapperLogger().warn("setRemoteVariable is not properly implemented, use at your "
+                                      "own risk.");
 
     size_t bottle_size = val.size();
     size_t device_size = remappedControlBoards.getNrOfSubControlBoards();
     if (bottle_size != device_size)
     {
-        yCError(CONTROLBOARDREMAPPER,
-                "DinRailControlBoardRemapper::setRemoteVariable bottle_size != device_size "
-                "failure");
+        controlBoardRemapperLogger().error("DinRailControlBoardRemapper::setRemoteVariable "
+                                           "bottle_size != device_size failure");
         return false;
     }
 
@@ -2392,14 +2400,14 @@ bool DinRailControlBoardRemapper::setRemoteVariable(std::string key, const yarp:
         RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(i);
         if (!p)
         {
-            yCError(CONTROLBOARDREMAPPER,
-                    "DinRailControlBoardRemapper::setRemoteVariable !p failure");
+            controlBoardRemapperLogger().error("DinRailControlBoardRemapper::setRemoteVariable !p "
+                                               "failure");
             return false;
         }
         if (!p->iVar)
         {
-            yCError(CONTROLBOARDREMAPPER,
-                    "DinRailControlBoardRemapper::setRemoteVariable !p->iVar failure");
+            controlBoardRemapperLogger().error("DinRailControlBoardRemapper::setRemoteVariable "
+                                               "!p->iVar failure");
             return false;
         }
         Bottle* partial_val = val.get(i).asList();
@@ -2408,8 +2416,8 @@ bool DinRailControlBoardRemapper::setRemoteVariable(std::string key, const yarp:
             b &= p->iVar->setRemoteVariable(key, *partial_val);
         } else
         {
-            yCError(CONTROLBOARDREMAPPER,
-                    "DinRailControlBoardRemapper::setRemoteVariable general failure");
+            controlBoardRemapperLogger().error("DinRailControlBoardRemapper::setRemoteVariable "
+                                               "general failure");
             return false;
         }
     }
@@ -2419,8 +2427,8 @@ bool DinRailControlBoardRemapper::setRemoteVariable(std::string key, const yarp:
 
 bool DinRailControlBoardRemapper::getRemoteVariablesList(yarp::os::Bottle* listOfKeys)
 {
-    yCWarning(CONTROLBOARDREMAPPER,
-              "getRemoteVariablesList is not properly implemented, use at your own risk.");
+    controlBoardRemapperLogger().warn("getRemoteVariablesList is not properly implemented, use at "
+                                      "your own risk.");
 
     size_t subIndex = remappedControlBoards.lut[0].subControlBoardIndex;
     RemappedSubControlBoard* p = remappedControlBoards.getSubControlBoard(subIndex);
@@ -3386,13 +3394,13 @@ bool DinRailControlBoardRemapper::calibrationDone(int j)
 
 bool DinRailControlBoardRemapper::abortPark()
 {
-    yCError(CONTROLBOARDREMAPPER, "Calling abortPark -- not implemented");
+    controlBoardRemapperLogger().error("Calling abortPark -- not implemented");
     return false;
 }
 
 bool DinRailControlBoardRemapper::abortCalibration()
 {
-    yCError(CONTROLBOARDREMAPPER, "Calling abortCalibration -- not implemented");
+    controlBoardRemapperLogger().error("Calling abortCalibration -- not implemented");
     return false;
 }
 

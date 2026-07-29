@@ -6,8 +6,11 @@
 #ifndef YARP_DEV_CONTROLBOARDWRAPPER_CONTROLBOARDWRAPPERLOGCOMPONENT_H
 #define YARP_DEV_CONTROLBOARDWRAPPER_CONTROLBOARDWRAPPERLOGCOMPONENT_H
 
-#include <yarp/os/LogComponent.h>
+#include <spdlog/spdlog.h>
 
-YARP_DECLARE_LOG_COMPONENT(CONTROLBOARD)
+#include <string_view>
+
+spdlog::logger& controlBoardLogger();
+bool controlBoardShouldLogThrottle(std::string_view key, double intervalSeconds);
 
 #endif // YARP_DEV_CONTROLBOARDWRAPPER_CONTROLBOARDWRAPPERLOGCOMPONENT_H

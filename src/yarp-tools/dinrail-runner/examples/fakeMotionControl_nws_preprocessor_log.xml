@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.1//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.1.dtd">
+<robot name="dinrail-runner-fake-controlboard" build="0" portprefix="/fake-controlboard" prefix="fake-controlboard" xmlns:xi="http://www.w3.org/2001/XInclude">
+    <devices>
+        <device name="fake_motion_control" type="fakeMotionControl">
+            <group name="GENERAL">
+                <param name="Joints">3</param>
+            </group>
+        </device>
+        <device name="fake_motion_control_nws" type="dr_controlboard_nws_yarp">
+            <param name="name">${portprefix}</param>
+            <param name="period">0.02</param>
+            <action phase="startup" level="5" type="attach">
+                <param name="device">fake_motion_control</param>
+            </action>
+            <action phase="shutdown" level="5" type="detach" />
+        </device>
+    </devices>
+</robot>

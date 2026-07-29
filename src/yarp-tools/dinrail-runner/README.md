@@ -54,6 +54,50 @@ At the moment details of the xml format of the files loaded by `dinrail-runner` 
 
 `dinrail-runner` loads the xml file from the location specified in the `--config` option.
 
+## Example
+
+An example XML configuration is available at:
+
+- `src/yarp-tools/dinrail-runner/examples/fakeMotionControl_nws.xml`
+
+It starts:
+
+- one `fakeMotionControl` device with `3` joints
+- one `dr_controlboard_nws_yarp` wrapper attached to that fake device
+
+The wrapper publishes the usual control board ports under the robot `portprefix`, so with the provided example you will get ports such as:
+
+- `/fake-controlboard/rpc:i`
+- `/fake-controlboard/command:i`
+- `/fake-controlboard/state:o`
+- `/fake-controlboard/stateExt:o`
+
+To launch the example from the repository root:
+
+1. Start a YARP server in a separate terminal:
+
+```bash
+yarpserver
+```
+
+2. Build the runner and YARP devices if needed:
+
+```bash
+pixi run cmake --build .build --target dinrail-runner dr_controlboard_nws_yarp -j4
+```
+
+3. Run the example:
+
+```bash
+pixi run .build/bin/dinrail-runner --config src/yarp-tools/dinrail-runner/examples/fakeMotionControl_nws.xml
+```
+
+If you only want to validate that the XML is well formed without opening devices, use:
+
+```bash
+pixi run .build/bin/dinrail-runner --config src/yarp-tools/dinrail-runner/examples/fakeMotionControl_nws.xml --dryrun --verbose
+```
+
 ## dinrail-runner-rt
 
 The CMake infrastructure installs two binaries, `dinrail-runner` and `dinrail-runner-rt`.

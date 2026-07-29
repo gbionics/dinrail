@@ -8,7 +8,6 @@
 #include <cstring>
 
 #include <yarp/os/BufferedPort.h>
-#include <yarp/os/LogStream.h>
 #include <yarp/os/Network.h>
 #include <yarp/os/PortablePair.h>
 #include <yarp/os/Stamp.h>
@@ -166,9 +165,9 @@ bool StateExtendedInputPort::getLastSingle(
             break;
 
         default:
-            yCError(REMOTECONTROLBOARD) << "DinRailControlBoardNWCYarp internal error while "
-                                           "reading data. Cannot get 'single' data of type "
-                                        << yarp::os::Vocab32::decode(field);
+            remoteControlBoardLogger().error("DinRailControlBoardNWCYarp internal error while "
+                                             "reading data. Cannot get 'single' data of type {}",
+                                             yarp::os::Vocab32::decode(field));
             break;
         }
 
@@ -204,9 +203,9 @@ bool StateExtendedInputPort::getLastSingle(
             break;
 
         default:
-            yCError(REMOTECONTROLBOARD) << "DinRailControlBoardNWCYarp internal error while "
-                                           "reading data. Cannot get 'single' data of type "
-                                        << yarp::os::Vocab32::decode(field);
+            remoteControlBoardLogger().error("DinRailControlBoardNWCYarp internal error while "
+                                             "reading data. Cannot get 'single' data of type {}",
+                                             yarp::os::Vocab32::decode(field));
             break;
         }
         localArrivalTime = now;
@@ -298,9 +297,9 @@ bool StateExtendedInputPort::getLastVector(int field,
             break;
 
         default:
-            yCError(REMOTECONTROLBOARD) << "DinRailControlBoardNWCYarp internal error while "
-                                           "reading data. Cannot get 'vector' data of type "
-                                        << yarp::os::Vocab32::decode(field);
+            remoteControlBoardLogger().error("DinRailControlBoardNWCYarp internal error while "
+                                             "reading data. Cannot get 'vector' data of type {}",
+                                             yarp::os::Vocab32::decode(field));
             break;
         }
 
@@ -342,9 +341,9 @@ bool StateExtendedInputPort::getLastVector(int field,
             break;
 
         default:
-            yCError(REMOTECONTROLBOARD) << "DinRailControlBoardNWCYarp internal error while "
-                                           "reading data. Cannot get 'vector' data of type "
-                                        << yarp::os::Vocab32::decode(field);
+            remoteControlBoardLogger().error("DinRailControlBoardNWCYarp internal error while "
+                                             "reading data. Cannot get 'vector' data of type {}",
+                                             yarp::os::Vocab32::decode(field));
             break;
         }
         localArrivalTime = now;

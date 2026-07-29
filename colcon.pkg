@@ -2,6 +2,7 @@
   "name": "dinrail",
   "type": "cmake",
   "dependencies": [
+    "spdlog",
     "sharedlibpp",
   ],
   "test-dependencies": [

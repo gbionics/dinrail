@@ -12,8 +12,6 @@
 
 #include <dinrail/ControlBoardYARPJointData.h>
 
-#include <yarp/os/LogStream.h>
-
 #include <cmath>
 #include <numeric>
 
@@ -71,7 +69,7 @@ bool DinRailControlBoardNWSYarp::open(Searchable& config)
     // Open ports, then attach the readers or callbacks
     if (!inputRPCPort.open((rootName + "/rpc:i")))
     {
-        yCError(CONTROLBOARD) << "Error opening port " << rootName + "/rpc:i";
+        controlBoardLogger().error("Error opening port {}", rootName + "/rpc:i");
         closePorts();
         return false;
     }
@@ -81,7 +79,7 @@ bool DinRailControlBoardNWSYarp::open(Searchable& config)
 
     if (!inputStreamingPort.open(rootName + "/command:i"))
     {
-        yCError(CONTROLBOARD) << "Error opening port " << rootName + "/rpc:i";
+        controlBoardLogger().error("Error opening port {}", rootName + "/rpc:i");
         closePorts();
         return false;
     }
@@ -90,7 +88,7 @@ bool DinRailControlBoardNWSYarp::open(Searchable& config)
 
     if (!outputPositionStatePort.open(rootName + "/state:o"))
     {
-        yCError(CONTROLBOARD) << "Error opening port " << rootName + "/state:o";
+        controlBoardLogger().error("Error opening port {}", rootName + "/state:o");
         closePorts();
         return false;
     }
@@ -98,7 +96,7 @@ bool DinRailControlBoardNWSYarp::open(Searchable& config)
     // Extended output state port
     if (!extendedOutputStatePort.open(rootName + "/stateExt:o"))
     {
-        yCError(CONTROLBOARD) << "Error opening port " << rootName + "/state:o";
+        controlBoardLogger().error("Error opening port {}", rootName + "/state:o");
         closePorts();
         return false;
     }
@@ -111,7 +109,7 @@ bool DinRailControlBoardNWSYarp::open(Searchable& config)
         setPeriod(m_period);
         if (!start())
         {
-            yCError(CONTROLBOARD) << "Error starting thread";
+            controlBoardLogger().error("Error starting thread");
             return false;
         }
     }
@@ -128,189 +126,179 @@ bool DinRailControlBoardNWSYarp::setDevice(yarp::dev::DeviceDriver* driver, bool
     subdevice_ptr->view(iJointFault);
     if (!iJointFault)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: iJointFault interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: iJointFault interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IPidControl* iPidControl{nullptr};
     subdevice_ptr->view(iPidControl);
     if (!iPidControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IPidControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IPidControl interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IPositionControl* iPositionControl{nullptr};
     subdevice_ptr->view(iPositionControl);
     if (!iPositionControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IPositionControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IPositionControl interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IPositionDirect* iPositionDirect{nullptr};
     subdevice_ptr->view(iPositionDirect);
     if (!iPositionDirect)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IPositionDirect interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IPositionDirect interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IVelocityControl* iVelocityControl{nullptr};
     subdevice_ptr->view(iVelocityControl);
     if (!iVelocityControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IVelocityControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IVelocityControl interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IEncodersTimed* iEncodersTimed{nullptr};
     subdevice_ptr->view(iEncodersTimed);
     if (!iEncodersTimed)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IEncodersTimed interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IEncodersTimed interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IMotor* iMotor{nullptr};
     subdevice_ptr->view(iMotor);
     if (!iMotor)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IMotor interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IMotor interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IMotorEncoders* iMotorEncoders{nullptr};
     subdevice_ptr->view(iMotorEncoders);
     if (!iMotorEncoders)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IMotorEncoders interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IMotorEncoders interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IAmplifierControl* iAmplifierControl{nullptr};
     subdevice_ptr->view(iAmplifierControl);
     if (!iAmplifierControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IAmplifierControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IAmplifierControl interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IControlLimits* iControlLimits{nullptr};
     subdevice_ptr->view(iControlLimits);
     if (!iControlLimits)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IControlLimits interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IControlLimits interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IControlCalibration* iControlCalibration{nullptr};
     subdevice_ptr->view(iControlCalibration);
     if (!iControlCalibration)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IControlCalibration interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IControlCalibration interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::ITorqueControl* iTorqueControl{nullptr};
     subdevice_ptr->view(iTorqueControl);
     if (!iTorqueControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: ITorqueControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: ITorqueControl interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IImpedanceControl* iImpedanceControl{nullptr};
     subdevice_ptr->view(iImpedanceControl);
     if (!iImpedanceControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IImpedanceControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IImpedanceControl interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // dinrail::IImpedanceAllSetPointsControl* iImpedanceAllSetPointsControl{nullptr};
     subdevice_ptr->view(iImpedanceAllSetPointsControl);
     if (!iImpedanceAllSetPointsControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IImpedanceAllSetPointsControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IImpedanceAllSetPointsControl interface was not "
+                                  "found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IControlMode* iControlMode{nullptr};
     subdevice_ptr->view(iControlMode);
     if (!iControlMode)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IControlMode interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IControlMode interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IAxisInfo* iAxisInfo{nullptr};
     subdevice_ptr->view(iAxisInfo);
     if (!iAxisInfo)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IAxisInfo interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IAxisInfo interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IPreciselyTimed* iPreciselyTimed{nullptr};
     subdevice_ptr->view(iPreciselyTimed);
     if (!iPreciselyTimed)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IPreciselyTimed interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IPreciselyTimed interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IInteractionMode* iInteractionMode{nullptr};
     subdevice_ptr->view(iInteractionMode);
     if (!iInteractionMode)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IInteractionMode interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IInteractionMode interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IRemoteVariables* iRemoteVariables{nullptr};
     subdevice_ptr->view(iRemoteVariables);
     if (!iRemoteVariables)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IRemoteVariables interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IRemoteVariables interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::IPWMControl* iPWMControl{nullptr};
     subdevice_ptr->view(iPWMControl);
     if (!iPWMControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: IPWMControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: IPWMControl interface was not found in subdevice.",
+                                  partName.c_str());
     }
 
     // yarp::dev::ICurrentControl* iCurrentControl{nullptr};
     subdevice_ptr->view(iCurrentControl);
     if (!iCurrentControl)
     {
-        yCWarning(CONTROLBOARD,
-                  "Part <%s>: ICurrentControl interface was not found in subdevice.",
-                  partName.c_str());
+        controlBoardLogger().warn("Part <%s>: ICurrentControl interface was not found in "
+                                  "subdevice.",
+                                  partName.c_str());
     }
 
     // Get the number of controlled joints
@@ -319,42 +307,44 @@ bool DinRailControlBoardNWSYarp::setDevice(yarp::dev::DeviceDriver* driver, bool
     {
         if (!iAxisInfo->getAxes(&tmp_axes))
         {
-            yCError(CONTROLBOARD) << "Part <%s>: iAxisInfo->getAxes() failed for subdevice "
-                                  << partName.c_str();
+            controlBoardLogger().error("Part <{}>: iAxisInfo->getAxes() failed for subdevice",
+                                       partName);
             return false;
         }
     } else if (iEncodersTimed)
     {
         if (!iEncodersTimed->getAxes(&tmp_axes))
         {
-            yCError(CONTROLBOARD) << "Part <%s>: iEncodersTimed->getAxes() failed for subdevice "
-                                  << partName.c_str();
+            controlBoardLogger().error("Part <{}>: iEncodersTimed->getAxes() failed for subdevice",
+                                       partName);
             return false;
         }
     } else if (iPositionControl)
     {
         if (!iPositionControl->getAxes(&tmp_axes))
         {
-            yCError(CONTROLBOARD) << "Part <%s>: iPositionControl->getAxes() failed for subdevice "
-                                  << partName.c_str();
+            controlBoardLogger().error("Part <{}>: iPositionControl->getAxes() failed for "
+                                       "subdevice",
+                                       partName);
             return false;
         }
     } else if (iVelocityControl)
     {
         if (!iVelocityControl->getAxes(&tmp_axes))
         {
-            yCError(CONTROLBOARD) << "Part <%s>: iVelocityControl->getAxes() failed for subdevice "
-                                  << partName.c_str();
+            controlBoardLogger().error("Part <{}>: iVelocityControl->getAxes() failed for "
+                                       "subdevice",
+                                       partName);
             return false;
         }
     }
 
     if (tmp_axes <= 0)
     {
-        yCError(CONTROLBOARD,
-                "Part <%s>: attached device has an invalid number of joints (%d)",
-                partName.c_str(),
-                tmp_axes);
+        controlBoardLogger().error("Part <%s>: attached device has an invalid number of joints "
+                                   "(%d)",
+                                   partName.c_str(),
+                                   tmp_axes);
         return false;
     }
     subdevice_joints = static_cast<size_t>(tmp_axes);
@@ -424,7 +414,7 @@ bool DinRailControlBoardNWSYarp::attach(yarp::dev::PolyDriver* poly)
     setPeriod(m_period);
     if (!start())
     {
-        yCError(CONTROLBOARD) << "Error starting thread";
+        controlBoardLogger().error("Error starting thread");
         return false;
     }
 
@@ -450,9 +440,10 @@ void DinRailControlBoardNWSYarp::run()
     constexpr int reads_for_warning = 20;
     if (inputStreamingPort.getPendingReads() >= reads_for_warning)
     {
-        yCIWarning(CONTROLBOARD, id())
-            << "Number of streaming input messages to be read is "
-            << inputStreamingPort.getPendingReads() << " and can overflow";
+        controlBoardLogger().warn("[{}] Number of streaming input messages to be read is {} and "
+                                  "can overflow",
+                                  id(),
+                                  inputStreamingPort.getPendingReads());
     }
     // handle stateExt first
     ControlBoardYARPJointData& data = extendedOutputState_buffer.get();
@@ -556,8 +547,12 @@ void DinRailControlBoardNWSYarp::run()
     {
         if (std::abs(times[0] - tt) > 1.0)
         {
-            yCIErrorThrottle(CONTROLBOARD, id(), 1.0) << "Encoder timestamps are not consistent! "
-                                                         "Data will not be published.";
+            if (controlBoardShouldLogThrottle(id(), 1.0))
+            {
+                controlBoardLogger().error("[{}] Encoder timestamps are not consistent! Data will "
+                                           "not be published.",
+                                           id());
+            }
             return;
         }
     }

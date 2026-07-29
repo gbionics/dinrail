@@ -8,6 +8,8 @@ set(dinrail_runner_SRCS
   main.cpp
   Module.cpp
   Module.h
+  RunnerLog.cpp
+  RunnerLog.h
 )
 
 target_sources(dinrail-runner
@@ -17,6 +19,7 @@ target_sources(dinrail-runner
 target_link_libraries(dinrail-runner
   PRIVATE
     dinrail::dinrail
+    spdlog::spdlog
     YARP::YARP_os
     YARP::YARP_dev
     YARP::YARP_init
@@ -34,6 +37,7 @@ target_sources(dinrail-runner-rt
 target_link_libraries(dinrail-runner-rt
   PRIVATE
     dinrail::dinrail
+    spdlog::spdlog
     YARP::YARP_os
     YARP::YARP_dev
     YARP::YARP_init

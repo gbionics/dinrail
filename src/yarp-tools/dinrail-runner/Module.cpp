@@ -4,6 +4,7 @@
  */
 
 #include "Module.h"
+#include "RunnerLog.h"
 
 #include <dinrail/RTMemoryGuard.h>
 
@@ -14,7 +15,7 @@
 #include <yarp/robotinterface/XMLReader.h>
 
 #include <yarp/conf/system.h>
-#include <yarp/os/LogStream.h>
+#include <yarp/os/Log.h>
 #include <yarp/os/ResourceFinder.h>
 
 #if __has_include( \
@@ -27,11 +28,6 @@
 #ifndef DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS
 #define DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS false
 #endif
-
-namespace
-{
-YARP_LOG_COMPONENT(DINRAIL_RUNNER_LOG, "dinrail.runner")
-}
 
 class dinrail::runner::Module::Private
 {
@@ -93,8 +89,9 @@ void dinrail::runner::Module::Private::sigsegv_handler(int nSignum, siginfo_t* s
     stack_depth = backtrace(stack_addrs, max_depth);
     stack_strings = backtrace_symbols(stack_addrs, stack_depth);
 
-    yError("dinrail-runner intercepted a segmentation fault caused by a faulty plugin:");
-    yError("%s\n", stack_strings[2]);
+    auto& logger = dinrail::runner::logger();
+    logger.error("dinrail-runner intercepted a segmentation fault caused by a faulty plugin:");
+    logger.error("{}", stack_strings[2]);
     yarp_print_trace(stderr, __FILE__, __LINE__);
 
     // Free memory allocated by backtrace_symbols()
@@ -126,6 +123,8 @@ dinrail::runner::Module::~Module()
 
 bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 {
+    auto& logger = dinrail::runner::logger();
+
     bool useRtSafeMemorySettings = DINRAIL_RUNNER_DEFAULT_USE_RT_SAFE_MEMORY_SETTINGS;
     if (rf.check("use_rt_safe_memory_settings"))
     {
@@ -140,11 +139,11 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
             const std::optional<std::string>& lastError = mPriv->rtMemoryGuard.lastError();
             if (lastError.has_value())
             {
-                yError() << "RT-safe memory settings requested but not fully applied:"
-                         << lastError.value();
+                logger.error("RT-safe memory settings requested but not fully applied: {}",
+                             lastError.value());
             } else
             {
-                yError() << "RT-safe memory settings requested but not fully applied.";
+                logger.error("RT-safe memory settings requested but not fully applied.");
             }
             return false;
         }
@@ -152,11 +151,12 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 
     if (!rf.check("config"))
     {
-        yFatal() << "Missing \"config\" argument";
+        logger.critical("Missing \"config\" argument");
+        return false;
     }
 
     const std::string& filename = rf.findFile("config");
-    yTrace() << "Reading robot config file" << filename;
+    logger.debug("Reading robot config file {}", filename);
 
     bool verbosity = rf.check("verbose");
     bool deprecated = rf.check("allow-deprecated-dtd");
@@ -178,7 +178,8 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
 
     if (!result.parsingIsSuccessful)
     {
-        yFatal() << "Config file " << filename << " not parsed correctly.";
+        logger.critical("Config file {} not parsed correctly.", filename);
+        return false;
     }
 
     mPriv->robot = std::move(result.robot);
@@ -196,17 +197,17 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
     std::string portprefix = mPriv->robot.portprefix();
     if (portprefix[0] != '/')
     {
-        yWarning() << "****************************************************************************"
-                      "*********\n"
-                      "* dinrail-runner 'portprefix' parameter does not follow convention,  *\n"
-                      "* it MUST start with a leading '/' since it is used as the full prefix port "
-                      "name    *\n"
-                      "*     name:    full port prefix name with leading '/',  e.g.  /robotName    "
-                      "  *\n"
-                      "* A temporary automatic fix will be done for you, but please fix your "
-                      "config file   *\n"
-                      "****************************************************************************"
-                      "*********";
+        logger.warn("******************************************************************************"
+                    "*******\n"
+                    "* dinrail-runner 'portprefix' parameter does not follow convention,  *\n"
+                    "* it MUST start with a leading '/' since it is used as the full prefix port "
+                    "name    *\n"
+                    "*     name:    full port prefix name with leading '/',  e.g.  /robotName      "
+                    "*\n"
+                    "* A temporary automatic fix will be done for you, but please fix your config "
+                    "file   *\n"
+                    "******************************************************************************"
+                    "*******");
         portprefix = "/" + portprefix;
     }
 
@@ -214,8 +215,8 @@ bool dinrail::runner::Module::configure(yarp::os::ResourceFinder& rf)
     if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseStartup)
         || !mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseRun))
     {
-        yError() << "Error in" << ActionPhaseToString(mPriv->robot.currentPhase())
-                 << "phase... see previous messages for more info";
+        logger.error("Error in {} phase... see previous messages for more info",
+                     ActionPhaseToString(mPriv->robot.currentPhase()));
         // stopModule() calls interruptModule() internally.
         // This ensure that interrupt1 phase actions (i.e. detach) are
         // performed before destroying the devices when we call close();
@@ -239,12 +240,12 @@ double dinrail::runner::Module::getPeriod()
 
 bool dinrail::runner::Module::updateModule()
 {
-    yCDebug(DINRAIL_RUNNER_LOG) << "dinrail-runner running happily";
+    auto& logger = dinrail::runner::logger();
+    logger.debug("dinrail-runner running happily");
     if (mPriv->autocloseAfterStart
         && mPriv->robot.currentPhase() == yarp::robotinterface::ActionPhaseRun)
     {
-        yCInfo(DINRAIL_RUNNER_LOG) << "`autocloseAfterStart` option selected. The executable is "
-                                      "exiting";
+        logger.info("`autocloseAfterStart` option selected. The executable is exiting");
         return false;
     }
 
@@ -253,9 +254,11 @@ bool dinrail::runner::Module::updateModule()
 
 bool dinrail::runner::Module::interruptModule()
 {
+    auto& logger = dinrail::runner::logger();
+
     mPriv->interruptReceived++;
 
-    yCWarning(DINRAIL_RUNNER_LOG) << "Interrupt #" << mPriv->interruptReceived << "# received.";
+    logger.warn("Interrupt #{}# received.", mPriv->interruptReceived);
 
     mPriv->robot.interrupt();
 
@@ -274,18 +277,16 @@ bool dinrail::runner::Module::interruptModule()
     case 2:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt2))
         {
-            yCError(DINRAIL_RUNNER_LOG)
-                << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt2)
-                << "phase... see previous messages for more info";
+            logger.error("Error in {} phase... see previous messages for more info",
+                         ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt2));
             return false;
         }
         break;
     case 3:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt3))
         {
-            yCError(DINRAIL_RUNNER_LOG)
-                << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt3)
-                << "phase... see previous messages for more info";
+            logger.error("Error in {} phase... see previous messages for more info",
+                         ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt3));
             return false;
         }
         break;
@@ -298,6 +299,8 @@ bool dinrail::runner::Module::interruptModule()
 
 bool dinrail::runner::Module::close()
 {
+    auto& logger = dinrail::runner::logger();
+
     if (mPriv->closed)
     {
         return mPriv->closeOk;
@@ -311,9 +314,8 @@ bool dinrail::runner::Module::close()
     case 1:
         if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseInterrupt1))
         {
-            yCError(DINRAIL_RUNNER_LOG)
-                << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt1)
-                << "phase... see previous messages for more info";
+            logger.error("Error in {} phase... see previous messages for more info",
+                         ActionPhaseToString(yarp::robotinterface::ActionPhaseInterrupt1));
             mPriv->closeOk = false;
         }
         break;
@@ -327,9 +329,8 @@ bool dinrail::runner::Module::close()
     // Finally call the shutdown phase.
     if (!mPriv->robot.enterPhase(yarp::robotinterface::ActionPhaseShutdown))
     {
-        yCError(DINRAIL_RUNNER_LOG)
-            << "Error in" << ActionPhaseToString(yarp::robotinterface::ActionPhaseShutdown)
-            << "phase... see previous messages for more info";
+        logger.error("Error in {} phase... see previous messages for more info",
+                     ActionPhaseToString(yarp::robotinterface::ActionPhaseShutdown));
         mPriv->closeOk = false;
     }
 
