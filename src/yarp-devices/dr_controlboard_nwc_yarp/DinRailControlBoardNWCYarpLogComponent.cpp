@@ -5,4 +5,10 @@
 
 #include "DinRailControlBoardNWCYarpLogComponent.h"
 
-YARP_LOG_COMPONENT(REMOTECONTROLBOARD, "yarp.device.remote_controlboard")
+#include <dinrail/SpdlogHelpers.h>
+
+spdlog::logger& remoteControlBoardLogger()
+{
+    static const auto instance = dinrail::createOrGetLogger("dinrail.dr_controlboard_nwc_yarp");
+    return *instance;
+}

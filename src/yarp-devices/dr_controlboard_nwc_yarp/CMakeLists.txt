@@ -8,7 +8,6 @@ yarp_prepare_plugin(dr_controlboard_nwc_yarp
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
-  GENERATE_PARSER
 )
 
 if(NOT SKIP_dr_controlboard_nwc_yarp)
@@ -31,6 +30,7 @@ if(NOT SKIP_dr_controlboard_nwc_yarp)
       dinrail::dinrail
       dinrail-yarp-dev-shared
       dinrail-yarp-dev-idl
+      spdlog::spdlog
       YARP::YARP_os
       YARP::YARP_sig
       YARP::YARP_dev

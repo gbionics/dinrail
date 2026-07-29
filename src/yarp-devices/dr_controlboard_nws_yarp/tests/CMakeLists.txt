@@ -35,6 +35,7 @@ target_link_libraries(harness_device_streamingMessagesParser
 		YARP::YARP_dev
 		Catch2::Catch2WithMain
 		dinrail-yarp-dev-shared
+		spdlog::spdlog
 )
 
 target_include_directories(harness_device_streamingMessagesParser

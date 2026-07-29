@@ -31,11 +31,13 @@ if(NOT SKIP_dr_controlboard_remapper OR NOT SKIP_dr_controlboard_remapper_nwc_ya
       DinRailControlBoardRemapperLogComponent.cpp
       DinRailControlBoardRemapperLogComponent.h
       DinRailControlBoardRemapperNWCYarp.cpp
-      DinRailControlBoardRemapperNWCYarp.h)
+      DinRailControlBoardRemapperNWCYarp.h
+    )
 
   target_link_libraries(dr_controlboard_remapper
     PRIVATE
       dinrail::dinrail
+      spdlog::spdlog
       YARP::YARP_os
       YARP::YARP_sig
       YARP::YARP_dev

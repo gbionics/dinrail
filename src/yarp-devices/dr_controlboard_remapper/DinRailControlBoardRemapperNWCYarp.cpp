@@ -4,10 +4,9 @@
  */
 
 #include "DinRailControlBoardRemapperNWCYarp.h"
+#include "DinRailControlBoardRemapperLogComponent.h"
 
-#include <yarp/os/Log.h>
-#include <yarp/os/LogComponent.h>
-#include <yarp/os/LogStream.h>
+#include <spdlog/spdlog.h>
 
 #include <algorithm>
 #include <cassert>
@@ -18,10 +17,7 @@ using namespace yarp::os;
 using namespace yarp::dev;
 using namespace yarp::sig;
 
-namespace
-{
-YARP_LOG_COMPONENT(REMOTECONTROLBOARDREMAPPER, "yarp.device.remotecontrolboardremapper")
-}
+using dinrail::yarp_devices::remapper::remoteControlBoardRemapperLogger;
 
 void DinRailControlBoardRemapperNWCYarp::closeAllRemoteControlBoards()
 {
@@ -69,16 +65,16 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
         localPortPrefix = prop.find("localPortPrefix").asString();
     } else
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"localPortPrefix\" should be "
-                                               "a string.";
+        remoteControlBoardRemapperLogger().error("Parsing parameters: \"localPortPrefix\" should "
+                                                 "be a string.");
         return false;
     }
 
     Bottle* remoteControlBoards = prop.find("remoteControlBoards").asList();
     if (remoteControlBoards == nullptr)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Parsing parameters: \"remoteControlBoards\" should "
-                                               "be followed by a list.";
+        remoteControlBoardRemapperLogger().error("Parsing parameters: \"remoteControlBoards\" "
+                                                 "should be followed by a list.");
         return false;
     }
 
@@ -121,8 +117,9 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
 
         if (!ok || !(m_remoteControlBoardDevices[ctrlBrd]->isValid()))
         {
-            yCError(REMOTECONTROLBOARDREMAPPER) << "Opening remote_controlboard with remote \""
-                                                << remote << "\", opening the device failed.";
+            remoteControlBoardRemapperLogger().error("Opening remote_controlboard with remote "
+                                                     "\"{}\", opening the device failed.",
+                                                     remote);
             closeAllRemoteControlBoards();
             return false;
         }
@@ -137,8 +134,8 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
 
     if (!ok)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Opening the controlboardremapper device, opening "
-                                               "the device failed.";
+        remoteControlBoardRemapperLogger().error("Opening the controlboardremapper device, opening "
+                                                 "the device failed.");
         DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;
@@ -149,8 +146,8 @@ bool DinRailControlBoardRemapperNWCYarp::open(Searchable& config)
 
     if (!ok)
     {
-        yCError(REMOTECONTROLBOARDREMAPPER) << "Calling attachAll in the controlboardremapper "
-                                               "device, opening the device failed.";
+        remoteControlBoardRemapperLogger().error("Calling attachAll in the controlboardremapper "
+                                                 "device, opening the device failed.");
         DinRailControlBoardRemapper::close();
         closeAllRemoteControlBoards();
         return false;

@@ -6,8 +6,6 @@
 
 #include "StreamingMessagesParser.h"
 
-#include <yarp/os/LogStream.h>
-
 #include "ControlBoardLogComponent.h"
 #include <dinrail/ControlBoardYARPProtocolSharedDefinitions.h>
 #include <iostream>
@@ -69,7 +67,7 @@ bool StreamingMessagesParser::initialize()
         return true;
     }
 
-    yCError(CONTROLBOARD, "Unable to get number of joints");
+    controlBoardLogger().error("Unable to get number of joints");
     return false;
 }
 
@@ -80,10 +78,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     Vector& cmdVector = v.body;
 
     // Use the following only for debug, since it can heavily slow down the system
-    yCTrace(CONTROLBOARD,
-            "Received command %s, %s\n",
-            b.toString().c_str(),
-            cmdVector.toString().c_str());
+    controlBoardLogger().trace("Received command %s, %s\n",
+                               b.toString().c_str(),
+                               cmdVector.toString().c_str());
 
     // some consistency checks
     size_t maxCommandVectorSize = static_cast<size_t>(stream_nJoints);
@@ -95,17 +92,18 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     if (cmdVector.size() > maxCommandVectorSize)
     {
         std::string str = yarp::os::Vocab32::decode(b.get(0).asVocab32());
-        yCError(CONTROLBOARD,
-                "Received command vector with number of elements bigger than axis controlled by "
-                "this wrapper (cmd: %s requested jnts: %zu received jnts: %zu)\n",
-                str.c_str(),
-                maxCommandVectorSize,
-                cmdVector.size());
+        controlBoardLogger().error("Received command vector with number of elements bigger than "
+                                   "axis controlled by "
+                                   "this wrapper (cmd: %s requested jnts: %zu received jnts: "
+                                   "%zu)\n",
+                                   str.c_str(),
+                                   maxCommandVectorSize,
+                                   cmdVector.size());
         return;
     }
     if (cmdVector.data() == nullptr)
     {
-        yCError(CONTROLBOARD, "Received null command vector");
+        controlBoardLogger().error("Received null command vector");
         return;
     }
 
@@ -121,11 +119,11 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 bool ok = stream_IPWM->setRefDutyCycle(b.get(2).asInt32(), cmdVector[0]);
                 if (!ok)
                 {
-                    yCError(CONTROLBOARD, "Errors while trying to command an pwm message");
+                    controlBoardLogger().error("Errors while trying to command an pwm message");
                 }
             } else
             {
-                yCError(CONTROLBOARD, "PWM interface not valid");
+                controlBoardLogger().error("PWM interface not valid");
             }
         }
         break;
@@ -135,11 +133,11 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 bool ok = stream_IPWM->setRefDutyCycles(cmdVector.data());
                 if (!ok)
                 {
-                    yCError(CONTROLBOARD, "Errors while trying to command an pwm message");
+                    controlBoardLogger().error("Errors while trying to command an pwm message");
                 }
             } else
             {
-                yCError(CONTROLBOARD, "PWM interface not valid");
+                controlBoardLogger().error("PWM interface not valid");
             }
         }
         break;
@@ -156,9 +154,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 bool ok = stream_ICurrent->setRefCurrent(b.get(2).asInt32(), cmdVector[0]);
                 if (!ok)
                 {
-                    yCError(CONTROLBOARD,
-                            "Errors while trying to command a streaming current message on single "
-                            "joint\n");
+                    controlBoardLogger().error("Errors while trying to command a streaming current "
+                                               "message on single "
+                                               "joint\n");
                 }
             }
         }
@@ -169,9 +167,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 bool ok = stream_ICurrent->setRefCurrents(cmdVector.data());
                 if (!ok)
                 {
-                    yCError(CONTROLBOARD,
-                            "Errors while trying to command a streaming current message on all "
-                            "joints\n");
+                    controlBoardLogger().error("Errors while trying to command a streaming current "
+                                               "message on all "
+                                               "joints\n");
                 }
             }
         }
@@ -183,18 +181,18 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 Bottle* jlut = b.get(3).asList();
                 if (jlut == nullptr)
                 {
-                    yCError(CONTROLBOARD,
-                            "Received malformed VOCAB_CURRENT_REF_GROUP: joint selection is not a "
-                            "list (%s)\n",
-                            b.toString().c_str());
+                    controlBoardLogger().error("Received malformed VOCAB_CURRENT_REF_GROUP: joint "
+                                               "selection is not a "
+                                               "list (%s)\n",
+                                               b.toString().c_str());
                     break;
                 }
                 if ((static_cast<int>(jlut->size()) != n_joints)
                     || (static_cast<int>(cmdVector.size()) != n_joints))
                 {
-                    yCError(CONTROLBOARD,
-                            "Received VOCAB_CURRENT_REF_GROUP size of joints vector or currents "
-                            "vector does not match the selected joint number\n");
+                    controlBoardLogger().error("Received VOCAB_CURRENT_REF_GROUP size of joints "
+                                               "vector or currents "
+                                               "vector does not match the selected joint number\n");
                     break;
                 }
 
@@ -207,9 +205,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 bool ok = stream_ICurrent->setRefCurrents(n_joints, joint_list, cmdVector.data());
                 if (!ok)
                 {
-                    yCError(CONTROLBOARD,
-                            "Error while trying to command a streaming current message on joint "
-                            "group\n");
+                    controlBoardLogger().error("Error while trying to command a streaming current "
+                                               "message on joint "
+                                               "group\n");
                 }
 
                 delete[] joint_list;
@@ -218,9 +216,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         break;
         default: {
             std::string str = yarp::os::Vocab32::decode(b.get(0).asVocab32());
-            yCError(CONTROLBOARD,
-                    "Unrecognized message while receiving on command port (%s)\n",
-                    str.c_str());
+            controlBoardLogger().error("Unrecognized message while receiving on command port "
+                                       "(%s)\n",
+                                       str.c_str());
         }
         break;
         }
@@ -229,8 +227,8 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
 
     // fallback to commands without interface name
     case VOCAB_POSITION_MODE: {
-        yCError(CONTROLBOARD,
-                "Received VOCAB_POSITION_MODE this is an send invalid message on streaming port");
+        controlBoardLogger().error("Received VOCAB_POSITION_MODE this is an send invalid message "
+                                   "on streaming port");
         break;
     }
 
@@ -240,15 +238,15 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IPosCtrl->positionMove(cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD, "Errors while trying to start a position move");
+                controlBoardLogger().error("Errors while trying to start a position move");
             }
         }
     }
     break;
 
     case VOCAB_VELOCITY_MODE: {
-        yCError(CONTROLBOARD,
-                "Received VOCAB_VELOCITY_MODE this is an send invalid message on streaming port");
+        controlBoardLogger().error("Received VOCAB_VELOCITY_MODE this is an send invalid message "
+                                   "on streaming port");
         break;
     }
 
@@ -258,7 +256,7 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IVel->velocityMove(b.get(1).asInt32(), cmdVector[0]);
             if (!ok)
             {
-                yCError(CONTROLBOARD, "Errors while trying to start a velocity move");
+                controlBoardLogger().error("Errors while trying to start a velocity move");
             }
         }
     }
@@ -270,7 +268,7 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IVel->velocityMove(cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD, "Errors while trying to start a velocity move");
+                controlBoardLogger().error("Errors while trying to start a velocity move");
             }
         }
     }
@@ -283,10 +281,10 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                                                      cmdVector[0]); // cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Errors while trying to command an streaming position direct message on "
-                        "joint %d\n",
-                        b.get(1).asInt32());
+                controlBoardLogger().error("Errors while trying to command an streaming position "
+                                           "direct message on "
+                                           "joint %d\n",
+                                           b.get(1).asInt32());
             }
         }
     }
@@ -298,9 +296,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_ITorque->setRefTorque(b.get(1).asInt32(), cmdVector[0]);
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Errors while trying to command a streaming torque direct message on "
-                        "single joint\n");
+                controlBoardLogger().error("Errors while trying to command a streaming torque "
+                                           "direct message on "
+                                           "single joint\n");
             }
         }
     }
@@ -312,9 +310,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_ITorque->setRefTorques(cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Errors while trying to command a streaming torque direct message on all "
-                        "joints\n");
+                controlBoardLogger().error("Errors while trying to command a streaming torque "
+                                           "direct message on all "
+                                           "joints\n");
             }
         }
     }
@@ -327,18 +325,18 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             Bottle* jlut = b.get(2).asList();
             if (jlut == nullptr)
             {
-                yCError(CONTROLBOARD,
-                        "Received malformed VOCAB_TORQUES_DIRECT_GROUP: joint selection is not a "
-                        "list (%s)\n",
-                        b.toString().c_str());
+                controlBoardLogger().error("Received malformed VOCAB_TORQUES_DIRECT_GROUP: joint "
+                                           "selection is not a "
+                                           "list (%s)\n",
+                                           b.toString().c_str());
                 break;
             }
             if ((static_cast<int>(jlut->size()) != n_joints)
                 || (static_cast<int>(cmdVector.size()) != n_joints))
             {
-                yCError(CONTROLBOARD,
-                        "Received VOCAB_TORQUES_DIRECT_GROUP size of joints vector or torques "
-                        "vector does not match the selected joint number\n");
+                controlBoardLogger().error("Received VOCAB_TORQUES_DIRECT_GROUP size of joints "
+                                           "vector or torques "
+                                           "vector does not match the selected joint number\n");
                 break;
             }
 
@@ -351,9 +349,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_ITorque->setRefTorques(n_joints, joint_list, cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command a streaming toruqe direct message on joint "
-                        "group\n");
+                controlBoardLogger().error("Error while trying to command a streaming toruqe "
+                                           "direct message on joint "
+                                           "group\n");
             }
 
             delete[] joint_list;
@@ -364,9 +362,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
     case dinrail::VOCAB_DINRAIL_IMPEDANCE_ALL_SETPOINTS: {
         if (b.get(1).asVocab32() != dinrail::VOCAB_DINRAIL_SETPOINT)
         {
-            yCError(CONTROLBOARD,
-                    "Received unsupported dinrail impedance-all-setpoints method on streaming "
-                    "port");
+            controlBoardLogger().error("Received unsupported dinrail impedance-all-setpoints "
+                                       "method on streaming "
+                                       "port");
             break;
         }
 
@@ -374,9 +372,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             if (cmdVector.size() != 5)
             {
-                yCError(CONTROLBOARD,
-                        "Received invalid single-joint impedance-all-setpoints payload size %zu",
-                        cmdVector.size());
+                controlBoardLogger().error("Received invalid single-joint impedance-all-setpoints "
+                                           "payload size %zu",
+                                           cmdVector.size());
                 break;
             }
 
@@ -410,7 +408,8 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             if (jlut == nullptr || static_cast<int>(jlut->size()) != n_joints
                 || static_cast<int>(cmdVector.size()) != 5 * n_joints)
             {
-                yCError(CONTROLBOARD, "Received invalid impedance-all-setpoints group payload\n");
+                controlBoardLogger().error("Received invalid impedance-all-setpoints group "
+                                           "payload\n");
                 break;
             }
 
@@ -475,9 +474,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             if (stream_nJoints <= 0 || static_cast<int>(cmdVector.size()) != 5 * stream_nJoints)
             {
-                yCError(CONTROLBOARD,
-                        "Received invalid full-joint impedance-all-setpoints payload size %zu",
-                        cmdVector.size());
+                controlBoardLogger().error("Received invalid full-joint impedance-all-setpoints "
+                                           "payload size %zu",
+                                           cmdVector.size());
                 break;
             }
 
@@ -530,14 +529,15 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command full-joint impedance-all-setpoints "
-                        "message\n");
+                controlBoardLogger().error("Error while trying to command full-joint "
+                                           "impedance-all-setpoints "
+                                           "message\n");
             }
             break;
         }
 
-        yCError(CONTROLBOARD, "Received malformed dinrail impedance-all-setpoints command header");
+        controlBoardLogger().error("Received malformed dinrail impedance-all-setpoints command "
+                                   "header");
     }
     break;
 
@@ -548,18 +548,18 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             Bottle* jlut = b.get(2).asList();
             if (jlut == nullptr)
             {
-                yCError(CONTROLBOARD,
-                        "Received malformed VOCAB_POSITION_DIRECT_GROUP: joint selection is not a "
-                        "list (%s)\n",
-                        b.toString().c_str());
+                controlBoardLogger().error("Received malformed VOCAB_POSITION_DIRECT_GROUP: joint "
+                                           "selection is not a "
+                                           "list (%s)\n",
+                                           b.toString().c_str());
                 break;
             }
             if ((static_cast<int>(jlut->size()) != n_joints)
                 || (static_cast<int>(cmdVector.size()) != n_joints))
             {
-                yCError(CONTROLBOARD,
-                        "Received VOCAB_POSITION_DIRECT_GROUP size of joints vector or positions "
-                        "vector does not match the selected joint number\n");
+                controlBoardLogger().error("Received VOCAB_POSITION_DIRECT_GROUP size of joints "
+                                           "vector or positions "
+                                           "vector does not match the selected joint number\n");
                 break;
             }
 
@@ -572,9 +572,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IPosDirect->setPositions(n_joints, joint_list, cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command a streaming position direct message on "
-                        "joint group\n");
+                controlBoardLogger().error("Error while trying to command a streaming position "
+                                           "direct message on "
+                                           "joint group\n");
             }
 
             delete[] joint_list;
@@ -588,9 +588,9 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IPosDirect->setPositions(cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command a streaming position direct message on all "
-                        "joints\n");
+                controlBoardLogger().error("Error while trying to command a streaming position "
+                                           "direct message on all "
+                                           "joints\n");
             }
         }
     }
@@ -603,18 +603,18 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             Bottle* jlut = b.get(2).asList();
             if (jlut == nullptr)
             {
-                yCError(CONTROLBOARD,
-                        "Received malformed VOCAB_VELOCITY_MOVE_GROUP: joint selection is not a "
-                        "list (%s)\n",
-                        b.toString().c_str());
+                controlBoardLogger().error("Received malformed VOCAB_VELOCITY_MOVE_GROUP: joint "
+                                           "selection is not a "
+                                           "list (%s)\n",
+                                           b.toString().c_str());
                 break;
             }
             if ((static_cast<int>(jlut->size()) != n_joints)
                 || (static_cast<int>(cmdVector.size()) != n_joints))
             {
-                yCError(CONTROLBOARD,
-                        "Received VOCAB_VELOCITY_MOVE_GROUP size of joints vector or positions "
-                        "vector does not match the selected joint number\n");
+                controlBoardLogger().error("Received VOCAB_VELOCITY_MOVE_GROUP size of joints "
+                                           "vector or positions "
+                                           "vector does not match the selected joint number\n");
                 break;
             }
 
@@ -627,8 +627,8 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             bool ok = stream_IVel->velocityMove(n_joints, joint_list, cmdVector.data());
             if (!ok)
             {
-                yCError(CONTROLBOARD,
-                        "Error while trying to command a velocity move on joint group\n");
+                controlBoardLogger().error("Error while trying to command a velocity move on joint "
+                                           "group\n");
             }
 
             delete[] joint_list;
@@ -638,9 +638,8 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
 
     default: {
         std::string str = yarp::os::Vocab32::decode(b.get(0).asVocab32());
-        yCError(CONTROLBOARD,
-                "Unrecognized message while receiving on command port (%s)\n",
-                str.c_str());
+        controlBoardLogger().error("Unrecognized message while receiving on command port (%s)\n",
+                                   str.c_str());
     }
     break;
     }

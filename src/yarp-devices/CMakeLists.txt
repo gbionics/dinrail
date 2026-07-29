@@ -11,6 +11,7 @@ if(PROJECT_IS_TOP_LEVEL)
 endif()
 
 find_package(YARP REQUIRED COMPONENTS os dev)
+find_package(spdlog REQUIRED)
 
 if(BUILD_TESTING)
 	find_package(Catch2 REQUIRED)

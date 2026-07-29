@@ -9,16 +9,10 @@ yarp_prepare_plugin(
   EXTRA_CONFIG
     WRAPPER=dr_controlboard_nws_yarp
   DEFAULT ON
-  GENERATE_PARSER
 )
 
 if(NOT SKIP_dr_controlboard_nws_yarp)
   yarp_add_plugin(dr_controlboard_nws_yarp)
-
-  target_compile_definitions(dr_controlboard_nws_yarp
-    PRIVATE
-      LOG_COMPONENT="yarp.devices.controlBoard_nws_yarp"
-  )
 
   target_sources(dr_controlboard_nws_yarp
     PRIVATE
@@ -39,6 +33,7 @@ if(NOT SKIP_dr_controlboard_nws_yarp)
       dinrail::dinrail
       dinrail-yarp-dev-shared
       dinrail-yarp-dev-idl
+      spdlog::spdlog
       YARP::YARP_os
       YARP::YARP_sig
       YARP::YARP_dev

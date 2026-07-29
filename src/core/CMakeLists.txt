@@ -29,6 +29,9 @@ target_sources(dinrail
     dinrail/RTMemoryGuard.cpp
     dinrail/RuntimeContext.cpp
     dinrail/RuntimeContext.h
+    # Technically this header use spdlog, but as it is an header-only
+    # header, we do not link spdlog here, and it is up to donwstream
+    dinrail/SpdlogHelpers.h
     dinrail/Value.cpp
 )
 
