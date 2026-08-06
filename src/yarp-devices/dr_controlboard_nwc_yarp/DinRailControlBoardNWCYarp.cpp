@@ -188,7 +188,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
     const std::string localRoot = m_local + m_namesuffix;
     const std::string remoteRoot = m_remote + m_namesuffix;
 
-    extendedIntputStatePort.setTimeout(m_timeout);
+    extendedInputStatePort.setTimeout(m_timeout);
 
     // handle local Qos
     yarp::os::QosStyle localQos;
@@ -249,13 +249,13 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         }
         s1 = localRoot;
         s1 += "/stateExt:i";
-        if (!extendedIntputStatePort.open(s1))
+        if (!extendedInputStatePort.open(s1))
         {
             portProblem = true;
         }
         if (!portProblem)
         {
-            extendedIntputStatePort.useCallback();
+            extendedInputStatePort.useCallback();
         }
     }
 
@@ -305,14 +305,14 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         s2 += "/stateExt:i";
         // not checking return value for now since it is wip (different machines can have different
         // compilation flags
-        ok = Network::connect(s1, extendedIntputStatePort.getName(), m_carrier);
+        ok = Network::connect(s1, extendedInputStatePort.getName(), m_carrier);
         if (ok)
         {
             // set the QoS preferences for the 'state' port
             if (m_local_qos_enable || m_remote_qos_enable)
             {
                 NetworkBase::setConnectionQos(s1,
-                                              extendedIntputStatePort.getName(),
+                                              extendedInputStatePort.getName(),
                                               remoteQos,
                                               localQos,
                                               false);
@@ -329,7 +329,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
 
         rpc_p.close();
         command_p.close();
-        extendedIntputStatePort.close();
+        extendedInputStatePort.close();
         return false;
     }
 
@@ -342,7 +342,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
         command_buffer.detach();
         rpc_p.close();
         command_p.close();
-        extendedIntputStatePort.close();
+        extendedInputStatePort.close();
         return false;
     }
 
@@ -354,7 +354,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
             command_buffer.detach();
             rpc_p.close();
             command_p.close();
-            extendedIntputStatePort.close();
+            extendedInputStatePort.close();
             return false;
         }
     }
@@ -362,7 +362,7 @@ bool DinRailControlBoardNWCYarp::open(Searchable& config)
     if (m_diagnostic)
     {
         diagnosticThread = new DiagnosticThread(DIAGNOSTIC_THREAD_PERIOD);
-        diagnosticThread->setOwner(&extendedIntputStatePort);
+        diagnosticThread->setOwner(&extendedInputStatePort);
         diagnosticThread->start();
     }
 
@@ -405,11 +405,11 @@ bool DinRailControlBoardNWCYarp::close()
 
     rpc_p.interrupt();
     command_p.interrupt();
-    extendedIntputStatePort.interrupt();
+    extendedInputStatePort.interrupt();
 
     rpc_p.close();
     command_p.close();
-    extendedIntputStatePort.close();
+    extendedInputStatePort.close();
     return true;
 }
 
@@ -1534,7 +1534,7 @@ bool DinRailControlBoardNWCYarp::getEncoder(int j, double* v)
 
     extendedPortMutex.lock();
     bool ret
-        = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
+        = extendedInputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -1545,7 +1545,7 @@ bool DinRailControlBoardNWCYarp::getEncoderTimed(int j, double* v, double* t)
 
     extendedPortMutex.lock();
     bool ret
-        = extendedIntputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
+        = extendedInputStatePort.getLastSingle(j, VOCAB_ENCODER, v, lastStamp, localArrivalTime);
     *t = lastStamp.getTime();
     extendedPortMutex.unlock();
     return ret;
@@ -1557,7 +1557,7 @@ bool DinRailControlBoardNWCYarp::getEncoders(double* encs)
 
     extendedPortMutex.lock();
     bool ret
-        = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
+        = extendedInputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
 
     return ret;
@@ -1569,7 +1569,7 @@ bool DinRailControlBoardNWCYarp::getEncodersTimed(double* encs, double* ts)
 
     extendedPortMutex.lock();
     bool ret
-        = extendedIntputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
+        = extendedInputStatePort.getLastVector(VOCAB_ENCODERS, encs, lastStamp, localArrivalTime);
     std::fill_n(ts, nj, lastStamp.getTime());
     extendedPortMutex.unlock();
     return ret;
@@ -1580,7 +1580,7 @@ bool DinRailControlBoardNWCYarp::getEncoderSpeed(int j, double* sp)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_ENCODER_SPEED,
                                                      sp,
                                                      lastStamp,
@@ -1594,7 +1594,7 @@ bool DinRailControlBoardNWCYarp::getEncoderSpeeds(double* spds)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_SPEEDS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_ENCODER_SPEEDS,
                                                      spds,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1606,7 +1606,7 @@ bool DinRailControlBoardNWCYarp::getEncoderAcceleration(int j, double* acc)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_ENCODER_ACCELERATION,
                                                      acc,
                                                      lastStamp,
@@ -1619,7 +1619,7 @@ bool DinRailControlBoardNWCYarp::getEncoderAccelerations(double* accs)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_ENCODER_ACCELERATIONS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_ENCODER_ACCELERATIONS,
                                                      accs,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1692,7 +1692,7 @@ bool DinRailControlBoardNWCYarp::getTemperature(int m, double* val)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(m,
+    bool ret = extendedInputStatePort.getLastSingle(m,
                                                      VOCAB_TEMPERATURE,
                                                      val,
                                                      lastStamp,
@@ -1706,7 +1706,7 @@ bool DinRailControlBoardNWCYarp::getTemperatures(double* vals)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURE,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_TEMPERATURE,
                                                      vals,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1774,7 +1774,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoder(int j, double* v)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_MOTOR_ENCODER,
                                                      v,
                                                      lastStamp,
@@ -1788,7 +1788,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoderTimed(int j, double* v, double* 
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_MOTOR_ENCODER,
                                                      v,
                                                      lastStamp,
@@ -1803,7 +1803,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoders(double* encs)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
                                                      encs,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1817,7 +1817,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncodersTimed(double* encs, double* ts)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_MOTOR_ENCODERS,
                                                      encs,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1830,7 +1830,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoderSpeed(int j, double* sp)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_MOTOR_ENCODER_SPEED,
                                                      sp,
                                                      lastStamp,
@@ -1843,7 +1843,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoderSpeeds(double* spds)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
                                                      spds,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -1855,7 +1855,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoderAcceleration(int j, double* acc)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_MOTOR_ENCODER_ACCELERATION,
                                                      acc,
                                                      lastStamp,
@@ -1868,7 +1868,7 @@ bool DinRailControlBoardNWCYarp::getMotorEncoderAccelerations(double* accs)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_MOTOR_ENCODER_SPEEDS,
                                                      accs,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -2185,7 +2185,7 @@ bool DinRailControlBoardNWCYarp::getPWM(int m, double* val)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(m,
+    bool ret = extendedInputStatePort.getLastSingle(m,
                                                      VOCAB_PWMCONTROL_PWM_OUTPUT,
                                                      val,
                                                      lastStamp,
@@ -2463,7 +2463,7 @@ bool DinRailControlBoardNWCYarp::getTorque(int j, double* t)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j, VOCAB_TRQ, t, lastStamp, localArrivalTime);
+    bool ret = extendedInputStatePort.getLastSingle(j, VOCAB_TRQ, t, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -2472,7 +2472,7 @@ bool DinRailControlBoardNWCYarp::getTorques(double* t)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TRQS, t, lastStamp, localArrivalTime);
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_TRQS, t, lastStamp, localArrivalTime);
     extendedPortMutex.unlock();
     return ret;
 }
@@ -2840,7 +2840,7 @@ bool DinRailControlBoardNWCYarp::getControlMode(int j, int* mode)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_CM_CONTROL_MODE,
                                                      mode,
                                                      lastStamp,
@@ -2853,7 +2853,7 @@ bool DinRailControlBoardNWCYarp::getControlModes(int* modes)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
                                                      modes,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -2866,7 +2866,7 @@ bool DinRailControlBoardNWCYarp::getControlModes(const int n_joint, const int* j
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_CM_CONTROL_MODES,
                                                      last_wholePart.controlMode.data(),
                                                      lastStamp,
                                                      localArrivalTime);
@@ -3081,7 +3081,7 @@ bool DinRailControlBoardNWCYarp::getInteractionMode(int axis, yarp::dev::Interac
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(axis,
+    bool ret = extendedInputStatePort.getLastSingle(axis,
                                                      VOCAB_INTERACTION_MODE,
                                                      (int*)mode,
                                                      lastStamp,
@@ -3097,7 +3097,7 @@ bool DinRailControlBoardNWCYarp::getInteractionModes(int n_joints,
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
                                                      last_wholePart.interactionMode.data(),
                                                      lastStamp,
                                                      localArrivalTime);
@@ -3120,7 +3120,7 @@ bool DinRailControlBoardNWCYarp::getInteractionModes(yarp::dev::InteractionModeE
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_INTERACTION_MODES,
                                                      (int*)modes,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -3363,7 +3363,7 @@ bool DinRailControlBoardNWCYarp::getCurrents(double* vals)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_AMP_CURRENTS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_AMP_CURRENTS,
                                                      vals,
                                                      lastStamp,
                                                      localArrivalTime);
@@ -3375,7 +3375,7 @@ bool DinRailControlBoardNWCYarp::getCurrent(int j, double* val)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_AMP_CURRENT,
                                                      val,
                                                      lastStamp,
@@ -3474,7 +3474,7 @@ bool DinRailControlBoardNWCYarp::getDutyCycle(int j, double* out)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastSingle(j,
+    bool ret = extendedInputStatePort.getLastSingle(j,
                                                      VOCAB_PWMCONTROL_PWM_OUTPUT,
                                                      out,
                                                      lastStamp,
@@ -3487,7 +3487,7 @@ bool DinRailControlBoardNWCYarp::getDutyCycles(double* outs)
 {
     double localArrivalTime = 0.0;
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_PWMCONTROL_PWM_OUTPUTS,
+    bool ret = extendedInputStatePort.getLastVector(VOCAB_PWMCONTROL_PWM_OUTPUTS,
                                                      outs,
                                                      lastStamp,
                                                      localArrivalTime);
