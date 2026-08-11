@@ -41,7 +41,7 @@ public:
     /**
      * @brief Virtual destructor.
      */
-    virtual ~IAxisInfo() = default;
+    virtual ~IAxisInfo();
 
     /**
      * @brief Get the number of controlled axes.
