@@ -1,6 +1,6 @@
-# Naming Conventions
+# Conventions and Guidelines
 
-This document describes the naming conventions used by dinrail plugins, and should be observed by both built-in dinrail plugins and custom dinrail plugins.
+This document describes guidelines and conventions used by dinrail interfaces plugins, and should be observed by both built-in dinrail code and custom code that build on top of dinrail.
 
 ## Device plugins
 
