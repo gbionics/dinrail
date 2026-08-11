@@ -1,6 +1,6 @@
 # Conventions and Guidelines
 
-This document describes guidelines and conventions used by dinrail interfaces plugins, and should be observed by both built-in dinrail code and custom code that build on top of dinrail.
+This document describes guidelines and conventions used by dinrail interfaces and plugins, and should be observed by both built-in dinrail code and custom code that builds on top of dinrail.
 
 ## Interfaces
 
