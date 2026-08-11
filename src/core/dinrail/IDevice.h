@@ -21,7 +21,7 @@ public:
     /**
      * @brief Virtual destructor.
      */
-    virtual ~IDevice() = default;
+    virtual ~IDevice();
 
     /**
      * Open the IDevice.

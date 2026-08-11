@@ -42,7 +42,7 @@ public:
     /**
      * @brief Virtual destructor.
      */
-    virtual ~IImpedanceAllSetPointsControl() = default;
+    virtual ~IImpedanceAllSetPointsControl();
 
     /**
      * @brief Set all impedance control setpoints for a single joint.
