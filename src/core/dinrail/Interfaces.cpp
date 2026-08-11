@@ -1,17 +1,22 @@
-// SPDX-FileCopyrightText: 2006-2021 Istituto Italiano di Tecnologia (IIT)
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IInterfaceView.h>
+#include <dinrail/IInteropPlugin.h>
 
 namespace dinrail
 {
 
-IAxisInfo::~IAxisInfo() = default;
-
 IDevice::~IDevice() = default;
+
+IInteropPlugin::~IInteropPlugin() = default;
+
+IInterfaceView::~IInterfaceView() = default;
+
+IAxisInfo::~IAxisInfo() = default;
 
 IImpedanceAllSetPointsControl::~IImpedanceAllSetPointsControl() = default;
 

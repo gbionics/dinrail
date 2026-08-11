@@ -6,11 +6,13 @@
 #define DINRAIL_DEVICE_H
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceView.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
 #include <string>
+#include <typeinfo>
 
 namespace dinrail
 {
@@ -84,6 +86,19 @@ public:
         {
             x = v;
             return true;
+        }
+
+        // Devices wrapping a foreign implementation (e.g. interop plugins) can
+        // resolve interfaces that are not reachable through a direct cast.
+        auto* interfaceView = dynamic_cast<IInterfaceView*>(impl);
+        if (interfaceView != nullptr)
+        {
+            void* resolved = interfaceView->viewInterface(typeid(T));
+            if (resolved != nullptr)
+            {
+                x = static_cast<T*>(resolved);
+                return true;
+            }
         }
 
         return false;

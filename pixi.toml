@@ -43,6 +43,12 @@ CMAKE_INSTALL_PREFIX = "%CONDA_PREFIX%\\Library"
 [target.unix.activation.env]
 CMAKE_INSTALL_PREFIX = "$CONDA_PREFIX"
 
+[target.linux-64.dependencies]
+gdb = ">=17.2,<18"
+
+[target.linux-aarch64.dependencies]
+gdb = ">=17.2,<18"
+
 [tasks]
 configure = { cmd = [
     "cmake",
