@@ -25,6 +25,14 @@ target_link_libraries(ParametersTest
 )
 add_test(NAME ParametersTest COMMAND ParametersTest)
 
+add_executable(RuntimeDynamicCastTest RuntimeDynamicCastTest.cpp)
+target_link_libraries(RuntimeDynamicCastTest
+    PRIVATE
+        dinrail::dinrail
+        Catch2::Catch2WithMain
+)
+add_test(NAME RuntimeDynamicCastTest COMMAND RuntimeDynamicCastTest)
+
 # Test-only interop plugins used to exercise interop discovery and the interop
 # device-creation fallback used by view().
 add_library(dinrail-interop-testalpha MODULE interop/TestInteropAlpha.cpp)
