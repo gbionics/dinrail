@@ -4,8 +4,12 @@
 #ifndef DINRAIL_RUNTIMECONTEXT_H
 #define DINRAIL_RUNTIMECONTEXT_H
 
+#include <dinrail/PluginUtils.h>
+
 #include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace dinrail
 {
@@ -32,7 +36,7 @@ template <class T> struct FactoryDeleter
 template <class T> using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>>;
 
 /**
- * Shared runtime state used to load device plug-ins.
+ * Shared runtime state used to load device and interop plug-ins.
  *
  * A RuntimeContext owns the plug-in cache. Copies are lightweight handles to
  * the same state, so passing a RuntimeContext to a Device is safe even when
@@ -54,6 +58,37 @@ public:
      */
     static const RuntimeContext& getDefault();
 
+    /**
+     * @brief List native dinrail device plugins discoverable on the search paths.
+     *
+     * @return Sorted, de-duplicated devices with name and plugin location.
+     */
+    std::vector<dinrail::DeviceInfo> listNativeDevices() const;
+
+    /**
+     * @brief List available interop plugins discoverable on the search paths.
+     *
+     * @return Sorted, de-duplicated interop plugins with name and plugin location.
+     */
+    std::vector<dinrail::InteropPluginInfo> listInteropPlugins() const;
+
+    /**
+     * @brief List the devices provided by the available interop plugins.
+     *
+     * Loads each interop plugin and queries `IInteropPlugin::listDevices()`.
+     * Mainly intended for inspection (see `dinrail dev --list`).
+     *
+     * @return One entry per interop plugin, grouped by plugin name.
+     */
+    std::vector<dinrail::InteropDevices> listInteropDevices() const;
+
+    /**
+     * @brief List all discoverable devices, including interop-provided ones.
+     *
+     * @return Native devices and interop-provided devices grouped by interop plugin.
+     */
+    dinrail::AvailableDevices listDevices() const;
+
 private:
     struct Impl;
     std::shared_ptr<Impl> m_pimpl;
@@ -63,6 +98,7 @@ private:
      *
      * Looks up (or loads) the plug-in library for the device named by
      * `config["device"]`, creates an instance, and calls `IDevice::open()`.
+     * If that fails, configured interop plugins are tried in order.
      * Returns nullptr on any failure.
      */
     FactoryUniquePtr<IDevice> createDevice(const Parameters& config);

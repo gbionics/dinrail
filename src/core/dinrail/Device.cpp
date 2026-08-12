@@ -6,6 +6,7 @@
 #include <dinrail/IDevice.h>
 #include <dinrail/RuntimeContext.h>
 
+#include <memory>
 #include <utility>
 
 namespace dinrail

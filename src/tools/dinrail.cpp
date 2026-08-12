@@ -4,93 +4,18 @@
 #include <CLI/CLI.hpp>
 
 #include <dinrail/PluginUtils.h>
+#include <dinrail/RuntimeContext.h>
 
-#include <algorithm>
 #include <filesystem>
 #include <iostream>
-#include <set>
 #include <string>
 #include <vector>
 
 namespace
 {
-
-std::string
-extractPluginNameFromLibrary(const std::string& fileName, const std::string& pluginPrefix)
-{
-#if defined(_WIN32)
-    const std::string prefix = pluginPrefix + "-";
-    const std::string suffix = ".dll";
-
-    if (fileName.size() > prefix.size() + suffix.size() && fileName.rfind(prefix, 0) == 0
-        && fileName.substr(fileName.size() - suffix.size()) == suffix)
-    {
-        return fileName.substr(prefix.size(), fileName.size() - prefix.size() - suffix.size());
-    }
-    return {};
-#else
-#if defined(__APPLE__)
-    const std::string suffix = ".dylib";
-#else
-    const std::string suffix = ".so";
-#endif
-    const std::string prefix = "lib" + pluginPrefix + "-";
-
-    if (fileName.rfind(prefix, 0) != 0)
-    {
-        return {};
-    }
-
-    const std::size_t suffixPos = fileName.find(suffix, prefix.size());
-    if (suffixPos == std::string::npos)
-    {
-        return {};
-    }
-
-    if (suffixPos == prefix.size())
-    {
-        return {};
-    }
-
-    return fileName.substr(prefix.size(), suffixPos - prefix.size());
-#endif
-}
-
 std::vector<std::filesystem::path> getCandidatePluginDirs()
 {
     return dinrail::getPluginSearchPaths();
-}
-
-std::vector<std::string> findAvailableDevices()
-{
-    std::set<std::string> devices;
-    static const std::string devicePluginPrefix = "dinrail-device";
-
-    for (const auto& dir : getCandidatePluginDirs())
-    {
-        std::error_code ec;
-        if (!std::filesystem::exists(dir, ec) || !std::filesystem::is_directory(dir, ec))
-        {
-            continue;
-        }
-
-        for (const auto& entry : std::filesystem::directory_iterator(dir, ec))
-        {
-            if (ec || !entry.is_regular_file(ec))
-            {
-                continue;
-            }
-
-            const auto deviceName = extractPluginNameFromLibrary(entry.path().filename().string(),
-                                                                 devicePluginPrefix);
-            if (!deviceName.empty())
-            {
-                devices.insert(deviceName);
-            }
-        }
-    }
-
-    return {devices.begin(), devices.end()};
 }
 
 } // namespace
@@ -107,7 +32,61 @@ int main(int argc, char** argv)
                             showSearchPath,
                             "List directories considered when searching dinrail plugins");
 
+    bool listInterop = false;
+    bool interopShowSearchPath = false;
+    auto* interopSubcommand = app.add_subcommand("interop", "Interop plugin commands (debugging)");
+    interopSubcommand->add_flag("--list", listInterop, "List available interop plugins");
+    interopSubcommand->add_flag("--show-search-path",
+                                interopShowSearchPath,
+                                "List directories considered when searching dinrail plugins");
+
     CLI11_PARSE(app, argc, argv);
+
+    if (interopSubcommand->parsed() != 0)
+    {
+        const auto searchPaths = getCandidatePluginDirs();
+        bool actionRequested = false;
+
+        if (interopShowSearchPath)
+        {
+            actionRequested = true;
+            if (searchPaths.empty())
+            {
+                std::cout << "No search paths found.\n";
+            } else
+            {
+                for (const auto& path : searchPaths)
+                {
+                    std::cout << path.lexically_normal().string() << "\n";
+                }
+            }
+        }
+
+        if (listInterop)
+        {
+            actionRequested = true;
+            const auto interopPlugins = dinrail::getAvailableInteropPlugins();
+            if (interopPlugins.empty())
+            {
+                std::cout << "No interop plugins found.\n";
+                return 0;
+            }
+
+            for (const auto& plugin : interopPlugins)
+            {
+                std::cout << plugin.name << "\t" << plugin.location << "\n";
+            }
+            return 0;
+        }
+
+        if (actionRequested)
+        {
+            return 0;
+        }
+
+        std::cout << interopSubcommand->help() << std::endl;
+        return 1;
+    }
 
     if (devSubcommand->parsed() == 0)
     {
@@ -136,17 +115,51 @@ int main(int argc, char** argv)
     if (listDevices)
     {
         actionRequested = true;
-        const auto devices = findAvailableDevices();
-        if (devices.empty())
+
+        const auto available = dinrail::getAvailableDevices();
+
+        bool anyInteropDevice = false;
+        for (const auto& group : available.interopDevices)
+        {
+            if (!group.devices.empty())
+            {
+                anyInteropDevice = true;
+                break;
+            }
+        }
+
+        if (available.nativeDevices.empty() && !anyInteropDevice)
         {
             std::cout << "No devices found.\n";
             return 0;
         }
 
-        for (const auto& d : devices)
+        std::cout << "dinrail devices:\n";
+        if (available.nativeDevices.empty())
         {
-            std::cout << d << "\n";
+            std::cout << "  (none)\n";
+        } else
+        {
+            for (const auto& device : available.nativeDevices)
+            {
+                std::cout << "  " << device.name << "\t" << device.location << "\n";
+            }
         }
+
+        for (const auto& group : available.interopDevices)
+        {
+            if (group.devices.empty())
+            {
+                continue;
+            }
+
+            std::cout << "\n" << group.interopPlugin.name << " devices (via interop):\n";
+            for (const auto& device : group.devices)
+            {
+                std::cout << "  " << device.name << "\t" << device.location << "\n";
+            }
+        }
+
         return 0;
     }
 

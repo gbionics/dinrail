@@ -22,6 +22,8 @@ target_sources(dinrail
     dinrail/Device.h
     dinrail/IAxisInfo.h
     dinrail/Interfaces.cpp
+    dinrail/IInterfaceView.h
+    dinrail/IInteropPlugin.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h
