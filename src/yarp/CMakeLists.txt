@@ -20,6 +20,8 @@ find_package(YARP REQUIRED COMPONENTS os dev)
 add_library(dinrail-yarp-conversions
     dinrail/YarpPropertyConverter.cpp
     dinrail/YarpPropertyConverter.h
+    dinrail/YarpStampConverter.cpp
+    dinrail/YarpStampConverter.h
 )
 add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp-conversions)
 
