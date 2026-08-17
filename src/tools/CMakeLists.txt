@@ -1,12 +1,14 @@
 # SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
+cmake_minimum_required(VERSION 3.28.3)
+
 project(dinrail-tools
         LANGUAGES C CXX
         DESCRIPTION "Executable tools for dinrail.")
 
 if(PROJECT_IS_TOP_LEVEL)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/../../DinrailCMakeCommon.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/DinrailCMakeCommon.cmake)
     find_package(dinrail REQUIRED)
 endif()
 
