@@ -212,8 +212,8 @@ can be migrated to:
 
 ```cpp
 #include <dinrail/Device.h>
+#include <dinrail/IAxisInfo.h>
 #include <dinrail/Parameters.h>
-#include <yarp/dev/IAxisInfo.h>
 
 dinrail::Parameters options;
 options.put("device", "fakeMotionControl");
@@ -222,8 +222,8 @@ options.addGroup("GENERAL").put("Joints", 3);
 dinrail::Device device;
 device.open(options);
 
-// Native yarp::dev::* interfaces of the wrapped device are resolved by view().
-yarp::dev::IAxisInfo* axisInfo = nullptr;
+// The YARP interface is translated automatically by the interop plugin.
+dinrail::IAxisInfo* axisInfo = nullptr;
 device.view(axisInfo);
 ```
 
@@ -231,9 +231,12 @@ The device name and parameters are the same; dinrail converts
 `dinrail::Parameters` to `yarp::os::Property` automatically when delegating to the
 YARP interop plugin.
 
-`dinrail::Device::view<T>()` resolves both dinrail interfaces implemented by the
-device and the native `yarp::dev::*` interfaces of the wrapped YARP device, so
-existing YARP interface code keeps working after the migration.
+`dinrail::Device::view<T>()` first resolves interfaces implemented by the device.
+If a requested dinrail interface is not available directly, runtime-loaded
+interop plugins can translate a compatible foreign interface. The bundled YARP
+plugin currently translates `yarp::dev::IAxisInfo` to `dinrail::IAxisInfo`.
+Native `yarp::dev::*` interfaces remain viewable as well, so existing YARP
+interface code keeps working during incremental migrations.
 
 ### Requirements
 
@@ -242,4 +245,3 @@ You can check which interop plugins are available (and therefore which ecosystem
 
 To enumerate native devices and devices reported by interop plugins, use
 `dinrail dev --list`.
-

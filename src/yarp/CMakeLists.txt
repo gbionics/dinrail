@@ -34,6 +34,8 @@ target_include_directories(dinrail-yarp-conversions
 )
 
 add_library(dinrail-interop-yarp SHARED
+    dinrail/YarpAxisInfoTranslation.cpp
+    dinrail/YarpAxisInfoTranslation.h
     dinrail/YarpDeviceWrapper.cpp
     dinrail/YarpDeviceWrapper.h
     dinrail/YarpInteropPlugin.cpp

@@ -101,6 +101,15 @@ public:
             }
         }
 
+        // Finally ask runtime-loaded interop plugins whether they can bridge
+        // an interface exposed by this device to the requested interface.
+        void* translated = viewTranslatedInterface(typeid(T));
+        if (translated != nullptr)
+        {
+            x = static_cast<T*>(translated);
+            return true;
+        }
+
         return false;
     }
 
@@ -111,6 +120,9 @@ private:
     // Internal method to retrieve the raw device implementation pointer,
     // used in the view() method for dynamic casting.
     IDevice* getImplementation();
+
+    // Resolve and retain an interop-provided interface translation.
+    void* viewTranslatedInterface(const std::type_info& interfaceType);
 };
 
 } // namespace dinrail

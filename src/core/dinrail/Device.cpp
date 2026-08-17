@@ -4,9 +4,12 @@
 
 #include <dinrail/Device.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceTranslation.h>
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
+#include <typeindex>
+#include <unordered_map>
 #include <utility>
 
 namespace dinrail
@@ -22,6 +25,7 @@ struct Device::Impl
     RuntimeContext context;
     bool isValid{false};
     FactoryUniquePtr<dinrail::IDevice> driver;
+    std::unordered_map<std::type_index, std::unique_ptr<IInterfaceTranslation>> translations;
 };
 
 Device::Device()
@@ -46,6 +50,7 @@ bool Device::open(const Parameters& config)
         return false;
     }
 
+    m_pimpl->translations.clear();
     m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
@@ -64,6 +69,7 @@ bool Device::close()
     bool result = true;
     if (m_pimpl->driver)
     {
+        m_pimpl->translations.clear();
         result = m_pimpl->driver->close();
     }
 
@@ -80,6 +86,36 @@ bool Device::isValid() const
 IDevice* Device::getImplementation()
 {
     return m_pimpl ? m_pimpl->driver.get() : nullptr;
+}
+
+void* Device::viewTranslatedInterface(const std::type_info& interfaceType)
+{
+    if (!m_pimpl || !m_pimpl->driver)
+    {
+        return nullptr;
+    }
+
+    const std::type_index key(interfaceType);
+    const auto existing = m_pimpl->translations.find(key);
+    if (existing != m_pimpl->translations.end())
+    {
+        return existing->second->getInterface();
+    }
+
+    auto translation = m_pimpl->context.createInterfaceTranslation(*m_pimpl->driver, interfaceType);
+    if (!translation)
+    {
+        return nullptr;
+    }
+
+    void* translatedInterface = translation->getInterface();
+    if (translatedInterface == nullptr)
+    {
+        return nullptr;
+    }
+
+    m_pimpl->translations.emplace(key, std::move(translation));
+    return translatedInterface;
 }
 
 } // namespace dinrail

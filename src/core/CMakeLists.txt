@@ -22,6 +22,8 @@ target_sources(dinrail
     dinrail/Device.h
     dinrail/IAxisInfo.h
     dinrail/Interfaces.cpp
+    dinrail/IInterfaceTranslation.h
+    dinrail/IInterfaceTranslationProvider.h
     dinrail/IInterfaceView.h
     dinrail/IInteropPlugin.h
     dinrail/Parameters.cpp
@@ -84,4 +86,3 @@ install_basic_package_files(${PROJECT_NAME}
 
 install(FILES ${DINRAIL_CMAKE_MODULES_PATH}/DinrailAddDevice.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dinrail)
-

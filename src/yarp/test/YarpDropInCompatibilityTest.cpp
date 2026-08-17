@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <dinrail/Device.h>
+#include <dinrail/IAxisInfo.h>
 #include <dinrail/Parameters.h>
 
 #include <yarp/dev/ControlBoardInterfaces.h>
@@ -41,6 +42,42 @@ TEST_CASE("View native YARP interfaces on a device opened via dinrail", "[yarp][
     int nativeAxes = 0;
     REQUIRE(nativeAxisInfo->getAxes(&nativeAxes));
     REQUIRE(nativeAxes == 3);
+
+    // The YARP interop plugin translates the native interface to the matching
+    // dinrail interface when the latter is requested.
+    dinrail::IAxisInfo* axisInfo = nullptr;
+    REQUIRE(device.view(axisInfo));
+    REQUIRE(axisInfo != nullptr);
+
+    int axes = 0;
+    REQUIRE(axisInfo->getAxes(&axes));
+    REQUIRE(axes == nativeAxes);
+
+    std::string nativeName;
+    std::string name;
+    REQUIRE(nativeAxisInfo->getAxisName(0, nativeName));
+    REQUIRE(axisInfo->getAxisName(0, name));
+    REQUIRE(name == nativeName);
+
+    yarp::dev::JointTypeEnum nativeJointType = yarp::dev::VOCAB_JOINTTYPE_UNKNOWN;
+    dinrail::JointType jointType = dinrail::JointType::UNKNOWN;
+    REQUIRE(nativeAxisInfo->getJointType(0, nativeJointType));
+    REQUIRE(axisInfo->getJointType(0, jointType));
+    if (nativeJointType == yarp::dev::VOCAB_JOINTTYPE_REVOLUTE)
+    {
+        REQUIRE(jointType == dinrail::JointType::REVOLUTE);
+    } else if (nativeJointType == yarp::dev::VOCAB_JOINTTYPE_PRISMATIC)
+    {
+        REQUIRE(jointType == dinrail::JointType::PRISMATIC);
+    } else
+    {
+        REQUIRE(jointType == dinrail::JointType::UNKNOWN);
+    }
+
+    // Successful translations are cached, giving callers a stable pointer.
+    dinrail::IAxisInfo* cachedAxisInfo = nullptr;
+    REQUIRE(device.view(cachedAxisInfo));
+    REQUIRE(cachedAxisInfo == axisInfo);
 
     // Check that yarp::dev::IEncoders is also working
     yarp::dev::IEncoders* encoders = nullptr;

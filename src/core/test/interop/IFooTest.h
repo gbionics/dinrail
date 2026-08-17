@@ -19,6 +19,14 @@ public:
     virtual std::string tag() const = 0;
 };
 
+// Destination interface used to verify runtime interop translations in core.
+class ITranslatedFooTest
+{
+public:
+    virtual ~ITranslatedFooTest() = default;
+    virtual std::string translatedTag() const = 0;
+};
+
 } // namespace dinrail::test
 
 #endif // DINRAIL_TEST_IFOOTEST_H

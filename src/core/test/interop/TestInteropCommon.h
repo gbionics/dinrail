@@ -7,6 +7,8 @@
 #include "IFooTest.h"
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceTranslation.h>
+#include <dinrail/IInterfaceTranslationProvider.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
@@ -36,6 +38,28 @@ public:
 
 private:
     std::string m_tag;
+};
+
+class FooTranslation final : public IInterfaceTranslation, public ITranslatedFooTest
+{
+public:
+    explicit FooTranslation(IFooTest& source)
+        : m_source(source)
+    {
+    }
+
+    void* getInterface() override
+    {
+        return static_cast<ITranslatedFooTest*>(this);
+    }
+
+    std::string translatedTag() const override
+    {
+        return "translated:" + m_source.tag();
+    }
+
+private:
+    IFooTest& m_source;
 };
 
 // Device that exposes IFooTest only through IInterfaceView (not as a direct

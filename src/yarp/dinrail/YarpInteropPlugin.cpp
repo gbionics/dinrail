@@ -3,11 +3,15 @@
 
 #include <dinrail/YarpInteropPlugin.h>
 
+#include <dinrail/IAxisInfo.h>
+#include <dinrail/IInterfaceView.h>
+#include <dinrail/YarpAxisInfoTranslation.h>
 #include <dinrail/YarpDeviceWrapper.h>
 #include <dinrail/YarpPropertyConverter.h>
 
 #include <sharedlibpp/SharedLibraryClassApi.h>
 
+#include <yarp/dev/IAxisInfo.h>
 #include <yarp/dev/PolyDriver.h>
 #include <yarp/os/Bottle.h>
 #include <yarp/os/Property.h>
@@ -111,6 +115,33 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
     }
 
     return std::make_unique<YarpDeviceWrapper>(std::move(yarpDriver));
+}
+
+std::unique_ptr<IInterfaceTranslation>
+YarpInteropPlugin::createInterfaceTranslation(IDevice& device, const std::type_info& interfaceType)
+{
+    if (interfaceType != typeid(dinrail::IAxisInfo))
+    {
+        return nullptr;
+    }
+
+    yarp::dev::IAxisInfo* yarpAxisInfo = dynamic_cast<yarp::dev::IAxisInfo*>(&device);
+    if (yarpAxisInfo == nullptr)
+    {
+        auto* interfaceView = dynamic_cast<IInterfaceView*>(&device);
+        if (interfaceView != nullptr)
+        {
+            yarpAxisInfo = static_cast<yarp::dev::IAxisInfo*>(
+                interfaceView->viewInterface(typeid(yarp::dev::IAxisInfo)));
+        }
+    }
+
+    if (yarpAxisInfo == nullptr)
+    {
+        return nullptr;
+    }
+
+    return std::make_unique<YarpAxisInfoTranslation>(*yarpAxisInfo);
 }
 
 std::vector<DeviceInfo> YarpInteropPlugin::listDevices() const

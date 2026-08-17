@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 namespace dinrail
@@ -16,6 +17,7 @@ namespace dinrail
 
 class Device;
 class IDevice;
+class IInterfaceTranslation;
 class Parameters;
 
 // Deleter for unique_ptr that calls a stored destroy function instead of delete.
@@ -102,6 +104,15 @@ private:
      * Returns nullptr on any failure.
      */
     FactoryUniquePtr<IDevice> createDevice(const Parameters& config);
+
+    /**
+     * @brief Ask available interop plugins to translate a device interface.
+     * @param device Device providing the source interface.
+     * @param interfaceType Requested destination interface type.
+     * @return An owned translation on success, nullptr otherwise.
+     */
+    std::unique_ptr<IInterfaceTranslation>
+    createInterfaceTranslation(IDevice& device, const std::type_info& interfaceType);
 
     friend class Device;
 };

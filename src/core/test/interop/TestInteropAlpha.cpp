@@ -8,12 +8,35 @@
 namespace dinrail::test
 {
 
-class TestInteropAlpha final : public TestInteropPluginBase
+class TestInteropAlpha final : public TestInteropPluginBase, public IInterfaceTranslationProvider
 {
 public:
     TestInteropAlpha()
         : TestInteropPluginBase("alpha", {"alpha_device"})
     {
+    }
+
+    std::unique_ptr<IInterfaceTranslation>
+    createInterfaceTranslation(IDevice& device, const std::type_info& interfaceType) override
+    {
+        if (interfaceType != typeid(ITranslatedFooTest))
+        {
+            return nullptr;
+        }
+
+        auto* interfaceView = dynamic_cast<IInterfaceView*>(&device);
+        if (interfaceView == nullptr)
+        {
+            return nullptr;
+        }
+
+        auto* source = static_cast<IFooTest*>(interfaceView->viewInterface(typeid(IFooTest)));
+        if (source == nullptr)
+        {
+            return nullptr;
+        }
+
+        return std::make_unique<FooTranslation>(*source);
     }
 };
 

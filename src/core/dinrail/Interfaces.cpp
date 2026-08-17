@@ -4,6 +4,8 @@
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IInterfaceTranslation.h>
+#include <dinrail/IInterfaceTranslationProvider.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
 
@@ -13,6 +15,10 @@ namespace dinrail
 IDevice::~IDevice() = default;
 
 IInteropPlugin::~IInteropPlugin() = default;
+
+IInterfaceTranslation::~IInterfaceTranslation() = default;
+
+IInterfaceTranslationProvider::~IInterfaceTranslationProvider() = default;
 
 IInterfaceView::~IInterfaceView() = default;
 

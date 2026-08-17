@@ -4,6 +4,8 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceTranslation.h>
+#include <dinrail/IInterfaceTranslationProvider.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
@@ -278,6 +280,44 @@ struct RuntimeContext::Impl
         return nullptr;
     }
 
+    std::unique_ptr<IInterfaceTranslation>
+    createInterfaceTranslation(IDevice& device, const std::type_info& interfaceType)
+    {
+        for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+        {
+            const std::string libraryName
+                = getSharedlibppLibraryNameFromInteropName(interopPluginInfo.name);
+            const std::string factoryName
+                = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
+            auto plugin = getInteropPlugin(libraryName, factoryName);
+            if (!plugin)
+            {
+                continue;
+            }
+
+            auto interop = plugin->allocate();
+            if (!interop)
+            {
+                continue;
+            }
+
+            auto* translationProvider = dynamic_cast<IInterfaceTranslationProvider*>(interop.get());
+            if (translationProvider == nullptr)
+            {
+                continue;
+            }
+
+            auto translation
+                = translationProvider->createInterfaceTranslation(device, interfaceType);
+            if (translation && translation->getInterface() != nullptr)
+            {
+                return translation;
+            }
+        }
+
+        return nullptr;
+    }
+
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<DevicePlugin>> devicePlugins;
 
@@ -301,6 +341,12 @@ const RuntimeContext& RuntimeContext::getDefault()
 FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
     return m_pimpl->createDevice(config);
+}
+
+std::unique_ptr<IInterfaceTranslation>
+RuntimeContext::createInterfaceTranslation(IDevice& device, const std::type_info& interfaceType)
+{
+    return m_pimpl->createInterfaceTranslation(device, interfaceType);
 }
 
 std::vector<dinrail::InteropDevices> RuntimeContext::listInteropDevices() const
