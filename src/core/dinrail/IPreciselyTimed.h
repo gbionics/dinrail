@@ -5,6 +5,9 @@
 #ifndef DINRAIL_IPRECISELYTIMED_H
 #define DINRAIL_IPRECISELYTIMED_H
 
+#include <chrono>
+#include <cstdint>
+
 namespace dinrail
 {
 
