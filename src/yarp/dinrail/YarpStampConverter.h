@@ -4,7 +4,7 @@
 #ifndef DINRAIL_YARPSTAMPCONVERTER_H
 #define DINRAIL_YARPSTAMPCONVERTER_H
 
-#include <dinrail/Stamp.h>
+#include <dinrail/IPreciselyTimed.h>
 
 namespace yarp::os
 {
