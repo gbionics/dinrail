@@ -8,44 +8,90 @@ namespace dinrail
 {
 
 /**
- * Interface for an SDL-backed joystick device.
+ * Interface for a joystick-like input device.
  *
- * Covers both raw input reading and SDL subsystem lifecycle management needed
- * for robust reconnection workflows.
+ * It covers both raw input reading and backend-specific reconnect support.
  *
  * Axes are normalised to [-1.0, 1.0]. Button values are 0.0 (released) or
- * 1.0 (pressed). Hat values follow the SDL bitmask convention (bit 0 = up,
- * bit 1 = right, bit 2 = down, bit 3 = left).
+ * 1.0 (pressed). Hat values follow the bitmask convention of the underlying
+ * backend.
  */
 class IJoypadControl
 {
 public:
-    virtual ~IJoypadControl() = default;
+    virtual ~IJoypadControl();
 
     // --- Input reading ---
 
+    /**
+     * @brief Get the number of controlled axes.
+     * @param count Output variable receiving the number of axes.
+     * @return true on success, false otherwise.
+     */
     virtual bool getAxisCount(unsigned int& count) = 0;
+
+    /**
+     * @brief Get the number of controlled buttons.
+     * @param count Output variable receiving the number of buttons.
+     * @return true on success, false otherwise.
+     */
     virtual bool getButtonCount(unsigned int& count) = 0;
+
+    /**
+     * @brief Get the number of controlled hats.
+     * @param count Output variable receiving the number of hats.
+     * @return true on success, false otherwise.
+     */
     virtual bool getHatCount(unsigned int& count) = 0;
 
+    /**
+     * @brief Get the state of an axis.
+     * @param axis_id Id of the axis to read.
+     * @param value Output variable receiving the axis value.
+     * @return true on success, false otherwise.
+     */
     virtual bool getAxis(unsigned int axis_id, double& value) = 0;
+
+    /**
+     * @brief Get the state of a button.
+     * @param button_id Id of the button to read.
+     * @param value Output variable receiving the button value.
+     * @return true on success, false otherwise.
+     */
     virtual bool getButton(unsigned int button_id, float& value) = 0;
+
+    /**
+     * @brief Get the state of a hat.
+     * @param hat_id Id of the hat to read.
+     * @param value Output variable receiving the hat value.
+     * @return true on success, false otherwise.
+     */
     virtual bool getHat(unsigned int hat_id, unsigned char& value) = 0;
 
-    // --- SDL subsystem lifecycle ---
+    // --- Backend reconnect support ---
 
     /**
-     * Quit the SDL joystick subsystem and immediately re-initialise it so
-     * that the next open() call performs a fresh hardware enumeration.
+     * Prepare the backend for a reconnect attempt.
+     *
      * Call this before re-opening the device after a disconnect.
+     *
+     * The exact behavior is backend-dependent.
+     * Example (SDL): call SDL_QuitSubSystem(SDL_INIT_JOYSTICK), then
+     * SDL_InitSubSystem(SDL_INIT_JOYSTICK), so the next open() performs a
+     * fresh device enumeration.
      */
-    virtual bool reinitJoystickSubsystem() = 0;
+    virtual bool prepareForReconnect() = 0;
 
     /**
-     * Return true if an SDL_JOYDEVICEREMOVED event is pending in the SDL
-     * event queue (and drain it).
+     * Consume one pending disconnect notification from the backend.
+     *
+     * Returns true only when a disconnect notification was present and
+     * consumed.
+     *
+     * Example (SDL): check for SDL_JOYDEVICEREMOVED and remove exactly one
+     * matching event from the queue.
      */
-    virtual bool isDeviceRemoved() = 0;
+    virtual bool consumeDisconnectEvent() = 0;
 };
 
 } // namespace dinrail

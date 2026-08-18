@@ -5,6 +5,7 @@
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IJoypadControl.h>
 
 namespace dinrail
 {
@@ -15,4 +16,5 @@ IDevice::~IDevice() = default;
 
 IImpedanceAllSetPointsControl::~IImpedanceAllSetPointsControl() = default;
 
+IJoypadControl::~IJoypadControl() = default;
 } // namespace dinrail
