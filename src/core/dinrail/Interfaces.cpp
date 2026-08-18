@@ -5,6 +5,7 @@
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IJoypadControl.h>
 #include <dinrail/IPreciselyTimed.h>
 
 namespace dinrail
@@ -15,6 +16,8 @@ IAxisInfo::~IAxisInfo() = default;
 IDevice::~IDevice() = default;
 
 IImpedanceAllSetPointsControl::~IImpedanceAllSetPointsControl() = default;
+
+IJoypadControl::~IJoypadControl() = default;
 
 IPreciselyTimed::~IPreciselyTimed() = default;
 
