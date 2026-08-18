@@ -25,6 +25,7 @@ target_sources(dinrail
     dinrail/IAxisInfo.h
     dinrail/IJoypadControl.h
     dinrail/Interfaces.cpp
+    dinrail/IPreciselyTimed.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h
