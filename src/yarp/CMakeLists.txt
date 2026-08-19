@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
+cmake_minimum_required(VERSION 3.28.3)
+
 include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/DinrailGlobalVersion.cmake)
 project(dinrail-yarp
         VERSION ${dinrail_global_VERSION}
@@ -8,7 +10,7 @@ project(dinrail-yarp
         DESCRIPTION "YARP compatibility support for dinrail.")
 
 if(PROJECT_IS_TOP_LEVEL)
-    include(${CMAKE_CURRENT_SOURCE_DIR}/../../DinrailCMakeCommon.cmake)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/DinrailCMakeCommon.cmake)
     find_package(dinrail REQUIRED)
 endif()
 
@@ -18,6 +20,8 @@ find_package(YARP REQUIRED COMPONENTS os dev)
 add_library(dinrail-yarp-conversions
     dinrail/YarpPropertyConverter.cpp
     dinrail/YarpPropertyConverter.h
+    dinrail/YarpStampConverter.cpp
+    dinrail/YarpStampConverter.h
 )
 add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp-conversions)
 

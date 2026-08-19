@@ -6,6 +6,8 @@
 #include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
+#include <dinrail/IJoypadControl.h>
+#include <dinrail/IPreciselyTimed.h>
 
 namespace dinrail
 {
@@ -19,5 +21,9 @@ IInterfaceView::~IInterfaceView() = default;
 IAxisInfo::~IAxisInfo() = default;
 
 IImpedanceAllSetPointsControl::~IImpedanceAllSetPointsControl() = default;
+
+IJoypadControl::~IJoypadControl() = default;
+
+IPreciselyTimed::~IPreciselyTimed() = default;
 
 } // namespace dinrail

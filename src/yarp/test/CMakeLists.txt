@@ -11,6 +11,14 @@ target_link_libraries(YarpPropertyConverterTest
 )
 add_test(NAME YarpPropertyConverterTest COMMAND YarpPropertyConverterTest)
 
+add_executable(YarpStampConverterTest YarpStampConverterTest.cpp)
+target_link_libraries(YarpStampConverterTest
+    PRIVATE
+        dinrail::dinrail-yarp-conversions
+        Catch2::Catch2WithMain
+)
+add_test(NAME YarpStampConverterTest COMMAND YarpStampConverterTest)
+
 add_executable(ValueCompatibilityTest ValueCompatibilityTest.cpp)
 target_link_libraries(ValueCompatibilityTest
     PRIVATE

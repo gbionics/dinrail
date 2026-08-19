@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Generative Bionics S.R.L.
 # SPDX-License-Identifier: BSD-3-Clause
 
+cmake_minimum_required(VERSION 3.28.3)
+
 # Support building just dinrail-core as standalone project
 set(DINRAIL_CMAKE_MODULES_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
 
@@ -21,9 +23,11 @@ target_sources(dinrail
     dinrail/Device.cpp
     dinrail/Device.h
     dinrail/IAxisInfo.h
+    dinrail/IJoypadControl.h
     dinrail/Interfaces.cpp
     dinrail/IInterfaceView.h
     dinrail/IInteropPlugin.h
+    dinrail/IPreciselyTimed.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h
@@ -84,4 +88,3 @@ install_basic_package_files(${PROJECT_NAME}
 
 install(FILES ${DINRAIL_CMAKE_MODULES_PATH}/DinrailAddDevice.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/dinrail)
-
