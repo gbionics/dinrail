@@ -8,6 +8,25 @@ namespace dinrail
 {
 
 /**
+ * Device-level events reported by a joypad backend.
+ *
+ * The initial set mirrors the SDL joystick device events
+ * (https://wiki.libsdl.org/SDL3/SDL_JoyDeviceEvent) and can be extended as
+ * needed.
+ */
+enum class JoypadDeviceEvent
+{
+    /// No event available, or device events are not supported by the backend.
+    NoEvent,
+    /// The device was connected (SDL_EVENT_JOYSTICK_ADDED).
+    Connected,
+    /// The device was disconnected (SDL_EVENT_JOYSTICK_REMOVED).
+    Disconnected,
+    /// The device finished updating its state (SDL_EVENT_JOYSTICK_UPDATE_COMPLETE).
+    UpdateComplete,
+};
+
+/**
  * Interface for a joystick-like input device.
  *
  * It covers both raw input reading and backend-specific reconnect support.
@@ -71,27 +90,32 @@ public:
     // --- Backend reconnect support ---
 
     /**
-     * Prepare the backend for a reconnect attempt.
-     *
-     * Call this before re-opening the device after a disconnect.
+     * Reset the backend so the device is ready to be used again after a
+     * disconnect.
      *
      * The exact behavior is backend-dependent.
      * Example (SDL): call SDL_QuitSubSystem(SDL_INIT_JOYSTICK), then
-     * SDL_InitSubSystem(SDL_INIT_JOYSTICK), so the next open() performs a
-     * fresh device enumeration.
+     * SDL_InitSubSystem(SDL_INIT_JOYSTICK) to perform a fresh device
+     * enumeration.
      */
-    virtual bool prepareForReconnect() = 0;
+    virtual bool reconnect() = 0;
 
     /**
-     * Consume one pending disconnect notification from the backend.
+     * Get the most recent device-level event reported by the backend.
      *
-     * Returns true only when a disconnect notification was present and
-     * consumed.
+     * This method does not mutate any internal state, so it is safe to call
+     * from concurrent applications reading the same interface. It reports the
+     * last known event rather than consuming it from a queue. After a
+     * successful reconnect(), the reported event becomes
+     * JoypadDeviceEvent::Connected.
      *
-     * Example (SDL): check for SDL_JOYDEVICEREMOVED and remove exactly one
-     * matching event from the queue.
+     * Backends that do not support device events return
+     * JoypadDeviceEvent::NoEvent.
+     *
+     * @param event Output variable receiving the last device event.
+     * @return true on success, false otherwise.
      */
-    virtual bool consumeDisconnectEvent() = 0;
+    virtual bool getLastEvent(JoypadDeviceEvent& event) = 0;
 };
 
 } // namespace dinrail
