@@ -13,6 +13,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
         LANGUAGES C CXX
         DESCRIPTION "A lightweight library for robot device abstractions")
     include(${DINRAIL_CMAKE_MODULES_PATH}/DinrailCMakeCommon.cmake)
+    option(DINRAIL_ENABLE_INTEROP_PLUGINS "Enable support for loading and using interop plugins." ON)
+    mark_as_advanced(DINRAIL_ENABLE_INTEROP_PLUGINS)
 endif()
 
 # Create the library
@@ -60,6 +62,13 @@ target_link_libraries(dinrail
 
 # To use std::span
 target_compile_features(dinrail PUBLIC cxx_std_20)
+
+if(DINRAIL_ENABLE_INTEROP_PLUGINS)
+    # dinrail::runtimeDynamicCast relies on the MSVC or Itanium C++ ABI internals;
+    # this definition is what makes RuntimeDynamicCast.cpp compile that ABI-specific
+    # code in, otherwise a portable no-op implementation is compiled instead.
+    target_compile_definitions(dinrail PRIVATE DINRAIL_ENABLE_INTEROP_PLUGINS)
+endif()
 
 # Install the library
 install(TARGETS dinrail

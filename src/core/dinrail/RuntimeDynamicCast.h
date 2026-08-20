@@ -121,6 +121,11 @@ template <class Source> [[nodiscard]] PolymorphicView makePolymorphicView(Source
  * IDerived* derived = static_cast<IDerived*>(
  *     dinrail::runtimeDynamicCast(view, typeid(IDerived)));
  * @endcode
+ *
+ * To support compilation on platforms different that do not support the Itanium ABI or MSVC ABI,
+ * the implementation is not compiled if DINRAIL_ENABLE_INTEROP_PLUGINS CMake option is set to OFF,
+ * and this function will always return nullptr.
+ *
  */
 [[nodiscard]]
 void* runtimeDynamicCast(const PolymorphicView& source, const std::type_info& testedType) noexcept;

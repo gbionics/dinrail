@@ -88,6 +88,8 @@ std::vector<DeviceInfo> getAvailableNativeDevices();
 /**
  * @brief Enumerate interop plugins available on plugin search paths.
  *
+ * If DINRAIL_ENABLE_INTEROP_PLUGINS is set to OFF, this function will always return an empty list.
+ *
  * @return Sorted, de-duplicated list of interop plugins with their library location.
  */
 std::vector<InteropPluginInfo> getAvailableInteropPlugins();
@@ -98,6 +100,8 @@ std::vector<InteropPluginInfo> getAvailableInteropPlugins();
  * Scans the directories returned by getPluginSearchPaths() for shared libraries
  * whose name matches the interop plugin convention (`dinrail-interop-<name>`)
  * and returns the extracted `<name>` values.
+ *
+ * If DINRAIL_ENABLE_INTEROP_PLUGINS is set to OFF, this function will always return an empty list.
  *
  * @return Sorted, de-duplicated list of available interop plugin names.
  */

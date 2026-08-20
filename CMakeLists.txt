@@ -17,4 +17,13 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DinrailCMakeCommon.cmake)
 # Optional YARP support
 option(DINRAIL_USES_YARP "Enable drop-in support for YARP device drivers" OFF)
 
+# Optional disable of interop plugins
+option(DINRAIL_ENABLE_INTEROP_PLUGINS "Enable support for loading and using interop plugins." ON)
+mark_as_advanced(DINRAIL_ENABLE_INTEROP_PLUGINS)
+
+if(DINRAIL_USES_YARP AND NOT DINRAIL_ENABLE_INTEROP_PLUGINS)
+  message(FATAL_ERROR "The DINRAIL_USES_YARP cmake option required the DINRAIL_ENABLE_INTEROP_PLUGINS to be set to ON.")
+endif()
+
+
 add_subdirectory(src)

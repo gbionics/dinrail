@@ -174,6 +174,8 @@ std::vector<InteropPluginInfo> getAvailableInteropPlugins()
 {
     std::map<std::string, std::string> pluginsByName;
 
+#if defined(DINRAIL_ENABLE_INTEROP_PLUGINS)
+
     for (const auto& dir : getPluginSearchPaths())
     {
         std::error_code ec;
@@ -199,6 +201,7 @@ std::vector<InteropPluginInfo> getAvailableInteropPlugins()
             }
         }
     }
+#endif
 
     std::vector<InteropPluginInfo> plugins;
     plugins.reserve(pluginsByName.size());

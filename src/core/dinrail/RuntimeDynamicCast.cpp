@@ -3,6 +3,8 @@
 
 #include <dinrail/RuntimeDynamicCast.h>
 
+#if defined(DINRAIL_ENABLE_INTEROP_PLUGINS)
+
 #if defined(_MSC_VER)
 
 #if !defined(_CPPRTTI)
@@ -24,9 +26,11 @@
 #else
 
 #error \
-    "dinrail::runtimeDynamicCast supports only the Microsoft C++ ABI and the GCC/Clang Itanium C++ ABI"
+    "dinrail::runtimeDynamicCast supports only the Microsoft C++ ABI and the GCC/Clang Itanium C++ ABI, to compile on other platforms please set DINRAIL_ENABLE_INTEROP_PLUGINS CMake option to OFF"
 
 #endif
+
+#endif // DINRAIL_ENABLE_INTEROP_PLUGINS
 
 namespace dinrail
 {
@@ -47,7 +51,12 @@ void* runtimeDynamicCast(const PolymorphicView& source, const std::type_info& te
         return basePtr;
     }
 
-#if defined(_MSC_VER)
+#if !defined(DINRAIL_ENABLE_INTEROP_PLUGINS)
+
+    // ABI-specific casts are not compiled in; only the identity cast above is supported.
+    return nullptr;
+
+#elif defined(_MSC_VER)
 
     // Check that vfDelta is well formed
     const std::ptrdiff_t vfDelta = source.vfDelta();

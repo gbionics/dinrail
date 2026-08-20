@@ -25,41 +25,46 @@ target_link_libraries(ParametersTest
 )
 add_test(NAME ParametersTest COMMAND ParametersTest)
 
-add_executable(RuntimeDynamicCastTest RuntimeDynamicCastTest.cpp)
-target_link_libraries(RuntimeDynamicCastTest
-    PRIVATE
-        dinrail::dinrail
-        Catch2::Catch2WithMain
-)
-add_test(NAME RuntimeDynamicCastTest COMMAND RuntimeDynamicCastTest)
-
-# Test-only interop plugins used to exercise interop discovery and the interop
-# device-creation fallback used by view().
-add_library(dinrail-interop-testalpha MODULE interop/TestInteropAlpha.cpp)
-add_library(dinrail-interop-testbeta MODULE interop/TestInteropBeta.cpp)
-
-foreach(_interop_plugin testalpha testbeta)
-    target_link_libraries(dinrail-interop-${_interop_plugin}
+# runtimeDynamicCast only performs real casts when built with the MSVC/Itanium
+# ABI-specific implementation (see DINRAIL_ENABLE_INTEROP_PLUGINS).
+if(DINRAIL_ENABLE_INTEROP_PLUGINS)
+    add_executable(RuntimeDynamicCastTest RuntimeDynamicCastTest.cpp)
+    target_link_libraries(RuntimeDynamicCastTest
         PRIVATE
             dinrail::dinrail
-            sharedlibpp::sharedlibpp
+            Catch2::Catch2WithMain
     )
-    target_include_directories(dinrail-interop-${_interop_plugin}
-        PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/interop
-    )
-endforeach()
+    add_test(NAME RuntimeDynamicCastTest COMMAND RuntimeDynamicCastTest)
 
-add_executable(InteropPluginTest InteropPluginTest.cpp)
-target_link_libraries(InteropPluginTest
-    PRIVATE
-        dinrail::dinrail
-        Catch2::Catch2WithMain
-)
-add_dependencies(InteropPluginTest
-    dinrail-interop-testalpha
-    dinrail-interop-testbeta
-)
-add_test(NAME InteropPluginTest COMMAND InteropPluginTest)
-set_tests_properties(InteropPluginTest PROPERTIES
-    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-testbeta>")
+    # Test-only interop plugins used to exercise interop discovery and the interop
+    # device-creation fallback used by view().
+    add_library(dinrail-interop-testalpha MODULE interop/TestInteropAlpha.cpp)
+    add_library(dinrail-interop-testbeta MODULE interop/TestInteropBeta.cpp)
+    
+    foreach(_interop_plugin testalpha testbeta)
+        target_link_libraries(dinrail-interop-${_interop_plugin}
+            PRIVATE
+                dinrail::dinrail
+                sharedlibpp::sharedlibpp
+        )
+        target_include_directories(dinrail-interop-${_interop_plugin}
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}/interop
+        )
+    endforeach()
+    
+    add_executable(InteropPluginTest InteropPluginTest.cpp)
+    target_link_libraries(InteropPluginTest
+        PRIVATE
+            dinrail::dinrail
+            Catch2::Catch2WithMain
+    )
+    add_dependencies(InteropPluginTest
+        dinrail-interop-testalpha
+        dinrail-interop-testbeta
+    )
+    add_test(NAME InteropPluginTest COMMAND InteropPluginTest)
+    set_tests_properties(InteropPluginTest PROPERTIES
+        ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-testbeta>")
+
+endif()
