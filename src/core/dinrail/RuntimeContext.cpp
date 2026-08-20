@@ -4,6 +4,7 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
 
@@ -15,6 +16,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace dinrail
 {
@@ -43,11 +45,19 @@ FactoryUniquePtr<T> make_factory_unique(const sharedlibpp::SharedLibraryClassFac
     return FactoryUniquePtr<T>(factory.create(), std::move(deleter));
 }
 
+template <class T> FactoryUniquePtr<T> make_factory_unique_with_delete(std::unique_ptr<T>&& ptr)
+{
+    FactoryDeleter<T> deleter;
+    deleter.destroy_fn = [](T* p) { delete p; };
+    return FactoryUniquePtr<T>(ptr.release(), std::move(deleter));
+}
+
 } // namespace
 
 struct RuntimeContext::Impl
 {
     using DeviceFactory = sharedlibpp::SharedLibraryClassFactory<dinrail::IDevice>;
+    using InteropFactory = sharedlibpp::SharedLibraryClassFactory<dinrail::IInteropPlugin>;
 
     // DevicePlugin bundles a factory with its own mutex so that concurrent
     // allocate() calls for different plugins do not block each other (only
@@ -67,9 +77,20 @@ struct RuntimeContext::Impl
         }
     };
 
-    Impl()
+    struct InteropPlugin
     {
-    }
+        std::unique_ptr<InteropFactory> factory;
+        std::mutex factoryCreateMutex; // protects concurrent factory->create() calls for a specific
+                                       // plugin
+
+        FactoryUniquePtr<IInteropPlugin> allocate()
+        {
+            std::lock_guard<std::mutex> lock(factoryCreateMutex);
+            return make_factory_unique<IInteropPlugin>(*factory);
+        }
+    };
+
+    Impl() = default;
 
     std::shared_ptr<DevicePlugin>
     getDevicePlugin(const std::string& libraryName, const std::string& factoryName)
@@ -126,6 +147,61 @@ struct RuntimeContext::Impl
         return plugin;
     }
 
+    std::shared_ptr<InteropPlugin>
+    getInteropPlugin(const std::string& libraryName, const std::string& factoryName)
+    {
+        const std::string key = pluginKey(libraryName, factoryName);
+
+        // First lookup: check if already cached
+        {
+            std::lock_guard<std::mutex> lock(interopPluginsCacheMutex);
+            auto existing = interopPlugins.find(key);
+            if (existing != interopPlugins.end())
+            {
+                return existing->second;
+            }
+        }
+
+        // Load plugin outside the lock to allow concurrent loads of different plugins
+        auto plugin = std::make_shared<InteropPlugin>();
+        plugin->factory = std::make_unique<InteropFactory>(SHLIBPP_DEFAULT_START_CHECK,
+                                                           SHLIBPP_DEFAULT_END_CHECK,
+                                                           SHLIBPP_DEFAULT_SYSTEM_VERSION,
+                                                           factoryName.c_str());
+
+        // Extend search path with all configured plugin directories (dinrail lib dir +
+        // DINRAIL_PLUGIN_PATH)
+        const auto pluginSearchPaths = getPluginSearchPaths();
+        for (const auto& path : pluginSearchPaths)
+        {
+            plugin->factory->extendSearchPath(path.string());
+        }
+
+        bool ok = plugin->factory->open(libraryName.c_str(), factoryName.c_str());
+        ok = ok && plugin->factory->isValid();
+        if (!ok)
+        {
+            return nullptr;
+        }
+
+        // Second lookup and insert: re-check cache in case another thread loaded it first
+        {
+            std::lock_guard<std::mutex> lock(interopPluginsCacheMutex);
+            auto existing = interopPlugins.find(key);
+            if (existing != interopPlugins.end())
+            {
+                // Another thread loaded it first, return theirs
+                return existing->second;
+            }
+            // Only cache successful loads; failures are not cached so that a
+            // subsequent open() call can retry (e.g. after the library becomes
+            // available on the search path).
+            interopPlugins.emplace(key, plugin);
+        }
+
+        return plugin;
+    }
+
     FactoryUniquePtr<IDevice> createDevice(const Parameters& config)
     {
         if (!config.check<std::string>("device"))
@@ -139,6 +215,7 @@ struct RuntimeContext::Impl
         const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
         const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
         auto plugin = getDevicePlugin(libraryName, factoryName);
+        std::string nativeFailureDiagnostic;
 
         if (plugin)
         {
@@ -149,18 +226,53 @@ struct RuntimeContext::Impl
             }
             if (!driver)
             {
-                std::cerr << "dinrail::Device: impossible to create instance for device '"
-                          << deviceName << "' from library '" << libraryName << "'" << std::endl;
+                nativeFailureDiagnostic = "dinrail::Device: impossible to create instance for "
+                                          "device '"
+                                          + deviceName + "' from library '" + libraryName + "'";
             } else
             {
-                std::cerr << "dinrail::Device: device '" << deviceName
-                          << "' failed to open with provided config" << std::endl;
+                nativeFailureDiagnostic = "dinrail::Device: device '" + deviceName
+                                          + "' failed to open with provided config";
             }
         } else
         {
-            std::cerr << "dinrail::Device: impossible to find library '" << libraryName
-                      << "' for device '" << deviceName << "' (factory symbol: '" << factoryName
-                      << "')" << std::endl;
+            nativeFailureDiagnostic = "dinrail::Device: impossible to find library '" + libraryName
+                                      + "' for device '" + deviceName + "' (factory symbol: '"
+                                      + factoryName + "')";
+        }
+
+        for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+        {
+            const auto& interopName = interopPluginInfo.name;
+            const std::string interopLibraryName
+                = getSharedlibppLibraryNameFromInteropName(interopName);
+            const std::string interopFactoryName
+                = getSharedlibppFactoryNameFromInteropName(interopName);
+            auto interopPlugin = getInteropPlugin(interopLibraryName, interopFactoryName);
+            if (!interopPlugin)
+            {
+                continue;
+            }
+
+            auto interop = interopPlugin->allocate();
+            if (!interop)
+            {
+                std::cerr << "dinrail::Device: impossible to create instance for interop plugin '"
+                          << interopName << "' from library '" << interopLibraryName << "'"
+                          << std::endl;
+                continue;
+            }
+
+            auto interopDriver = interop->createDevice(config);
+            if (interopDriver)
+            {
+                return make_factory_unique_with_delete<IDevice>(std::move(interopDriver));
+            }
+        }
+
+        if (!nativeFailureDiagnostic.empty())
+        {
+            std::cerr << nativeFailureDiagnostic << std::endl;
         }
 
         return nullptr;
@@ -168,6 +280,9 @@ struct RuntimeContext::Impl
 
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<DevicePlugin>> devicePlugins;
+
+    std::mutex interopPluginsCacheMutex; // protects interopPlugins map insertions and lookups
+    std::unordered_map<std::string, std::shared_ptr<InteropPlugin>> interopPlugins;
 };
 
 RuntimeContext::RuntimeContext()
@@ -186,6 +301,26 @@ const RuntimeContext& RuntimeContext::getDefault()
 FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
     return m_pimpl->createDevice(config);
+}
+
+std::vector<dinrail::InteropDevices> RuntimeContext::listInteropDevices() const
+{
+    return getAvailableInteropDevices();
+}
+
+std::vector<dinrail::DeviceInfo> RuntimeContext::listNativeDevices() const
+{
+    return getAvailableNativeDevices();
+}
+
+std::vector<dinrail::InteropPluginInfo> RuntimeContext::listInteropPlugins() const
+{
+    return getAvailableInteropPlugins();
+}
+
+dinrail::AvailableDevices RuntimeContext::listDevices() const
+{
+    return getAvailableDevices();
 }
 
 } // namespace dinrail

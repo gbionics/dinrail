@@ -37,6 +37,27 @@ target_include_directories(dinrail-yarp-conversions
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+add_library(dinrail-interop-yarp SHARED
+    dinrail/YarpDeviceWrapper.cpp
+    dinrail/YarpDeviceWrapper.h
+    dinrail/YarpInteropPlugin.cpp
+    dinrail/YarpInteropPlugin.h
+)
+
+target_link_libraries(dinrail-interop-yarp
+    PRIVATE
+        dinrail::dinrail
+        dinrail::dinrail-yarp-conversions
+        YARP::YARP_dev
+        YARP::YARP_os
+        sharedlibpp::sharedlibpp
+)
+
+target_include_directories(dinrail-interop-yarp
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 if(BUILD_TESTING)
     add_subdirectory(test)
 endif()
@@ -45,10 +66,11 @@ endif()
 install(TARGETS dinrail-yarp-conversions
     EXPORT ${PROJECT_NAME})
 
-# Install headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dinrail
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    FILES_MATCHING PATTERN "*.h")
+install(TARGETS dinrail-interop-yarp)
+
+# Install the public header (the plugin headers are intentionally not installed)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)
 
 include(InstallBasicPackageFiles)
 # Workaround for https://github.com/robotology/ycm-cmake-modules/pull/481

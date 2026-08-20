@@ -28,6 +28,18 @@ target_link_libraries(ValueCompatibilityTest
 )
 add_test(NAME ValueCompatibilityTest COMMAND ValueCompatibilityTest)
 
+add_executable(YarpDropInCompatibilityTest YarpDropInCompatibilityTest.cpp)
+target_link_libraries(YarpDropInCompatibilityTest
+    PRIVATE
+        dinrail::dinrail
+        dinrail::dinrail-yarp-conversions
+        YARP::YARP_dev
+        Catch2::Catch2WithMain
+)
+add_test(NAME YarpDropInCompatibilityTest COMMAND YarpDropInCompatibilityTest)
+set_tests_properties(YarpDropInCompatibilityTest PROPERTIES
+    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-yarp>;YARP_DATA_DIRS=${CMAKE_INSTALL_PREFIX}/share/yarp")
+
 option(DINRAIL_USES_BipedalLocomotionFramework "Enable BLF deps for testing" OFF)
 
 if (DINRAIL_USES_BipedalLocomotionFramework)
