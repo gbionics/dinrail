@@ -25,6 +25,27 @@ target_link_libraries(ParametersTest
 )
 add_test(NAME ParametersTest COMMAND ParametersTest)
 
+# Test-only native MODULE plugin. On macOS, CMake gives MODULE libraries the
+# .so suffix, unlike SHARED libraries, which use .dylib.
+add_library(dinrail-device-testnative MODULE plugin/TestNativeDevice.cpp)
+target_link_libraries(dinrail-device-testnative
+    PRIVATE
+        dinrail::dinrail
+        sharedlibpp::sharedlibpp
+)
+
+add_executable(PluginLoadingTest PluginLoadingTest.cpp)
+target_link_libraries(PluginLoadingTest
+    PRIVATE
+        dinrail::dinrail
+        Catch2::Catch2WithMain
+)
+add_dependencies(PluginLoadingTest dinrail-device-testnative)
+add_test(NAME PluginLoadingTest COMMAND PluginLoadingTest)
+set_tests_properties(PluginLoadingTest PROPERTIES
+    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-testnative>"
+)
+
 # runtimeDynamicCast only performs real casts when built with the MSVC/Itanium
 # ABI-specific implementation (see DINRAIL_ENABLE_INTEROP_PLUGINS).
 if(DINRAIL_ENABLE_INTEROP_PLUGINS)

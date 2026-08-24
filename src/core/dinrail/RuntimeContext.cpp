@@ -214,7 +214,12 @@ struct RuntimeContext::Impl
 
         const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
         const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
-        auto plugin = getDevicePlugin(libraryName, factoryName);
+        const std::string libraryLocation
+            = findNativeDevicePluginLibrary(deviceName).value_or(libraryName);
+
+        // Prefer an exact candidate path. This is required for MODULE libraries
+        // on macOS, which use .so rather than .dylib.
+        auto plugin = getDevicePlugin(libraryLocation, factoryName);
         std::string nativeFailureDiagnostic;
 
         if (plugin)
@@ -244,11 +249,9 @@ struct RuntimeContext::Impl
         for (const auto& interopPluginInfo : getAvailableInteropPlugins())
         {
             const auto& interopName = interopPluginInfo.name;
-            const std::string interopLibraryName
-                = getSharedlibppLibraryNameFromInteropName(interopName);
             const std::string interopFactoryName
                 = getSharedlibppFactoryNameFromInteropName(interopName);
-            auto interopPlugin = getInteropPlugin(interopLibraryName, interopFactoryName);
+            auto interopPlugin = getInteropPlugin(interopPluginInfo.location, interopFactoryName);
             if (!interopPlugin)
             {
                 continue;
@@ -258,7 +261,7 @@ struct RuntimeContext::Impl
             if (!interop)
             {
                 std::cerr << "dinrail::Device: impossible to create instance for interop plugin '"
-                          << interopName << "' from library '" << interopLibraryName << "'"
+                          << interopName << "' from library '" << interopPluginInfo.location << "'"
                           << std::endl;
                 continue;
             }

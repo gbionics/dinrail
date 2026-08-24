@@ -64,6 +64,17 @@ std::string getSharedlibppLibraryNameFromDeviceName(const std::string& deviceNam
 std::string getSharedlibppFactoryNameFromDeviceName(const std::string& deviceName);
 
 /**
+ * @brief Find a native dinrail device plugin by checking its expected filenames.
+ *
+ * Checks each directory returned by getPluginSearchPaths() without enumerating
+ * unrelated directory entries.
+ *
+ * @param deviceName Device identifier (for example, "dr_controlboard_fake").
+ * @return The first matching library path, or an empty optional if none exists.
+ */
+std::optional<std::string> findNativeDevicePluginLibrary(const std::string& deviceName);
+
+/**
  * @brief Build the shared library name for a dinrail interop plugin.
  * @param interopName Interop identifier (for example, "yarp").
  * @return Library stem in the form "dinrail-interop-<interopName>".

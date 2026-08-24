@@ -25,46 +25,74 @@ namespace dinrail
 namespace
 {
 
-// Extract plugin name from a shared library file name following the
-// `<pluginPrefix>-<name>` convention, or an empty string if it does not match.
-std::string
-extractPluginNameFromLibraryFileName(const std::string& fileName, const std::string& pluginPrefix)
+struct PluginLibraryFileNameConvention
 {
-#if defined(_WIN32)
-    const std::string prefix = pluginPrefix + "-";
-    const std::string suffix = ".dll";
+    std::string pluginPrefix;
+    std::string platformPrefix;
+    std::vector<std::string> suffixes;
 
-    if (fileName.size() > prefix.size() + suffix.size() && fileName.rfind(prefix, 0) == 0
-        && fileName.substr(fileName.size() - suffix.size()) == suffix)
+    std::string libraryStem(const std::string& pluginName) const
     {
-        return fileName.substr(prefix.size(), fileName.size() - prefix.size() - suffix.size());
+        return pluginPrefix + "-" + pluginName;
     }
-    return {};
-#else
-    const std::string prefix = "lib" + pluginPrefix + "-";
-#if defined(__APPLE__)
-    const std::vector<std::string> suffixes{".dylib", ".so"};
-#else
-    const std::vector<std::string> suffixes{".so"};
-#endif
 
-    if (fileName.rfind(prefix, 0) != 0)
+    std::string fileNameStem(const std::string& pluginName) const
     {
+        return platformPrefix + libraryStem(pluginName);
+    }
+
+    std::vector<std::string> fileNameCandidates(const std::string& pluginName) const
+    {
+        std::vector<std::string> candidates;
+        candidates.reserve(suffixes.size());
+        for (const auto& suffix : suffixes)
+        {
+            candidates.push_back(fileNameStem(pluginName) + suffix);
+        }
+        return candidates;
+    }
+
+    // Extract the plugin name, or return an empty string if the file does not
+    // follow this convention.
+    std::string pluginNameFromFileName(const std::string& fileName) const
+    {
+        const std::string prefix = fileNameStem({});
+        if (fileName.rfind(prefix, 0) != 0)
+        {
+            return {};
+        }
+
+        for (const auto& suffix : suffixes)
+        {
+            if (fileName.size() > prefix.size() + suffix.size()
+                && fileName.compare(fileName.size() - suffix.size(), suffix.size(), suffix) == 0)
+            {
+                return fileName.substr(prefix.size(),
+                                       fileName.size() - prefix.size() - suffix.size());
+            }
+        }
+
         return {};
     }
+};
 
-    for (const auto& suffix : suffixes)
-    {
-        const std::size_t suffixPos = fileName.find(suffix, prefix.size());
-        if (suffixPos != std::string::npos && suffixPos != prefix.size())
-        {
-            return fileName.substr(prefix.size(), suffixPos - prefix.size());
-        }
-    }
-
-    return {};
+PluginLibraryFileNameConvention makePluginLibraryFileNameConvention(const std::string& pluginPrefix)
+{
+#if defined(_WIN32)
+    return {pluginPrefix, "", {".dll"}};
+#else
+    PluginLibraryFileNameConvention convention{pluginPrefix, "lib", {".so"}};
+#if defined(__APPLE__)
+    convention.suffixes.insert(convention.suffixes.begin(), ".dylib");
+#endif
+    return convention;
 #endif
 }
+
+const PluginLibraryFileNameConvention nativePluginConvention
+    = makePluginLibraryFileNameConvention("dinrail-device");
+const PluginLibraryFileNameConvention interopPluginConvention
+    = makePluginLibraryFileNameConvention("dinrail-interop");
 
 template <class T>
 std::unique_ptr<T, std::function<void(T*)>>
@@ -83,7 +111,7 @@ makeFactoryUnique(const sharedlibpp::SharedLibraryClassFactory<T>& factory)
 
 std::string getSharedlibppLibraryNameFromDeviceName(const std::string& deviceName)
 {
-    return "dinrail-device-" + deviceName;
+    return nativePluginConvention.libraryStem(deviceName);
 }
 
 std::string getSharedlibppFactoryNameFromDeviceName(const std::string& deviceName)
@@ -99,9 +127,29 @@ std::string getSharedlibppFactoryNameFromDeviceName(const std::string& deviceNam
     return factoryName;
 }
 
+std::optional<std::string> findNativeDevicePluginLibrary(const std::string& deviceName)
+{
+    const auto fileNames = nativePluginConvention.fileNameCandidates(deviceName);
+
+    for (const auto& directory : getPluginSearchPaths())
+    {
+        for (const auto& fileName : fileNames)
+        {
+            const std::filesystem::path candidate = directory / fileName;
+            std::error_code ec;
+            if (std::filesystem::is_regular_file(candidate, ec))
+            {
+                return candidate.string();
+            }
+        }
+    }
+
+    return std::nullopt;
+}
+
 std::string getSharedlibppLibraryNameFromInteropName(const std::string& interopName)
 {
-    return "dinrail-interop-" + interopName;
+    return interopPluginConvention.libraryStem(interopName);
 }
 
 std::string getSharedlibppFactoryNameFromInteropName(const std::string& interopName)
@@ -151,8 +199,7 @@ std::vector<DeviceInfo> getAvailableNativeDevices()
             }
 
             const std::string name
-                = extractPluginNameFromLibraryFileName(entry.path().filename().string(),
-                                                       "dinrail-device");
+                = nativePluginConvention.pluginNameFromFileName(entry.path().filename().string());
             if (!name.empty())
             {
                 devicesByName.emplace(name, entry.path().string());
@@ -193,8 +240,7 @@ std::vector<InteropPluginInfo> getAvailableInteropPlugins()
             }
 
             const std::string name
-                = extractPluginNameFromLibraryFileName(entry.path().filename().string(),
-                                                       "dinrail-interop");
+                = interopPluginConvention.pluginNameFromFileName(entry.path().filename().string());
             if (!name.empty())
             {
                 pluginsByName.emplace(name, entry.path().string());
@@ -219,8 +265,6 @@ std::vector<InteropDevices> getAvailableInteropDevices()
 
     for (const auto& interopPluginInfo : getAvailableInteropPlugins())
     {
-        const std::string libraryName
-            = getSharedlibppLibraryNameFromInteropName(interopPluginInfo.name);
         const std::string factoryName
             = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
 
@@ -235,7 +279,10 @@ std::vector<InteropDevices> getAvailableInteropDevices()
             factory.extendSearchPath(path.string());
         }
 
-        bool ok = factory.open(libraryName.c_str(), factoryName.c_str());
+        // Load the exact file found during discovery. In particular, CMake MODULE
+        // libraries use the .so suffix on macOS, while sharedlibpp expands a bare
+        // library name to .dylib only on that platform.
+        bool ok = factory.open(interopPluginInfo.location.c_str(), factoryName.c_str());
         ok = ok && factory.isValid();
         if (!ok)
         {
