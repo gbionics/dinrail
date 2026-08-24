@@ -23,6 +23,21 @@
 
 #include <cxxabi.h>
 
+// Apple's <cxxabi.h> does not expose __class_type_info or __dynamic_cast in
+// its public headers even though they are present in the libc++abi runtime.
+// Forward-declare them so we can call through the Itanium ABI on Apple platforms.
+#if defined(__APPLE__)
+#include <cstddef>
+namespace __cxxabiv1
+{
+class __class_type_info;
+extern "C++" void* __dynamic_cast(const void* src_ptr,
+                                  const __class_type_info* src_type,
+                                  const __class_type_info* dst_type,
+                                  std::ptrdiff_t src2dst_offset);
+} // namespace __cxxabiv1
+#endif
+
 #else
 
 #error \
