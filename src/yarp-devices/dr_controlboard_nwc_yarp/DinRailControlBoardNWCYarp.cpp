@@ -1706,7 +1706,7 @@ bool DinRailControlBoardNWCYarp::getTemperatures(double* vals)
     double localArrivalTime = 0.0;
 
     extendedPortMutex.lock();
-    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURE,
+    bool ret = extendedIntputStatePort.getLastVector(VOCAB_TEMPERATURES,
                                                      vals,
                                                      lastStamp,
                                                      localArrivalTime);
