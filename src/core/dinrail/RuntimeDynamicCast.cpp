@@ -28,13 +28,15 @@
 // Forward-declare them so we can call through the Itanium ABI on Apple platforms.
 #if defined(__APPLE__)
 #include <cstddef>
+
 namespace __cxxabiv1
 {
 class __class_type_info;
-extern "C++" void* __dynamic_cast(const void* src_ptr,
-                                  const __class_type_info* src_type,
-                                  const __class_type_info* dst_type,
-                                  std::ptrdiff_t src2dst_offset);
+
+extern "C" void* __dynamic_cast(const void* sourcePointer,
+                                const __class_type_info* sourceType,
+                                const __class_type_info* targetType,
+                                std::ptrdiff_t sourceToTargetOffset);
 } // namespace __cxxabiv1
 #endif
 
@@ -111,12 +113,19 @@ void* runtimeDynamicCast(const PolymorphicView& source, const std::type_info& te
 
     using ClassTypeInfo = __cxxabiv1::__class_type_info;
 
+#if defined(__APPLE__)
+    // libc++abi keeps __class_type_info incomplete in its public headers.
+    const auto* const sourceClass = reinterpret_cast<const ClassTypeInfo*>(&baseType);
+    const auto* const targetClass = reinterpret_cast<const ClassTypeInfo*>(&testedType);
+#else
     const auto* const sourceClass = dynamic_cast<const ClassTypeInfo*>(&baseType);
     const auto* const targetClass = dynamic_cast<const ClassTypeInfo*>(&testedType);
+
     if (sourceClass == nullptr || targetClass == nullptr)
     {
         return nullptr;
     }
+#endif
 
     // -1 means no source-to-destination offset hint is available; always valid.
     return __cxxabiv1::__dynamic_cast(basePtr, sourceClass, targetClass, -1);
