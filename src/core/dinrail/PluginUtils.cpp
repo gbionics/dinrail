@@ -27,13 +27,18 @@ namespace
 
 struct PluginLibraryFileNameConvention
 {
-    std::string libraryStemPrefix;
-    std::string fileNamePrefix;
+    std::string pluginPrefix;
+    std::string platformPrefix;
     std::vector<std::string> suffixes;
 
     std::string libraryStem(const std::string& pluginName) const
     {
-        return libraryStemPrefix + pluginName;
+        return pluginPrefix + "-" + pluginName;
+    }
+
+    std::string fileNameStem(const std::string& pluginName) const
+    {
+        return platformPrefix + libraryStem(pluginName);
     }
 
     std::vector<std::string> fileNameCandidates(const std::string& pluginName) const
@@ -42,7 +47,7 @@ struct PluginLibraryFileNameConvention
         candidates.reserve(suffixes.size());
         for (const auto& suffix : suffixes)
         {
-            candidates.push_back(fileNamePrefix + pluginName + suffix);
+            candidates.push_back(fileNameStem(pluginName) + suffix);
         }
         return candidates;
     }
@@ -51,18 +56,19 @@ struct PluginLibraryFileNameConvention
     // follow this convention.
     std::string pluginNameFromFileName(const std::string& fileName) const
     {
-        if (fileName.rfind(fileNamePrefix, 0) != 0)
+        const std::string prefix = fileNameStem({});
+        if (fileName.rfind(prefix, 0) != 0)
         {
             return {};
         }
 
         for (const auto& suffix : suffixes)
         {
-            if (fileName.size() > fileNamePrefix.size() + suffix.size()
+            if (fileName.size() > prefix.size() + suffix.size()
                 && fileName.compare(fileName.size() - suffix.size(), suffix.size(), suffix) == 0)
             {
-                return fileName.substr(fileNamePrefix.size(),
-                                       fileName.size() - fileNamePrefix.size() - suffix.size());
+                return fileName.substr(prefix.size(),
+                                       fileName.size() - prefix.size() - suffix.size());
             }
         }
 
@@ -72,13 +78,14 @@ struct PluginLibraryFileNameConvention
 
 PluginLibraryFileNameConvention makePluginLibraryFileNameConvention(const std::string& pluginPrefix)
 {
-    const std::string libraryStemPrefix = pluginPrefix + "-";
 #if defined(_WIN32)
-    return {libraryStemPrefix, libraryStemPrefix, {".dll"}};
-#elif defined(__APPLE__)
-    return {libraryStemPrefix, "lib" + libraryStemPrefix, {".dylib", ".so"}};
+    return {pluginPrefix, "", {".dll"}};
 #else
-    return {libraryStemPrefix, "lib" + libraryStemPrefix, {".so"}};
+    PluginLibraryFileNameConvention convention{pluginPrefix, "lib", {".so"}};
+#if defined(__APPLE__)
+    convention.suffixes.insert(convention.suffixes.begin(), ".dylib");
+#endif
+    return convention;
 #endif
 }
 
