@@ -14,36 +14,35 @@
 namespace yarp::dev::tests
 {
 
+constexpr int controlModeMaxAttempts = 100;
+constexpr double controlModePollingPeriod = 0.005;
+
 inline bool wait_for_single_mode(yarp::dev::IControlMode* icmd, int expected, int* ret)
 {
-    constexpr int maxAttempts = 20;
-    constexpr double sleepSeconds = 0.001;
     bool b = false;
-    for (int attempt = 0; attempt < maxAttempts; ++attempt)
+    for (int attempt = 0; attempt < controlModeMaxAttempts; ++attempt)
     {
         b = icmd->getControlMode(0, ret);
         if (b && *ret == expected)
         {
             return true;
         }
-        yarp::os::SystemClock::delaySystem(sleepSeconds);
+        yarp::os::SystemClock::delaySystem(controlModePollingPeriod);
     }
     return b && *ret == expected;
 }
 
 inline bool wait_for_all_modes(yarp::dev::IControlMode* icmd, int expected, int rets[2])
 {
-    constexpr int maxAttempts = 20;
-    constexpr double sleepSeconds = 0.001;
     bool b = false;
-    for (int attempt = 0; attempt < maxAttempts; ++attempt)
+    for (int attempt = 0; attempt < controlModeMaxAttempts; ++attempt)
     {
         b = icmd->getControlModes(rets);
         if (b && rets[0] == expected && rets[1] == expected)
         {
             return true;
         }
-        yarp::os::SystemClock::delaySystem(sleepSeconds);
+        yarp::os::SystemClock::delaySystem(controlModePollingPeriod);
     }
     return b && rets[0] == expected && rets[1] == expected;
 }
@@ -51,17 +50,15 @@ inline bool wait_for_all_modes(yarp::dev::IControlMode* icmd, int expected, int 
 inline bool
 wait_for_multi_modes(yarp::dev::IControlMode* icmd, int expected, int joints[2], int rets[2])
 {
-    constexpr int maxAttempts = 20;
-    constexpr double sleepSeconds = 0.001;
     bool b = false;
-    for (int attempt = 0; attempt < maxAttempts; ++attempt)
+    for (int attempt = 0; attempt < controlModeMaxAttempts; ++attempt)
     {
         b = icmd->getControlModes(2, joints, rets);
         if (b && rets[0] == expected && rets[1] == expected)
         {
             return true;
         }
-        yarp::os::SystemClock::delaySystem(sleepSeconds);
+        yarp::os::SystemClock::delaySystem(controlModePollingPeriod);
     }
     return b && rets[0] == expected && rets[1] == expected;
 }
