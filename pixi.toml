@@ -22,6 +22,7 @@ extra-args = [
     "-DCMAKE_BUILD_TYPE=Release",
     "-DDINRAIL_USES_YARP:BOOL=ON",
     "-DBUILD_TESTING:BOOL=OFF",
+    "-DCMAKE_CXX_SCAN_FOR_MODULES:BOOL=OFF",
 ]
 
 [package.build-dependencies]
@@ -54,6 +55,9 @@ configure = { cmd = [
     "-DBUILD_TESTING:BOOL=ON",
     # Workaround for slow PCL find in BLF
     "-DCMAKE_DISABLE_FIND_PACKAGE_VTK:BOOL=ON",
+    # Workaround for https://github.com/gbionics/yarp-device-keyboard-joypad/pull/13#issuecomment-5406943040,
+    # can stay like that until we actually use C++ modules in dinrail
+    "-DCMAKE_CXX_SCAN_FOR_MODULES:BOOL=OFF",
     # Use the cross-platform Ninja generator
     "-G",
     "Ninja",
