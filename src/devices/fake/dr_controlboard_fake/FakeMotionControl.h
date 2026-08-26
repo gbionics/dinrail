@@ -7,6 +7,7 @@
 
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <dinrail/IPreciselyTimed.h>
 
@@ -19,6 +20,8 @@ namespace dinrail
 
 class FakeMotionControl : public IDevice,
                           public IAxisInfo,
+                          public IEncoders,
+                          public IEncodersSimulation,
                           public IImpedanceAllSetPointsControl,
                           public IPreciselyTimed,
                           public IPreciselyTimedSimulation
@@ -33,6 +36,26 @@ public:
     bool getAxes(int* ax) override;
     bool getAxisName(int axis, std::string& name) override;
     bool getJointType(int axis, JointType& type) override;
+
+    bool getEncoder(int j, double* value) override;
+    bool getEncoders(VectorProxy<double>::Ref values) override;
+    bool getEncoderTimed(int j, double* value, double* timestamp) override;
+    bool
+    getEncodersTimed(VectorProxy<double>::Ref values, VectorProxy<double>::Ref timestamps) override;
+    bool getEncoderSpeed(int j, double* speed) override;
+    bool getEncoderSpeeds(VectorProxy<double>::Ref speeds) override;
+    bool getEncoderAcceleration(int j, double* acceleration) override;
+    bool getEncoderAccelerations(VectorProxy<double>::Ref accelerations) override;
+
+    bool setEncoder(int j, double value) override;
+    bool setEncoders(const VectorProxy<const double>::Ref values) override;
+    bool setEncoderTimed(int j, double value, double timestamp) override;
+    bool setEncodersTimed(const VectorProxy<const double>::Ref values,
+                          const VectorProxy<const double>::Ref timestamps) override;
+    bool setEncoderSpeed(int j, double speed) override;
+    bool setEncoderSpeeds(const VectorProxy<const double>::Ref speeds) override;
+    bool setEncoderAcceleration(int j, double acceleration) override;
+    bool setEncoderAccelerations(const VectorProxy<const double>::Ref accelerations) override;
 
     Stamp getLastInputStamp() override;
     void setLastInputStamp(const Stamp& stamp) override;
@@ -72,6 +95,10 @@ private:
     Stamp m_lastInputStamp;
     std::vector<std::string> m_axisNames;
     std::vector<JointType> m_jointTypes;
+    std::vector<double> m_encoderPositions;
+    std::vector<double> m_encoderTimestamps;
+    std::vector<double> m_encoderSpeeds;
+    std::vector<double> m_encoderAccelerations;
     std::vector<double> m_posSetpoints;
     std::vector<double> m_velSetpoints;
     std::vector<double> m_torqueSetpoints;

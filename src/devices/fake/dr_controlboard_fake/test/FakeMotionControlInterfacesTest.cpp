@@ -5,12 +5,116 @@
 
 #include <dinrail/Device.h>
 #include <dinrail/IAxisInfo.h>
+#include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
 #include <dinrail/IPreciselyTimed.h>
 #include <dinrail/Parameters.h>
 
+#include <array>
 #include <chrono>
 #include <vector>
+
+TEST_CASE("FakeMotionControl exposes encoder interfaces", "[core][device][encoders]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", "dr_controlboard_fake");
+    opts.put("number_of_joints", 3);
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::IEncoders* encoders = nullptr;
+    REQUIRE(device.view(encoders));
+    REQUIRE(encoders != nullptr);
+
+    dinrail::IEncodersSimulation* encoderSimulation = nullptr;
+    REQUIRE(device.view(encoderSimulation));
+    REQUIRE(encoderSimulation != nullptr);
+
+    int axes = 0;
+    REQUIRE(encoders->getAxes(&axes));
+    REQUIRE(axes == 3);
+
+    SECTION("single encoder measurements")
+    {
+        REQUIRE(encoderSimulation->setEncoder(1, 11.5));
+        double value = 0.0;
+        REQUIRE(encoders->getEncoder(1, &value));
+        REQUIRE(value == 11.5);
+
+        REQUIRE(encoderSimulation->setEncoderTimed(1, 12.5, 42.25));
+        REQUIRE(encoderSimulation->setEncoderSpeed(1, 3.5));
+        REQUIRE(encoderSimulation->setEncoderAcceleration(1, -1.25));
+
+        double timestamp = 0.0;
+        double speed = 0.0;
+        double acceleration = 0.0;
+        REQUIRE(encoders->getEncoder(1, &value));
+        REQUIRE(value == 12.5);
+        REQUIRE(encoders->getEncoderTimed(1, &value, &timestamp));
+        REQUIRE(value == 12.5);
+        REQUIRE(timestamp == 42.25);
+        REQUIRE(encoders->getEncoderSpeed(1, &speed));
+        REQUIRE(speed == 3.5);
+        REQUIRE(encoders->getEncoderAcceleration(1, &acceleration));
+        REQUIRE(acceleration == -1.25);
+
+        REQUIRE_FALSE(encoderSimulation->setEncoder(-1, 0.0));
+        REQUIRE_FALSE(encoderSimulation->setEncoder(3, 0.0));
+        REQUIRE_FALSE(encoders->getEncoder(-1, &value));
+        REQUIRE_FALSE(encoders->getEncoder(3, &value));
+        REQUIRE_FALSE(encoders->getEncoder(0, nullptr));
+        REQUIRE_FALSE(encoders->getEncoderTimed(0, nullptr, &timestamp));
+        REQUIRE_FALSE(encoders->getEncoderTimed(0, &value, nullptr));
+        REQUIRE_FALSE(encoders->getEncoderSpeed(0, nullptr));
+        REQUIRE_FALSE(encoders->getEncoderAcceleration(0, nullptr));
+    }
+
+    SECTION("all encoder measurements")
+    {
+        const std::vector<double> values{1.0, 2.0, 3.0};
+        const std::vector<double> timestamps{10.0, 20.0, 30.0};
+        const std::vector<double> speeds{4.0, 5.0, 6.0};
+        const std::vector<double> accelerations{7.0, 8.0, 9.0};
+        REQUIRE(encoderSimulation->setEncoders(values));
+        std::vector<double> valuesOut;
+        REQUIRE(encoders->getEncoders(valuesOut));
+        REQUIRE(valuesOut == values);
+
+        REQUIRE(encoderSimulation->setEncodersTimed(values, timestamps));
+        REQUIRE(encoderSimulation->setEncoderSpeeds(speeds));
+        REQUIRE(encoderSimulation->setEncoderAccelerations(accelerations));
+
+        // Resizable outputs are resized to the number of axes.
+        std::vector<double> timestampsOut;
+        std::vector<double> speedsOut;
+        std::vector<double> accelerationsOut;
+        REQUIRE(encoders->getEncoders(valuesOut));
+        REQUIRE(valuesOut == values);
+        REQUIRE(encoders->getEncodersTimed(valuesOut, timestampsOut));
+        REQUIRE(valuesOut == values);
+        REQUIRE(timestampsOut == timestamps);
+        REQUIRE(encoders->getEncoderSpeeds(speedsOut));
+        REQUIRE(speedsOut == speeds);
+        REQUIRE(encoders->getEncoderAccelerations(accelerationsOut));
+        REQUIRE(accelerationsOut == accelerations);
+
+        // Fixed-size outputs must already have the number of controlled axes.
+        std::array<double, 3> fixedOutput{};
+        REQUIRE(encoders->getEncoders(fixedOutput));
+        REQUIRE(std::vector<double>(fixedOutput.begin(), fixedOutput.end()) == values);
+        std::array<double, 2> shortOutput{};
+        REQUIRE_FALSE(encoders->getEncoders(shortOutput));
+
+        const std::vector<double> wrongSize{1.0, 2.0};
+        REQUIRE_FALSE(encoderSimulation->setEncoders(wrongSize));
+        REQUIRE_FALSE(encoderSimulation->setEncodersTimed(values, wrongSize));
+        REQUIRE_FALSE(encoderSimulation->setEncoderSpeeds(wrongSize));
+        REQUIRE_FALSE(encoderSimulation->setEncoderAccelerations(wrongSize));
+    }
+
+    REQUIRE(device.close());
+}
 
 TEST_CASE("FakeMotionControl exposes precisely timed interfaces", "[core][device][precisely_timed]")
 {
