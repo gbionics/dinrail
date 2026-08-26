@@ -19,6 +19,15 @@ target_link_libraries(YarpStampConverterTest
 )
 add_test(NAME YarpStampConverterTest COMMAND YarpStampConverterTest)
 
+add_executable(YarpStatusConverterTest YarpStatusConverterTest.cpp)
+target_link_libraries(YarpStatusConverterTest
+    PRIVATE
+        dinrail::dinrail-yarp-conversions
+        YARP::YARP_dev
+        Catch2::Catch2WithMain
+)
+add_test(NAME YarpStatusConverterTest COMMAND YarpStatusConverterTest)
+
 add_executable(ValueCompatibilityTest ValueCompatibilityTest.cpp)
 target_link_libraries(ValueCompatibilityTest
     PRIVATE

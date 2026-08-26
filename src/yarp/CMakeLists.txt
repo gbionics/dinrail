@@ -16,18 +16,21 @@ endif()
 
 find_package(YARP REQUIRED COMPONENTS os dev)
 
-# Minimal YARP conversion support for dinrail::Parameters <-> yarp::os::Property.
+# Conversion support between dinrail and YARP value types.
 add_library(dinrail-yarp-conversions
     dinrail/YarpPropertyConverter.cpp
     dinrail/YarpPropertyConverter.h
     dinrail/YarpStampConverter.cpp
     dinrail/YarpStampConverter.h
+    dinrail/YarpStatusConverter.cpp
+    dinrail/YarpStatusConverter.h
 )
 add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp-conversions)
 
 
 target_link_libraries(dinrail-yarp-conversions    PUBLIC
         dinrail::dinrail
+        YARP::YARP_dev
         YARP::YARP_os
 )
 
@@ -68,8 +71,10 @@ install(TARGETS dinrail-yarp-conversions
 
 install(TARGETS dinrail-interop-yarp)
 
-# Install the public header (the plugin headers are intentionally not installed)
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
+# Install the public headers (the plugin headers are intentionally not installed)
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStatusConverter.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)
 
 include(InstallBasicPackageFiles)
