@@ -24,3 +24,19 @@ This helps to avoid known RTTI and `dynamic_cast` failures that can happen acros
 ### Device parameters
 
 `dinrail` devices should always name their parameters using `snake_case`, unless a different style is required to provide drop-in compatibility for existing legacy devices.
+
+### Downstream devices
+
+`dinrail` devices that are not maintained in the `dinrail` repository may have to support multiple versions of the `dinrail` interfaces. According to the dinrail versioning policy, API changes may also occur in minor releases.
+
+To keep compile-time compatibility with different dinrail versions, downstream code maintainers are encouraged to use the `DINRAIL_VERSION_AT_LEAST` macro defined in `<dinrail/Version.h>`. For example, code supporting both dinrail 0.1 and an API introduced in dinrail 0.2 can use:
+
+~~~cpp
+#include <dinrail/Version.h>
+
+#if DINRAIL_VERSION_AT_LEAST(0, 2, 0)
+// Use the API available since dinrail 0.2.0.
+#else
+// Use the compatibility implementation for dinrail 0.1.x.
+#endif
+~~~
