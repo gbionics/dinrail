@@ -50,6 +50,7 @@ target_sources(dinrail
     # Technically this header use spdlog, but as it is an header-only
     # header, we do not link spdlog here, and it is up to donwstream
     dinrail/SpdlogHelpers.h
+    dinrail/Status.cpp
     dinrail/Status.h
     dinrail/Value.cpp
     dinrail/Version.h

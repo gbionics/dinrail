@@ -4,6 +4,10 @@
 #ifndef DINRAIL_STATUS_H
 #define DINRAIL_STATUS_H
 
+#include <iosfwd>
+#include <string>
+#include <string_view>
+
 namespace dinrail
 {
 
@@ -38,6 +42,19 @@ enum class StatusCode : int
 };
 
 /**
+ * @brief Return the canonical name of @p code, or an empty view for an unknown code.
+ */
+[[nodiscard]] std::string_view StatusCodeToStringView(StatusCode code) noexcept;
+
+/**
+ * @brief Return the canonical name of @p code, or an empty string for an unknown code.
+ */
+[[nodiscard]] std::string StatusCodeToString(StatusCode code);
+
+/** @brief Write the canonical name of @p code to @p os. */
+std::ostream& operator<<(std::ostream& os, StatusCode code);
+
+/**
  * @brief Lightweight outcome of an operation.
  *
  * Status stores only a canonical StatusCode. It intentionally has no error
@@ -67,6 +84,12 @@ public:
         return m_code;
     }
 
+    /** @brief Return the canonical name of this status, or an empty view for an unknown code. */
+    [[nodiscard]] std::string_view ToStringView() const noexcept;
+
+    /** @brief Return the canonical name of this status, or an empty string for an unknown code. */
+    [[nodiscard]] std::string ToString() const;
+
     /**
      * @brief Record @p newStatus if this status is currently OK.
      *
@@ -91,6 +114,9 @@ public:
 private:
     StatusCode m_code{StatusCode::Ok};
 };
+
+/** @brief Write the canonical name of @p status to @p os. */
+std::ostream& operator<<(std::ostream& os, const Status& status);
 
 /** @brief Return an OK status. */
 [[nodiscard]] constexpr Status OkStatus() noexcept
