@@ -20,8 +20,15 @@ endif()
 # Create the library
 add_library(dinrail)
 
+configure_file(
+    dinrail/Config.h.in
+    include/dinrail/Config.h
+    @ONLY
+)
+
 target_sources(dinrail
     PRIVATE
+    ${CMAKE_CURRENT_BINARY_DIR}/include/dinrail/Config.h
     dinrail/Device.cpp
     dinrail/Device.h
     dinrail/IAxisInfo.h
@@ -44,6 +51,7 @@ target_sources(dinrail
     # header, we do not link spdlog here, and it is up to donwstream
     dinrail/SpdlogHelpers.h
     dinrail/Value.cpp
+    dinrail/Version.h
 )
 
 add_library(${PROJECT_NAME}::dinrail ALIAS dinrail)
@@ -52,6 +60,7 @@ add_library(${PROJECT_NAME}::dinrail ALIAS dinrail)
 target_include_directories(dinrail
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
@@ -78,6 +87,9 @@ install(TARGETS dinrail
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/dinrail
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/dinrail/Config.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)
 
 # Add tests
 if(BUILD_TESTING)

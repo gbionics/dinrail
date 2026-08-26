@@ -1,0 +1,11 @@
+// SPDX-FileCopyrightText: Generative Bionics S.R.L.
+// SPDX-License-Identifier: BSD-3-Clause
+
+#ifndef DINRAIL_CONFIG_H
+#define DINRAIL_CONFIG_H
+
+#define DINRAIL_VERSION_MAJOR @dinrail_VERSION_MAJOR@
+#define DINRAIL_VERSION_MINOR @dinrail_VERSION_MINOR@
+#define DINRAIL_VERSION_PATCH @dinrail_VERSION_PATCH@
+
+#endif // DINRAIL_CONFIG_H
