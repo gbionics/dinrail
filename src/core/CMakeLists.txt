@@ -32,6 +32,7 @@ target_sources(dinrail
     dinrail/Device.cpp
     dinrail/Device.h
     dinrail/IAxisInfo.h
+    dinrail/IEncoders.h
     dinrail/IJoypadControl.h
     dinrail/Interfaces.cpp
     dinrail/IInterfaceView.h

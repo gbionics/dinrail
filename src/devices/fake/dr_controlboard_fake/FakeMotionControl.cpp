@@ -38,6 +38,12 @@ bool parseJointType(const std::string& typeString, JointType& type)
 
     return false;
 }
+
+bool prepareEncoderOutput(VectorProxy<double>::Ref output, int njoints)
+{
+    const auto expectedSize = static_cast<std::ptrdiff_t>(njoints);
+    return output.size() == expectedSize || output.resizeVector(expectedSize);
+}
 } // namespace
 
 bool FakeMotionControl::open(const Parameters& config)
@@ -68,6 +74,10 @@ bool FakeMotionControl::open(const Parameters& config)
     m_axisNames.reserve(static_cast<std::size_t>(m_njoints));
     m_jointTypes.clear();
     m_jointTypes.assign(static_cast<std::size_t>(m_njoints), JointType::REVOLUTE);
+    m_encoderPositions.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_encoderTimestamps.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_encoderSpeeds.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_encoderAccelerations.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_posSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_velSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_torqueSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
@@ -154,6 +164,204 @@ bool FakeMotionControl::getJointType(int axis, JointType& type)
     }
 
     type = m_jointTypes[static_cast<std::size_t>(axis)];
+    return true;
+}
+
+bool FakeMotionControl::getEncoder(int j, double* value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints) || value == nullptr)
+    {
+        return false;
+    }
+
+    *value = m_encoderPositions[static_cast<std::size_t>(j)];
+    return true;
+}
+
+bool FakeMotionControl::getEncoders(VectorProxy<double>::Ref values)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(values, m_njoints))
+    {
+        return false;
+    }
+
+    return values.clone(std::span<double>(m_encoderPositions));
+}
+
+bool FakeMotionControl::getEncoderTimed(int j, double* value, double* timestamp)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints) || value == nullptr || timestamp == nullptr)
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    *value = m_encoderPositions[index];
+    *timestamp = m_encoderTimestamps[index];
+    return true;
+}
+
+bool FakeMotionControl::getEncodersTimed(VectorProxy<double>::Ref values,
+                                         VectorProxy<double>::Ref timestamps)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(values, m_njoints)
+        || !prepareEncoderOutput(timestamps, m_njoints))
+    {
+        return false;
+    }
+
+    return values.clone(std::span<double>(m_encoderPositions))
+           && timestamps.clone(std::span<double>(m_encoderTimestamps));
+}
+
+bool FakeMotionControl::getEncoderSpeed(int j, double* speed)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints) || speed == nullptr)
+    {
+        return false;
+    }
+
+    *speed = m_encoderSpeeds[static_cast<std::size_t>(j)];
+    return true;
+}
+
+bool FakeMotionControl::getEncoderSpeeds(VectorProxy<double>::Ref speeds)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(speeds, m_njoints))
+    {
+        return false;
+    }
+
+    return speeds.clone(std::span<double>(m_encoderSpeeds));
+}
+
+bool FakeMotionControl::getEncoderAcceleration(int j, double* acceleration)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints) || acceleration == nullptr)
+    {
+        return false;
+    }
+
+    *acceleration = m_encoderAccelerations[static_cast<std::size_t>(j)];
+    return true;
+}
+
+bool FakeMotionControl::getEncoderAccelerations(VectorProxy<double>::Ref accelerations)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(accelerations, m_njoints))
+    {
+        return false;
+    }
+
+    return accelerations.clone(std::span<double>(m_encoderAccelerations));
+}
+
+bool FakeMotionControl::setEncoder(int j, double value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    m_encoderPositions[static_cast<std::size_t>(j)] = value;
+    return true;
+}
+
+bool FakeMotionControl::setEncoders(const VectorProxy<const double>::Ref values)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || values.size() != static_cast<std::ptrdiff_t>(m_njoints))
+    {
+        return false;
+    }
+
+    std::copy(values.begin(), values.end(), m_encoderPositions.begin());
+    return true;
+}
+
+bool FakeMotionControl::setEncoderTimed(int j, double value, double timestamp)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    m_encoderPositions[index] = value;
+    m_encoderTimestamps[index] = timestamp;
+    return true;
+}
+
+bool FakeMotionControl::setEncodersTimed(const VectorProxy<const double>::Ref values,
+                                         const VectorProxy<const double>::Ref timestamps)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    const auto expectedSize = static_cast<std::ptrdiff_t>(m_njoints);
+    if (!m_opened || values.size() != expectedSize || timestamps.size() != expectedSize)
+    {
+        return false;
+    }
+
+    std::copy(values.begin(), values.end(), m_encoderPositions.begin());
+    std::copy(timestamps.begin(), timestamps.end(), m_encoderTimestamps.begin());
+    return true;
+}
+
+bool FakeMotionControl::setEncoderSpeed(int j, double speed)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    m_encoderSpeeds[static_cast<std::size_t>(j)] = speed;
+    return true;
+}
+
+bool FakeMotionControl::setEncoderSpeeds(const VectorProxy<const double>::Ref speeds)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || speeds.size() != static_cast<std::ptrdiff_t>(m_njoints))
+    {
+        return false;
+    }
+
+    std::copy(speeds.begin(), speeds.end(), m_encoderSpeeds.begin());
+    return true;
+}
+
+bool FakeMotionControl::setEncoderAcceleration(int j, double acceleration)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    m_encoderAccelerations[static_cast<std::size_t>(j)] = acceleration;
+    return true;
+}
+
+bool FakeMotionControl::setEncoderAccelerations(const VectorProxy<const double>::Ref accelerations)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || accelerations.size() != static_cast<std::ptrdiff_t>(m_njoints))
+    {
+        return false;
+    }
+
+    std::copy(accelerations.begin(), accelerations.end(), m_encoderAccelerations.begin());
     return true;
 }
 
