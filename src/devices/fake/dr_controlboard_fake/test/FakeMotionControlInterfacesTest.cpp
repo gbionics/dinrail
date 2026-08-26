@@ -6,9 +6,41 @@
 #include <dinrail/Device.h>
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IPreciselyTimed.h>
 #include <dinrail/Parameters.h>
 
+#include <chrono>
 #include <vector>
+
+TEST_CASE("FakeMotionControl exposes precisely timed interfaces", "[core][device][precisely_timed]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", "dr_controlboard_fake");
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::IPreciselyTimed* preciselyTimed = nullptr;
+    REQUIRE(device.view(preciselyTimed));
+    REQUIRE(preciselyTimed != nullptr);
+
+    dinrail::IPreciselyTimedSimulation* preciselyTimedSimulation = nullptr;
+    REQUIRE(device.view(preciselyTimedSimulation));
+    REQUIRE(preciselyTimedSimulation != nullptr);
+
+    const auto initialStamp = preciselyTimed->getLastInputStamp();
+    REQUIRE(initialStamp.time == std::chrono::nanoseconds::zero());
+    REQUIRE(initialStamp.sequenceNumber == 0);
+
+    const dinrail::Stamp expectedStamp{std::chrono::nanoseconds{123456789}, 42};
+    preciselyTimedSimulation->setLastInputStamp(expectedStamp);
+
+    const auto actualStamp = preciselyTimed->getLastInputStamp();
+    REQUIRE(actualStamp.time == expectedStamp.time);
+    REQUIRE(actualStamp.sequenceNumber == expectedStamp.sequenceNumber);
+
+    REQUIRE(device.close());
+}
 
 TEST_CASE("FakeMotionControl exposes IAxisInfo", "[core][device][axisinfo]")
 {

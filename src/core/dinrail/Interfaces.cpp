@@ -26,4 +26,6 @@ IJoypadControl::~IJoypadControl() = default;
 
 IPreciselyTimed::~IPreciselyTimed() = default;
 
+IPreciselyTimedSimulation::~IPreciselyTimedSimulation() = default;
+
 } // namespace dinrail
