@@ -4,6 +4,8 @@ This document describes guidelines and conventions used by dinrail interfaces an
 
 ## Interfaces
 
+### Virtual destructors
+
 Public `dinrail` interfaces should always declare a virtual destructor in the header and define it out-of-line in a `.cpp` file linked into the library. Do not use inline defaulted destructors such as `virtual ~IFoo() = default;` in public interface headers.
 
 This helps to avoid known RTTI and `dynamic_cast` failures that can happen across shared-library boundaries on some toolchain and visibility combinations, especially with `libc++`-based platforms, see for example:
@@ -14,6 +16,36 @@ This helps to avoid known RTTI and `dynamic_cast` failures that can happen acros
 * https://github.com/SOCI/soci/issues/913
 * https://github.com/android/ndk/issues/1075
 * https://github.com/android/ndk/issues/519
+
+### Simulation interfaces
+
+For each interface that it is supposed to read or write data that changes over time, an interface named `<InterfaceNamed>Simulation is expected to be available.
+
+The role of this simulation interface is meant to permit simple simulation to be implemented on top of simple `fake` devices.
+
+For example, if the interface is defined as:
+
+~~~cpp
+class IPreciselyTimed
+{
+public:
+    virtual ~IPreciselyTimed();
+    virtual Stamp getLastInputStamp() = 0;
+};
+~~~
+
+the related simulation interface would be defined as:
+
+~~~cpp
+class IPreciselyTimedSimulation
+{
+public:
+    virtual ~IPreciselyTimedSimulation();
+    virtual void setLastInputStamp(const Stamp& stamp) = 0;
+};
+~~~
+
+As the `Simulation` interfaces are only meant to be used to implement a simulator, they are not handled by remappers, network wrapper server and network wrapper clients.
 
 ## Device plugins
 

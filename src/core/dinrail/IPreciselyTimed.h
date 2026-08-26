@@ -45,6 +45,28 @@ public:
     virtual Stamp getLastInputStamp() = 0;
 };
 
+/**
+ * @brief Simulation interface for devices that provide a timestamp for the last measurement.
+ *
+ * This interface is typically used by `fake` devices that implement the `IPreciselyTimed`
+ * interface, to provide a way for simulators to set the timestamp of the last measurement returned
+ * by the `fake` device.
+ */
+class IPreciselyTimedSimulation
+{
+public:
+    /**
+     * @brief Virtual destructor.
+     */
+    virtual ~IPreciselyTimedSimulation();
+
+    /**
+     * @brief Set the timestamp associated with the last measurement.
+     * @param stamp The timestamp and sequence number of the last measurement.
+     */
+    virtual void setLastInputStamp(const Stamp& stamp) = 0;
+};
+
 } // namespace dinrail
 
 #endif // DINRAIL_IPRECISELYTIMED_H

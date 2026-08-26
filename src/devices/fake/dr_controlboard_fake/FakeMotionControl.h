@@ -8,6 +8,7 @@
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IPreciselyTimed.h>
 
 #include <mutex>
 #include <string>
@@ -16,7 +17,11 @@
 namespace dinrail
 {
 
-class FakeMotionControl : public IDevice, public IAxisInfo, public IImpedanceAllSetPointsControl
+class FakeMotionControl : public IDevice,
+                          public IAxisInfo,
+                          public IImpedanceAllSetPointsControl,
+                          public IPreciselyTimed,
+                          public IPreciselyTimedSimulation
 {
 public:
     FakeMotionControl() = default;
@@ -28,6 +33,9 @@ public:
     bool getAxes(int* ax) override;
     bool getAxisName(int axis, std::string& name) override;
     bool getJointType(int axis, JointType& type) override;
+
+    Stamp getLastInputStamp() override;
+    void setLastInputStamp(const Stamp& stamp) override;
 
     bool setSetPoint(
         int j, double pos, double vel, double torque, double stiffness, double damping) override;
@@ -61,6 +69,7 @@ private:
     std::mutex m_mutex;
     int m_njoints{0};
     bool m_opened{false};
+    Stamp m_lastInputStamp;
     std::vector<std::string> m_axisNames;
     std::vector<JointType> m_jointTypes;
     std::vector<double> m_posSetpoints;

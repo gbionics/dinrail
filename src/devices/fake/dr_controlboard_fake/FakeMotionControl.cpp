@@ -157,6 +157,18 @@ bool FakeMotionControl::getJointType(int axis, JointType& type)
     return true;
 }
 
+Stamp FakeMotionControl::getLastInputStamp()
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    return m_lastInputStamp;
+}
+
+void FakeMotionControl::setLastInputStamp(const Stamp& stamp)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    m_lastInputStamp = stamp;
+}
+
 bool FakeMotionControl::setSetPoint(
     int j, double pos, double vel, double torque, double stiffness, double damping)
 {
