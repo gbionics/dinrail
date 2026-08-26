@@ -6,6 +6,14 @@ find_package(Catch2 3 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(iDynTree REQUIRED)
 
+add_executable(StatusTest StatusTest.cpp)
+target_link_libraries(StatusTest
+    PRIVATE
+        dinrail::dinrail
+        Catch2::Catch2WithMain
+)
+add_test(NAME StatusTest COMMAND StatusTest)
+
 
 add_executable(VectorProxyTest VectorProxyTest.cpp)
 target_link_libraries(VectorProxyTest
