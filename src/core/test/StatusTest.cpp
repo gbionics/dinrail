@@ -6,7 +6,18 @@
 #include <dinrail/Status.h>
 
 #include <sstream>
+#include <string_view>
 #include <type_traits>
+
+namespace
+{
+void requireStringViewEquals(std::string_view actual, std::string_view expected)
+{
+    // Comparing through compare() keeps Catch2 from instantiating its
+    // StringMaker<std::string_view>, which is unavailable in some Windows builds.
+    REQUIRE(actual.compare(expected) == 0);
+}
+} // namespace
 
 TEST_CASE("Status defaults to OK", "[Status]")
 {
@@ -46,29 +57,40 @@ TEST_CASE("Status Update preserves the first error", "[Status]")
 
 TEST_CASE("StatusCode converts every canonical code to its name", "[Status]")
 {
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Ok) == "Ok");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Cancelled) == "Cancelled");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unknown) == "Unknown");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::InvalidArgument)
-            == "InvalidArgument");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::DeadlineExceeded)
-            == "DeadlineExceeded");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::NotFound) == "NotFound");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::AlreadyExists) == "AlreadyExists");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::PermissionDenied)
-            == "PermissionDenied");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::ResourceExhausted)
-            == "ResourceExhausted");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::FailedPrecondition)
-            == "FailedPrecondition");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Aborted) == "Aborted");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::OutOfRange) == "OutOfRange");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unimplemented) == "Unimplemented");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Internal) == "Internal");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unavailable) == "Unavailable");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::DataLoss) == "DataLoss");
-    REQUIRE(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unauthenticated)
-            == "Unauthenticated");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Ok), "Ok");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Cancelled),
+                            "Cancelled");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unknown),
+                            "Unknown");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::InvalidArgument),
+                            "InvalidArgument");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::DeadlineExceeded),
+                            "DeadlineExceeded");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::NotFound),
+                            "NotFound");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::AlreadyExists),
+                            "AlreadyExists");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::PermissionDenied),
+                            "PermissionDenied");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::ResourceExhausted),
+                            "ResourceExhausted");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(
+                                dinrail::StatusCode::FailedPrecondition),
+                            "FailedPrecondition");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Aborted),
+                            "Aborted");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::OutOfRange),
+                            "OutOfRange");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unimplemented),
+                            "Unimplemented");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Internal),
+                            "Internal");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unavailable),
+                            "Unavailable");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::DataLoss),
+                            "DataLoss");
+    requireStringViewEquals(dinrail::StatusCodeToStringView(dinrail::StatusCode::Unauthenticated),
+                            "Unauthenticated");
 }
 
 TEST_CASE("Status and StatusCode support string and stream formatting", "[Status]")
@@ -81,7 +103,7 @@ TEST_CASE("Status and StatusCode support string and stream formatting", "[Status
     statusStream << status;
 
     REQUIRE(dinrail::StatusCodeToString(status.code()) == "FailedPrecondition");
-    REQUIRE(status.ToStringView() == "FailedPrecondition");
+    requireStringViewEquals(status.ToStringView(), "FailedPrecondition");
     REQUIRE(status.ToString() == "FailedPrecondition");
     REQUIRE(codeStream.str() == "FailedPrecondition");
     REQUIRE(statusStream.str() == "FailedPrecondition");
