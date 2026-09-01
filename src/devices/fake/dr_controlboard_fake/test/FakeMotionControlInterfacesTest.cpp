@@ -7,6 +7,9 @@
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IJointFault.h>
+#include <dinrail/IMotor.h>
+#include <dinrail/IMotorEncoders.h>
 #include <dinrail/IPreciselyTimed.h>
 #include <dinrail/Parameters.h>
 
@@ -142,6 +145,165 @@ TEST_CASE("FakeMotionControl exposes precisely timed interfaces", "[core][device
     const auto actualStamp = preciselyTimed->getLastInputStamp();
     REQUIRE(actualStamp.time == expectedStamp.time);
     REQUIRE(actualStamp.sequenceNumber == expectedStamp.sequenceNumber);
+
+    REQUIRE(device.close());
+}
+
+TEST_CASE("FakeMotionControl exposes motor interfaces", "[core][device][motor]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", "dr_controlboard_fake");
+    opts.put("number_of_joints", 3);
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::IMotor* motor = nullptr;
+    dinrail::IMotorSimulation* motorSimulation = nullptr;
+    REQUIRE(device.view(motor));
+    REQUIRE(device.view(motorSimulation));
+    REQUIRE(motor != nullptr);
+    REQUIRE(motorSimulation != nullptr);
+
+    int motors = 0;
+    REQUIRE(motor->getNumberOfMotors(&motors));
+    REQUIRE(motors == 3);
+
+    REQUIRE(motorSimulation->setTemperature(1, 42.5));
+    double value = 0.0;
+    REQUIRE(motor->getTemperature(1, &value));
+    REQUIRE(value == 42.5);
+
+    const std::vector<double> temperatures{10.0, 20.0, 30.0};
+    REQUIRE(motorSimulation->setTemperatures(temperatures));
+    std::vector<double> temperaturesOut;
+    REQUIRE(motor->getTemperatures(temperaturesOut));
+    REQUIRE(temperaturesOut == temperatures);
+
+    REQUIRE(motor->getTemperatureLimit(0, &value));
+    REQUIRE(value == 100.0);
+    REQUIRE(motor->setTemperatureLimit(0, 80.0));
+    REQUIRE(motor->getTemperatureLimit(0, &value));
+    REQUIRE(value == 80.0);
+
+    REQUIRE(motor->getGearboxRatio(0, &value));
+    REQUIRE(value == 1.0);
+    REQUIRE(motor->setGearboxRatio(0, 100.0));
+    REQUIRE(motor->getGearboxRatio(0, &value));
+    REQUIRE(value == 100.0);
+
+    REQUIRE_FALSE(motor->getTemperature(-1, &value));
+    REQUIRE_FALSE(motor->getTemperature(3, &value));
+    REQUIRE_FALSE(motor->getTemperature(0, nullptr));
+    REQUIRE_FALSE(motorSimulation->setTemperature(3, 0.0));
+    REQUIRE_FALSE(motorSimulation->setTemperatures(std::vector<double>{1.0, 2.0}));
+
+    REQUIRE(device.close());
+}
+
+TEST_CASE("FakeMotionControl exposes motor encoder interfaces", "[core][device][motor_encoders]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", "dr_controlboard_fake");
+    opts.put("number_of_joints", 3);
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::IMotorEncoders* motorEncoders = nullptr;
+    dinrail::IMotorEncodersSimulation* motorEncoderSimulation = nullptr;
+    REQUIRE(device.view(motorEncoders));
+    REQUIRE(device.view(motorEncoderSimulation));
+    REQUIRE(motorEncoders != nullptr);
+    REQUIRE(motorEncoderSimulation != nullptr);
+
+    int encoders = 0;
+    REQUIRE(motorEncoders->getNumberOfMotorEncoders(&encoders));
+    REQUIRE(encoders == 3);
+
+    double value = 0.0;
+    REQUIRE(motorEncoders->getMotorEncoderCountsPerRevolution(0, &value));
+    REQUIRE(value == 1.0);
+
+    REQUIRE(motorEncoderSimulation->setMotorEncoder(1, 11.5));
+    REQUIRE(motorEncoderSimulation->setMotorEncoderTimed(1, 12.5, 42.25));
+    REQUIRE(motorEncoderSimulation->setMotorEncoderSpeed(1, 3.5));
+    REQUIRE(motorEncoderSimulation->setMotorEncoderAcceleration(1, -1.25));
+
+    double timestamp = 0.0;
+    double speed = 0.0;
+    double acceleration = 0.0;
+    REQUIRE(motorEncoders->getMotorEncoder(1, &value));
+    REQUIRE(value == 12.5);
+    REQUIRE(motorEncoders->getMotorEncoderTimed(1, &value, &timestamp));
+    REQUIRE(value == 12.5);
+    REQUIRE(timestamp == 42.25);
+    REQUIRE(motorEncoders->getMotorEncoderSpeed(1, &speed));
+    REQUIRE(speed == 3.5);
+    REQUIRE(motorEncoders->getMotorEncoderAcceleration(1, &acceleration));
+    REQUIRE(acceleration == -1.25);
+
+    const std::vector<double> values{1.0, 2.0, 3.0};
+    const std::vector<double> timestamps{10.0, 20.0, 30.0};
+    const std::vector<double> speeds{4.0, 5.0, 6.0};
+    const std::vector<double> accelerations{7.0, 8.0, 9.0};
+    REQUIRE(motorEncoderSimulation->setMotorEncodersTimed(values, timestamps));
+    REQUIRE(motorEncoderSimulation->setMotorEncoderSpeeds(speeds));
+    REQUIRE(motorEncoderSimulation->setMotorEncoderAccelerations(accelerations));
+
+    std::vector<double> valuesOut;
+    std::vector<double> timestampsOut;
+    std::vector<double> speedsOut;
+    std::vector<double> accelerationsOut;
+    REQUIRE(motorEncoders->getMotorEncoders(valuesOut));
+    REQUIRE(motorEncoders->getMotorEncodersTimed(valuesOut, timestampsOut));
+    REQUIRE(motorEncoders->getMotorEncoderSpeeds(speedsOut));
+    REQUIRE(motorEncoders->getMotorEncoderAccelerations(accelerationsOut));
+    REQUIRE(valuesOut == values);
+    REQUIRE(timestampsOut == timestamps);
+    REQUIRE(speedsOut == speeds);
+    REQUIRE(accelerationsOut == accelerations);
+
+    std::array<double, 2> shortOutput{};
+    REQUIRE_FALSE(motorEncoders->getMotorEncoders(shortOutput));
+    REQUIRE_FALSE(motorEncoderSimulation->setMotorEncoders(std::vector<double>{1.0, 2.0}));
+    REQUIRE_FALSE(
+        motorEncoderSimulation->setMotorEncodersTimed(values, std::vector<double>{1.0, 2.0}));
+    REQUIRE_FALSE(motorEncoders->getMotorEncoder(-1, &value));
+    REQUIRE_FALSE(motorEncoders->getMotorEncoder(3, &value));
+    REQUIRE_FALSE(motorEncoders->getMotorEncoder(0, nullptr));
+
+    REQUIRE(device.close());
+}
+
+TEST_CASE("FakeMotionControl exposes joint fault interfaces", "[core][device][joint_fault]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", "dr_controlboard_fake");
+    opts.put("number_of_joints", 2);
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::IJointFault* jointFault = nullptr;
+    dinrail::IJointFaultSimulation* jointFaultSimulation = nullptr;
+    REQUIRE(device.view(jointFault));
+    REQUIRE(device.view(jointFaultSimulation));
+    REQUIRE(jointFault != nullptr);
+    REQUIRE(jointFaultSimulation != nullptr);
+
+    int fault = -1;
+    std::string message;
+    REQUIRE(jointFault->getLastJointFault(0, fault, message));
+    REQUIRE(fault == 0);
+    REQUIRE(message.empty());
+
+    REQUIRE(jointFaultSimulation->setLastJointFault(0, 17, "overtemperature"));
+    REQUIRE(jointFault->getLastJointFault(0, fault, message));
+    REQUIRE(fault == 17);
+    REQUIRE(message == "overtemperature");
+    REQUIRE_FALSE(jointFault->getLastJointFault(2, fault, message));
+    REQUIRE_FALSE(jointFaultSimulation->setLastJointFault(-1, 0, "invalid"));
 
     REQUIRE(device.close());
 }

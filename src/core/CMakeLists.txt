@@ -33,6 +33,9 @@ target_sources(dinrail
     dinrail/Device.h
     dinrail/IAxisInfo.h
     dinrail/IEncoders.h
+    dinrail/IJointFault.h
+    dinrail/IMotor.h
+    dinrail/IMotorEncoders.h
     dinrail/IJoypadControl.h
     dinrail/Interfaces.cpp
     dinrail/IInterfaceView.h

@@ -78,6 +78,12 @@ bool FakeMotionControl::open(const Parameters& config)
     m_encoderTimestamps.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_encoderSpeeds.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_encoderAccelerations.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_motorTemperatures.assign(static_cast<std::size_t>(m_njoints), 0.0);
+    m_motorTemperatureLimits.assign(static_cast<std::size_t>(m_njoints), 100.0);
+    m_motorGearboxRatios.assign(static_cast<std::size_t>(m_njoints), 1.0);
+    m_motorEncoderCountsPerRevolution.assign(static_cast<std::size_t>(m_njoints), 1.0);
+    m_jointFaults.assign(static_cast<std::size_t>(m_njoints), 0);
+    m_jointFaultMessages.assign(static_cast<std::size_t>(m_njoints), std::string{});
     m_posSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_velSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
     m_torqueSetpoints.assign(static_cast<std::size_t>(m_njoints), 0.0);
@@ -262,6 +268,304 @@ bool FakeMotionControl::getEncoderAccelerations(VectorProxy<double>::Ref acceler
     }
 
     return accelerations.clone(std::span<double>(m_encoderAccelerations));
+}
+
+bool FakeMotionControl::getNumberOfMotors(int* num)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || num == nullptr)
+    {
+        return false;
+    }
+
+    *num = m_njoints;
+    return true;
+}
+
+bool FakeMotionControl::getTemperature(int m, double* value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || value == nullptr)
+    {
+        return false;
+    }
+
+    *value = m_motorTemperatures[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::getTemperatures(VectorProxy<double>::Ref values)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(values, m_njoints))
+    {
+        return false;
+    }
+
+    return values.clone(std::span<double>(m_motorTemperatures));
+}
+
+bool FakeMotionControl::getTemperatureLimit(int m, double* temperature)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || temperature == nullptr)
+    {
+        return false;
+    }
+
+    *temperature = m_motorTemperatureLimits[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::setTemperatureLimit(int m, double temperature)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints))
+    {
+        return false;
+    }
+
+    m_motorTemperatureLimits[static_cast<std::size_t>(m)] = temperature;
+    return true;
+}
+
+bool FakeMotionControl::getGearboxRatio(int m, double* value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || value == nullptr)
+    {
+        return false;
+    }
+
+    *value = m_motorGearboxRatios[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::setGearboxRatio(int m, double value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints))
+    {
+        return false;
+    }
+
+    m_motorGearboxRatios[static_cast<std::size_t>(m)] = value;
+    return true;
+}
+
+bool FakeMotionControl::setTemperature(int m, double value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints))
+    {
+        return false;
+    }
+
+    m_motorTemperatures[static_cast<std::size_t>(m)] = value;
+    return true;
+}
+
+bool FakeMotionControl::setTemperatures(const VectorProxy<const double>::Ref values)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || values.size() != static_cast<std::ptrdiff_t>(m_njoints))
+    {
+        return false;
+    }
+
+    std::copy(values.begin(), values.end(), m_motorTemperatures.begin());
+    return true;
+}
+
+bool FakeMotionControl::getNumberOfMotorEncoders(int* num)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || num == nullptr)
+    {
+        return false;
+    }
+
+    *num = m_njoints;
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncoderCountsPerRevolution(int m, double* countsPerRevolution)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || countsPerRevolution == nullptr)
+    {
+        return false;
+    }
+
+    *countsPerRevolution = m_motorEncoderCountsPerRevolution[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncoder(int m, double* value)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || value == nullptr)
+    {
+        return false;
+    }
+
+    *value = m_encoderPositions[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncoders(VectorProxy<double>::Ref values)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(values, m_njoints))
+    {
+        return false;
+    }
+
+    return values.clone(std::span<double>(m_encoderPositions));
+}
+
+bool FakeMotionControl::getMotorEncoderTimed(int m, double* value, double* timestamp)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || value == nullptr || timestamp == nullptr)
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(m);
+    *value = m_encoderPositions[index];
+    *timestamp = m_encoderTimestamps[index];
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncodersTimed(VectorProxy<double>::Ref values,
+                                              VectorProxy<double>::Ref timestamps)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(values, m_njoints)
+        || !prepareEncoderOutput(timestamps, m_njoints))
+    {
+        return false;
+    }
+
+    return values.clone(std::span<double>(m_encoderPositions))
+           && timestamps.clone(std::span<double>(m_encoderTimestamps));
+}
+
+bool FakeMotionControl::getMotorEncoderSpeed(int m, double* speed)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || speed == nullptr)
+    {
+        return false;
+    }
+
+    *speed = m_encoderSpeeds[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncoderSpeeds(VectorProxy<double>::Ref speeds)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(speeds, m_njoints))
+    {
+        return false;
+    }
+
+    return speeds.clone(std::span<double>(m_encoderSpeeds));
+}
+
+bool FakeMotionControl::getMotorEncoderAcceleration(int m, double* acceleration)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(m, m_njoints) || acceleration == nullptr)
+    {
+        return false;
+    }
+
+    *acceleration = m_encoderAccelerations[static_cast<std::size_t>(m)];
+    return true;
+}
+
+bool FakeMotionControl::getMotorEncoderAccelerations(VectorProxy<double>::Ref accelerations)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !prepareEncoderOutput(accelerations, m_njoints))
+    {
+        return false;
+    }
+
+    return accelerations.clone(std::span<double>(m_encoderAccelerations));
+}
+
+bool FakeMotionControl::setMotorEncoder(int m, double value)
+{
+    return setEncoder(m, value);
+}
+
+bool FakeMotionControl::setMotorEncoders(const VectorProxy<const double>::Ref values)
+{
+    return setEncoders(values);
+}
+
+bool FakeMotionControl::setMotorEncoderTimed(int m, double value, double timestamp)
+{
+    return setEncoderTimed(m, value, timestamp);
+}
+
+bool FakeMotionControl::setMotorEncodersTimed(const VectorProxy<const double>::Ref values,
+                                              const VectorProxy<const double>::Ref timestamps)
+{
+    return setEncodersTimed(values, timestamps);
+}
+
+bool FakeMotionControl::setMotorEncoderSpeed(int m, double speed)
+{
+    return setEncoderSpeed(m, speed);
+}
+
+bool FakeMotionControl::setMotorEncoderSpeeds(const VectorProxy<const double>::Ref speeds)
+{
+    return setEncoderSpeeds(speeds);
+}
+
+bool FakeMotionControl::setMotorEncoderAcceleration(int m, double acceleration)
+{
+    return setEncoderAcceleration(m, acceleration);
+}
+
+bool FakeMotionControl::setMotorEncoderAccelerations(
+    const VectorProxy<const double>::Ref accelerations)
+{
+    return setEncoderAccelerations(accelerations);
+}
+
+bool FakeMotionControl::getLastJointFault(int j, int& fault, std::string& message)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    fault = m_jointFaults[index];
+    message = m_jointFaultMessages[index];
+    return true;
+}
+
+bool FakeMotionControl::setLastJointFault(int j, int fault, const std::string& message)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened || !isValidJointIndex(j, m_njoints))
+    {
+        return false;
+    }
+
+    const auto index = static_cast<std::size_t>(j);
+    m_jointFaults[index] = fault;
+    m_jointFaultMessages[index] = message;
+    return true;
 }
 
 bool FakeMotionControl::setEncoder(int j, double value)
