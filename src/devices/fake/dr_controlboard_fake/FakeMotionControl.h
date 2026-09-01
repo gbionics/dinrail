@@ -9,6 +9,9 @@
 #include <dinrail/IDevice.h>
 #include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IJointFault.h>
+#include <dinrail/IMotor.h>
+#include <dinrail/IMotorEncoders.h>
 #include <dinrail/IPreciselyTimed.h>
 
 #include <mutex>
@@ -23,6 +26,12 @@ class FakeMotionControl : public IDevice,
                           public IEncoders,
                           public IEncodersSimulation,
                           public IImpedanceAllSetPointsControl,
+                          public IJointFault,
+                          public IJointFaultSimulation,
+                          public IMotor,
+                          public IMotorSimulation,
+                          public IMotorEncoders,
+                          public IMotorEncodersSimulation,
                           public IPreciselyTimed,
                           public IPreciselyTimedSimulation
 {
@@ -46,6 +55,42 @@ public:
     bool getEncoderSpeeds(VectorProxy<double>::Ref speeds) override;
     bool getEncoderAcceleration(int j, double* acceleration) override;
     bool getEncoderAccelerations(VectorProxy<double>::Ref accelerations) override;
+
+    bool getNumberOfMotors(int* num) override;
+    bool getTemperature(int m, double* value) override;
+    bool getTemperatures(VectorProxy<double>::Ref values) override;
+    bool getTemperatureLimit(int m, double* temperature) override;
+    bool setTemperatureLimit(int m, double temperature) override;
+    bool getGearboxRatio(int m, double* value) override;
+    bool setGearboxRatio(int m, double value) override;
+
+    bool setTemperature(int m, double value) override;
+    bool setTemperatures(const VectorProxy<const double>::Ref values) override;
+
+    bool getNumberOfMotorEncoders(int* num) override;
+    bool getMotorEncoderCountsPerRevolution(int m, double* countsPerRevolution) override;
+    bool getMotorEncoder(int m, double* value) override;
+    bool getMotorEncoders(VectorProxy<double>::Ref values) override;
+    bool getMotorEncoderTimed(int m, double* value, double* timestamp) override;
+    bool getMotorEncodersTimed(VectorProxy<double>::Ref values,
+                               VectorProxy<double>::Ref timestamps) override;
+    bool getMotorEncoderSpeed(int m, double* speed) override;
+    bool getMotorEncoderSpeeds(VectorProxy<double>::Ref speeds) override;
+    bool getMotorEncoderAcceleration(int m, double* acceleration) override;
+    bool getMotorEncoderAccelerations(VectorProxy<double>::Ref accelerations) override;
+
+    bool setMotorEncoder(int m, double value) override;
+    bool setMotorEncoders(const VectorProxy<const double>::Ref values) override;
+    bool setMotorEncoderTimed(int m, double value, double timestamp) override;
+    bool setMotorEncodersTimed(const VectorProxy<const double>::Ref values,
+                               const VectorProxy<const double>::Ref timestamps) override;
+    bool setMotorEncoderSpeed(int m, double speed) override;
+    bool setMotorEncoderSpeeds(const VectorProxy<const double>::Ref speeds) override;
+    bool setMotorEncoderAcceleration(int m, double acceleration) override;
+    bool setMotorEncoderAccelerations(const VectorProxy<const double>::Ref accelerations) override;
+
+    bool getLastJointFault(int j, int& fault, std::string& message) override;
+    bool setLastJointFault(int j, int fault, const std::string& message) override;
 
     bool setEncoder(int j, double value) override;
     bool setEncoders(const VectorProxy<const double>::Ref values) override;
@@ -99,6 +144,12 @@ private:
     std::vector<double> m_encoderTimestamps;
     std::vector<double> m_encoderSpeeds;
     std::vector<double> m_encoderAccelerations;
+    std::vector<double> m_motorTemperatures;
+    std::vector<double> m_motorTemperatureLimits;
+    std::vector<double> m_motorGearboxRatios;
+    std::vector<double> m_motorEncoderCountsPerRevolution;
+    std::vector<int> m_jointFaults;
+    std::vector<std::string> m_jointFaultMessages;
     std::vector<double> m_posSetpoints;
     std::vector<double> m_velSetpoints;
     std::vector<double> m_torqueSetpoints;
