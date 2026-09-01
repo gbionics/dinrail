@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <dinrail/IAxisInfo.h>
+#include <dinrail/IBattery.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
@@ -20,6 +21,10 @@ IInteropPlugin::~IInteropPlugin() = default;
 IInterfaceView::~IInterfaceView() = default;
 
 IAxisInfo::~IAxisInfo() = default;
+
+IBattery::~IBattery() = default;
+
+IBatterySimulation::~IBatterySimulation() = default;
 
 IEncoders::~IEncoders() = default;
 
