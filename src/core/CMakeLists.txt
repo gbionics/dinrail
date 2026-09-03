@@ -39,6 +39,7 @@ target_sources(dinrail
     dinrail/IInterfaceView.h
     dinrail/IInteropPlugin.h
     dinrail/IPreciselyTimed.h
+    dinrail/MultipleAnalogSensorsInterfaces.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
     dinrail/PluginUtils.h
