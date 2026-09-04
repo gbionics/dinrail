@@ -14,3 +14,4 @@ endif()
 
 add_subdirectory(fake/dr_battery_fake)
 add_subdirectory(fake/dr_controlboard_fake)
+add_subdirectory(fake/dr_multiplenalogsensors_fake)
