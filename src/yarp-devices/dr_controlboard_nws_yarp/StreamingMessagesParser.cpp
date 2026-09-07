@@ -203,12 +203,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 }
 
                 bool ok = stream_ICurrent->setRefCurrents(n_joints, joint_list, cmdVector.data());
-                if (!ok)
-                {
-                    controlBoardLogger().error("Error while trying to command a streaming current "
-                                               "message on joint "
-                                               "group\n");
-                }
 
                 delete[] joint_list;
             }
@@ -279,13 +273,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         {
             bool ok = stream_IPosDirect->setPosition(b.get(1).asInt32(),
                                                      cmdVector[0]); // cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Errors while trying to command an streaming position "
-                                           "direct message on "
-                                           "joint %d\n",
-                                           b.get(1).asInt32());
-            }
         }
     }
     break;
@@ -294,12 +281,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         if (stream_ITorque)
         {
             bool ok = stream_ITorque->setRefTorque(b.get(1).asInt32(), cmdVector[0]);
-            if (!ok)
-            {
-                controlBoardLogger().error("Errors while trying to command a streaming torque "
-                                           "direct message on "
-                                           "single joint\n");
-            }
         }
     }
     break;
@@ -308,12 +289,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         if (stream_ITorque)
         {
             bool ok = stream_ITorque->setRefTorques(cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Errors while trying to command a streaming torque "
-                                           "direct message on all "
-                                           "joints\n");
-            }
         }
     }
     break;
@@ -347,12 +322,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             bool ok = stream_ITorque->setRefTorques(n_joints, joint_list, cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Error while trying to command a streaming toruqe "
-                                           "direct message on joint "
-                                           "group\n");
-            }
 
             delete[] joint_list;
         }
@@ -527,12 +496,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
                 }
                 ok = setPosOk && setVelOk && setTorqueOk && setImpOk;
             }
-            if (!ok)
-            {
-                controlBoardLogger().error("Error while trying to command full-joint "
-                                           "impedance-all-setpoints "
-                                           "message\n");
-            }
             break;
         }
 
@@ -570,12 +533,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             bool ok = stream_IPosDirect->setPositions(n_joints, joint_list, cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Error while trying to command a streaming position "
-                                           "direct message on "
-                                           "joint group\n");
-            }
 
             delete[] joint_list;
         }
@@ -586,12 +543,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
         if (stream_IPosDirect)
         {
             bool ok = stream_IPosDirect->setPositions(cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Error while trying to command a streaming position "
-                                           "direct message on all "
-                                           "joints\n");
-            }
         }
     }
     break;
@@ -625,11 +576,6 @@ void StreamingMessagesParser::onRead(CommandMessage& v)
             }
 
             bool ok = stream_IVel->velocityMove(n_joints, joint_list, cmdVector.data());
-            if (!ok)
-            {
-                controlBoardLogger().error("Error while trying to command a velocity move on joint "
-                                           "group\n");
-            }
 
             delete[] joint_list;
         }
