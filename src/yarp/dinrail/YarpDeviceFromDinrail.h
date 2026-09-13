@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef DINRAIL_YARPDEVICE_H
-#define DINRAIL_YARPDEVICE_H
+#ifndef DINRAIL_YARPDEVICEFROMDINRAIL_H
+#define DINRAIL_YARPDEVICEFROMDINRAIL_H
 
 #include <dinrail/Device.h>
 #include <dinrail/YarpPropertyConverter.h>
@@ -44,17 +44,17 @@ constexpr std::size_t targetProviderCount
  * configuration.
  */
 template <class... Adapters>
-class YarpDevice : public yarp::dev::DeviceDriver, public Adapters...
+class YarpDeviceFromDinrail : public yarp::dev::DeviceDriver, public Adapters...
 {
     static_assert((!std::is_abstract_v<Adapters> && ...),
-                  "YarpDevice: selected adapter is abstract");
+                  "YarpDeviceFromDinrail: selected adapter is abstract");
     static_assert((std::is_default_constructible_v<Adapters> && ...),
-                  "YarpDevice: selected adapter must be default constructible");
+                  "YarpDeviceFromDinrail: selected adapter must be default constructible");
     static_assert(((detail::targetProviderCount<Adapters, Adapters...> == 1) && ...),
-                  "YarpDevice: selected adapters expose an ambiguous interface; select only one "
+                  "YarpDeviceFromDinrail: selected adapters expose an ambiguous interface; select only one "
                   "provider");
     static_assert(sizeof...(Adapters) > 0,
-                  "YarpDevice: explicitly list adapters to expose");
+                  "YarpDeviceFromDinrail: explicitly list adapters to expose");
 
 public:
     dinrail::Device& device()
