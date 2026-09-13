@@ -17,7 +17,7 @@ namespace dinrail
  * @brief Status of an individual sensor in a multiple analog sensors device.
  *
  * The numeric values intentionally match `yarp::dev::MAS_status`, allowing a
- * direct translation when adapting a YARP device.
+ * direct conversion when adapting a YARP device.
  */
 enum MAS_status
 {
