@@ -9,6 +9,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <typeinfo>
 #include <vector>
 
 namespace dinrail
@@ -16,6 +17,7 @@ namespace dinrail
 
 class Device;
 class IDevice;
+class IInterfaceAdapter;
 class Parameters;
 
 // Deleter for unique_ptr that calls a stored destroy function instead of delete.
@@ -105,7 +107,11 @@ private:
      * value selects an interop plugin by name (for example, `yarp`).
      * Returns nullptr on any failure.
      */
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config);
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop = true);
+
+    /** Ask available interop plugins to adapt a device interface. */
+    std::unique_ptr<IInterfaceAdapter>
+    createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType);
 
     friend class Device;
 };

@@ -4,9 +4,12 @@
 
 #include <dinrail/Device.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
+#include <typeindex>
+#include <unordered_map>
 #include <utility>
 
 namespace dinrail
@@ -22,6 +25,7 @@ struct Device::Impl
     RuntimeContext context;
     bool isValid{false};
     FactoryUniquePtr<dinrail::IDevice> driver;
+    std::unordered_map<std::type_index, std::unique_ptr<IInterfaceAdapter>> adapters;
 };
 
 Device::Device()
@@ -46,10 +50,27 @@ bool Device::open(const Parameters& config)
         return false;
     }
 
+    m_pimpl->adapters.clear();
     m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
     m_pimpl->driver = m_pimpl->context.createDevice(config);
+    m_pimpl->isValid = (m_pimpl->driver != nullptr);
+    return m_pimpl->isValid;
+}
+
+bool Device::openNative(const Parameters& config)
+{
+    if (!m_pimpl)
+    {
+        return false;
+    }
+
+    m_pimpl->adapters.clear();
+    m_pimpl->driver.reset();
+    m_pimpl->isValid = false;
+
+    m_pimpl->driver = m_pimpl->context.createDevice(config, false);
     m_pimpl->isValid = (m_pimpl->driver != nullptr);
     return m_pimpl->isValid;
 }
@@ -64,6 +85,7 @@ bool Device::close()
     bool result = true;
     if (m_pimpl->driver)
     {
+        m_pimpl->adapters.clear();
         result = m_pimpl->driver->close();
     }
 
@@ -80,6 +102,36 @@ bool Device::isValid() const
 IDevice* Device::getImplementation()
 {
     return m_pimpl ? m_pimpl->driver.get() : nullptr;
+}
+
+void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
+{
+    if (!m_pimpl || !m_pimpl->driver)
+    {
+        return nullptr;
+    }
+
+    const std::type_index key(interfaceType);
+    const auto existing = m_pimpl->adapters.find(key);
+    if (existing != m_pimpl->adapters.end())
+    {
+        return existing->second->getInterface();
+    }
+
+    auto adapter = m_pimpl->context.createInterfaceAdapter(*m_pimpl->driver, interfaceType);
+    if (!adapter)
+    {
+        return nullptr;
+    }
+
+    void* adaptedInterface = adapter->getInterface();
+    if (adaptedInterface == nullptr)
+    {
+        return nullptr;
+    }
+
+    m_pimpl->adapters.emplace(key, std::move(adapter));
+    return adaptedInterface;
 }
 
 } // namespace dinrail

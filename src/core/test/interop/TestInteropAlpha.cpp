@@ -15,6 +15,11 @@ public:
         : TestInteropPluginBase("alpha", {"alpha_device"}, true)
     {
     }
+
+    void registerInterfaceAdapters(InterfaceAdapterRegistry& registry) override
+    {
+        registry.add<IAdaptedFooTest, IFooTest, FooAdapter>();
+    }
 };
 
 } // namespace dinrail::test

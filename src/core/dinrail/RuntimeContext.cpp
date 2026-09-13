@@ -4,6 +4,7 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
@@ -231,7 +232,7 @@ struct RuntimeContext::Impl
         return plugin;
     }
 
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config)
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop)
     {
         if (!config.check<std::string>("device"))
         {
@@ -249,8 +250,8 @@ struct RuntimeContext::Impl
 
         const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
         const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
-        const std::string libraryLocation
-            = findNativeDevicePluginLibrary(deviceName).value_or(libraryName);
+        const auto nativeLibraryLocation = findNativeDevicePluginLibrary(deviceName);
+        const std::string libraryLocation = nativeLibraryLocation.value_or(libraryName);
 
         std::string nativeFailureDiagnostic;
         if (tryNative)
@@ -284,7 +285,7 @@ struct RuntimeContext::Impl
         }
 
         bool selectedInteropPluginFound = false;
-        if (tryInterop)
+        if (tryInterop && allowInterop)
         {
             for (const auto& interopPluginInfo : getAvailableInteropPlugins())
             {
@@ -365,11 +366,44 @@ struct RuntimeContext::Impl
         return result;
     }
 
+    std::unique_ptr<IInterfaceAdapter>
+    createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType)
+    {
+        ensureInterfaceAdaptersRegistered();
+        return interfaceAdapters.create(device, interfaceType);
+    }
+
+    void ensureInterfaceAdaptersRegistered()
+    {
+        std::call_once(interfaceAdaptersRegistrationOnce, [this] {
+            for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+            {
+                const std::string factoryName
+                    = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
+                auto plugin = getInteropPlugin(interopPluginInfo.location, factoryName);
+                if (!plugin)
+                {
+                    continue;
+                }
+
+                std::lock_guard<std::mutex> lock(plugin->instanceMutex);
+                auto* interop = plugin->getInstance();
+                if (interop)
+                {
+                    interop->registerInterfaceAdapters(interfaceAdapters);
+                }
+            }
+        });
+    }
+
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<DevicePlugin>> devicePlugins;
 
     std::mutex interopPluginsCacheMutex; // protects interopPlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<InteropPlugin>> interopPlugins;
+
+    std::once_flag interfaceAdaptersRegistrationOnce;
+    InterfaceAdapterRegistry interfaceAdapters;
 };
 
 RuntimeContext::RuntimeContext()
@@ -385,9 +419,15 @@ const RuntimeContext& RuntimeContext::getDefault()
     return context;
 }
 
-FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
+FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config, bool allowInterop)
 {
-    return m_pimpl->createDevice(config);
+    return m_pimpl->createDevice(config, allowInterop);
+}
+
+std::unique_ptr<IInterfaceAdapter>
+RuntimeContext::createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType)
+{
+    return m_pimpl->createInterfaceAdapter(device, interfaceType);
 }
 
 std::vector<dinrail::InteropDevices> RuntimeContext::listInteropDevices() const
