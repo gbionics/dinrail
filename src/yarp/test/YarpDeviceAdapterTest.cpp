@@ -9,7 +9,7 @@
 #include <dinrail/Device.h>
 #include <dinrail/IJoypadControl.h>
 #include <dinrail/RuntimeDynamicCast.h>
-#include <dinrail/YarpDevice.h>
+#include <dinrail/YarpDeviceFromDinrail.h>
 #include <dinrail/YarpInteropPlugin.h>
 #include <vector>
 #include <yarp/dev/PolyDriver.h>
@@ -903,7 +903,7 @@ public:
 
 TEST_CASE("Explicit YARP interface lists restrict exposure and share inherited interfaces")
 {
-    dinrail::YarpDevice<
+    dinrail::YarpDeviceFromDinrail<
         dinrail::InterfaceAdapter<yarp::dev::IEncodersTimed, dinrail::IEncoders>>
         wrapper;
     yarp::os::Property config;
@@ -925,7 +925,7 @@ TEST_CASE("Explicit YARP interface lists restrict exposure and share inherited i
 
 TEST_CASE("A selected adapter prevents opening when its source is unavailable")
 {
-    dinrail::YarpDevice<
+    dinrail::YarpDeviceFromDinrail<
         dinrail::InterfaceAdapter<yarp::dev::IEncodersTimed, dinrail::IEncoders>>
         wrapper;
     yarp::os::Property config;

@@ -6,9 +6,9 @@
 
 #include <dinrail/CommonAdapters.h>
 #include <dinrail/ControlBoardAdapters.h>
-#include <dinrail/YarpDevice.h>
+#include <dinrail/YarpDeviceFromDinrail.h>
 
-using FakeMotionControlYarp = dinrail::YarpDevice<
+using FakeMotionControlYarp = dinrail::YarpDeviceFromDinrail<
     dinrail::InterfaceAdapter<yarp::dev::IAxisInfo, dinrail::IAxisInfo>,
     dinrail::InterfaceAdapter<yarp::dev::IEncodersTimed, dinrail::IEncoders>,
     dinrail::InterfaceAdapter<yarp::dev::IJointFault, dinrail::IJointFault>,

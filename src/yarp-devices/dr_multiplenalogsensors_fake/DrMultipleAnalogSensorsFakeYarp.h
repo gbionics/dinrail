@@ -5,9 +5,9 @@
 #define DINRAIL_DRMULTIPLEANALOGSENSORSFAKEYARP_H
 
 #include <dinrail/MultipleAnalogSensorsAdapters.h>
-#include <dinrail/YarpDevice.h>
+#include <dinrail/YarpDeviceFromDinrail.h>
 
-using DrMultipleAnalogSensorsFakeYarp = dinrail::YarpDevice<
+using DrMultipleAnalogSensorsFakeYarp = dinrail::YarpDeviceFromDinrail<
     dinrail::InterfaceAdapter<yarp::dev::IThreeAxisGyroscopes, dinrail::IThreeAxisGyroscopes>,
     dinrail::InterfaceAdapter<yarp::dev::IThreeAxisLinearAccelerometers,
                               dinrail::IThreeAxisLinearAccelerometers>,

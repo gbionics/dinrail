@@ -5,9 +5,9 @@
 #define DINRAIL_DRBATTERYFAKEYARP_H
 
 #include <dinrail/BatteryAdapters.h>
-#include <dinrail/YarpDevice.h>
+#include <dinrail/YarpDeviceFromDinrail.h>
 
 using DrBatteryFakeYarp =
-    dinrail::YarpDevice<dinrail::InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>;
+    dinrail::YarpDeviceFromDinrail<dinrail::InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>;
 
 #endif
