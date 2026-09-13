@@ -84,3 +84,24 @@ add_test(NAME BatteryAdaptersTest COMMAND BatteryAdaptersTest)
 set_tests_properties(BatteryAdaptersTest PROPERTIES
     ENVIRONMENT_MODIFICATION
         "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")
+
+add_executable(InterfaceAdapterRegistryTest InterfaceAdapterRegistryTest.cpp)
+target_include_directories(InterfaceAdapterRegistryTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_link_libraries(InterfaceAdapterRegistryTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
+add_test(NAME InterfaceAdapterRegistryTest COMMAND InterfaceAdapterRegistryTest)
+
+add_executable(YarpDeviceAdapterTest YarpDeviceAdapterTest.cpp)
+target_include_directories(YarpDeviceAdapterTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
+target_link_libraries(YarpDeviceAdapterTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_dependencies(YarpDeviceAdapterTest
+    dinrail-device-dr_battery_fake
+    dinrail-device-dr_controlboard_fake
+    dinrail-device-dr_multiplenalogsensors_fake)
+foreach(device IN ITEMS dr_battery_fake dr_controlboard_fake dr_multiplenalogsensors_fake)
+    target_include_directories(YarpDeviceAdapterTest PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../yarp-devices/${device})
+endforeach()
+add_test(NAME YarpDeviceAdapterTest COMMAND YarpDeviceAdapterTest)
+set_tests_properties(YarpDeviceAdapterTest PROPERTIES
+    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-yarp>:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>:$<TARGET_FILE_DIR:dinrail-device-dr_controlboard_fake>:$<TARGET_FILE_DIR:dinrail-device-dr_multiplenalogsensors_fake>;YARP_DATA_DIRS=${CMAKE_INSTALL_PREFIX}/share/yarp")

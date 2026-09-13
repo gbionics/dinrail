@@ -47,6 +47,31 @@ public:
 
 As the `Simulation` interfaces are only meant to be used to implement a simulator, they are not handled by remappers, network wrapper server and network wrapper clients.
 
+### Interface adapters
+
+Classes that expose one interface by adapting another use this name:
+
+```text
+Provide<ProvidedNamespace><ProvidedInterface>From<SourceNamespace><SourceInterface>
+```
+
+Use CamelCase namespace tokens. In particular, use `Dinrail` for `dinrail` and
+`YarpDev` for `yarp::dev`. The name always includes both namespaces, including
+when an interface is shared unchanged by the source and target device.
+For adapters that require more than one source interface, append each source
+namespace and interface after `From`, separated by `And`.
+
+For example:
+
+```cpp
+ProvideYarpDevIAxisInfoFromDinrailIAxisInfo
+ProvideDinrailIAxisInfoFromYarpDevIAxisInfo
+ProvideYarpDevIEncodersTimedFromDinrailIEncoders
+ProvideDinrailIEncodersFromYarpDevIEncodersTimed
+ProvideDinrailIEncodersFromYarpDevIEncodersAndYarpDevIEncodersTimed
+ProvideDinrailIImpedanceAllSetPointsControlFromDinrailIImpedanceAllSetPointsControl
+```
+
 ## Device plugins
 
 ### Device name

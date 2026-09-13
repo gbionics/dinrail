@@ -212,8 +212,8 @@ can be migrated to:
 
 ```cpp
 #include <dinrail/Device.h>
+#include <dinrail/IAxisInfo.h>
 #include <dinrail/Parameters.h>
-#include <yarp/dev/IAxisInfo.h>
 
 dinrail::Parameters options;
 options.put("device", "fakeMotionControl");
@@ -222,8 +222,8 @@ options.addGroup("GENERAL").put("Joints", 3);
 dinrail::Device device;
 device.open(options);
 
-// Native yarp::dev::* interfaces of the wrapped device are resolved by view().
-yarp::dev::IAxisInfo* axisInfo = nullptr;
+// The native YARP interface is adapted automatically.
+dinrail::IAxisInfo* axisInfo = nullptr;
 device.view(axisInfo);
 ```
 
@@ -231,9 +231,18 @@ The device name and parameters are the same; dinrail converts
 `dinrail::Parameters` to `yarp::os::Property` automatically when delegating to the
 YARP interop plugin.
 
-`dinrail::Device::view<T>()` resolves both dinrail interfaces implemented by the
-device and the native `yarp::dev::*` interfaces of the wrapped YARP device, so
-existing YARP interface code keeps working after the migration.
+`dinrail::Device::view<T>()` first resolves interfaces implemented by the device.
+If a requested dinrail interface is not available directly, the YARP interop
+plugin can adapt the matching native YARP interface. It currently supports
+`IAxisInfo`, `IEncoders`, `IBattery`, `IJointFault`, `IJoypadControl`, `IMotor`,
+`IMotorEncoders`, `IPreciselyTimed`, and all read-only interfaces in
+`MultipleAnalogSensorsInterfaces.h`. Adapting `IEncoders` requires the YARP
+device to expose both `IEncoders` and `IEncodersTimed`. The YARP joypad interface
+does not expose reconnect or device-event operations: its adapter returns
+`false` for reconnect and reports `NoEvent`.
+
+Native `yarp::dev::*` interfaces remain viewable as well, allowing existing YARP
+interface code to keep working during an incremental migration.
 
 ### Requirements
 
@@ -243,3 +252,75 @@ You can check which interop plugins are available (and therefore which ecosystem
 To enumerate native devices and devices reported by interop plugins, use
 `dinrail dev --list`.
 
+### Using dinrail devices from YARP
+
+With YARP support enabled, the native devices also install as YARP plugins under
+their existing names:
+
+- `dr_battery_fake`
+- `dr_controlboard_fake`
+- `dr_multiplenalogsensors_fake` (the existing spelling is preserved)
+
+Use the same native device parameters with `yarp::dev::PolyDriver`:
+
+```cpp
+yarp::os::Property config;
+config.put("device", "dr_controlboard_fake");
+config.put("number_of_joints", 3);
+yarp::dev::PolyDriver driver(config);
+yarp::dev::IEncodersTimed* encoders = nullptr;
+driver.view(encoders);
+```
+
+Each directory under `src/yarp-devices` declares its native device with one CMake
+call, for example:
+
+```cmake
+dinrail_add_yarp_device(dr_battery_fake DrBatteryFakeYarp DrBatteryFakeYarp.h)
+```
+
+The checked-in `DrBatteryFakeYarp.h` declares the device and its required YARP
+interfaces explicitly:
+
+```cpp
+#include <dinrail/BatteryAdapters.h>
+#include <dinrail/YarpDevice.h>
+
+using DrBatteryFakeYarp =
+    dinrail::YarpDevice<dinrail::InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>;
+```
+
+The helper registers this existing C++ type and installs the YARP plugin and
+manifest. It does not generate the wrapper declaration or link the native
+implementation. Each listed adapter explicitly selects an interface to expose.
+During `open()`, the wrapper
+uses `Device::openNative()` with the supplied configuration, so interop fallback
+is disabled, and fails if a selected adapter source cannot be viewed. An
+empty interface list also fails.
+Unlisted adapters are not selected. Inherited interfaces remain available:
+`IEncodersTimed` also exposes `IEncoders`.
+
+The wrapper contains a runtime `dinrail::Device`; it inherits only the selected
+YARP adapters. Its `device()` accessor provides that runtime handle when using
+the concrete wrapper directly. Native interfaces, including test simulation
+interfaces, can be retrieved through `device().view()`.
+
+The shared adapter catalog covers battery, axis information, joint and motor
+encoders, motor properties, joint faults, timestamps, joypad, and all read-only
+Multiple Analog Sensors families. Shared interfaces can be exposed with an
+`InterfaceAdapter<Interface, Interface>` forwarder; `FakeMotionControlYarp` uses
+one for `dinrail::IImpedanceAllSetPointsControl`. Native simulation interfaces
+are not currently selected by these wrappers.
+
+YARP encoder calibration/reset/set operations and the motor encoder counts-per-
+revolution setter return `false`, because these operations were intentionally
+removed from dinrail's measurement interfaces. Simulation setters are not treated
+as hardware calibration operations. Joypad stick, trackball and touch operations
+also return `false`. Common measurements, metadata and supported setters are
+forwarded in both directions. Status conversions retain the existing documented
+loss of error-code detail, and YARP's floating-point timestamps can lose nanosecond
+precision at large absolute times.
+
+`YarpDeviceAdapterTest` checks the installed plugins, reverse registry lookup,
+and dinrail → YARP → dinrail round trips using changed measurements, metadata,
+statuses, timestamps, resizable vectors, invalid requests and dropped operations.
