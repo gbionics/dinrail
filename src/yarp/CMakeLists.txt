@@ -22,7 +22,7 @@ add_library(dinrail-yarp-conversions
     dinrail/JoypadAdapters.cpp dinrail/JoypadAdapters.h
     dinrail/CommonAdapters.cpp dinrail/CommonAdapters.h
     dinrail/MultipleAnalogSensorsAdapters.cpp dinrail/MultipleAnalogSensorsAdapters.h
-    dinrail/YarpDevice.h)
+    dinrail/YarpDeviceFromDinrail.h)
 add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp-conversions)
 
 target_link_libraries(dinrail-yarp-conversions PUBLIC dinrail::dinrail YARP::YARP_dev YARP::YARP_os)
@@ -31,7 +31,7 @@ target_include_directories(dinrail-yarp-conversions PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
 add_library(dinrail-interop-yarp SHARED
-    dinrail/YarpDeviceWrapper.cpp dinrail/YarpDeviceWrapper.h
+    dinrail/DinrailDeviceFromYarp.cpp dinrail/DinrailDeviceFromYarp.h
     dinrail/YarpInteropPlugin.cpp dinrail/YarpInteropPlugin.h)
 target_link_libraries(dinrail-interop-yarp PRIVATE dinrail::dinrail dinrail::dinrail-yarp-conversions YARP::YARP_dev YARP::YARP_os sharedlibpp::sharedlibpp)
 target_include_directories(dinrail-interop-yarp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -51,7 +51,7 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/JoypadAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/CommonAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/MultipleAnalogSensorsAdapters.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpDevice.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpDeviceFromDinrail.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)
 
 include(InstallBasicPackageFiles)

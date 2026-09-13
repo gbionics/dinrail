@@ -8,7 +8,7 @@
 #include <dinrail/ControlBoardAdapters.h>
 #include <dinrail/JoypadAdapters.h>
 #include <dinrail/MultipleAnalogSensorsAdapters.h>
-#include <dinrail/YarpDeviceWrapper.h>
+#include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpPropertyConverter.h>
 
 #include <sharedlibpp/SharedLibraryClassApi.h>
@@ -115,7 +115,7 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
         return nullptr;
     }
 
-    return std::make_unique<YarpDeviceWrapper>(std::move(yarpDriver));
+    return std::make_unique<DinrailDeviceFromYarp>(std::move(yarpDriver));
 }
 
 void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)

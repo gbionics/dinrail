@@ -1,27 +1,27 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include <dinrail/YarpDeviceWrapper.h>
+#include <dinrail/DinrailDeviceFromYarp.h>
 
 #include <dinrail/RuntimeDynamicCast.h>
 
 namespace dinrail
 {
 
-YarpDeviceWrapper::YarpDeviceWrapper(std::unique_ptr<yarp::dev::PolyDriver> yarpDevice)
+DinrailDeviceFromYarp::DinrailDeviceFromYarp(std::unique_ptr<yarp::dev::PolyDriver> yarpDevice)
     : m_yarpDevice(std::move(yarpDevice))
 {
 }
 
-YarpDeviceWrapper::~YarpDeviceWrapper() = default;
+DinrailDeviceFromYarp::~DinrailDeviceFromYarp() = default;
 
-bool YarpDeviceWrapper::open(const Parameters& config)
+bool DinrailDeviceFromYarp::open(const Parameters& config)
 {
     static_cast<void>(config);
     return m_yarpDevice != nullptr && m_yarpDevice->isValid();
 }
 
-bool YarpDeviceWrapper::close()
+bool DinrailDeviceFromYarp::close()
 {
     if (m_yarpDevice == nullptr)
     {
@@ -31,7 +31,7 @@ bool YarpDeviceWrapper::close()
     return m_yarpDevice->close();
 }
 
-void* YarpDeviceWrapper::viewInterface(const std::type_info& interfaceType)
+void* DinrailDeviceFromYarp::viewInterface(const std::type_info& interfaceType)
 {
     if (m_yarpDevice == nullptr)
     {
