@@ -302,6 +302,13 @@ struct RuntimeContext::Impl
                       << "' is not available" << std::endl;
         }
 
+        // Always provide a final, selector-independent diagnostic. Some interop
+        // plugins report their own detailed errors, while others simply decline
+        // to create a device. In either case, callers must be able to identify
+        // both the device and the selected implementation when open() fails.
+        std::cerr << "dinrail::Device: failed to open device '" << deviceName
+                  << "' with dinrail_device_type '" << dinrailDeviceType << "'" << std::endl;
+
         return nullptr;
     }
 
