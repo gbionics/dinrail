@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef DINRAIL_YARPDEVICEWRAPPER_H
-#define DINRAIL_YARPDEVICEWRAPPER_H
+#ifndef DINRAIL_DINRAILDEVICEFROMYARP_H
+#define DINRAIL_DINRAILDEVICEFROMYARP_H
 
 #include <dinrail/IDevice.h>
 #include <dinrail/IInterfaceView.h>
@@ -21,11 +21,11 @@ namespace dinrail
  * Native YARP interfaces implemented by the wrapped device are exposed through
  * IInterfaceView so that dinrail::Device::view() can resolve them.
  */
-class YarpDeviceWrapper final : public IDevice, public IInterfaceView
+class DinrailDeviceFromYarp final : public IDevice, public IInterfaceView
 {
 public:
-    explicit YarpDeviceWrapper(std::unique_ptr<yarp::dev::PolyDriver> yarpDevice);
-    ~YarpDeviceWrapper() override;
+    explicit DinrailDeviceFromYarp(std::unique_ptr<yarp::dev::PolyDriver> yarpDevice);
+    ~DinrailDeviceFromYarp() override;
 
     bool open(const Parameters& config) override;
     bool close() override;

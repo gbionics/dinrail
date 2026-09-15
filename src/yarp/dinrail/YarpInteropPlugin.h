@@ -19,6 +19,8 @@ public:
 
     std::unique_ptr<dinrail::IDevice> createDevice(const Parameters& config) override;
 
+    void registerInterfaceAdapters(InterfaceAdapterRegistry& registry) override;
+
     std::vector<DeviceInfo> listDevices() const override;
 };
 

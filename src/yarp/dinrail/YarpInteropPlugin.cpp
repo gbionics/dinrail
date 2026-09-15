@@ -3,7 +3,12 @@
 
 #include <dinrail/YarpInteropPlugin.h>
 
-#include <dinrail/YarpDeviceWrapper.h>
+#include <dinrail/BatteryAdapters.h>
+#include <dinrail/CommonAdapters.h>
+#include <dinrail/ControlBoardAdapters.h>
+#include <dinrail/JoypadAdapters.h>
+#include <dinrail/MultipleAnalogSensorsAdapters.h>
+#include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpPropertyConverter.h>
 
 #include <sharedlibpp/SharedLibraryClassApi.h>
@@ -110,8 +115,58 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
         return nullptr;
     }
 
-    return std::make_unique<YarpDeviceWrapper>(std::move(yarpDriver));
+    return std::make_unique<DinrailDeviceFromYarp>(std::move(yarpDriver));
 }
+
+void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)
+{
+    // BatteryAdapters
+    registry.add<dinrail::IBattery, yarp::dev::IBattery, InterfaceAdapter<dinrail::IBattery, yarp::dev::IBattery>>();
+    registry.add<yarp::dev::IBattery, dinrail::IBattery, InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>();
+    // CommonAdapters
+    registry.add<dinrail::IPreciselyTimed, yarp::dev::IPreciselyTimed, InterfaceAdapter<dinrail::IPreciselyTimed, yarp::dev::IPreciselyTimed>>();
+    registry.add<yarp::dev::IPreciselyTimed, dinrail::IPreciselyTimed, InterfaceAdapter<yarp::dev::IPreciselyTimed, dinrail::IPreciselyTimed>>();
+    // ControlBoardAdapters
+    registry.add<yarp::dev::IAxisInfo, dinrail::IAxisInfo, InterfaceAdapter<yarp::dev::IAxisInfo, dinrail::IAxisInfo>>();
+    registry.add<yarp::dev::IEncodersTimed, dinrail::IEncoders, InterfaceAdapter<yarp::dev::IEncodersTimed, dinrail::IEncoders>>();
+    registry.add<yarp::dev::IEncoders, dinrail::IEncoders, InterfaceAdapter<yarp::dev::IEncoders, dinrail::IEncoders>>();
+    registry.add<yarp::dev::IJointFault, dinrail::IJointFault, InterfaceAdapter<yarp::dev::IJointFault, dinrail::IJointFault>>();
+    registry.add<yarp::dev::IMotor, dinrail::IMotor, InterfaceAdapter<yarp::dev::IMotor, dinrail::IMotor>>();
+    registry.add<yarp::dev::IMotorEncoders, dinrail::IMotorEncoders, InterfaceAdapter<yarp::dev::IMotorEncoders, dinrail::IMotorEncoders>>();
+    registry.add<dinrail::IAxisInfo, yarp::dev::IAxisInfo, InterfaceAdapter<dinrail::IAxisInfo, yarp::dev::IAxisInfo>>();
+    registry.add<dinrail::IEncoders, yarp::dev::IEncodersTimed, InterfaceAdapter<dinrail::IEncoders, yarp::dev::IEncodersTimed>>();
+    registry.add<dinrail::IEncoders, yarp::dev::IEncoders, InterfaceAdapter<dinrail::IEncoders, yarp::dev::IEncoders>>();
+    registry.add<dinrail::IJointFault, yarp::dev::IJointFault, InterfaceAdapter<dinrail::IJointFault, yarp::dev::IJointFault>>();
+    registry.add<dinrail::IMotor, yarp::dev::IMotor, InterfaceAdapter<dinrail::IMotor, yarp::dev::IMotor>>();
+    registry.add<dinrail::IMotorEncoders, yarp::dev::IMotorEncoders, InterfaceAdapter<dinrail::IMotorEncoders, yarp::dev::IMotorEncoders>>();
+    // JoypadAdapters
+    registry.add<dinrail::IJoypadControl, yarp::dev::IJoypadController, InterfaceAdapter<dinrail::IJoypadControl, yarp::dev::IJoypadController>>();
+    registry.add<yarp::dev::IJoypadController, dinrail::IJoypadControl, InterfaceAdapter<yarp::dev::IJoypadController, dinrail::IJoypadControl>>();
+    // MultipleAnalogSensorsAdapters
+    registry.add<yarp::dev::IThreeAxisGyroscopes, dinrail::IThreeAxisGyroscopes, InterfaceAdapter<yarp::dev::IThreeAxisGyroscopes, dinrail::IThreeAxisGyroscopes>>();
+    registry.add<dinrail::IThreeAxisGyroscopes, yarp::dev::IThreeAxisGyroscopes, InterfaceAdapter<dinrail::IThreeAxisGyroscopes, yarp::dev::IThreeAxisGyroscopes>>();
+    registry.add<yarp::dev::IThreeAxisLinearAccelerometers, dinrail::IThreeAxisLinearAccelerometers, InterfaceAdapter<yarp::dev::IThreeAxisLinearAccelerometers, dinrail::IThreeAxisLinearAccelerometers>>();
+    registry.add<dinrail::IThreeAxisLinearAccelerometers, yarp::dev::IThreeAxisLinearAccelerometers, InterfaceAdapter<dinrail::IThreeAxisLinearAccelerometers, yarp::dev::IThreeAxisLinearAccelerometers>>();
+    registry.add<yarp::dev::IThreeAxisAngularAccelerometers, dinrail::IThreeAxisAngularAccelerometers, InterfaceAdapter<yarp::dev::IThreeAxisAngularAccelerometers, dinrail::IThreeAxisAngularAccelerometers>>();
+    registry.add<dinrail::IThreeAxisAngularAccelerometers, yarp::dev::IThreeAxisAngularAccelerometers, InterfaceAdapter<dinrail::IThreeAxisAngularAccelerometers, yarp::dev::IThreeAxisAngularAccelerometers>>();
+    registry.add<yarp::dev::IThreeAxisMagnetometers, dinrail::IThreeAxisMagnetometers, InterfaceAdapter<yarp::dev::IThreeAxisMagnetometers, dinrail::IThreeAxisMagnetometers>>();
+    registry.add<dinrail::IThreeAxisMagnetometers, yarp::dev::IThreeAxisMagnetometers, InterfaceAdapter<dinrail::IThreeAxisMagnetometers, yarp::dev::IThreeAxisMagnetometers>>();
+    registry.add<yarp::dev::IPositionSensors, dinrail::IPositionSensors, InterfaceAdapter<yarp::dev::IPositionSensors, dinrail::IPositionSensors>>();
+    registry.add<dinrail::IPositionSensors, yarp::dev::IPositionSensors, InterfaceAdapter<dinrail::IPositionSensors, yarp::dev::IPositionSensors>>();
+    registry.add<yarp::dev::ILinearVelocitySensors, dinrail::ILinearVelocitySensors, InterfaceAdapter<yarp::dev::ILinearVelocitySensors, dinrail::ILinearVelocitySensors>>();
+    registry.add<dinrail::ILinearVelocitySensors, yarp::dev::ILinearVelocitySensors, InterfaceAdapter<dinrail::ILinearVelocitySensors, yarp::dev::ILinearVelocitySensors>>();
+    registry.add<yarp::dev::IOrientationSensors, dinrail::IOrientationSensors, InterfaceAdapter<yarp::dev::IOrientationSensors, dinrail::IOrientationSensors>>();
+    registry.add<dinrail::IOrientationSensors, yarp::dev::IOrientationSensors, InterfaceAdapter<dinrail::IOrientationSensors, yarp::dev::IOrientationSensors>>();
+    registry.add<yarp::dev::ITemperatureSensors, dinrail::ITemperatureSensors, InterfaceAdapter<yarp::dev::ITemperatureSensors, dinrail::ITemperatureSensors>>();
+    registry.add<dinrail::ITemperatureSensors, yarp::dev::ITemperatureSensors, InterfaceAdapter<dinrail::ITemperatureSensors, yarp::dev::ITemperatureSensors>>();
+    registry.add<yarp::dev::ISixAxisForceTorqueSensors, dinrail::ISixAxisForceTorqueSensors, InterfaceAdapter<yarp::dev::ISixAxisForceTorqueSensors, dinrail::ISixAxisForceTorqueSensors>>();
+    registry.add<dinrail::ISixAxisForceTorqueSensors, yarp::dev::ISixAxisForceTorqueSensors, InterfaceAdapter<dinrail::ISixAxisForceTorqueSensors, yarp::dev::ISixAxisForceTorqueSensors>>();
+    registry.add<yarp::dev::IContactLoadCellArrays, dinrail::IContactLoadCellArrays, InterfaceAdapter<yarp::dev::IContactLoadCellArrays, dinrail::IContactLoadCellArrays>>();
+    registry.add<dinrail::IContactLoadCellArrays, yarp::dev::IContactLoadCellArrays, InterfaceAdapter<dinrail::IContactLoadCellArrays, yarp::dev::IContactLoadCellArrays>>();
+    registry.add<yarp::dev::IEncoderArrays, dinrail::IEncoderArrays, InterfaceAdapter<yarp::dev::IEncoderArrays, dinrail::IEncoderArrays>>();
+    registry.add<dinrail::IEncoderArrays, yarp::dev::IEncoderArrays, InterfaceAdapter<dinrail::IEncoderArrays, yarp::dev::IEncoderArrays>>();
+    registry.add<yarp::dev::ISkinPatches, dinrail::ISkinPatches, InterfaceAdapter<yarp::dev::ISkinPatches, dinrail::ISkinPatches>>();
+    registry.add<dinrail::ISkinPatches, yarp::dev::ISkinPatches, InterfaceAdapter<dinrail::ISkinPatches, yarp::dev::ISkinPatches>>();}
 
 std::vector<DeviceInfo> YarpInteropPlugin::listDevices() const
 {

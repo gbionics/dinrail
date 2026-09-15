@@ -47,8 +47,13 @@ public:
     Device& operator=(Device&&) = default;
 
     /**
-     * @brief Open a device plugin from the provided configuration.
-     * @param config Device configuration, including at least the device name.
+     * @brief Open a native or interop-provided device from the configuration.
+     *
+     * @param config Device configuration. It must provide `device`, the device
+     * name. The optional `dinrail_device_type` selects how the device is
+     * created: `auto` (the default) tries a native dinrail plugin and then all
+     * available interop plugins; `dinrail` only tries the native plugin; any
+     * other value selects an interop plugin by name (for example, `yarp`).
      * @return true on success, false otherwise.
      */
     bool open(const Parameters& config);
@@ -67,8 +72,8 @@ public:
 
     /**
      * @brief Retrieve a typed interface implemented by the underlying device.
-     * @tparam T Interface type to query.
-     * @param x Output pointer receiving the requested interface on success.
+      * @tparam T Interface type to query.
+      * @param x Output pointer receiving the requested interface on success.
      * @return true if the interface is available, false otherwise.
      */
     template <class T> bool view(T*& x)
@@ -101,6 +106,15 @@ public:
             }
         }
 
+        // Finally ask runtime-loaded interop plugins whether they can bridge
+        // an interface exposed by this device to the requested interface.
+        void* adapted = viewAdaptedInterface(typeid(T));
+        if (adapted != nullptr)
+        {
+            x = static_cast<T*>(adapted);
+            return true;
+        }
+
         return false;
     }
 
@@ -111,6 +125,9 @@ private:
     // Internal method to retrieve the raw device implementation pointer,
     // used in the view() method for dynamic casting.
     IDevice* getImplementation();
+
+    // Resolve and retain an interop-provided interface adapter.
+    void* viewAdaptedInterface(const std::type_info& interfaceType);
 };
 
 } // namespace dinrail
