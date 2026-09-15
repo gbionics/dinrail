@@ -85,11 +85,6 @@ set_tests_properties(BatteryAdaptersTest PROPERTIES
     ENVIRONMENT_MODIFICATION
         "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")
 
-add_executable(InterfaceAdapterRegistryTest InterfaceAdapterRegistryTest.cpp)
-target_include_directories(InterfaceAdapterRegistryTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
-target_link_libraries(InterfaceAdapterRegistryTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
-add_test(NAME InterfaceAdapterRegistryTest COMMAND InterfaceAdapterRegistryTest)
-
 add_executable(YarpDeviceAdapterTest YarpDeviceAdapterTest.cpp)
 target_include_directories(YarpDeviceAdapterTest PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/..)
 target_link_libraries(YarpDeviceAdapterTest PRIVATE

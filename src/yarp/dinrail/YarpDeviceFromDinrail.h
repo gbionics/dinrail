@@ -70,7 +70,9 @@ public:
         close();
         yarp::os::Property property;
         property.fromString(config.toString());
-        if (!m_device.openNative(dinrail::YarpPropertyConverter::toDinrailParameters(property)))
+        auto dinrailConfig = dinrail::YarpPropertyConverter::toDinrailParameters(property);
+        dinrailConfig.put("dinrail_device_type", "dinrail");
+        if (!m_device.open(dinrailConfig))
         {
             return false;
         }
