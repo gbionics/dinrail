@@ -59,14 +59,6 @@ public:
     bool open(const Parameters& config);
 
     /**
-     * @brief Open only a native dinrail device plugin.
-     *
-     * Interop plugin fallback is disabled. This is used by adapters that must
-     * avoid reopening themselves through a foreign device implementation.
-     */
-    bool openNative(const Parameters& config);
-
-    /**
      * @brief Close the currently open device, if any.
      * @return true on success, false otherwise.
      */

@@ -213,13 +213,14 @@ TEST_CASE("view() caches interface adapters supplied by interop plugins", "[inte
     dinrail::Parameters opts;
     opts.put("device", std::string("alpha_device"));
 
-    dinrail::Device device;
+    dinrail::RuntimeContext context;
+    dinrail::Device device(context);
     REQUIRE(device.open(opts));
 
     dinrail::test::IAdaptedFooTest* adapted = nullptr;
     REQUIRE(device.view(adapted));
     REQUIRE(adapted != nullptr);
-    REQUIRE(adapted->adaptedTag() == "adapted:alpha");
+    REQUIRE(adapted->adaptedTag() == "adapted:alpha-1");
 
     dinrail::test::IAdaptedFooTest* cached = nullptr;
     REQUIRE(device.view(cached));
@@ -227,4 +228,3 @@ TEST_CASE("view() caches interface adapters supplied by interop plugins", "[inte
 
     REQUIRE(device.close());
 }
-

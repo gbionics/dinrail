@@ -17,7 +17,7 @@ add_library(dinrail-yarp-conversions
     dinrail/YarpPropertyConverter.cpp dinrail/YarpPropertyConverter.h
     dinrail/YarpStampConverter.cpp dinrail/YarpStampConverter.h
     dinrail/YarpStatusConverter.cpp dinrail/YarpStatusConverter.h
-    dinrail/BatteryAdapters.cpp dinrail/BatteryAdapters.h 
+    dinrail/BatteryAdapters.cpp dinrail/BatteryAdapters.h
     dinrail/ControlBoardAdapters.cpp dinrail/ControlBoardAdapters.h
     dinrail/JoypadAdapters.cpp dinrail/JoypadAdapters.h
     dinrail/CommonAdapters.cpp dinrail/CommonAdapters.h

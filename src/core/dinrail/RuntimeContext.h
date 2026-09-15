@@ -107,7 +107,7 @@ private:
      * value selects an interop plugin by name (for example, `yarp`).
      * Returns nullptr on any failure.
      */
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop = true);
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config);
 
     /** Ask available interop plugins to adapt a device interface. */
     std::unique_ptr<IInterfaceAdapter>

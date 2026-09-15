@@ -232,7 +232,7 @@ struct RuntimeContext::Impl
         return plugin;
     }
 
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop)
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config)
     {
         if (!config.check<std::string>("device"))
         {
@@ -285,7 +285,7 @@ struct RuntimeContext::Impl
         }
 
         bool selectedInteropPluginFound = false;
-        if (tryInterop && allowInterop)
+        if (tryInterop)
         {
             for (const auto& interopPluginInfo : getAvailableInteropPlugins())
             {
@@ -419,9 +419,9 @@ const RuntimeContext& RuntimeContext::getDefault()
     return context;
 }
 
-FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config, bool allowInterop)
+FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
-    return m_pimpl->createDevice(config, allowInterop);
+    return m_pimpl->createDevice(config);
 }
 
 std::unique_ptr<IInterfaceAdapter>
