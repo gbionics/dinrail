@@ -59,22 +59,6 @@ bool Device::open(const Parameters& config)
     return m_pimpl->isValid;
 }
 
-bool Device::openNative(const Parameters& config)
-{
-    if (!m_pimpl)
-    {
-        return false;
-    }
-
-    m_pimpl->adapters.clear();
-    m_pimpl->driver.reset();
-    m_pimpl->isValid = false;
-
-    m_pimpl->driver = m_pimpl->context.createDevice(config, false);
-    m_pimpl->isValid = (m_pimpl->driver != nullptr);
-    return m_pimpl->isValid;
-}
-
 bool Device::close()
 {
     if (!m_pimpl)

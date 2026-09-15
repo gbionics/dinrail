@@ -100,11 +100,13 @@ private:
      *
      * Looks up (or loads) the plug-in library for the device named by
      * `config["device"]`, creates an instance, and calls `IDevice::open()`.
-     * If `allowInterop` is true and native loading fails, configured interop
-     * plugins are tried in order.
+     * `config["dinrail_device_type"]` selects the implementation: `auto`
+     * (the default) tries the native plugin first and then every available
+     * interop plugin, `dinrail` tries only the native plugin, and any other
+     * value selects an interop plugin by name (for example, `yarp`).
      * Returns nullptr on any failure.
      */
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop = true);
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config);
 
     /** Ask available interop plugins to adapt a device interface. */
     std::unique_ptr<IInterfaceAdapter>

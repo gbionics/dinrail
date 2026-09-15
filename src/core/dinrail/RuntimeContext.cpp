@@ -203,7 +203,7 @@ struct RuntimeContext::Impl
         return plugin;
     }
 
-    FactoryUniquePtr<IDevice> createDevice(const Parameters& config, bool allowInterop)
+    FactoryUniquePtr<IDevice> createDevice(const Parameters& config)
     {
         if (!config.check<std::string>("device"))
         {
@@ -212,77 +212,93 @@ struct RuntimeContext::Impl
         }
 
         const std::string deviceName = config.find("device").as<std::string>();
+        const std::string dinrailDeviceType
+            = config.check<std::string>("dinrail_device_type")
+                  ? config.find("dinrail_device_type").as<std::string>()
+                  : "auto";
+        const bool tryNative = dinrailDeviceType == "auto" || dinrailDeviceType == "dinrail";
+        const bool tryInterop = dinrailDeviceType != "dinrail";
 
         const std::string libraryName = getSharedlibppLibraryNameFromDeviceName(deviceName);
         const std::string factoryName = getSharedlibppFactoryNameFromDeviceName(deviceName);
         const auto nativeLibraryLocation = findNativeDevicePluginLibrary(deviceName);
         const std::string libraryLocation = nativeLibraryLocation.value_or(libraryName);
 
-        // Prefer an exact candidate path. This is required for MODULE libraries
-        // on macOS, which use .so rather than .dylib.
-        auto plugin = getDevicePlugin(libraryLocation, factoryName);
         std::string nativeFailureDiagnostic;
-
-        if (plugin)
+        if (tryNative)
         {
-            auto driver = plugin->allocate();
-            if (driver && driver->open(config))
+            // Prefer an exact candidate path. This is required for MODULE libraries
+            // on macOS, which use .so rather than .dylib.
+            auto plugin = getDevicePlugin(libraryLocation, factoryName);
+            if (plugin)
             {
-                return driver;
-            }
-            if (!driver)
-            {
-                nativeFailureDiagnostic = "dinrail::Device: impossible to create instance for "
-                                          "device '"
-                                          + deviceName + "' from library '" + libraryName + "'";
+                auto driver = plugin->allocate();
+                if (driver && driver->open(config))
+                {
+                    return driver;
+                }
+                if (!driver)
+                {
+                    nativeFailureDiagnostic = "dinrail::Device: impossible to create instance for "
+                                              "device '"
+                                              + deviceName + "' from library '" + libraryName + "'";
+                } else
+                {
+                    nativeFailureDiagnostic = "dinrail::Device: device '" + deviceName
+                                              + "' failed to open with provided config";
+                }
             } else
             {
-                nativeFailureDiagnostic = "dinrail::Device: device '" + deviceName
-                                          + "' failed to open with provided config";
+                nativeFailureDiagnostic = "dinrail::Device: impossible to find library '" + libraryName
+                                          + "' for device '" + deviceName + "' (factory symbol: '"
+                                          + factoryName + "')";
             }
-        } else
-        {
-            nativeFailureDiagnostic = "dinrail::Device: impossible to find library '" + libraryName
-                                      + "' for device '" + deviceName + "' (factory symbol: '"
-                                      + factoryName + "')";
         }
 
-        if (!allowInterop)
+        bool selectedInteropPluginFound = false;
+        if (tryInterop)
         {
-            std::cerr << nativeFailureDiagnostic << std::endl;
-            return nullptr;
-        }
-
-        for (const auto& interopPluginInfo : getAvailableInteropPlugins())
-        {
-            const auto& interopName = interopPluginInfo.name;
-            const std::string interopFactoryName
-                = getSharedlibppFactoryNameFromInteropName(interopName);
-            auto interopPlugin = getInteropPlugin(interopPluginInfo.location, interopFactoryName);
-            if (!interopPlugin)
+            for (const auto& interopPluginInfo : getAvailableInteropPlugins())
             {
-                continue;
-            }
+                const auto& interopName = interopPluginInfo.name;
+                if (dinrailDeviceType != "auto" && dinrailDeviceType != interopName)
+                {
+                    continue;
+                }
+                selectedInteropPluginFound = true;
+                const std::string interopFactoryName
+                    = getSharedlibppFactoryNameFromInteropName(interopName);
+                auto interopPlugin = getInteropPlugin(interopPluginInfo.location, interopFactoryName);
+                if (!interopPlugin)
+                {
+                    continue;
+                }
 
-            auto interop = interopPlugin->allocate();
-            if (!interop)
-            {
-                std::cerr << "dinrail::Device: impossible to create instance for interop plugin '"
-                          << interopName << "' from library '" << interopPluginInfo.location << "'"
-                          << std::endl;
-                continue;
-            }
+                auto interop = interopPlugin->allocate();
+                if (!interop)
+                {
+                    std::cerr << "dinrail::Device: impossible to create instance for interop plugin '"
+                              << interopName << "' from library '" << interopPluginInfo.location << "'"
+                              << std::endl;
+                    continue;
+                }
 
-            auto interopDriver = interop->createDevice(config);
-            if (interopDriver)
-            {
-                return make_factory_unique_with_delete<IDevice>(std::move(interopDriver));
+                auto interopDriver = interop->createDevice(config);
+                if (interopDriver)
+                {
+                    return make_factory_unique_with_delete<IDevice>(std::move(interopDriver));
+                }
             }
         }
 
         if (!nativeFailureDiagnostic.empty())
         {
             std::cerr << nativeFailureDiagnostic << std::endl;
+        }
+        if (!tryNative && !selectedInteropPluginFound)
+        {
+            std::cerr << "dinrail::Device: interop plugin '" << dinrailDeviceType
+                      << "' is not available" << std::endl;
         }
 
         return nullptr;
@@ -340,9 +356,9 @@ const RuntimeContext& RuntimeContext::getDefault()
     return context;
 }
 
-FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config, bool allowInterop)
+FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
-    return m_pimpl->createDevice(config, allowInterop);
+    return m_pimpl->createDevice(config);
 }
 
 std::unique_ptr<IInterfaceAdapter>
