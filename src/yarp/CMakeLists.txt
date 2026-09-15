@@ -41,8 +41,8 @@ target_include_directories(dinrail-yarp-conversions
 )
 
 add_library(dinrail-interop-yarp SHARED
-    dinrail/YarpDeviceWrapper.cpp
-    dinrail/YarpDeviceWrapper.h
+    dinrail/DinrailDeviceFromYarp.cpp
+    dinrail/DinrailDeviceFromYarp.h
     dinrail/YarpInteropPlugin.cpp
     dinrail/YarpInteropPlugin.h
 )
