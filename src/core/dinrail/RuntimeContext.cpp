@@ -79,14 +79,43 @@ struct RuntimeContext::Impl
 
     struct InteropPlugin
     {
+        // Keep the factory before the instance so it is destroyed after the
+        // factory-owned instance and remains valid for the custom deleter.
         std::unique_ptr<InteropFactory> factory;
-        std::mutex factoryCreateMutex; // protects concurrent factory->create() calls for a specific
-                                       // plugin
+        FactoryUniquePtr<IInteropPlugin> instance;
+        std::mutex instanceMutex;
+        bool allocationAttempted{false};
 
-        FactoryUniquePtr<IInteropPlugin> allocate()
+        IInteropPlugin* getInstance()
         {
-            std::lock_guard<std::mutex> lock(factoryCreateMutex);
-            return make_factory_unique<IInteropPlugin>(*factory);
+            if (!allocationAttempted)
+            {
+                instance = make_factory_unique<IInteropPlugin>(*factory);
+                allocationAttempted = true;
+            }
+            return instance.get();
+        }
+
+        std::unique_ptr<IDevice> createDevice(const Parameters& config, bool& instanceAvailable)
+        {
+            // IInteropPlugin predates shared instances and has no thread-safety
+            // contract, so serialize all calls made on the cached instance.
+            std::lock_guard<std::mutex> lock(instanceMutex);
+            auto* interop = getInstance();
+            instanceAvailable = interop != nullptr;
+            return interop != nullptr ? interop->createDevice(config) : nullptr;
+        }
+
+        bool listDevices(std::vector<DeviceInfo>& devices)
+        {
+            std::lock_guard<std::mutex> lock(instanceMutex);
+            auto* interop = getInstance();
+            if (interop == nullptr)
+            {
+                return false;
+            }
+            devices = interop->listDevices();
+            return true;
         }
     };
 
@@ -257,8 +286,9 @@ struct RuntimeContext::Impl
                 continue;
             }
 
-            auto interop = interopPlugin->allocate();
-            if (!interop)
+            bool instanceAvailable = false;
+            auto interopDriver = interopPlugin->createDevice(config, instanceAvailable);
+            if (!instanceAvailable)
             {
                 std::cerr << "dinrail::Device: impossible to create instance for interop plugin '"
                           << interopName << "' from library '" << interopPluginInfo.location << "'"
@@ -266,7 +296,6 @@ struct RuntimeContext::Impl
                 continue;
             }
 
-            auto interopDriver = interop->createDevice(config);
             if (interopDriver)
             {
                 return make_factory_unique_with_delete<IDevice>(std::move(interopDriver));
@@ -279,6 +308,30 @@ struct RuntimeContext::Impl
         }
 
         return nullptr;
+    }
+
+    std::vector<InteropDevices> listInteropDevices()
+    {
+        std::vector<InteropDevices> result;
+
+        for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+        {
+            const std::string factoryName
+                = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
+            auto interopPlugin = getInteropPlugin(interopPluginInfo.location, factoryName);
+            if (!interopPlugin)
+            {
+                continue;
+            }
+
+            std::vector<DeviceInfo> devices;
+            if (interopPlugin->listDevices(devices))
+            {
+                result.push_back({interopPluginInfo, std::move(devices)});
+            }
+        }
+
+        return result;
     }
 
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
@@ -308,7 +361,7 @@ FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 
 std::vector<dinrail::InteropDevices> RuntimeContext::listInteropDevices() const
 {
-    return getAvailableInteropDevices();
+    return m_pimpl->listInteropDevices();
 }
 
 std::vector<dinrail::DeviceInfo> RuntimeContext::listNativeDevices() const
@@ -323,7 +376,7 @@ std::vector<dinrail::InteropPluginInfo> RuntimeContext::listInteropPlugins() con
 
 dinrail::AvailableDevices RuntimeContext::listDevices() const
 {
-    return getAvailableDevices();
+    return {getAvailableNativeDevices(), m_pimpl->listInteropDevices()};
 }
 
 } // namespace dinrail

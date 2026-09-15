@@ -39,9 +39,32 @@ TEST_CASE("view() resolves a custom interface added by an interop plugin", "[int
     dinrail::test::IFooTest* foo = nullptr;
     REQUIRE(device.view(foo));
     REQUIRE(foo != nullptr);
-    REQUIRE(foo->tag() == "alpha");
+    REQUIRE(foo->tag().rfind("alpha-", 0) == 0);
 
     REQUIRE(device.close());
+}
+
+TEST_CASE("An interop plugin instance is reused by devices in the same runtime context",
+          "[interop]")
+{
+    dinrail::RuntimeContext context;
+    dinrail::Parameters opts;
+    opts.put("device", std::string("alpha_device"));
+
+    dinrail::Device first(context);
+    dinrail::Device second(context);
+    REQUIRE(first.open(opts));
+    REQUIRE(second.open(opts));
+
+    dinrail::test::IFooTest* firstFoo = nullptr;
+    dinrail::test::IFooTest* secondFoo = nullptr;
+    REQUIRE(first.view(firstFoo));
+    REQUIRE(second.view(secondFoo));
+
+    // The alpha test plugin stores this counter in the plugin object itself.
+    // Seeing consecutive values proves both devices used the same instance.
+    REQUIRE(firstFoo->tag() == "alpha-1");
+    REQUIRE(secondFoo->tag() == "alpha-2");
 }
 
 TEST_CASE("Interop plugins are tried until one handles the device", "[interop]")
