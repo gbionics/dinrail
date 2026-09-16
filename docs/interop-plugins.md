@@ -119,6 +119,10 @@ returned pointers at that point. Unknown or unavailable interfaces still fail.
 Concurrent adapter queries share the cached adapter. Opening, closing, moving,
 or destroying the device must not overlap with queries or use of its interfaces;
 the backing implementation must also support concurrent interface queries.
+Interop callbacks and adapter registration are serialized within a runtime
+context and may synchronously query native child devices. Concurrent cache
+misses may construct more than one adapter, but only one is retained and
+returned to callers; unused adapters are destroyed outside the cache lock.
 
 `src/yarp/test/BatteryAdaptersTest.cpp` demonstrates the native-to-YARP request
 and a return trip through the registry, checking measurements, all battery

@@ -22,7 +22,8 @@ namespace dinrail
  * When a native dinrail device plugin cannot be opened, the available interop
  * plugins are asked, in alphabetical order, to open the device. A runtime
  * context creates at most one instance of each interop plugin and reuses it for
- * device creation and discovery. Calls to an instance are serialized.
+ * device creation and discovery. Calls to interop plugins in a context are
+ * serialized; callbacks may synchronously query devices in the same context.
  */
 class IInteropPlugin
 {

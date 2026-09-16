@@ -107,6 +107,22 @@ if(DINRAIL_ENABLE_INTEROP_PLUGINS)
     set_tests_properties(InteropPluginTest PROPERTIES
         ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-testbeta>")
 
+    add_library(dinrail-interop-testreentrant MODULE interop/TestInteropReentrant.cpp)
+    target_link_libraries(dinrail-interop-testreentrant PRIVATE dinrail::dinrail)
+    # This fixture must not register its adapters in unrelated test processes.
+    set_target_properties(dinrail-interop-testreentrant PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/reentrant-plugin"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/reentrant-plugin")
+    add_executable(InteropReentrancyTest InteropReentrancyTest.cpp)
+    target_link_libraries(InteropReentrancyTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
+    add_dependencies(InteropReentrancyTest
+        dinrail-device-testnative dinrail-interop-testreentrant)
+    add_test(NAME InteropReentrancyTest COMMAND InteropReentrancyTest)
+    set_tests_properties(InteropReentrancyTest PROPERTIES
+        TIMEOUT 15
+        ENVIRONMENT_MODIFICATION
+            "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-testreentrant>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-testnative>")
+
 endif()
 
 add_executable(InterfaceAdapterRegistryTest InterfaceAdapterRegistryTest.cpp)

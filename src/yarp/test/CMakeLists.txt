@@ -82,4 +82,5 @@ target_link_libraries(BatteryAdaptersTest PRIVATE
 add_dependencies(BatteryAdaptersTest dinrail-device-dr_battery_fake)
 add_test(NAME BatteryAdaptersTest COMMAND BatteryAdaptersTest)
 set_tests_properties(BatteryAdaptersTest PROPERTIES
-    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-yarp>:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")
+    ENVIRONMENT_MODIFICATION
+        "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")

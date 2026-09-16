@@ -85,24 +85,28 @@ struct RuntimeContext::Impl
         // factory-owned instance and remains valid for the custom deleter.
         std::unique_ptr<InteropFactory> factory;
         FactoryUniquePtr<IInteropPlugin> instance;
-        std::mutex instanceMutex;
         bool allocationAttempted{false};
 
         IInteropPlugin* getInstance()
         {
             if (!allocationAttempted)
             {
-                instance = make_factory_unique<IInteropPlugin>(*factory);
                 allocationAttempted = true;
+                try
+                {
+                    instance = make_factory_unique<IInteropPlugin>(*factory);
+                } catch (...)
+                {
+                    allocationAttempted = false;
+                    throw;
+                }
             }
             return instance.get();
         }
 
         std::unique_ptr<IDevice> createDevice(const Parameters& config, bool& instanceAvailable)
         {
-            // IInteropPlugin predates shared instances and has no thread-safety
-            // contract, so serialize all calls made on the cached instance.
-            std::lock_guard<std::mutex> lock(instanceMutex);
+            // The caller holds the context's recursive interop mutex.
             auto* interop = getInstance();
             instanceAvailable = interop != nullptr;
             return interop != nullptr ? interop->createDevice(config) : nullptr;
@@ -110,7 +114,7 @@ struct RuntimeContext::Impl
 
         bool listDevices(std::vector<DeviceInfo>& devices)
         {
-            std::lock_guard<std::mutex> lock(instanceMutex);
+            // The caller holds the context's recursive interop mutex.
             auto* interop = getInstance();
             if (interop == nullptr)
             {
@@ -306,7 +310,11 @@ struct RuntimeContext::Impl
                 }
 
                 bool instanceAvailable = false;
-                auto interopDriver = interopPlugin->createDevice(config, instanceAvailable);
+                std::unique_ptr<IDevice> interopDriver;
+                {
+                    std::lock_guard<std::recursive_mutex> lock(interopCallsMutex);
+                    interopDriver = interopPlugin->createDevice(config, instanceAvailable);
+                }
                 if (!instanceAvailable)
                 {
                     std::cerr << "dinrail::Device: impossible to create instance for interop "
@@ -358,7 +366,12 @@ struct RuntimeContext::Impl
             }
 
             std::vector<DeviceInfo> devices;
-            if (interopPlugin->listDevices(devices))
+            bool listed;
+            {
+                std::lock_guard<std::recursive_mutex> lock(interopCallsMutex);
+                listed = interopPlugin->listDevices(devices);
+            }
+            if (listed)
             {
                 result.push_back({interopPluginInfo, std::move(devices)});
             }
@@ -372,7 +385,7 @@ struct RuntimeContext::Impl
     {
         InterfaceAdapterRegistry snapshot;
         {
-            std::lock_guard<std::mutex> lock(interfaceAdaptersMutex);
+            std::lock_guard<std::recursive_mutex> lock(interopCallsMutex);
             ensureInterfaceAdaptersRegistered();
             snapshot = interfaceAdapters;
         }
@@ -382,14 +395,15 @@ struct RuntimeContext::Impl
 
     void ensureInterfaceAdaptersRegistered()
     {
-        // Called with interfaceAdaptersMutex held. Retry discovery and failed
+        // Called with interopCallsMutex held. Retry discovery and failed
         // library loads, but register each successfully loaded plugin only once.
         for (const auto& interopPluginInfo : getAvailableInteropPlugins())
         {
             const std::string factoryName
                 = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
             const auto key = pluginKey(interopPluginInfo.location, factoryName);
-            if (registeredInterfaceAdapterPlugins.contains(key))
+            if (registeredInterfaceAdapterPlugins.contains(key)
+                || registeringInterfaceAdapterPlugins.contains(key))
             {
                 continue;
             }
@@ -399,13 +413,23 @@ struct RuntimeContext::Impl
                 continue;
             }
 
-            std::lock_guard<std::mutex> lock(plugin->instanceMutex);
-            auto* interop = plugin->getInstance();
-            if (interop)
+            // Constructors and registration hooks may themselves query a device.
+            // A nested query must not invoke the same unfinished hook again.
+            registeringInterfaceAdapterPlugins.insert(key);
+            try
             {
-                interop->registerInterfaceAdapters(interfaceAdapters);
-                registeredInterfaceAdapterPlugins.insert(key);
+                auto* interop = plugin->getInstance();
+                if (interop)
+                {
+                    interop->registerInterfaceAdapters(interfaceAdapters);
+                    registeredInterfaceAdapterPlugins.insert(key);
+                }
+            } catch (...)
+            {
+                registeringInterfaceAdapterPlugins.erase(key);
+                throw;
             }
+            registeringInterfaceAdapterPlugins.erase(key);
         }
     }
 
@@ -415,7 +439,10 @@ struct RuntimeContext::Impl
     std::mutex interopPluginsCacheMutex; // protects interopPlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<InteropPlugin>> interopPlugins;
 
-    std::mutex interfaceAdaptersMutex;
+    // One lock for callbacks and registration avoids lock-order inversions
+    // between plugins. Recursion permits callbacks to query native child devices.
+    std::recursive_mutex interopCallsMutex;
+    std::unordered_set<std::string> registeringInterfaceAdapterPlugins;
     std::unordered_set<std::string> registeredInterfaceAdapterPlugins;
     InterfaceAdapterRegistry interfaceAdapters;
 };

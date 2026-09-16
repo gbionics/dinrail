@@ -97,14 +97,18 @@ void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
         return nullptr;
     }
 
-    std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
     const std::type_index key(interfaceType);
-    const auto existing = m_pimpl->adapters.find(key);
-    if (existing != m_pimpl->adapters.end())
     {
-        return existing->second->getInterface();
+        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
+        const auto existing = m_pimpl->adapters.find(key);
+        if (existing != m_pimpl->adapters.end())
+        {
+            return existing->second->getInterface();
+        }
     }
 
+    // Plugin callbacks can query devices too. Never hold the cache mutex while
+    // entering the runtime or constructing an adapter.
     auto adapter = m_pimpl->context.createInterfaceAdapter(*m_pimpl->driver, interfaceType);
     if (!adapter)
     {
@@ -117,7 +121,15 @@ void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
         return nullptr;
     }
 
-    m_pimpl->adapters.emplace(key, std::move(adapter));
+    {
+        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
+        const auto [entry, inserted] = m_pimpl->adapters.try_emplace(key, std::move(adapter));
+        if (!inserted)
+        {
+            adaptedInterface = entry->second->getInterface();
+        }
+    }
+    // If another query won the race, destroy the unused adapter outside the lock.
     return adaptedInterface;
 }
 
