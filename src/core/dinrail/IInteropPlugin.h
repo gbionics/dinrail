@@ -19,7 +19,9 @@ namespace dinrail
  * @brief Interface implemented by interop plugins.
  *
  * When a native dinrail device plugin cannot be opened, the available interop
- * plugins are asked, in alphabetical order, to open the device.
+ * plugins are asked, in alphabetical order, to open the device. A runtime
+ * context creates at most one instance of each interop plugin and reuses it for
+ * device creation and discovery. Calls to an instance are serialized.
  */
 class IInteropPlugin
 {
