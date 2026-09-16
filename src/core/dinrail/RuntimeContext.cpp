@@ -307,10 +307,10 @@ struct RuntimeContext::Impl
                 auto interopDriver = interopPlugin->createDevice(config, instanceAvailable);
                 if (!instanceAvailable)
                 {
-                    std::cerr
-                        << "dinrail::Device: impossible to create instance for interop plugin '"
-                        << interopName << "' from library '" << interopPluginInfo.location << "'"
-                        << std::endl;
+                    std::cerr << "dinrail::Device: impossible to create instance for interop "
+                                 "plugin '"
+                              << interopName << "' from library '" << interopPluginInfo.location
+                              << "'" << std::endl;
                     continue;
                 }
 
