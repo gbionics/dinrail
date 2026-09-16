@@ -70,6 +70,12 @@ if (DINRAIL_USES_BipedalLocomotionFramework)
   add_test(NAME BLFParametersHandlerCompatibilityTest COMMAND BLFParametersHandlerCompatibilityTest)
 endif()
 
+if(NOT TARGET dinrail-device-dr_battery_fake)
+    # Standalone YARP builds also need the native battery fixture.
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../devices/fake/dr_battery_fake
+                     ${CMAKE_CURRENT_BINARY_DIR}/dr_battery_fake)
+endif()
+
 add_executable(BatteryAdaptersTest BatteryAdaptersTest.cpp)
 target_link_libraries(BatteryAdaptersTest PRIVATE
     dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)

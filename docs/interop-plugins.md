@@ -68,8 +68,10 @@ provided by the device.
 
 An interop plugin can override `registerInterfaceAdapters()` to register bridges
 between interfaces. The default implementation registers nothing. The runtime
-calls this hook once per plugin while initializing its context's adapter registry,
+calls this hook once per successfully loaded plugin in its context's adapter registry,
 using the same cached plugin instance as device creation and discovery.
+Uncached adapter requests rescan the search path, so newly available plugins and
+previously failed library loads can register adapters in the same context.
 
 Custom adapters derive from `InterfaceAdapterBase<Target, Source>` and implement
 the target methods by forwarding or converting calls to `source()`. Register an
@@ -114,6 +116,9 @@ if (device.open(config))
 return the same interface pointer. Adapters are destroyed before the backing
 device when it is closed, reopened, or destroyed; callers must stop using the
 returned pointers at that point. Unknown or unavailable interfaces still fail.
+Concurrent adapter queries share the cached adapter. Opening, closing, moving,
+or destroying the device must not overlap with queries or use of its interfaces;
+the backing implementation must also support concurrent interface queries.
 
 `src/yarp/test/BatteryAdaptersTest.cpp` demonstrates the native-to-YARP request
 and a return trip through the registry, checking measurements, all battery

@@ -10,9 +10,17 @@
 #include "interop/IFooTest.h"
 
 #include <algorithm>
+#include <array>
+#include <atomic>
+#include <barrier>
+#include <chrono>
+#include <cstdlib>
+#include <filesystem>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace
@@ -227,4 +235,132 @@ TEST_CASE("view() caches interface adapters supplied by interop plugins", "[inte
     REQUIRE(cached == adapted);
 
     REQUIRE(device.close());
+}
+
+TEST_CASE("Concurrent first queries retain the same live adapter", "[interop]")
+{
+    dinrail::RuntimeContext context;
+    dinrail::Parameters opts;
+    opts.put("device", "alpha_device");
+    for (int round = 0; round < 8; ++round)
+    {
+        dinrail::Device device(context);
+        REQUIRE(device.open(opts));
+        std::array<dinrail::test::IAdaptedFooTest*, 16> interfaces{};
+        std::barrier start(static_cast<std::ptrdiff_t>(interfaces.size()));
+        std::atomic<int> successes{0};
+        std::vector<std::thread> workers;
+        for (std::size_t index = 0; index < interfaces.size(); ++index)
+        {
+            workers.emplace_back([&, index] {
+                start.arrive_and_wait();
+                if (device.view(interfaces[index]))
+                {
+                    ++successes;
+                }
+            });
+        }
+        for (auto& worker : workers)
+        {
+            worker.join();
+        }
+        REQUIRE(successes == interfaces.size());
+        REQUIRE(interfaces.front() != nullptr);
+        for (auto* interface : interfaces)
+        {
+            REQUIRE(interface == interfaces.front());
+            REQUIRE(interface->adaptedTag() == "adapted:alpha-" + std::to_string(round + 1));
+        }
+    }
+}
+
+namespace
+{
+// Restore the process environment and remove the fixture even on a failed assertion.
+class LatePluginSearchPath
+{
+public:
+    LatePluginSearchPath()
+    {
+        if (const char* previous = std::getenv("DINRAIL_PLUGIN_PATH"))
+        {
+            m_previous = previous;
+        }
+        m_directory
+            = std::filesystem::temp_directory_path()
+              / ("dinrail-late-plugin-"
+                 + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+        std::filesystem::create_directory(m_directory);
+        std::string path = m_previous.value_or("");
+#ifdef _WIN32
+        path += ";";
+#else
+        path += ":";
+#endif
+        path += m_directory.string();
+        setPath(path.c_str());
+    }
+
+    ~LatePluginSearchPath()
+    {
+        setPath(m_previous ? m_previous->c_str() : nullptr);
+        std::error_code error;
+        std::filesystem::remove_all(m_directory, error);
+    }
+
+    std::filesystem::path destination() const
+    {
+        return m_directory / std::filesystem::path(DINRAIL_TEST_LATE_PLUGIN).filename();
+    }
+
+private:
+    static void setPath(const char* value)
+    {
+#ifdef _WIN32
+        _putenv_s("DINRAIL_PLUGIN_PATH", value ? value : "");
+#else
+        if (value)
+        {
+            setenv("DINRAIL_PLUGIN_PATH", value, 1);
+        } else
+        {
+            unsetenv("DINRAIL_PLUGIN_PATH");
+        }
+#endif
+    }
+
+    std::optional<std::string> m_previous;
+    std::filesystem::path m_directory;
+};
+} // namespace
+
+TEST_CASE("A context registers adapters from newly available plugins", "[interop]")
+{
+    LatePluginSearchPath searchPath;
+    dinrail::RuntimeContext context;
+    dinrail::Device device(context);
+    dinrail::Parameters opts;
+    opts.put("device", "alpha_device");
+    REQUIRE(device.open(opts));
+    dinrail::test::ILateAdaptedFooTest* adapted = nullptr;
+    REQUIRE_FALSE(device.view(adapted));
+
+    // A discovered but unloadable library must also remain retryable.
+    std::filesystem::copy_file(DINRAIL_TEST_LATE_PLUGIN, searchPath.destination());
+    std::filesystem::resize_file(searchPath.destination(), 0);
+    REQUIRE_FALSE(device.view(adapted));
+    std::filesystem::copy_file(DINRAIL_TEST_LATE_PLUGIN,
+                               searchPath.destination(),
+                               std::filesystem::copy_options::overwrite_existing);
+    REQUIRE(device.view(adapted));
+    REQUIRE(adapted->adaptedTag() == "late:alpha-1");
+    dinrail::test::ILateAdaptedFooTest* cached = nullptr;
+    REQUIRE(device.view(cached));
+    REQUIRE(cached == adapted);
+
+    // A new device rescans the registry without invoking successful hooks again.
+    dinrail::Device second(context);
+    REQUIRE(second.open(opts));
+    REQUIRE(second.view(adapted));
+    REQUIRE(adapted->adaptedTag() == "late:alpha-2");
 }

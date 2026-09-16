@@ -75,6 +75,9 @@ public:
      * @tparam T Interface type to query.
      * @param x Output pointer receiving the requested interface on success.
      * @return true if the interface is available, false otherwise.
+     * Concurrent queries are supported when the implementation's casts and
+     * IInterfaceView queries are thread-safe. Opening, closing, moving, or
+     * destroying the handle must not overlap with queries or interface use.
      */
     template <class T> bool view(T*& x)
     {

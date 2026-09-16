@@ -17,6 +17,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace dinrail
@@ -369,31 +370,43 @@ struct RuntimeContext::Impl
     std::unique_ptr<IInterfaceAdapter>
     createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType)
     {
-        ensureInterfaceAdaptersRegistered();
-        return interfaceAdapters.create(device, interfaceType);
+        InterfaceAdapterRegistry snapshot;
+        {
+            std::lock_guard<std::mutex> lock(interfaceAdaptersMutex);
+            ensureInterfaceAdaptersRegistered();
+            snapshot = interfaceAdapters;
+        }
+        // Run adapter constructors without holding the shared registry lock.
+        return snapshot.create(device, interfaceType);
     }
 
     void ensureInterfaceAdaptersRegistered()
     {
-        std::call_once(interfaceAdaptersRegistrationOnce, [this] {
-            for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+        // Called with interfaceAdaptersMutex held. Retry discovery and failed
+        // library loads, but register each successfully loaded plugin only once.
+        for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+        {
+            const std::string factoryName
+                = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
+            const auto key = pluginKey(interopPluginInfo.location, factoryName);
+            if (registeredInterfaceAdapterPlugins.contains(key))
             {
-                const std::string factoryName
-                    = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
-                auto plugin = getInteropPlugin(interopPluginInfo.location, factoryName);
-                if (!plugin)
-                {
-                    continue;
-                }
-
-                std::lock_guard<std::mutex> lock(plugin->instanceMutex);
-                auto* interop = plugin->getInstance();
-                if (interop)
-                {
-                    interop->registerInterfaceAdapters(interfaceAdapters);
-                }
+                continue;
             }
-        });
+            auto plugin = getInteropPlugin(interopPluginInfo.location, factoryName);
+            if (!plugin)
+            {
+                continue;
+            }
+
+            std::lock_guard<std::mutex> lock(plugin->instanceMutex);
+            auto* interop = plugin->getInstance();
+            if (interop)
+            {
+                interop->registerInterfaceAdapters(interfaceAdapters);
+                registeredInterfaceAdapterPlugins.insert(key);
+            }
+        }
     }
 
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
@@ -402,7 +415,8 @@ struct RuntimeContext::Impl
     std::mutex interopPluginsCacheMutex; // protects interopPlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<InteropPlugin>> interopPlugins;
 
-    std::once_flag interfaceAdaptersRegistrationOnce;
+    std::mutex interfaceAdaptersMutex;
+    std::unordered_set<std::string> registeredInterfaceAdapterPlugins;
     InterfaceAdapterRegistry interfaceAdapters;
 };
 

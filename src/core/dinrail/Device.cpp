@@ -8,6 +8,7 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
+#include <mutex>
 #include <typeindex>
 #include <unordered_map>
 #include <utility>
@@ -25,6 +26,7 @@ struct Device::Impl
     RuntimeContext context;
     bool isValid{false};
     FactoryUniquePtr<dinrail::IDevice> driver;
+    std::mutex adaptersMutex;
     std::unordered_map<std::type_index, std::unique_ptr<IInterfaceAdapter>> adapters;
 };
 
@@ -95,6 +97,7 @@ void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
         return nullptr;
     }
 
+    std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
     const std::type_index key(interfaceType);
     const auto existing = m_pimpl->adapters.find(key);
     if (existing != m_pimpl->adapters.end())
