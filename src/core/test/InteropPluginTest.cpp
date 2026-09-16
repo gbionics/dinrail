@@ -207,3 +207,24 @@ TEST_CASE("Interop plugins report the devices they can open", "[interop]")
     REQUIRE(deviceIsListedBy("testalpha", "alpha_device"));
     REQUIRE(deviceIsListedBy("testbeta", "beta_device"));
 }
+
+TEST_CASE("view() caches interface adapters supplied by interop plugins", "[interop]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", std::string("alpha_device"));
+
+    dinrail::RuntimeContext context;
+    dinrail::Device device(context);
+    REQUIRE(device.open(opts));
+
+    dinrail::test::IAdaptedFooTest* adapted = nullptr;
+    REQUIRE(device.view(adapted));
+    REQUIRE(adapted != nullptr);
+    REQUIRE(adapted->adaptedTag() == "adapted:alpha-1");
+
+    dinrail::test::IAdaptedFooTest* cached = nullptr;
+    REQUIRE(device.view(cached));
+    REQUIRE(cached == adapted);
+
+    REQUIRE(device.close());
+}
