@@ -3,9 +3,7 @@
 
 #include <dinrail/PluginUtils.h>
 
-#include <dinrail/IInteropPlugin.h>
-
-#include <sharedlibpp/SharedLibraryClassFactory.h>
+#include <dinrail/RuntimeContext.h>
 
 #include <cstdlib>
 #include <map>
@@ -93,19 +91,6 @@ const PluginLibraryFileNameConvention nativePluginConvention
     = makePluginLibraryFileNameConvention("dinrail-device");
 const PluginLibraryFileNameConvention interopPluginConvention
     = makePluginLibraryFileNameConvention("dinrail-interop");
-
-template <class T>
-std::unique_ptr<T, std::function<void(T*)>>
-makeFactoryUnique(const sharedlibpp::SharedLibraryClassFactory<T>& factory)
-{
-    auto* factoryPtr = &factory;
-    return std::unique_ptr<T, std::function<void(T*)>>(factory.create(), [factoryPtr](T* p) {
-        if (p != nullptr && factoryPtr != nullptr)
-        {
-            factoryPtr->destroy(p);
-        }
-    });
-}
 
 } // namespace
 
@@ -261,52 +246,7 @@ std::vector<InteropPluginInfo> getAvailableInteropPlugins()
 
 std::vector<InteropDevices> getAvailableInteropDevices()
 {
-    std::vector<InteropDevices> result;
-
-    for (const auto& interopPluginInfo : getAvailableInteropPlugins())
-    {
-        const std::string factoryName
-            = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
-
-        sharedlibpp::SharedLibraryClassFactory<dinrail::IInteropPlugin>
-            factory(SHLIBPP_DEFAULT_START_CHECK,
-                    SHLIBPP_DEFAULT_END_CHECK,
-                    SHLIBPP_DEFAULT_SYSTEM_VERSION,
-                    factoryName.c_str());
-
-        for (const auto& path : getPluginSearchPaths())
-        {
-            factory.extendSearchPath(path.string());
-        }
-
-        // Load the exact file found during discovery. In particular, CMake MODULE
-        // libraries use the .so suffix on macOS, while sharedlibpp expands a bare
-        // library name to .dylib only on that platform.
-        bool ok = factory.open(interopPluginInfo.location.c_str(), factoryName.c_str());
-        ok = ok && factory.isValid();
-        if (!ok)
-        {
-            continue;
-        }
-
-        auto interop = makeFactoryUnique(factory);
-        if (!interop)
-        {
-            continue;
-        }
-
-        std::vector<DeviceInfo> devices;
-        const auto pluginDevices = interop->listDevices();
-        devices.reserve(pluginDevices.size());
-        for (const auto& device : pluginDevices)
-        {
-            devices.push_back({device.name, device.location});
-        }
-
-        result.push_back({interopPluginInfo, std::move(devices)});
-    }
-
-    return result;
+    return RuntimeContext::getDefault().listInteropDevices();
 }
 
 AvailableDevices getAvailableDevices()

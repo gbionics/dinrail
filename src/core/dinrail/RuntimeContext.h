@@ -38,9 +38,10 @@ template <class T> using FactoryUniquePtr = std::unique_ptr<T, FactoryDeleter<T>
 /**
  * Shared runtime state used to load device and interop plug-ins.
  *
- * A RuntimeContext owns the plug-in cache. Copies are lightweight handles to
- * the same state, so passing a RuntimeContext to a Device is safe even when
- * the original RuntimeContext object goes out of scope.
+ * A RuntimeContext owns the plug-in cache. Each interop plug-in is instantiated
+ * at most once and reused for all operations in the context. Copies are
+ * lightweight handles to the same state, so passing a RuntimeContext to a
+ * Device is safe even when the original RuntimeContext object goes out of scope.
  */
 class RuntimeContext
 {

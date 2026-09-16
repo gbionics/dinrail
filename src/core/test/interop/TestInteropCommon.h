@@ -76,9 +76,12 @@ private:
 class TestInteropPluginBase : public IInteropPlugin
 {
 public:
-    TestInteropPluginBase(std::string tag, std::set<std::string> handledDevices)
+    TestInteropPluginBase(std::string tag,
+                          std::set<std::string> handledDevices,
+                          bool exposeCreationCount = false)
         : m_tag(std::move(tag))
         , m_handledDevices(std::move(handledDevices))
+        , m_exposeCreationCount(exposeCreationCount)
     {
     }
 
@@ -95,7 +98,10 @@ public:
             return nullptr;
         }
 
-        auto dev = std::make_unique<TestFooDevice>(m_tag);
+        ++m_createdDeviceCount;
+        const std::string tag
+            = m_exposeCreationCount ? m_tag + "-" + std::to_string(m_createdDeviceCount) : m_tag;
+        auto dev = std::make_unique<TestFooDevice>(tag);
         if (!dev->open(config))
         {
             return nullptr;
@@ -116,6 +122,8 @@ public:
 private:
     std::string m_tag;
     std::set<std::string> m_handledDevices;
+    bool m_exposeCreationCount{false};
+    std::size_t m_createdDeviceCount{0};
 };
 
 } // namespace dinrail::test

@@ -12,7 +12,7 @@ class TestInteropAlpha final : public TestInteropPluginBase
 {
 public:
     TestInteropAlpha()
-        : TestInteropPluginBase("alpha", {"alpha_device"})
+        : TestInteropPluginBase("alpha", {"alpha_device"}, true)
     {
     }
 };

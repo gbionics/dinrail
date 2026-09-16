@@ -41,8 +41,8 @@ target_include_directories(dinrail-yarp-conversions
 )
 
 add_library(dinrail-interop-yarp SHARED
-    dinrail/YarpDeviceWrapper.cpp
-    dinrail/YarpDeviceWrapper.h
+    dinrail/DinrailDeviceFromYarp.cpp
+    dinrail/DinrailDeviceFromYarp.h
     dinrail/YarpInteropPlugin.cpp
     dinrail/YarpInteropPlugin.h
 )
@@ -74,6 +74,7 @@ install(TARGETS dinrail-interop-yarp)
 # Install the public headers (the plugin headers are intentionally not installed)
 install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStampConverter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStatusConverter.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)
 
