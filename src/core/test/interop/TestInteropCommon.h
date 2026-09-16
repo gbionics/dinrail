@@ -7,6 +7,7 @@
 #include "IFooTest.h"
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
@@ -36,6 +37,20 @@ public:
 
 private:
     std::string m_tag;
+};
+
+class FooAdapter final : public InterfaceAdapterBase<IAdaptedFooTest, IFooTest>
+{
+public:
+    explicit FooAdapter(IFooTest& source)
+        : InterfaceAdapterBase(source)
+    {
+    }
+
+    std::string adaptedTag() const override
+    {
+        return "adapted:" + source().tag();
+    }
 };
 
 // Device that exposes IFooTest only through IInterfaceView (not as a direct

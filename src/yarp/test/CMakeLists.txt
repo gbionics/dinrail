@@ -69,3 +69,11 @@ if (DINRAIL_USES_BipedalLocomotionFramework)
   )
   add_test(NAME BLFParametersHandlerCompatibilityTest COMMAND BLFParametersHandlerCompatibilityTest)
 endif()
+
+add_executable(BatteryAdaptersTest BatteryAdaptersTest.cpp)
+target_link_libraries(BatteryAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_dependencies(BatteryAdaptersTest dinrail-device-dr_battery_fake)
+add_test(NAME BatteryAdaptersTest COMMAND BatteryAdaptersTest)
+set_tests_properties(BatteryAdaptersTest PROPERTIES
+    ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-yarp>:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")

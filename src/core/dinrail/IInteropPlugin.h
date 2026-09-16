@@ -5,6 +5,7 @@
 #define DINRAIL_IINTEROPPLUGIN_H
 
 #include <dinrail/IDevice.h>
+#include <dinrail/InterfaceAdapterRegistry.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
 
@@ -38,6 +39,15 @@ public:
      * @return Opened device instance on success, nullptr otherwise.
      */
     virtual std::unique_ptr<dinrail::IDevice> createDevice(const Parameters& config) = 0;
+
+    /** Register this plugin's interface adapter factories.
+     *
+     * The runtime calls this once while building its shared adapter registry.
+     * Factories should be registered with InterfaceAdapterRegistry::add().
+     */
+    virtual void registerInterfaceAdapters(InterfaceAdapterRegistry& /*registry*/)
+    {
+    }
 
     /**
      * @brief List the devices this interop plugin can open.

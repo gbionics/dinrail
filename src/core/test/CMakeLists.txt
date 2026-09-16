@@ -97,3 +97,7 @@ if(DINRAIL_ENABLE_INTEROP_PLUGINS)
         ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-testbeta>")
 
 endif()
+
+add_executable(InterfaceAdapterRegistryTest InterfaceAdapterRegistryTest.cpp)
+target_link_libraries(InterfaceAdapterRegistryTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
+add_test(NAME InterfaceAdapterRegistryTest COMMAND InterfaceAdapterRegistryTest)

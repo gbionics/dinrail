@@ -4,6 +4,7 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
@@ -365,11 +366,44 @@ struct RuntimeContext::Impl
         return result;
     }
 
+    std::unique_ptr<IInterfaceAdapter>
+    createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType)
+    {
+        ensureInterfaceAdaptersRegistered();
+        return interfaceAdapters.create(device, interfaceType);
+    }
+
+    void ensureInterfaceAdaptersRegistered()
+    {
+        std::call_once(interfaceAdaptersRegistrationOnce, [this] {
+            for (const auto& interopPluginInfo : getAvailableInteropPlugins())
+            {
+                const std::string factoryName
+                    = getSharedlibppFactoryNameFromInteropName(interopPluginInfo.name);
+                auto plugin = getInteropPlugin(interopPluginInfo.location, factoryName);
+                if (!plugin)
+                {
+                    continue;
+                }
+
+                std::lock_guard<std::mutex> lock(plugin->instanceMutex);
+                auto* interop = plugin->getInstance();
+                if (interop)
+                {
+                    interop->registerInterfaceAdapters(interfaceAdapters);
+                }
+            }
+        });
+    }
+
     std::mutex devicePluginsCacheMutex; // protects devicePlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<DevicePlugin>> devicePlugins;
 
     std::mutex interopPluginsCacheMutex; // protects interopPlugins map insertions and lookups
     std::unordered_map<std::string, std::shared_ptr<InteropPlugin>> interopPlugins;
+
+    std::once_flag interfaceAdaptersRegistrationOnce;
+    InterfaceAdapterRegistry interfaceAdapters;
 };
 
 RuntimeContext::RuntimeContext()
@@ -388,6 +422,12 @@ const RuntimeContext& RuntimeContext::getDefault()
 FactoryUniquePtr<IDevice> RuntimeContext::createDevice(const Parameters& config)
 {
     return m_pimpl->createDevice(config);
+}
+
+std::unique_ptr<IInterfaceAdapter>
+RuntimeContext::createInterfaceAdapter(IDevice& device, const std::type_info& interfaceType)
+{
+    return m_pimpl->createInterfaceAdapter(device, interfaceType);
 }
 
 std::vector<dinrail::InteropDevices> RuntimeContext::listInteropDevices() const

@@ -19,6 +19,13 @@ public:
     virtual std::string tag() const = 0;
 };
 
+class IAdaptedFooTest
+{
+public:
+    virtual ~IAdaptedFooTest() = default;
+    virtual std::string adaptedTag() const = 0;
+};
+
 } // namespace dinrail::test
 
 #endif // DINRAIL_TEST_IFOOTEST_H
