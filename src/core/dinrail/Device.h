@@ -47,8 +47,13 @@ public:
     Device& operator=(Device&&) = default;
 
     /**
-     * @brief Open a device plugin from the provided configuration.
-     * @param config Device configuration, including at least the device name.
+     * @brief Open a native or interop-provided device from the configuration.
+     *
+     * @param config Device configuration. It must provide `device`, the device
+     * name. The optional `dinrail_device_type` selects how the device is
+     * created: `auto` (the default) tries a native dinrail plugin and then all
+     * available interop plugins; `dinrail` only tries the native plugin; any
+     * other value selects an interop plugin by name (for example, `yarp`).
      * @return true on success, false otherwise.
      */
     bool open(const Parameters& config);

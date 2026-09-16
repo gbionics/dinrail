@@ -27,3 +27,14 @@ TEST_CASE("Native module plugins are discovered and loaded by their exact path",
     REQUIRE(device.open(opts));
     REQUIRE(device.close());
 }
+
+TEST_CASE("dinrail_device_type selects native device plugins", "[plugin]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", std::string("testnative"));
+    opts.put("dinrail_device_type", std::string("dinrail"));
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+    REQUIRE(device.close());
+}

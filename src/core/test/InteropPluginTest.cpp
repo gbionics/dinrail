@@ -10,7 +10,38 @@
 #include "interop/IFooTest.h"
 
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <vector>
+
+namespace
+{
+
+class CerrCapture
+{
+public:
+    CerrCapture()
+        : m_previous(std::cerr.rdbuf(m_stream.rdbuf()))
+    {
+    }
+
+    ~CerrCapture()
+    {
+        std::cerr.rdbuf(m_previous);
+    }
+
+    std::string str() const
+    {
+        return m_stream.str();
+    }
+
+private:
+    std::ostringstream m_stream;
+    std::streambuf* m_previous;
+};
+
+} // namespace
 
 TEST_CASE("Available interop plugins are discovered on the search path", "[interop]")
 {
@@ -82,6 +113,72 @@ TEST_CASE("Interop plugins are tried until one handles the device", "[interop]")
     REQUIRE(foo->tag() == "beta");
 
     REQUIRE(device.close());
+}
+
+TEST_CASE("dinrail_device_type selects a named interop plugin", "[interop]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", std::string("beta_device"));
+    opts.put("dinrail_device_type", std::string("testbeta"));
+
+    dinrail::Device device;
+    REQUIRE(device.open(opts));
+
+    dinrail::test::IFooTest* foo = nullptr;
+    REQUIRE(device.view(foo));
+    REQUIRE(foo != nullptr);
+    REQUIRE(foo->tag() == "beta");
+
+    REQUIRE(device.close());
+}
+
+TEST_CASE("dinrail_device_type restricts device plugin selection", "[interop]")
+{
+    dinrail::Parameters opts;
+    opts.put("device", std::string("alpha_device"));
+
+    SECTION("native selection does not fall back to interop plugins")
+    {
+        opts.put("dinrail_device_type", std::string("dinrail"));
+        dinrail::Device device;
+        REQUIRE_FALSE(device.open(opts));
+    }
+
+    SECTION("a different interop plugin is not tried")
+    {
+        opts.put("dinrail_device_type", std::string("testbeta"));
+        dinrail::Device device;
+        REQUIRE_FALSE(device.open(opts));
+    }
+
+    SECTION("an unavailable interop plugin fails")
+    {
+        opts.put("dinrail_device_type", std::string("missing"));
+        dinrail::Device device;
+        REQUIRE_FALSE(device.open(opts));
+    }
+}
+
+TEST_CASE("A failed open reports the device and dinrail_device_type", "[interop]")
+{
+    const std::vector<std::string> deviceTypes{"auto", "dinrail", "testbeta", "missing"};
+
+    for (const auto& deviceType : deviceTypes)
+    {
+        dinrail::Parameters opts;
+        opts.put("device", std::string("unhandled_device"));
+        opts.put("dinrail_device_type", deviceType);
+
+        dinrail::Device device;
+        CerrCapture captured;
+        const bool opened = device.open(opts);
+
+        REQUIRE_FALSE(opened);
+        const std::string expected = "dinrail::Device: failed to open device 'unhandled_device' "
+                                     "with dinrail_device_type '"
+                                     + deviceType + "'";
+        REQUIRE(captured.str().find(expected) != std::string::npos);
+    }
 }
 
 TEST_CASE("Interop plugins report the devices they can open", "[interop]")
