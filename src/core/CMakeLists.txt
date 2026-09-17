@@ -39,6 +39,9 @@ target_sources(dinrail
     dinrail/IMotorEncoders.h
     dinrail/IJoypadControl.h
     dinrail/Interfaces.cpp
+    dinrail/IInterfaceAdapter.h
+    dinrail/InterfaceAdapter.h
+    dinrail/InterfaceAdapterRegistry.h
     dinrail/IInterfaceView.h
     dinrail/IInteropPlugin.h
     dinrail/IPreciselyTimed.h

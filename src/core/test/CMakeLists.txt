@@ -69,12 +69,19 @@ if(DINRAIL_ENABLE_INTEROP_PLUGINS)
     # device-creation fallback used by view().
     add_library(dinrail-interop-testalpha MODULE interop/TestInteropAlpha.cpp)
     add_library(dinrail-interop-testbeta MODULE interop/TestInteropBeta.cpp)
+    add_library(dinrail-interop-testlate MODULE interop/TestInteropLate.cpp)
+    # Keep the late plugin out of the automatically discovered library directory.
+    set_target_properties(dinrail-interop-testlate PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/late-plugin"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/late-plugin")
     
-    foreach(_interop_plugin testalpha testbeta)
+    find_package(Threads REQUIRED)
+    foreach(_interop_plugin testalpha testbeta testlate)
         target_link_libraries(dinrail-interop-${_interop_plugin}
             PRIVATE
                 dinrail::dinrail
                 sharedlibpp::sharedlibpp
+                Threads::Threads
         )
         target_include_directories(dinrail-interop-${_interop_plugin}
             PRIVATE
@@ -87,13 +94,37 @@ if(DINRAIL_ENABLE_INTEROP_PLUGINS)
         PRIVATE
             dinrail::dinrail
             Catch2::Catch2WithMain
+            Threads::Threads
     )
     add_dependencies(InteropPluginTest
         dinrail-interop-testalpha
         dinrail-interop-testbeta
+        dinrail-interop-testlate
     )
+    target_compile_definitions(InteropPluginTest PRIVATE
+        DINRAIL_TEST_LATE_PLUGIN="$<TARGET_FILE:dinrail-interop-testlate>")
     add_test(NAME InteropPluginTest COMMAND InteropPluginTest)
     set_tests_properties(InteropPluginTest PROPERTIES
         ENVIRONMENT "DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-interop-testbeta>")
 
+    add_library(dinrail-interop-testreentrant MODULE interop/TestInteropReentrant.cpp)
+    target_link_libraries(dinrail-interop-testreentrant PRIVATE dinrail::dinrail)
+    # This fixture must not register its adapters in unrelated test processes.
+    set_target_properties(dinrail-interop-testreentrant PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/reentrant-plugin"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/reentrant-plugin")
+    add_executable(InteropReentrancyTest InteropReentrancyTest.cpp)
+    target_link_libraries(InteropReentrancyTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
+    add_dependencies(InteropReentrancyTest
+        dinrail-device-testnative dinrail-interop-testreentrant)
+    add_test(NAME InteropReentrancyTest COMMAND InteropReentrancyTest)
+    set_tests_properties(InteropReentrancyTest PROPERTIES
+        TIMEOUT 15
+        ENVIRONMENT_MODIFICATION
+            "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-testreentrant>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-testnative>")
+
 endif()
+
+add_executable(InterfaceAdapterRegistryTest InterfaceAdapterRegistryTest.cpp)
+target_link_libraries(InterfaceAdapterRegistryTest PRIVATE dinrail::dinrail Catch2::Catch2WithMain)
+add_test(NAME InterfaceAdapterRegistryTest COMMAND InterfaceAdapterRegistryTest)

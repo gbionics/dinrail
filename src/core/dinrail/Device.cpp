@@ -4,9 +4,13 @@
 
 #include <dinrail/Device.h>
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
+#include <mutex>
+#include <typeindex>
+#include <unordered_map>
 #include <utility>
 
 namespace dinrail
@@ -22,6 +26,8 @@ struct Device::Impl
     RuntimeContext context;
     bool isValid{false};
     FactoryUniquePtr<dinrail::IDevice> driver;
+    std::mutex adaptersMutex;
+    std::unordered_map<std::type_index, std::unique_ptr<IInterfaceAdapter>> adapters;
 };
 
 Device::Device()
@@ -46,6 +52,7 @@ bool Device::open(const Parameters& config)
         return false;
     }
 
+    m_pimpl->adapters.clear();
     m_pimpl->driver.reset();
     m_pimpl->isValid = false;
 
@@ -64,6 +71,7 @@ bool Device::close()
     bool result = true;
     if (m_pimpl->driver)
     {
+        m_pimpl->adapters.clear();
         result = m_pimpl->driver->close();
     }
 
@@ -80,6 +88,49 @@ bool Device::isValid() const
 IDevice* Device::getImplementation()
 {
     return m_pimpl ? m_pimpl->driver.get() : nullptr;
+}
+
+void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
+{
+    if (!m_pimpl || !m_pimpl->driver)
+    {
+        return nullptr;
+    }
+
+    const std::type_index key(interfaceType);
+    {
+        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
+        const auto existing = m_pimpl->adapters.find(key);
+        if (existing != m_pimpl->adapters.end())
+        {
+            return existing->second->getInterface();
+        }
+    }
+
+    // Plugin callbacks can query devices too. Never hold the cache mutex while
+    // entering the runtime or constructing an adapter.
+    auto adapter = m_pimpl->context.createInterfaceAdapter(*m_pimpl->driver, interfaceType);
+    if (!adapter)
+    {
+        return nullptr;
+    }
+
+    void* adaptedInterface = adapter->getInterface();
+    if (adaptedInterface == nullptr)
+    {
+        return nullptr;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
+        const auto [entry, inserted] = m_pimpl->adapters.try_emplace(key, std::move(adapter));
+        if (!inserted)
+        {
+            adaptedInterface = entry->second->getInterface();
+        }
+    }
+    // If another query won the race, destroy the unused adapter outside the lock.
+    return adaptedInterface;
 }
 
 } // namespace dinrail

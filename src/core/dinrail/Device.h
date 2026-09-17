@@ -75,6 +75,9 @@ public:
      * @tparam T Interface type to query.
      * @param x Output pointer receiving the requested interface on success.
      * @return true if the interface is available, false otherwise.
+     * Concurrent queries are supported when the implementation's casts and
+     * IInterfaceView queries are thread-safe. Opening, closing, moving, or
+     * destroying the handle must not overlap with queries or interface use.
      */
     template <class T> bool view(T*& x)
     {
@@ -106,6 +109,15 @@ public:
             }
         }
 
+        // Finally ask runtime-loaded interop plugins whether they can bridge
+        // an interface exposed by this device to the requested interface.
+        void* adapted = viewAdaptedInterface(typeid(T));
+        if (adapted != nullptr)
+        {
+            x = static_cast<T*>(adapted);
+            return true;
+        }
+
         return false;
     }
 
@@ -116,6 +128,9 @@ private:
     // Internal method to retrieve the raw device implementation pointer,
     // used in the view() method for dynamic casting.
     IDevice* getImplementation();
+
+    // Resolve and retain an interop-provided interface adapter.
+    void* viewAdaptedInterface(const std::type_info& interfaceType);
 };
 
 } // namespace dinrail
