@@ -73,21 +73,25 @@ using the same cached plugin instance as device creation and discovery.
 Uncached adapter requests rescan the search path, so newly available plugins and
 previously failed library loads can register adapters in the same context.
 
-Custom adapters derive from `InterfaceAdapterBase<Target, Source>` and implement
-the target methods by forwarding or converting calls to `source()`. Register an
-adapter with `registry.add<Target, Source, Adapter>()`. Source interfaces are
-resolved through a direct cast or `IInterfaceView`; factories for a requested
-target are tried in registration order until a source is available.
+To define a new interface adapter, a class must be derived from `dinrail::InterfaceAdapterBase<Target, Source>` and implement
+the target methods by forwarding or converting calls to `source()`. The interface adapter then needs to be
+registered with `registry.add<Target, Source, Adapter>()` called in the interop plugin `registerInterfaceAdapters()`.
+
+For adapters implemented inside `dinrail`, the convention used is to make them explicit instantiation of the `dinrail::InterfaceAdapter<Target, Source>`
+template, but this is just a convention for easy readability, as an interface adapter can be an arbitrary non-templated class,
+as long as it derives from `dinrail::InterfaceAdapterBase<Target, Source>`.
 
 For example, the YARP plugin registers battery adapters in both directions:
 
 ```cpp
 void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)
 {
+    // ...
     registry.add<dinrail::IBattery, yarp::dev::IBattery,
                  InterfaceAdapter<dinrail::IBattery, yarp::dev::IBattery>>();
     registry.add<yarp::dev::IBattery, dinrail::IBattery,
                  InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>();
+    // ...
 }
 ```
 
@@ -112,23 +116,3 @@ if (device.open(config))
 }
 ```
 
-`Device` caches successful adapters by target interface type. Repeated requests
-return the same interface pointer. Adapters are destroyed before the backing
-device when it is closed, reopened, or destroyed; callers must stop using the
-returned pointers at that point. Unknown or unavailable interfaces still fail.
-Concurrent adapter queries share the cached adapter. Opening, closing, moving,
-or destroying the device must not overlap with queries or use of its interfaces;
-the backing implementation must also support concurrent interface queries.
-Interop callbacks and adapter registration are serialized within a runtime
-context and may synchronously query native child devices. Concurrent cache
-misses may construct more than one adapter, but only one is retained and
-returned to callers; unused adapters are destroyed outside the cache lock.
-
-`src/yarp/test/BatteryAdaptersTest.cpp` demonstrates the native-to-YARP request
-and a return trip through the registry, checking measurements, all battery
-status values, error conversion, caching, and reopening. No YARP device wrapper
-is needed to use these adapters.
-
-Adding the registration hook changes the interop plugin virtual interface;
-existing plugin binaries must be rebuilt. Existing plugin source implementations
-can inherit the default empty hook.
