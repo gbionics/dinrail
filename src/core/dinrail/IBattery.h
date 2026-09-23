@@ -6,7 +6,10 @@
 #define DINRAIL_IBATTERY_H
 
 #include <dinrail/Status.h>
+#include <dinrail/VectorProxy.h>
 
+#include <chrono>
+#include <cstddef>
 #include <string>
 
 namespace dinrail
@@ -31,6 +34,17 @@ enum class BatteryStatus : int
     LowWarning = 5,
     /** The battery charge is critically low. */
     CriticalWarning = 6,
+};
+
+/**
+ * @brief A single event reported by the battery management system.
+ * */
+struct BatteryEvent
+{
+    /** Time at which the event occurred, as a duration in nanoseconds. */
+    std::chrono::nanoseconds timestamp{0};
+    /** Description of the event. */
+    std::string message;
 };
 
 /**
@@ -88,6 +102,16 @@ public:
      * @return The outcome of the operation.
      */
     virtual Status getBatteryInfo(std::string& batteryInfo) = 0;
+
+    /**
+     * @brief Get the most recent events reported by the battery.
+      * @param events Caller-owned output vector; its size is the maximum number of events to
+      * retrieve.
+      * @param eventCount The number of events written, newest first.
+     * @return The outcome of the operation.
+     */
+     virtual Status getBatteryLatestEvents(VectorProxy<BatteryEvent>::Ref events,
+                                                        std::size_t& eventCount) = 0;
 };
 
 /**
@@ -145,6 +169,13 @@ public:
      * @return The outcome of the operation.
      */
     virtual Status setBatteryInfo(const std::string& batteryInfo) = 0;
+
+    /**
+     * @brief Set the simulated battery events, ordered newest first.
+     * @param events The events to report.
+     * @return The outcome of the operation.
+     */
+    virtual Status setBatteryEvents(const VectorProxy<const BatteryEvent>::Ref events) = 0;
 };
 
 } // namespace dinrail

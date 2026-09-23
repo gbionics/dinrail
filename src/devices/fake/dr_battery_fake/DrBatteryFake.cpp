@@ -3,6 +3,7 @@
 
 #include "DrBatteryFake.h"
 
+#include <algorithm>
 #include <cmath>
 
 namespace dinrail
@@ -29,6 +30,7 @@ bool DrBatteryFake::open(const Parameters& config)
     m_status = BatteryStatus::OkStandby;
     m_temperature = 25.0;
     m_info = "Fake battery";
+    m_events.clear();
     m_opened = true;
     return true;
 }
@@ -112,6 +114,20 @@ Status DrBatteryFake::getBatteryInfo(std::string& batteryInfo)
     return OkStatus();
 }
 
+Status DrBatteryFake::getBatteryLatestEvents(VectorProxy<BatteryEvent>::Ref events,
+                                             std::size_t& eventCount)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return deviceNotOpenStatus();
+    }
+
+    eventCount = std::min(static_cast<std::size_t>(events.size()), m_events.size());
+    std::copy_n(m_events.begin(), eventCount, events.begin());
+    return OkStatus();
+}
+
 Status DrBatteryFake::setBatteryVoltage(double voltage)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
@@ -185,6 +201,18 @@ Status DrBatteryFake::setBatteryInfo(const std::string& batteryInfo)
     }
 
     m_info = batteryInfo;
+    return OkStatus();
+}
+
+Status DrBatteryFake::setBatteryEvents(const VectorProxy<const BatteryEvent>::Ref events)
+{
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (!m_opened)
+    {
+        return deviceNotOpenStatus();
+    }
+
+    m_events.assign(events.begin(), events.end());
     return OkStatus();
 }
 

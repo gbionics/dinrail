@@ -9,6 +9,7 @@
 
 #include <mutex>
 #include <string>
+#include <vector>
 
 namespace dinrail
 {
@@ -31,6 +32,8 @@ public:
     Status getBatteryStatus(BatteryStatus& status) override;
     Status getBatteryTemperature(double& temperature) override;
     Status getBatteryInfo(std::string& batteryInfo) override;
+    Status getBatteryLatestEvents(VectorProxy<BatteryEvent>::Ref events,
+                                  std::size_t& eventCount) override;
 
     Status setBatteryVoltage(double voltage) override;
     Status setBatteryCurrent(double current) override;
@@ -38,6 +41,7 @@ public:
     Status setBatteryStatus(BatteryStatus status) override;
     Status setBatteryTemperature(double temperature) override;
     Status setBatteryInfo(const std::string& batteryInfo) override;
+    Status setBatteryEvents(const VectorProxy<const BatteryEvent>::Ref events) override;
 
 private:
     std::mutex m_mutex;
@@ -48,6 +52,7 @@ private:
     BatteryStatus m_status{BatteryStatus::OkStandby};
     double m_temperature{25.0};
     std::string m_info{"Fake battery"};
+    std::vector<BatteryEvent> m_events;
 };
 
 } // namespace dinrail

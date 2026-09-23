@@ -7,6 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <limits>
 #include <string>
 
@@ -32,6 +33,12 @@ TEST_CASE("dr_battery_fake exposes battery interfaces", "[core][device][battery]
     REQUIRE(batterySimulation->setBatteryStatus(dinrail::BatteryStatus::OkInUse).ok());
     REQUIRE(batterySimulation->setBatteryTemperature(24.0).ok());
     REQUIRE(batterySimulation->setBatteryInfo("Test battery").ok());
+    const std::array<dinrail::BatteryEvent, 3> simulatedEvents{{
+        {std::chrono::nanoseconds{3}, "Third Event"},
+        {std::chrono::nanoseconds{2}, "Second Event"},
+        {std::chrono::nanoseconds{1}, "First Event"},
+    }};
+    REQUIRE(batterySimulation->setBatteryEvents(simulatedEvents).ok());
 
     double voltage = 0.0;
     double current = 0.0;
@@ -39,6 +46,8 @@ TEST_CASE("dr_battery_fake exposes battery interfaces", "[core][device][battery]
     double temperature = 0.0;
     dinrail::BatteryStatus status = dinrail::BatteryStatus::GeneralError;
     std::string info;
+    std::array<dinrail::BatteryEvent, 2> events;
+    std::size_t eventCount = events.size();
 
     REQUIRE(battery->getBatteryVoltage(voltage).ok());
     REQUIRE(battery->getBatteryCurrent(current).ok());
@@ -46,6 +55,7 @@ TEST_CASE("dr_battery_fake exposes battery interfaces", "[core][device][battery]
     REQUIRE(battery->getBatteryStatus(status).ok());
     REQUIRE(battery->getBatteryTemperature(temperature).ok());
     REQUIRE(battery->getBatteryInfo(info).ok());
+    REQUIRE(battery->getBatteryLatestEvents(events, eventCount).ok());
 
     REQUIRE(voltage == 48.0);
     REQUIRE(current == 2.5);
@@ -53,7 +63,13 @@ TEST_CASE("dr_battery_fake exposes battery interfaces", "[core][device][battery]
     REQUIRE(status == dinrail::BatteryStatus::OkInUse);
     REQUIRE(temperature == 24.0);
     REQUIRE(info == "Test battery");
-
+    REQUIRE(eventCount == events.size());
+    REQUIRE(events[0].timestamp == std::chrono::nanoseconds{3});
+    REQUIRE(events[0].message == "Third Event");
+    REQUIRE(events[1].timestamp == std::chrono::nanoseconds{2});
+    REQUIRE(events[1].message == "Second Event");
+    REQUIRE(events[2].timestamp == std::chrono::nanoseconds{1});
+    REQUIRE(events[2].message == "First Event");
     REQUIRE(device.close());
 }
 
