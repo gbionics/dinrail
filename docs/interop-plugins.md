@@ -66,20 +66,22 @@ provided by the device.
 
 ### Interface adapters
 
-An interop plugin can override `registerInterfaceAdapters()` to register bridges
-between interfaces. The default implementation registers nothing. The runtime
-calls this hook once per successfully loaded plugin in its context's adapter registry,
-using the same cached plugin instance as device creation and discovery.
-Uncached adapter requests rescan the search path, so newly available plugins and
-previously failed library loads can register adapters in the same context.
+An interface adapter lets `Device::view<Target>()` provide a requested `Target`
+interface when the device exposes only a `Source` interface. To define one,
+derive from `dinrail::InterfaceAdapterBase<Target, Source>` and implement the
+`Target` methods. The base class stores a reference to the `Source` object; its
+protected `source()` method returns that object so the adapter can call its
+methods and convert their inputs or results as needed.
 
-To define a new interface adapter, a class must be derived from `dinrail::InterfaceAdapterBase<Target, Source>` and implement
-the target methods by forwarding or converting calls to `source()`. The interface adapter then needs to be
-registered with `registry.add<Target, Source, Adapter>()` called in the interop plugin `registerInterfaceAdapters()`.
+An interop plugin registers the adapter from its `registerInterfaceAdapters()`
+override by calling `registry.add<Target, Source, Adapter>()`, where `Adapter` is
+the concrete adapter class.
 
-For adapters implemented inside `dinrail`, the convention used is to make them explicit instantiation of the `dinrail::InterfaceAdapter<Target, Source>`
-template, but this is just a convention for easy readability, as an interface adapter can be an arbitrary non-templated class,
-as long as it derives from `dinrail::InterfaceAdapterBase<Target, Source>`.
+Adapters provided by dinrail conventionally specialize
+`dinrail::InterfaceAdapter<Target, Source>`. This keeps the fully qualified target
+and source interface types visible wherever an adapter is used. It is only a
+naming convention: a non-templated class works too, provided that it derives
+from `dinrail::InterfaceAdapterBase<Target, Source>`.
 
 For example, the YARP plugin registers battery adapters in both directions:
 
