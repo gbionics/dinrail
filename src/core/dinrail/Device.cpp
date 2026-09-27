@@ -26,7 +26,7 @@ struct Device::Impl
     RuntimeContext context;
     bool isValid{false};
     FactoryUniquePtr<dinrail::IDevice> driver;
-    std::mutex adaptersMutex;
+    std::mutex mutex;
     std::unordered_map<std::type_index, std::unique_ptr<IInterfaceAdapter>> adapters;
 };
 
@@ -52,9 +52,8 @@ bool Device::open(const Parameters& config)
         return false;
     }
 
-    m_pimpl->adapters.clear();
-    m_pimpl->driver.reset();
-    m_pimpl->isValid = false;
+    std::unique_lock<std::mutex> lock(m_pimpl->mutex);
+    closeWithoutLock();
 
     m_pimpl->driver = m_pimpl->context.createDevice(config);
     m_pimpl->isValid = (m_pimpl->driver != nullptr);
@@ -68,10 +67,21 @@ bool Device::close()
         return true;
     }
 
+    std::unique_lock<std::mutex> lock(m_pimpl->mutex);
+    return closeWithoutLock();
+}
+
+std::unique_lock<std::mutex> Device::lockImpl() const
+{
+    return std::unique_lock<std::mutex>(m_pimpl->mutex);
+}
+
+bool Device::closeWithoutLock()
+{
     bool result = true;
+    m_pimpl->adapters.clear();
     if (m_pimpl->driver)
     {
-        m_pimpl->adapters.clear();
         result = m_pimpl->driver->close();
     }
 
@@ -82,33 +92,33 @@ bool Device::close()
 
 bool Device::isValid() const
 {
-    return m_pimpl && m_pimpl->isValid;
+    if (!m_pimpl)
+    {
+        return false;
+    }
+    std::unique_lock<std::mutex> lock(m_pimpl->mutex);
+    return m_pimpl->isValid;
 }
 
-IDevice* Device::getImplementation()
+IDevice* Device::getImplementationWithoutLock()
 {
-    return m_pimpl ? m_pimpl->driver.get() : nullptr;
+    return m_pimpl->driver.get();
 }
 
-void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
+void* Device::viewAdaptedInterfaceWithoutLock(const std::type_info& interfaceType)
 {
-    if (!m_pimpl || !m_pimpl->driver)
+    if (!m_pimpl->driver)
     {
         return nullptr;
     }
 
     const std::type_index key(interfaceType);
+    const auto existing = m_pimpl->adapters.find(key);
+    if (existing != m_pimpl->adapters.end())
     {
-        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
-        const auto existing = m_pimpl->adapters.find(key);
-        if (existing != m_pimpl->adapters.end())
-        {
-            return existing->second->getInterface();
-        }
+        return existing->second->getInterface();
     }
 
-    // Plugin callbacks can query devices too. Never hold the cache mutex while
-    // entering the runtime or constructing an adapter.
     auto adapter = m_pimpl->context.createInterfaceAdapter(*m_pimpl->driver, interfaceType);
     if (!adapter)
     {
@@ -121,15 +131,7 @@ void* Device::viewAdaptedInterface(const std::type_info& interfaceType)
         return nullptr;
     }
 
-    {
-        std::lock_guard<std::mutex> lock(m_pimpl->adaptersMutex);
-        const auto [entry, inserted] = m_pimpl->adapters.try_emplace(key, std::move(adapter));
-        if (!inserted)
-        {
-            adaptedInterface = entry->second->getInterface();
-        }
-    }
-    // If another query won the race, destroy the unused adapter outside the lock.
+    m_pimpl->adapters.emplace(key, std::move(adapter));
     return adaptedInterface;
 }
 
