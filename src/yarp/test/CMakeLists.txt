@@ -84,3 +84,16 @@ add_test(NAME BatteryAdaptersTest COMMAND BatteryAdaptersTest)
 set_tests_properties(BatteryAdaptersTest PROPERTIES
     ENVIRONMENT_MODIFICATION
         "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>")
+
+add_executable(YarpDeviceFromDinrailTest YarpDeviceFromDinrailTest.cpp)
+target_include_directories(YarpDeviceFromDinrailTest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../yarp-devices/dr_battery_fake)
+target_link_libraries(YarpDeviceFromDinrailTest PRIVATE
+    dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_dependencies(YarpDeviceFromDinrailTest
+    dinrail-device-dr_battery_fake
+    dr_battery_fake)
+add_test(NAME YarpDeviceFromDinrailTest COMMAND YarpDeviceFromDinrailTest)
+set_tests_properties(YarpDeviceFromDinrailTest PROPERTIES
+    ENVIRONMENT_MODIFICATION
+        "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>;YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")

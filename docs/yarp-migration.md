@@ -243,3 +243,58 @@ You can check which interop plugins are available (and therefore which ecosystem
 To enumerate native devices and devices reported by interop plugins, use
 `dinrail dev --list`.
 
+## From `dinrail::Device` to `yarp::dev::PolyDriver`
+
+`dinrail::YarpDeviceFromDinrail` is a `yarp::dev::DeviceDriver` template that
+owns a native `dinrail::Device` and exposes an explicit list of YARP interface
+adapters. For example, the `dr_battery_fake` YARP wrapper is defined as:
+
+```cpp
+#include <dinrail/BatteryAdapters.h>
+#include <dinrail/YarpDeviceFromDinrail.h>
+
+using DrBatteryFakeYarp =
+    dinrail::YarpDeviceFromDinrail<
+        dinrail::InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>;
+```
+
+The wrapper can then be registered as a YARP plugin with the supplied CMake
+helper:
+
+```cmake
+dinrail_add_yarp_device(dr_battery_fake DrBatteryFakeYarp DrBatteryFakeYarp.h)
+```
+
+Once installed, the native dinrail device can be opened through
+`yarp::dev::PolyDriver` under the same name:
+
+```cpp
+#include <yarp/dev/IBattery.h>
+#include <yarp/dev/PolyDriver.h>
+#include <yarp/os/Property.h>
+
+yarp::os::Property config;
+config.put("device", "dr_battery_fake");
+
+yarp::dev::PolyDriver driver(config);
+yarp::dev::IBattery* battery = nullptr;
+driver.view(battery);
+```
+
+The wrapper converts the YARP configuration to `dinrail::Parameters` and sets
+`dinrail_device_type` to `dinrail`, ensuring that only the native device plugin
+is considered and avoiding recursive interop fallback. It then opens the device
+and binds every selected adapter to an interface returned by
+`dinrail::Device::view()`. Opening fails if the native device cannot be opened or
+if any selected adapter source is unavailable.
+
+Adapters are selected explicitly: interfaces not listed in the wrapper type are
+not exposed through YARP. The selected adapters must be default constructible,
+concrete, and provide each target interface only once; these constraints are
+checked at compile time.
+
+The wrapper unbinds its adapters before closing the native device. When using
+the concrete wrapper directly, `device()` returns the owned `dinrail::Device`,
+which can be used to access native-only interfaces such as simulation controls.
+The wrapper links the adapter library but does not link the native device
+implementation; the native device remains a separate runtime plugin.

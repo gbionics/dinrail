@@ -28,3 +28,6 @@ add_subdirectory(shared)
 add_subdirectory(dr_controlboard_nwc_yarp)
 add_subdirectory(dr_controlboard_nws_yarp)
 add_subdirectory(dr_controlboard_remapper)
+
+include(${CMAKE_CURRENT_SOURCE_DIR}/DinrailAddYarpDevice.cmake)
+add_subdirectory(dr_battery_fake)
