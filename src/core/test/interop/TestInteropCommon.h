@@ -7,13 +7,16 @@
 #include "IFooTest.h"
 
 #include <dinrail/IDevice.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/Parameters.h>
 
+#include <chrono>
 #include <memory>
 #include <set>
 #include <string>
+#include <thread>
 #include <typeinfo>
 #include <utility>
 #include <vector>
@@ -36,6 +39,22 @@ public:
 
 private:
     std::string m_tag;
+};
+
+class FooAdapter final : public InterfaceAdapterBase<IAdaptedFooTest, IFooTest>
+{
+public:
+    explicit FooAdapter(IFooTest& source)
+        : InterfaceAdapterBase(source)
+    {
+        // Widen the cache-miss window for the concurrent first-query test.
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    }
+
+    std::string adaptedTag() const override
+    {
+        return "adapted:" + source().tag();
+    }
 };
 
 // Device that exposes IFooTest only through IInterfaceView (not as a direct

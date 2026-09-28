@@ -5,6 +5,7 @@
 #define DINRAIL_IINTEROPPLUGIN_H
 
 #include <dinrail/IDevice.h>
+#include <dinrail/InterfaceAdapterRegistry.h>
 #include <dinrail/Parameters.h>
 #include <dinrail/PluginUtils.h>
 
@@ -21,7 +22,8 @@ namespace dinrail
  * When a native dinrail device plugin cannot be opened, the available interop
  * plugins are asked, in alphabetical order, to open the device. A runtime
  * context creates at most one instance of each interop plugin and reuses it for
- * device creation and discovery. Calls to an instance are serialized.
+ * device creation and discovery. Calls to interop plugins in a context are
+ * serialized; callbacks may synchronously query devices in the same context.
  */
 class IInteropPlugin
 {
@@ -38,6 +40,15 @@ public:
      * @return Opened device instance on success, nullptr otherwise.
      */
     virtual std::unique_ptr<dinrail::IDevice> createDevice(const Parameters& config) = 0;
+
+    /** Register this plugin's interface adapter factories.
+     *
+     * The runtime calls this once while building its shared adapter registry.
+     * Factories should be registered with InterfaceAdapterRegistry::add().
+     */
+    virtual void registerInterfaceAdapters(InterfaceAdapterRegistry& /*registry*/)
+    {
+    }
 
     /**
      * @brief List the devices this interop plugin can open.

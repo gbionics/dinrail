@@ -6,6 +6,7 @@
 #include <dinrail/IDevice.h>
 #include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
+#include <dinrail/IInterfaceAdapter.h>
 #include <dinrail/IInterfaceView.h>
 #include <dinrail/IInteropPlugin.h>
 #include <dinrail/IJointFault.h>
@@ -21,6 +22,8 @@ namespace dinrail
 IDevice::~IDevice() = default;
 
 IInteropPlugin::~IInteropPlugin() = default;
+
+IInterfaceAdapter::~IInterfaceAdapter() = default;
 
 IInterfaceView::~IInterfaceView() = default;
 

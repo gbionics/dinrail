@@ -11,6 +11,7 @@
 #include <dinrail/RuntimeContext.h>
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <typeinfo>
 
@@ -75,12 +76,21 @@ public:
      * @tparam T Interface type to query.
      * @param x Output pointer receiving the requested interface on success.
      * @return true if the interface is available, false otherwise.
+     * Concurrent queries and lifecycle operations are serialized. Moving or
+     * destroying the handle must not overlap queries, and closing the device
+     * must not overlap use of a previously returned interface.
      */
     template <class T> bool view(T*& x)
     {
         x = nullptr;
 
-        IDevice* impl = getImplementation();
+        if (!m_pimpl)
+        {
+            return false;
+        }
+        auto lock = lockImpl();
+
+        IDevice* impl = getImplementationWithoutLock();
         if (!impl)
         {
             return false;
@@ -106,6 +116,15 @@ public:
             }
         }
 
+        // Finally ask runtime-loaded interop plugins whether they can bridge
+        // an interface exposed by this device to the requested interface.
+        void* adapted = viewAdaptedInterfaceWithoutLock(typeid(T));
+        if (adapted != nullptr)
+        {
+            x = static_cast<T*>(adapted);
+            return true;
+        }
+
         return false;
     }
 
@@ -113,9 +132,17 @@ private:
     struct Impl;
     std::unique_ptr<Impl> m_pimpl;
 
-    // Internal method to retrieve the raw device implementation pointer,
-    // used in the view() method for dynamic casting.
-    IDevice* getImplementation();
+    // view() is defined while Impl is incomplete, so it cannot access the mutex directly.
+    // Keep this helper private to view(); other methods lock the mutex directly.
+    std::unique_lock<std::mutex> lockImpl() const;
+
+    bool closeWithoutLock();
+
+    // Retrieve the raw device implementation for dynamic casting.
+    IDevice* getImplementationWithoutLock();
+
+    // Resolve and retain an interop-provided interface adapter.
+    void* viewAdaptedInterfaceWithoutLock(const std::type_info& interfaceType);
 };
 
 } // namespace dinrail

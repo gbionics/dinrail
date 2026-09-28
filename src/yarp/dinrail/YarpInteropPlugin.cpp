@@ -3,6 +3,7 @@
 
 #include <dinrail/YarpInteropPlugin.h>
 
+#include <dinrail/BatteryAdapters.h>
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpPropertyConverter.h>
 
@@ -111,6 +112,16 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
     }
 
     return std::make_unique<DinrailDeviceFromYarp>(std::move(yarpDriver));
+}
+
+void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)
+{
+    registry.add<dinrail::IBattery,
+                 yarp::dev::IBattery,
+                 InterfaceAdapter<dinrail::IBattery, yarp::dev::IBattery>>();
+    registry.add<yarp::dev::IBattery,
+                 dinrail::IBattery,
+                 InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>();
 }
 
 std::vector<DeviceInfo> YarpInteropPlugin::listDevices() const
