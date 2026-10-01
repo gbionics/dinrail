@@ -53,6 +53,7 @@ TEST_CASE("YarpDeviceFromDinrail can reopen its native device")
     REQUIRE(wrapper.close());
 }
 
+#ifdef DINRAIL_HAS_YARP_BATTERY_WRAPPER
 TEST_CASE("A YarpDeviceFromDinrail wrapper loads as an installed YARP plugin")
 {
     yarp::os::Property config;
@@ -68,3 +69,4 @@ TEST_CASE("A YarpDeviceFromDinrail wrapper loads as an installed YARP plugin")
     REQUIRE_FALSE(driver.view(unsupported));
     REQUIRE(driver.close());
 }
+#endif

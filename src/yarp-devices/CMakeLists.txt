@@ -9,7 +9,7 @@ project(dinrail-yarp-devices
 
 if(PROJECT_IS_TOP_LEVEL)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/DinrailCMakeCommon.cmake)
-    find_package(dinrail REQUIRED)
+    find_package(dinrail REQUIRED COMPONENTS yarp)
 endif()
 
 find_package(YARP REQUIRED COMPONENTS os dev)
