@@ -13,12 +13,24 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Pixi
         uses: prefix-dev/setup-pixi@v0
+
+      - name: Restore compiler cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pixi.lock', 'examples/pixi.lock') }}-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('pixi.lock', 'examples/pixi.lock') }}-
+            ccache-${{ runner.os }}-${{ runner.arch }}-
 
       - name: Check clang-format consistency
         if: matrix.os == 'ubuntu-latest'
@@ -29,3 +41,7 @@ jobs:
 
       - name: Build examples as standalone project
         run: pixi run --manifest-path examples/pixi.toml build
+
+      - name: Show compiler cache statistics
+        if: always()
+        run: pixi run ccache --show-stats
