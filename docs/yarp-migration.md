@@ -284,17 +284,3 @@ driver.view(battery);
 The wrapper opens the corresponding native dinrail device and presents the
 adapters selected in its type as YARP interfaces. If the native device or a
 required interface is unavailable, opening fails.
-
-## Joypad interface adapters
-
-`<dinrail/YarpJoypadAdapters.h>` provides bidirectional adapters between
-`dinrail::IJoypadControl` and `yarp::dev::IJoypadController`. The YARP interop
-plugin registers them automatically, so `dinrail::Device::view()` can retrieve
-one interface from a device implementing the other. Axis, button and hat counts
-and values are forwarded, including errors reported by the source.
-
-The interfaces cover different operations. When adapting a YARP joypad to
-dinrail, `reconnect()` returns `false` and `getLastEvent()` returns `true` with
-`JoypadDeviceEvent::NoEvent`, as YARP does not provide those device operations.
-When adapting a dinrail joypad to YARP, stick, trackball and touch operations
-return `false`. YARP event-driven input is also unsupported.
