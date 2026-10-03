@@ -284,36 +284,3 @@ driver.view(battery);
 The wrapper opens the corresponding native dinrail device and presents the
 adapters selected in its type as YARP interfaces. If the native device or a
 required interface is unavailable, opening fails.
-
-## Controlboard interface adapters
-
-`<dinrail/YarpControlBoardAdapters.h>` provides bidirectional adapters for
-`IAxisInfo`, `IEncoders`, `IJointFault`, `IMotor` and `IMotorEncoders`. The YARP
-interop plugin registers them automatically, so `dinrail::Device::view()` can
-retrieve the corresponding dinrail interface from a YARP device, or a YARP
-interface from a native dinrail device.
-
-When adapting a YARP device to `dinrail::IEncoders`, the registry prefers
-`yarp::dev::IEncodersTimed`. Devices exposing only `yarp::dev::IEncoders` can
-still provide measurements, but timed reads return `false`.
-
-With YARP support enabled, the native `dr_controlboard_fake` is also installed
-as a YARP plugin under the same name:
-
-```cpp
-yarp::os::Property config;
-config.put("device", "dr_controlboard_fake");
-config.put("number_of_joints", 3);
-yarp::dev::PolyDriver driver(config);
-yarp::dev::IEncodersTimed* encoders = nullptr;
-driver.view(encoders);
-```
-
-The wrapper selects axis information, timed encoders, joint faults, motor
-properties, motor encoders and `IPreciselyTimed`. It also exposes
-`dinrail::IImpedanceAllSetPointsControl` through a same-interface forwarder.
-This is a subset of the full YARP controlboard interface set. Encoder
-calibration/reset/set operations and the motor encoder counts-per-revolution
-setter return `false`, because these operations are absent from dinrail's
-measurement interfaces. Native simulation interfaces are available through
-`device().view()` when using the concrete `FakeMotionControlYarp` wrapper.
