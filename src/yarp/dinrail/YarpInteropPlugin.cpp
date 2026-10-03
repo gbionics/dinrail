@@ -5,6 +5,7 @@
 
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
+#include <dinrail/YarpJoypadAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
 
@@ -117,6 +118,12 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
 
 void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)
 {
+    registry.add<dinrail::IJoypadControl,
+                 yarp::dev::IJoypadController,
+                 InterfaceAdapter<dinrail::IJoypadControl, yarp::dev::IJoypadController>>();
+    registry.add<yarp::dev::IJoypadController,
+                 dinrail::IJoypadControl,
+                 InterfaceAdapter<yarp::dev::IJoypadController, dinrail::IJoypadControl>>();
     registry.add<dinrail::IPreciselyTimed,
                  yarp::dev::IPreciselyTimed,
                  InterfaceAdapter<dinrail::IPreciselyTimed, yarp::dev::IPreciselyTimed>>();
