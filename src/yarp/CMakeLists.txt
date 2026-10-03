@@ -20,6 +20,8 @@ find_package(YARP REQUIRED COMPONENTS os dev)
 add_library(dinrail-yarp-conversions
     dinrail/YarpBatteryAdapters.cpp
     dinrail/YarpBatteryAdapters.h
+    dinrail/YarpControlBoardAdapters.cpp
+    dinrail/YarpControlBoardAdapters.h
     dinrail/YarpDeviceFromDinrail.h
     dinrail/YarpPreciselyTimedAdapters.cpp
     dinrail/YarpPreciselyTimedAdapters.h
@@ -79,6 +81,7 @@ install(TARGETS dinrail-interop-yarp)
 # Install the public headers (the plugin headers are intentionally not installed)
 install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpBatteryAdapters.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpControlBoardAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpDeviceFromDinrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPreciselyTimedAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
