@@ -21,6 +21,8 @@ add_library(dinrail-yarp-conversions
     dinrail/YarpBatteryAdapters.cpp
     dinrail/YarpBatteryAdapters.h
     dinrail/YarpDeviceFromDinrail.h
+    dinrail/YarpPreciselyTimedAdapters.cpp
+    dinrail/YarpPreciselyTimedAdapters.h
     dinrail/YarpPropertyConverter.cpp
     dinrail/YarpPropertyConverter.h
     dinrail/YarpStampConverter.cpp
@@ -78,6 +80,7 @@ install(TARGETS dinrail-interop-yarp)
 install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpBatteryAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpDeviceFromDinrail.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPreciselyTimedAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStampConverter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStatusConverter.h

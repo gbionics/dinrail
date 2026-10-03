@@ -104,3 +104,8 @@ if(NOT PROJECT_IS_TOP_LEVEL)
         ENVIRONMENT_MODIFICATION
             "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_battery_fake>;YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")
 endif()
+
+add_executable(YarpPreciselyTimedAdaptersTest YarpPreciselyTimedAdaptersTest.cpp)
+target_link_libraries(YarpPreciselyTimedAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_test(NAME YarpPreciselyTimedAdaptersTest COMMAND YarpPreciselyTimedAdaptersTest)
