@@ -4,7 +4,7 @@
 #ifndef DINRAIL_DRBATTERYFAKEYARP_H
 #define DINRAIL_DRBATTERYFAKEYARP_H
 
-#include <dinrail/BatteryAdapters.h>
+#include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpDeviceFromDinrail.h>
 
 using DrBatteryFakeYarp = dinrail::YarpDeviceFromDinrail<
