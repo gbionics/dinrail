@@ -97,7 +97,7 @@ void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& regi
 }
 ```
 
-The specializations in `BatteryAdapters.h` convert operation results between
+The specializations in `YarpBatteryAdapters.h` convert operation results between
 `dinrail::Status` and YARP's return values, and convert battery status values.
 With the YARP interop plugin available on the plugin search path, a native
 battery can expose the YARP interface through the ordinary device handle:

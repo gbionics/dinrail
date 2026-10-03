@@ -3,8 +3,8 @@
 
 #include <dinrail/YarpInteropPlugin.h>
 
-#include <dinrail/BatteryAdapters.h>
 #include <dinrail/DinrailDeviceFromYarp.h>
+#include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
 
 #include <sharedlibpp/SharedLibraryClassApi.h>

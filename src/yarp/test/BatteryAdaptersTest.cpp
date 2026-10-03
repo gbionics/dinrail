@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include <catch2/catch_test_macros.hpp>
-#include <dinrail/BatteryAdapters.h>
 #include <dinrail/Device.h>
+#include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpInteropPlugin.h>
 
 namespace

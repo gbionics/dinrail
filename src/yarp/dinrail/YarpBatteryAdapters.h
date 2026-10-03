@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Generative Bionics S.R.L.
 // SPDX-License-Identifier: BSD-3-Clause
 
-#ifndef DINRAIL_DINRAILBATTERYINTERFACEADAPTERS_H
-#define DINRAIL_DINRAILBATTERYINTERFACEADAPTERS_H
+#ifndef DINRAIL_YARPBATTERYADAPTERS_H
+#define DINRAIL_YARPBATTERYADAPTERS_H
 
 #include <dinrail/IBattery.h>
 #include <dinrail/InterfaceAdapter.h>

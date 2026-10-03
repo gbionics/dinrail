@@ -250,7 +250,7 @@ owns a native `dinrail::Device` and exposes an explicit list of YARP interface
 adapters. For example, the `dr_battery_fake` YARP wrapper is defined as:
 
 ```cpp
-#include <dinrail/BatteryAdapters.h>
+#include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpDeviceFromDinrail.h>
 
 using DrBatteryFakeYarp =
