@@ -25,7 +25,19 @@ extra-args = [
     "-DCMAKE_CXX_SCAN_FOR_MODULES:BOOL=OFF",
 ]
 
+[package.build.config.env]
+CMAKE_C_COMPILER_LAUNCHER = "ccache"
+CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
+
+# Package builds run in an isolated environment.
+[package.build.target.unix.config.env]
+CCACHE_BASEDIR = "$RECIPE_DIR"
+
+[package.build.target.win.config.env]
+CCACHE_BASEDIR = "%RECIPE_DIR%"
+
 [package.build-dependencies]
+ccache = "*"
 cmake = "*"
 ninja = "*"
 pkg-config = "*"
@@ -37,12 +49,17 @@ cli11 = "*"
 spdlog = "*"
 libyarp = "*"
 
+[activation.env]
+CMAKE_C_COMPILER_LAUNCHER = "ccache"
+CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 
 [target.win.activation.env]
 CMAKE_INSTALL_PREFIX = "%CONDA_PREFIX%\\Library"
+CCACHE_BASEDIR = "%PIXI_PROJECT_ROOT%"
 
 [target.unix.activation.env]
 CMAKE_INSTALL_PREFIX = "$CONDA_PREFIX"
+CCACHE_BASEDIR = "$PIXI_PROJECT_ROOT"
 
 [tasks]
 configure = { cmd = [
@@ -80,6 +97,7 @@ format-check = { cmd = "clang-format --dry-run --Werror **/*.h **/*.cpp" }
 [dependencies]
 
 # Dev tools
+ccache = "*"
 cmake = "*"
 cxx-compiler = "*"
 ninja = "*"

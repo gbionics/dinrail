@@ -44,6 +44,9 @@
 .build
 build
 
+# Compiler cache
+.ccache/
+
 # pixi environments
 .pixi/*
 !.pixi/config.toml
