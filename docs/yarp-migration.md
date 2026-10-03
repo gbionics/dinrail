@@ -235,14 +235,6 @@ YARP interop plugin.
 device and the native `yarp::dev::*` interfaces of the wrapped YARP device, so
 existing YARP interface code keeps working after the migration.
 
-The YARP interop plugin automatically adapts `dinrail::IPreciselyTimed` and
-`yarp::dev::IPreciselyTimed` in both directions when the requested interface is
-not directly available. The adapters declared in
-`<dinrail/YarpPreciselyTimedAdapters.h>` forward `getLastInputStamp()` using the
-existing stamp converters, preserving the sequence number and converting between
-nanoseconds and floating-point seconds. YARP timestamps can lose nanosecond
-precision at large absolute times.
-
 ### Requirements
 
 You can check which interop plugins are available (and therefore which ecosystems
