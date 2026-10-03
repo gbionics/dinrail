@@ -109,3 +109,8 @@ add_executable(YarpPreciselyTimedAdaptersTest YarpPreciselyTimedAdaptersTest.cpp
 target_link_libraries(YarpPreciselyTimedAdaptersTest PRIVATE
     dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
 add_test(NAME YarpPreciselyTimedAdaptersTest COMMAND YarpPreciselyTimedAdaptersTest)
+
+add_executable(YarpJoypadAdaptersTest YarpJoypadAdaptersTest.cpp)
+target_link_libraries(YarpJoypadAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_test(NAME YarpJoypadAdaptersTest COMMAND YarpJoypadAdaptersTest)
