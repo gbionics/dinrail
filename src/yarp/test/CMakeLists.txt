@@ -132,3 +132,8 @@ if(NOT PROJECT_IS_TOP_LEVEL)
     set_property(TEST YarpMultipleAnalogSensorsAdaptersTest APPEND PROPERTY
         ENVIRONMENT_MODIFICATION "YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")
 endif()
+
+add_executable(YarpJoypadAdaptersTest YarpJoypadAdaptersTest.cpp)
+target_link_libraries(YarpJoypadAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_test(NAME YarpJoypadAdaptersTest COMMAND YarpJoypadAdaptersTest)

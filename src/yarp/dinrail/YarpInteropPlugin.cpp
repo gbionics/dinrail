@@ -6,6 +6,7 @@
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
+#include <dinrail/YarpJoypadAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
 
@@ -202,6 +203,12 @@ void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& regi
     registry.add<dinrail::ISkinPatches,
                  yarp::dev::ISkinPatches,
                  InterfaceAdapter<dinrail::ISkinPatches, yarp::dev::ISkinPatches>>();
+    registry.add<dinrail::IJoypadControl,
+                 yarp::dev::IJoypadController,
+                 InterfaceAdapter<dinrail::IJoypadControl, yarp::dev::IJoypadController>>();
+    registry.add<yarp::dev::IJoypadController,
+                 dinrail::IJoypadControl,
+                 InterfaceAdapter<yarp::dev::IJoypadController, dinrail::IJoypadControl>>();
     registry.add<dinrail::IPreciselyTimed,
                  yarp::dev::IPreciselyTimed,
                  InterfaceAdapter<dinrail::IPreciselyTimed, yarp::dev::IPreciselyTimed>>();
