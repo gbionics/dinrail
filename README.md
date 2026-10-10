@@ -66,6 +66,7 @@ to see the available devices.
 
 See the following links for more documentation on the dinrail project:
 * [dinrail::Parameters](docs/parameters.md) — how to use the hierarchical key-value configuration container
+* [dinrail::ParametersFinder](docs/parameters-finder.md) — how to find configuration file containing parameters in the filesystem
 * [Plugin types / internals](docs/internals.md) — overview of plugin internals
 * [Convention and Guidelines](docs/conventions-and-guidelines.md) - convention and guidelines for dinrail code
 
