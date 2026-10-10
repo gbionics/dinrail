@@ -5,8 +5,8 @@
 
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
-#include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
 #include <dinrail/YarpJoypadAdapters.h>
+#include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
 
