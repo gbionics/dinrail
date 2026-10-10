@@ -66,7 +66,9 @@ to see the available devices.
 
 See the following links for more documentation on the dinrail project:
 * [dinrail::Parameters](docs/parameters.md) — how to use the hierarchical key-value configuration container
-* [Plugin types / internals](docs/internals.md) — overview of plugin internals
+* [Plugin discovery](docs/plugin-discovery.md) — how device and interop plugins are discovered at runtime
+* [Interoperability plugins](docs/interop-plugins.md) — how to write plugins for foreign device systems
+* [YARP migration guide](docs/yarp-migration.md) — guides for migrating parameters, logging, devices, and sensor adapters
 * [Convention and Guidelines](docs/conventions-and-guidelines.md) - convention and guidelines for dinrail code
 
 ## Examples
@@ -77,7 +79,20 @@ Examples documentation (including Pixi commands) is available at:
 
 ## Built-in device documentation
 
+These `dinrail` devices are part of the `dinrail-devices` package.
+
+* [dr_battery_fake README](src/devices/fake/dr_battery_fake/README.md) — parameters accepted by the `dr_battery_fake` plugin
 * [dr_controlboard_fake README](src/devices/fake/dr_controlboard_fake/README.md) — parameters accepted by the `dr_controlboard_fake` plugin
+* [dr_multiplenalogsensors_fake README](src/devices/fake/dr_multiplenalogsensors_fake/README.md) — parameters accepted by the `dr_multiplenalogsensors_fake` plugin
+
+### YARP network devices
+
+All bult-in devices in `dinrail-devices` are also available as `yarp` devices with the same names and parameters, inside the `dinrail-yarp-devices` package.
+
+Furthermore, in `dinrail-yarp-devices` the following YARP-only devices are available:
+
+* [dr_controlboard_nwc_yarp README](src/yarp-devices/dr_controlboard_nwc_yarp/README.md) — parameters for connecting to a remote control board over the YARP network
+* [dr_controlboard_nws_yarp README](src/yarp-devices/dr_controlboard_nws_yarp/README.md) — parameters for exposing an attached control board over the YARP network
 
 ## Versioning policy
 
