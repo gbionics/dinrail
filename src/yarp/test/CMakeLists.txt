@@ -110,6 +110,29 @@ target_link_libraries(YarpPreciselyTimedAdaptersTest PRIVATE
     dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
 add_test(NAME YarpPreciselyTimedAdaptersTest COMMAND YarpPreciselyTimedAdaptersTest)
 
+if(NOT TARGET dinrail-device-dr_controlboard_fake)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../devices/fake/dr_controlboard_fake
+                     ${CMAKE_CURRENT_BINARY_DIR}/dr_controlboard_fake)
+endif()
+
+add_executable(YarpControlBoardAdaptersTest YarpControlBoardAdaptersTest.cpp)
+target_include_directories(YarpControlBoardAdaptersTest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../yarp-devices/dr_controlboard_fake)
+target_link_libraries(YarpControlBoardAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_dependencies(YarpControlBoardAdaptersTest dinrail-device-dr_controlboard_fake)
+add_test(NAME YarpControlBoardAdaptersTest COMMAND YarpControlBoardAdaptersTest)
+set_tests_properties(YarpControlBoardAdaptersTest PROPERTIES
+    ENVIRONMENT_MODIFICATION
+        "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_controlboard_fake>")
+if(NOT PROJECT_IS_TOP_LEVEL)
+    add_dependencies(YarpControlBoardAdaptersTest dr_controlboard_fake)
+    target_compile_definitions(YarpControlBoardAdaptersTest PRIVATE
+        DINRAIL_HAS_YARP_CONTROLBOARD_WRAPPER)
+    set_property(TEST YarpControlBoardAdaptersTest APPEND PROPERTY
+        ENVIRONMENT_MODIFICATION "YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")
+endif()
+
 if(NOT TARGET dinrail-device-dr_multiplenalogsensors_fake)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../devices/fake/dr_multiplenalogsensors_fake
                      ${CMAKE_CURRENT_BINARY_DIR}/dr_multiplenalogsensors_fake)

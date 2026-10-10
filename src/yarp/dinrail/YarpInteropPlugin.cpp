@@ -5,6 +5,7 @@
 
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
+#include <dinrail/YarpControlBoardAdapters.h>
 #include <dinrail/YarpJoypadAdapters.h>
 #include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
@@ -119,6 +120,42 @@ std::unique_ptr<dinrail::IDevice> YarpInteropPlugin::createDevice(const Paramete
 
 void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& registry)
 {
+    registry.add<yarp::dev::IAxisInfo,
+                 dinrail::IAxisInfo,
+                 InterfaceAdapter<yarp::dev::IAxisInfo, dinrail::IAxisInfo>>();
+    registry.add<yarp::dev::IEncodersTimed,
+                 dinrail::IEncoders,
+                 InterfaceAdapter<yarp::dev::IEncodersTimed, dinrail::IEncoders>>();
+    registry.add<yarp::dev::IEncoders,
+                 dinrail::IEncoders,
+                 InterfaceAdapter<yarp::dev::IEncoders, dinrail::IEncoders>>();
+    registry.add<yarp::dev::IJointFault,
+                 dinrail::IJointFault,
+                 InterfaceAdapter<yarp::dev::IJointFault, dinrail::IJointFault>>();
+    registry.add<yarp::dev::IMotor,
+                 dinrail::IMotor,
+                 InterfaceAdapter<yarp::dev::IMotor, dinrail::IMotor>>();
+    registry.add<yarp::dev::IMotorEncoders,
+                 dinrail::IMotorEncoders,
+                 InterfaceAdapter<yarp::dev::IMotorEncoders, dinrail::IMotorEncoders>>();
+    registry.add<dinrail::IAxisInfo,
+                 yarp::dev::IAxisInfo,
+                 InterfaceAdapter<dinrail::IAxisInfo, yarp::dev::IAxisInfo>>();
+    registry.add<dinrail::IEncoders,
+                 yarp::dev::IEncodersTimed,
+                 InterfaceAdapter<dinrail::IEncoders, yarp::dev::IEncodersTimed>>();
+    registry.add<dinrail::IEncoders,
+                 yarp::dev::IEncoders,
+                 InterfaceAdapter<dinrail::IEncoders, yarp::dev::IEncoders>>();
+    registry.add<dinrail::IJointFault,
+                 yarp::dev::IJointFault,
+                 InterfaceAdapter<dinrail::IJointFault, yarp::dev::IJointFault>>();
+    registry.add<dinrail::IMotor,
+                 yarp::dev::IMotor,
+                 InterfaceAdapter<dinrail::IMotor, yarp::dev::IMotor>>();
+    registry.add<dinrail::IMotorEncoders,
+                 yarp::dev::IMotorEncoders,
+                 InterfaceAdapter<dinrail::IMotorEncoders, yarp::dev::IMotorEncoders>>();
     registry.add<yarp::dev::IThreeAxisGyroscopes,
                  dinrail::IThreeAxisGyroscopes,
                  InterfaceAdapter<yarp::dev::IThreeAxisGyroscopes, dinrail::IThreeAxisGyroscopes>>();
