@@ -6,6 +6,8 @@
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
 #include <dinrail/YarpControlBoardAdapters.h>
+#include <dinrail/YarpJoypadAdapters.h>
+#include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
 
@@ -154,6 +156,96 @@ void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& regi
     registry.add<dinrail::IMotorEncoders,
                  yarp::dev::IMotorEncoders,
                  InterfaceAdapter<dinrail::IMotorEncoders, yarp::dev::IMotorEncoders>>();
+    registry.add<yarp::dev::IThreeAxisGyroscopes,
+                 dinrail::IThreeAxisGyroscopes,
+                 InterfaceAdapter<yarp::dev::IThreeAxisGyroscopes, dinrail::IThreeAxisGyroscopes>>();
+    registry.add<dinrail::IThreeAxisGyroscopes,
+                 yarp::dev::IThreeAxisGyroscopes,
+                 InterfaceAdapter<dinrail::IThreeAxisGyroscopes, yarp::dev::IThreeAxisGyroscopes>>();
+    registry.add<yarp::dev::IThreeAxisLinearAccelerometers,
+                 dinrail::IThreeAxisLinearAccelerometers,
+                 InterfaceAdapter<yarp::dev::IThreeAxisLinearAccelerometers,
+                                  dinrail::IThreeAxisLinearAccelerometers>>();
+    registry.add<dinrail::IThreeAxisLinearAccelerometers,
+                 yarp::dev::IThreeAxisLinearAccelerometers,
+                 InterfaceAdapter<dinrail::IThreeAxisLinearAccelerometers,
+                                  yarp::dev::IThreeAxisLinearAccelerometers>>();
+    registry.add<yarp::dev::IThreeAxisAngularAccelerometers,
+                 dinrail::IThreeAxisAngularAccelerometers,
+                 InterfaceAdapter<yarp::dev::IThreeAxisAngularAccelerometers,
+                                  dinrail::IThreeAxisAngularAccelerometers>>();
+    registry.add<dinrail::IThreeAxisAngularAccelerometers,
+                 yarp::dev::IThreeAxisAngularAccelerometers,
+                 InterfaceAdapter<dinrail::IThreeAxisAngularAccelerometers,
+                                  yarp::dev::IThreeAxisAngularAccelerometers>>();
+    registry.add<
+        yarp::dev::IThreeAxisMagnetometers,
+        dinrail::IThreeAxisMagnetometers,
+        InterfaceAdapter<yarp::dev::IThreeAxisMagnetometers, dinrail::IThreeAxisMagnetometers>>();
+    registry.add<
+        dinrail::IThreeAxisMagnetometers,
+        yarp::dev::IThreeAxisMagnetometers,
+        InterfaceAdapter<dinrail::IThreeAxisMagnetometers, yarp::dev::IThreeAxisMagnetometers>>();
+    registry.add<yarp::dev::IPositionSensors,
+                 dinrail::IPositionSensors,
+                 InterfaceAdapter<yarp::dev::IPositionSensors, dinrail::IPositionSensors>>();
+    registry.add<dinrail::IPositionSensors,
+                 yarp::dev::IPositionSensors,
+                 InterfaceAdapter<dinrail::IPositionSensors, yarp::dev::IPositionSensors>>();
+    registry
+        .add<yarp::dev::ILinearVelocitySensors,
+             dinrail::ILinearVelocitySensors,
+             InterfaceAdapter<yarp::dev::ILinearVelocitySensors, dinrail::ILinearVelocitySensors>>();
+    registry
+        .add<dinrail::ILinearVelocitySensors,
+             yarp::dev::ILinearVelocitySensors,
+             InterfaceAdapter<dinrail::ILinearVelocitySensors, yarp::dev::ILinearVelocitySensors>>();
+    registry.add<yarp::dev::IOrientationSensors,
+                 dinrail::IOrientationSensors,
+                 InterfaceAdapter<yarp::dev::IOrientationSensors, dinrail::IOrientationSensors>>();
+    registry.add<dinrail::IOrientationSensors,
+                 yarp::dev::IOrientationSensors,
+                 InterfaceAdapter<dinrail::IOrientationSensors, yarp::dev::IOrientationSensors>>();
+    registry.add<yarp::dev::ITemperatureSensors,
+                 dinrail::ITemperatureSensors,
+                 InterfaceAdapter<yarp::dev::ITemperatureSensors, dinrail::ITemperatureSensors>>();
+    registry.add<dinrail::ITemperatureSensors,
+                 yarp::dev::ITemperatureSensors,
+                 InterfaceAdapter<dinrail::ITemperatureSensors, yarp::dev::ITemperatureSensors>>();
+    registry.add<yarp::dev::ISixAxisForceTorqueSensors,
+                 dinrail::ISixAxisForceTorqueSensors,
+                 InterfaceAdapter<yarp::dev::ISixAxisForceTorqueSensors,
+                                  dinrail::ISixAxisForceTorqueSensors>>();
+    registry.add<dinrail::ISixAxisForceTorqueSensors,
+                 yarp::dev::ISixAxisForceTorqueSensors,
+                 InterfaceAdapter<dinrail::ISixAxisForceTorqueSensors,
+                                  yarp::dev::ISixAxisForceTorqueSensors>>();
+    registry
+        .add<yarp::dev::IContactLoadCellArrays,
+             dinrail::IContactLoadCellArrays,
+             InterfaceAdapter<yarp::dev::IContactLoadCellArrays, dinrail::IContactLoadCellArrays>>();
+    registry
+        .add<dinrail::IContactLoadCellArrays,
+             yarp::dev::IContactLoadCellArrays,
+             InterfaceAdapter<dinrail::IContactLoadCellArrays, yarp::dev::IContactLoadCellArrays>>();
+    registry.add<yarp::dev::IEncoderArrays,
+                 dinrail::IEncoderArrays,
+                 InterfaceAdapter<yarp::dev::IEncoderArrays, dinrail::IEncoderArrays>>();
+    registry.add<dinrail::IEncoderArrays,
+                 yarp::dev::IEncoderArrays,
+                 InterfaceAdapter<dinrail::IEncoderArrays, yarp::dev::IEncoderArrays>>();
+    registry.add<yarp::dev::ISkinPatches,
+                 dinrail::ISkinPatches,
+                 InterfaceAdapter<yarp::dev::ISkinPatches, dinrail::ISkinPatches>>();
+    registry.add<dinrail::ISkinPatches,
+                 yarp::dev::ISkinPatches,
+                 InterfaceAdapter<dinrail::ISkinPatches, yarp::dev::ISkinPatches>>();
+    registry.add<dinrail::IJoypadControl,
+                 yarp::dev::IJoypadController,
+                 InterfaceAdapter<dinrail::IJoypadControl, yarp::dev::IJoypadController>>();
+    registry.add<yarp::dev::IJoypadController,
+                 dinrail::IJoypadControl,
+                 InterfaceAdapter<yarp::dev::IJoypadController, dinrail::IJoypadControl>>();
     registry.add<dinrail::IPreciselyTimed,
                  yarp::dev::IPreciselyTimed,
                  InterfaceAdapter<dinrail::IPreciselyTimed, yarp::dev::IPreciselyTimed>>();

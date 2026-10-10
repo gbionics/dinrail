@@ -284,3 +284,31 @@ driver.view(battery);
 The wrapper opens the corresponding native dinrail device and presents the
 adapters selected in its type as YARP interfaces. If the native device or a
 required interface is unavailable, opening fails.
+
+## Multiple Analog Sensors interface adapters
+
+`<dinrail/YarpMultipleAnalogSensorsAdapters.h>` provides bidirectional adapters
+for all twelve read-only sensor interfaces in
+`<dinrail/MultipleAnalogSensorsInterfaces.h>`. The YARP interop plugin registers
+them automatically. Measurements, timestamps, statuses, sensor names and frame
+names are forwarded, along with array sizes and both temperature-measurement
+overloads. The status enums have matching numeric values.
+
+When adapting YARP measurements to dinrail, resizable output vectors are resized
+to fit the returned measurements. Fixed-size output buffers must have the
+matching size; otherwise the read returns `false`.
+
+With YARP support enabled, the native `dr_multiplenalogsensors_fake` is also
+installed as a YARP plugin under the same name (preserving the existing spelling):
+
+```cpp
+yarp::os::Property config;
+config.put("device", "dr_multiplenalogsensors_fake");
+yarp::dev::PolyDriver driver(config);
+yarp::dev::IThreeAxisGyroscopes* gyroscopes = nullptr;
+driver.view(gyroscopes);
+```
+
+The wrapper exposes all twelve YARP sensor interfaces. Native simulation
+interfaces remain available through `device().view()` when using the concrete
+`DrMultipleAnalogSensorsFakeYarp` wrapper.

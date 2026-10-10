@@ -132,3 +132,31 @@ if(NOT PROJECT_IS_TOP_LEVEL)
     set_property(TEST YarpControlBoardAdaptersTest APPEND PROPERTY
         ENVIRONMENT_MODIFICATION "YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")
 endif()
+
+if(NOT TARGET dinrail-device-dr_multiplenalogsensors_fake)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../devices/fake/dr_multiplenalogsensors_fake
+                     ${CMAKE_CURRENT_BINARY_DIR}/dr_multiplenalogsensors_fake)
+endif()
+
+add_executable(YarpMultipleAnalogSensorsAdaptersTest YarpMultipleAnalogSensorsAdaptersTest.cpp)
+target_include_directories(YarpMultipleAnalogSensorsAdaptersTest PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../yarp-devices/dr_multiplenalogsensors_fake)
+target_link_libraries(YarpMultipleAnalogSensorsAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_dependencies(YarpMultipleAnalogSensorsAdaptersTest dinrail-device-dr_multiplenalogsensors_fake)
+add_test(NAME YarpMultipleAnalogSensorsAdaptersTest COMMAND YarpMultipleAnalogSensorsAdaptersTest)
+set_tests_properties(YarpMultipleAnalogSensorsAdaptersTest PROPERTIES
+    ENVIRONMENT_MODIFICATION
+        "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_multiplenalogsensors_fake>")
+if(NOT PROJECT_IS_TOP_LEVEL)
+    add_dependencies(YarpMultipleAnalogSensorsAdaptersTest dr_multiplenalogsensors_fake)
+    target_compile_definitions(YarpMultipleAnalogSensorsAdaptersTest PRIVATE
+        DINRAIL_HAS_YARP_MAS_WRAPPER)
+    set_property(TEST YarpMultipleAnalogSensorsAdaptersTest APPEND PROPERTY
+        ENVIRONMENT_MODIFICATION "YARP_DATA_DIRS=path_list_prepend:${CMAKE_INSTALL_PREFIX}/share/yarp")
+endif()
+
+add_executable(YarpJoypadAdaptersTest YarpJoypadAdaptersTest.cpp)
+target_link_libraries(YarpJoypadAdaptersTest PRIVATE
+    dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
+add_test(NAME YarpJoypadAdaptersTest COMMAND YarpJoypadAdaptersTest)
