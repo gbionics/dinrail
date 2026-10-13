@@ -72,3 +72,7 @@ To keep compile-time compatibility with different dinrail versions, downstream c
 // Use the compatibility implementation for dinrail 0.1.x.
 #endif
 ~~~
+
+## Adapters
+
+All adapters should avoid any dynamic memory allocation in the hot path, moving any kind of buffer that we can as attribute in the adapter class, so it is is created only once/allocated only once.

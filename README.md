@@ -79,15 +79,16 @@ Examples documentation (including Pixi commands) is available at:
 
 ## Built-in device documentation
 
-These `dinrail` devices are part of the `dinrail-devices` package.
+Parameters and behavior of the built-in `dinrail` devices are documented below.
 
 * [dr_battery_fake README](src/devices/fake/dr_battery_fake/README.md) — parameters accepted by the `dr_battery_fake` plugin
+* [dr_camera_fake README](src/camera-devices/fake/dr_camera_fake/README.md) — parameters accepted by the `dr_camera_fake` plugin
 * [dr_controlboard_fake README](src/devices/fake/dr_controlboard_fake/README.md) — parameters accepted by the `dr_controlboard_fake` plugin
 * [dr_multiplenalogsensors_fake README](src/devices/fake/dr_multiplenalogsensors_fake/README.md) — parameters accepted by the `dr_multiplenalogsensors_fake` plugin
 
 ### YARP network devices
 
-All bult-in devices in `dinrail-devices` are also available as `yarp` devices with the same names and parameters, inside the `dinrail-yarp-devices` package.
+All built-in devices listed above are also available as `yarp` devices with the same names and parameters, inside the `dinrail-yarp-devices` package.
 
 Furthermore, in `dinrail-yarp-devices` the following YARP-only devices are available:
 

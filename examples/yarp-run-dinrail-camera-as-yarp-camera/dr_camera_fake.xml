@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPDX-FileCopyrightText: Generative Bionics S.R.L.
+  SPDX-License-Identifier: BSD-3-Clause
+-->
+<!DOCTYPE robot PUBLIC "-//YARP//DTD yarprobotinterface 3.1//EN" "http://www.yarp.it/DTD/yarprobotinterfaceV3.1.dtd">
+<robot name="dinrail-camera-example" build="0" portprefix="/dinrail-camera"
+       xmlns:xi="http://www.w3.org/2001/XInclude">
+    <devices>
+        <device name="camera" type="dr_camera_fake">
+            <param name="mode">framegrabber</param>
+            <param name="test_pattern">true</param>
+            <param name="width">640</param>
+            <param name="height">480</param>
+        </device>
+
+        <device name="camera_nws" type="frameGrabber_nws_yarp">
+            <param name="name">/dinrail-camera</param>
+            <param name="capabilities">COLOR</param>
+            <param name="period">0.033</param>
+
+            <action phase="startup" level="5" type="attach">
+                <param name="device">camera</param>
+            </action>
+            <action phase="shutdown" level="5" type="detach"/>
+        </device>
+    </devices>
+</robot>

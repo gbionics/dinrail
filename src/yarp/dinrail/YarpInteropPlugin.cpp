@@ -5,6 +5,7 @@
 
 #include <dinrail/DinrailDeviceFromYarp.h>
 #include <dinrail/YarpBatteryAdapters.h>
+#include <dinrail/YarpCameraAdapters.h>
 #include <dinrail/YarpControlBoardAdapters.h>
 #include <dinrail/YarpJoypadAdapters.h>
 #include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
@@ -258,6 +259,43 @@ void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& regi
     registry.add<yarp::dev::IBattery,
                  dinrail::IBattery,
                  InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>();
+    registry
+        .add<dinrail::IFrameGrabberControls,
+             yarp::dev::IFrameGrabberControls,
+             InterfaceAdapter<dinrail::IFrameGrabberControls, yarp::dev::IFrameGrabberControls>>();
+    registry
+        .add<yarp::dev::IFrameGrabberControls,
+             dinrail::IFrameGrabberControls,
+             InterfaceAdapter<yarp::dev::IFrameGrabberControls, dinrail::IFrameGrabberControls>>();
+    registry
+        .add<dinrail::IFrameGrabberImageRaw,
+             yarp::dev::IFrameGrabberImageRaw,
+             InterfaceAdapter<dinrail::IFrameGrabberImageRaw, yarp::dev::IFrameGrabberImageRaw>>();
+    registry
+        .add<yarp::dev::IFrameGrabberImageRaw,
+             dinrail::IFrameGrabberImageRaw,
+             InterfaceAdapter<yarp::dev::IFrameGrabberImageRaw, dinrail::IFrameGrabberImageRaw>>();
+    registry.add<dinrail::IRgbVisualParams,
+                 yarp::dev::IRgbVisualParams,
+                 InterfaceAdapter<dinrail::IRgbVisualParams, yarp::dev::IRgbVisualParams>>();
+    registry.add<yarp::dev::IRgbVisualParams,
+                 dinrail::IRgbVisualParams,
+                 InterfaceAdapter<yarp::dev::IRgbVisualParams, dinrail::IRgbVisualParams>>();
+    registry.add<dinrail::IDepthVisualParams,
+                 yarp::dev::IDepthVisualParams,
+                 InterfaceAdapter<dinrail::IDepthVisualParams, yarp::dev::IDepthVisualParams>>();
+    registry.add<yarp::dev::IDepthVisualParams,
+                 dinrail::IDepthVisualParams,
+                 InterfaceAdapter<yarp::dev::IDepthVisualParams, dinrail::IDepthVisualParams>>();
+    registry.add<dinrail::IRGBDSensor,
+                 yarp::dev::IRGBDSensor,
+                 InterfaceAdapter<dinrail::IRGBDSensor, yarp::dev::IRGBDSensor>>();
+    registry.add<yarp::dev::IRGBDSensor,
+                 dinrail::IRGBDSensor,
+                 InterfaceAdapter<yarp::dev::IRGBDSensor, dinrail::IRGBDSensor>>();
+    registry.add<yarp::dev::IFrameGrabberImage,
+                 dinrail::IRGBDSensor,
+                 InterfaceAdapter<yarp::dev::IFrameGrabberImage, dinrail::IRGBDSensor>>();
 }
 
 std::vector<DeviceInfo> YarpInteropPlugin::listDevices() const
