@@ -14,6 +14,9 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/DinrailCMakeCommon.cmake)
 
 ### Global Options
 
+# Optional camera support. OpenCV is confined to dinrail-camera and its consumers.
+option(DINRAIL_USES_OPENCV "Build camera interfaces and devices" OFF)
+
 # Optional YARP support
 option(DINRAIL_USES_YARP "Enable drop-in support for YARP device drivers" OFF)
 

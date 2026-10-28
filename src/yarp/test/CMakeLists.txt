@@ -160,3 +160,18 @@ add_executable(YarpJoypadAdaptersTest YarpJoypadAdaptersTest.cpp)
 target_link_libraries(YarpJoypadAdaptersTest PRIVATE
     dinrail-interop-yarp dinrail::dinrail-yarp-conversions Catch2::Catch2WithMain)
 add_test(NAME YarpJoypadAdaptersTest COMMAND YarpJoypadAdaptersTest)
+
+if(NOT TARGET dinrail-device-dr_camera_fake)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../camera-devices/fake/dr_camera_fake
+                     ${CMAKE_CURRENT_BINARY_DIR}/dr_camera_fake)
+endif()
+
+add_executable(YarpCameraAdaptersTest YarpCameraAdaptersTest.cpp
+    ../../camera-devices/fake/dr_camera_fake/DrCameraFake.cpp)
+target_link_libraries(YarpCameraAdaptersTest PRIVATE
+    dinrail::dinrail-yarp-conversions opencv_imgproc Catch2::Catch2WithMain)
+add_dependencies(YarpCameraAdaptersTest dinrail-device-dr_camera_fake dinrail-interop-yarp)
+add_test(NAME YarpCameraAdaptersTest COMMAND YarpCameraAdaptersTest)
+set_tests_properties(YarpCameraAdaptersTest PROPERTIES
+    ENVIRONMENT_MODIFICATION
+        "DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-interop-yarp>;DINRAIL_PLUGIN_PATH=path_list_prepend:$<TARGET_FILE_DIR:dinrail-device-dr_camera_fake>")

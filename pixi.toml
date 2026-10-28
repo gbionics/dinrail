@@ -44,6 +44,7 @@ pkg-config = "*"
 ycm-cmake-modules = "*"
 
 [package.host-dependencies]
+libopencv = "*"
 libsharedlibpp = "*"
 cli11 = "*"
 spdlog = "*"
@@ -122,3 +123,4 @@ libbipedal-locomotion-framework = "*"
 libidyntree = "*"
 catch2 = "*"
 eigen = "*"
+libopencv = ">=5.0.0,<6"

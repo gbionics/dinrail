@@ -1,11 +1,12 @@
 # Examples
 
-This directory contains standalone example projects that consume `dinrail` as an external package.
+This directory contains standalone example projects that consume `dinrail` as an external package, and command-line examples for running its devices.
 
 ## Available examples
 
 - `implement-your-first-device/`: implement a minimal device plugin and load it at runtime with `dinrail::Device`.
 - `yarp-conversions/`: minimal conversion round-trip between `dinrail::Parameters` and `yarp::os::Property`.
+- [yarp-run-dinrail-camera-as-yarp-camera/](yarp-run-dinrail-camera-as-yarp-camera/README.md): run `dr_camera_fake` and YARP's `fakeFrameGrabber` with `yarprobotinterface` and view their RGB streams with `yarpview`.
 
 ## Run examples with Pixi
 

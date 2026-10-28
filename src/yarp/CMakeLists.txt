@@ -12,12 +12,15 @@ project(dinrail-yarp
 if(PROJECT_IS_TOP_LEVEL)
     include(${CMAKE_CURRENT_SOURCE_DIR}/../../cmake/DinrailCMakeCommon.cmake)
     find_package(dinrail REQUIRED)
+    find_package(dinrail-camera REQUIRED)
 endif()
 
 find_package(YARP REQUIRED COMPONENTS os dev)
 
 # Conversion support between dinrail and YARP value types.
 add_library(dinrail-yarp-conversions
+    dinrail/YarpCameraAdapters.cpp
+    dinrail/YarpCameraAdapters.h
     dinrail/YarpBatteryAdapters.cpp
     dinrail/YarpBatteryAdapters.h
     dinrail/YarpControlBoardAdapters.cpp
@@ -41,6 +44,7 @@ add_library(dinrail::dinrail-yarp-conversions ALIAS dinrail-yarp-conversions)
 
 target_link_libraries(dinrail-yarp-conversions    PUBLIC
         dinrail::dinrail
+        dinrail::dinrail-camera
         YARP::YARP_dev
         YARP::YARP_os
 )
@@ -84,6 +88,7 @@ install(TARGETS dinrail-interop-yarp)
 
 # Install the public headers (the plugin headers are intentionally not installed)
 install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpCameraAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpBatteryAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpControlBoardAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpMultipleAnalogSensorsAdapters.h
@@ -105,4 +110,4 @@ install_basic_package_files(${PROJECT_NAME}
                             NAMESPACE dinrail-yarp::
                             CONFIG_TEMPLATE ${CMAKE_CURRENT_SOURCE_DIR}/dinrail-yarp-config.cmake.in
                             LOWERCASE_FILENAMES
-                            DEPENDENCIES "YARP COMPONENTS os dev")
+                            DEPENDENCIES dinrail-camera "YARP COMPONENTS os dev")

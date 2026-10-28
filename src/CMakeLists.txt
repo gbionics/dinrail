@@ -4,6 +4,11 @@
 # Add the main dinrail core library.
 add_subdirectory(core)
 
+if(DINRAIL_USES_OPENCV OR DINRAIL_USES_YARP)
+    add_subdirectory(camera)
+    add_subdirectory(camera-devices)
+endif()
+
 # Add device plugins.
 add_subdirectory(devices)
 
