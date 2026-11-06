@@ -10,6 +10,7 @@
 #include <dinrail/bindings/core/MethodWrapper.h>
 
 #include <cstddef>
+#include <optional>
 #include <tuple>
 #include <vector>
 
@@ -64,12 +65,17 @@ void CreateIImpedanceAllSetPointsControl(pybind11::module_& module)
                                            OutVector(stiffness),
                                            OutVector(damping));
                 }
-                return std::make_tuple(ok,
-                                       std::move(pos),
-                                       std::move(vel),
-                                       std::move(torque),
-                                       std::move(stiffness),
-                                       std::move(damping));
+                // As for the methods using wrapMethod, outputs are None if the call failed.
+                using Output = std::optional<std::vector<double>>;
+                const auto output = [ok](std::vector<double>& values) {
+                    return ok ? Output(std::move(values)) : Output(std::nullopt);
+                };
+                return std::make_tuple(output(pos),
+                                       output(vel),
+                                       output(torque),
+                                       output(stiffness),
+                                       output(damping),
+                                       ok);
             },
             py::arg("numberOfJoints"),
             "Get the set points of all the controlled joints, that are numberOfJoints.");

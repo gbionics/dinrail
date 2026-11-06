@@ -11,6 +11,7 @@
 #include <pybind11/stl.h>
 
 #include <cstddef>
+#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -23,6 +24,28 @@ namespace detail
 {
 
 namespace py = ::pybind11;
+
+// An output is None in Python if the call failed, to not expose partially filled outputs.
+template <class T> std::tuple<std::optional<T>> collectOutput(T& value, bool success)
+{
+    return std::tuple<std::optional<T>>(success ? std::optional<T>(std::move(value))
+                                                : std::nullopt);
+}
+
+inline bool succeeded(bool result)
+{
+    return result;
+}
+
+inline bool succeeded(const ::dinrail::Status& result)
+{
+    return result.ok();
+}
+
+template <class Result> bool succeeded(const Result&)
+{
+    return true;
+}
 
 // How a C++ parameter is mapped to Python. This primary template handles inputs passed by value
 // or by const reference.
@@ -65,9 +88,9 @@ struct Param<
         return storage;
     }
 
-    static std::tuple<Plain> collect(Storage& storage)
+    static auto collect(Storage& storage, bool success)
     {
-        return std::tuple<Plain>(std::move(storage));
+        return collectOutput(storage, success);
     }
 };
 
@@ -89,9 +112,9 @@ template <class P> struct Param<P, std::enable_if_t<std::is_pointer_v<P>>>
         return &storage;
     }
 
-    static std::tuple<Plain> collect(Storage& storage)
+    static auto collect(Storage& storage, bool success)
     {
-        return std::tuple<Plain>(std::move(storage));
+        return collectOutput(storage, success);
     }
 };
 
@@ -112,9 +135,9 @@ template <> struct Param<::dinrail::VectorProxy<double>::Ref>
         return ::dinrail::VectorProxy<double>::Ref(storage);
     }
 
-    static std::tuple<Storage> collect(Storage& storage)
+    static auto collect(Storage& storage, bool success)
     {
-        return std::tuple<Storage>(std::move(storage));
+        return collectOutput(storage, success);
     }
 };
 
@@ -178,6 +201,7 @@ struct FunctionTraits<R (I::*)(Ps...) const> : FunctionTraits<R (I::*)(Ps...)>
 {
 };
 
+// The result of the call is the last element, after the outputs.
 template <class Result, class Outputs> auto assembleResult(Result&& result, Outputs&& outputs)
 {
     if constexpr (std::tuple_size_v<std::decay_t<Outputs>> == 0)
@@ -185,8 +209,8 @@ template <class Result, class Outputs> auto assembleResult(Result&& result, Outp
         return std::forward<Result>(result);
     } else
     {
-        return std::tuple_cat(std::make_tuple(std::forward<Result>(result)),
-                              std::forward<Outputs>(outputs));
+        return std::tuple_cat(std::forward<Outputs>(outputs),
+                              std::make_tuple(std::forward<Result>(result)));
     }
 }
 
@@ -252,20 +276,21 @@ private:
         if constexpr (std::is_void_v<Result>)
         {
             (self.*function)(Param<Ps>::pass(std::get<Ns>(storage))...);
-            return assembleVoidResult(std::tuple_cat(collect<Ps>(std::get<Ns>(storage))...));
+            return assembleVoidResult(std::tuple_cat(collect<Ps>(std::get<Ns>(storage), true)...));
         } else
         {
             Result result = (self.*function)(Param<Ps>::pass(std::get<Ns>(storage))...);
+            const bool success = succeeded(result);
             return assembleResult(std::move(result),
-                                  std::tuple_cat(collect<Ps>(std::get<Ns>(storage))...));
+                                  std::tuple_cat(collect<Ps>(std::get<Ns>(storage), success)...));
         }
     }
 
-    template <class P, class Storage> static auto collect(Storage& storage)
+    template <class P, class Storage> static auto collect(Storage& storage, bool success)
     {
         if constexpr (Param<P>::isOutput)
         {
-            return Param<P>::collect(storage);
+            return Param<P>::collect(storage, success);
         } else
         {
             return std::tuple<>{};
@@ -302,11 +327,15 @@ auto makeWrapper(F function, SizeFunction outputSize, std::tuple<Ps...>*)
  * Parameters are mapped following the conventions of the dinrail interfaces:
  * - parameters passed by value or by const reference are inputs of the Python method;
  * - non-const reference parameters, pointer parameters and `VectorProxy<double>::Ref` parameters
- *   are outputs, and they are returned by the Python method after the value returned by the C++
- *   method: `bool getEncoder(int j, double* value)` becomes `getEncoder(j) -> (bool, float)`;
+ *   are outputs. They are returned by the Python method before the value returned by the C++
+ *   method, so that the latter can be easily discarded:
+ *   `bool getEncoder(int j, double* value)` becomes `getEncoder(j) -> (float | None, bool)`;
+ * - an output is `None` if the C++ method returned `false` or a non-ok `Status`, so that
+ *   partially filled outputs are never exposed;
  * - input vectors (`VectorProxy<const T>::Ref`) are Python lists.
  *
- * If the C++ method has no output parameters, its return value is returned as it is.
+ * If the C++ method has no output parameters, its return value is returned as it is. If it returns
+ * `void`, only the outputs are returned (a single value if there is just one output).
  *
  * @param method Pointer to the method to wrap. Overloaded methods require a `static_cast`.
  * @param outputSize Callable `std::size_t(Interface&, const std::tuple<Inputs...>&)`, that returns

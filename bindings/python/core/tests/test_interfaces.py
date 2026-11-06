@@ -61,10 +61,11 @@ def sensors():
 def test_axis_info(controlboard):
     axis_info = controlboard.view(dinrail.IAxisInfo)
 
-    assert axis_info.getAxes() == (True, 3)
-    assert axis_info.getAxisName(1) == (True, "elbow")
-    assert axis_info.getJointType(1) == (True, dinrail.JointType.PRISMATIC)
-    assert axis_info.getAxisName(10)[0] is False
+    assert axis_info.getAxes() == (3, True)
+    assert axis_info.getAxisName(1) == ("elbow", True)
+    assert axis_info.getJointType(1) == (dinrail.JointType.PRISMATIC, True)
+    # The outputs of a failed call are None
+    assert axis_info.getAxisName(10) == (None, False)
 
 
 @requires_controlboard
@@ -72,28 +73,28 @@ def test_encoders(controlboard):
     encoders = controlboard.view(dinrail.IEncoders)
     simulation = controlboard.view(dinrail.IEncodersSimulation)
 
-    assert encoders.getAxes() == (True, 3)
+    assert encoders.getAxes() == (3, True)
 
     assert simulation.setEncoders([1.0, 2.0, 3.0])
-    assert encoders.getEncoders() == (True, [1.0, 2.0, 3.0])
+    assert encoders.getEncoders() == ([1.0, 2.0, 3.0], True)
     assert simulation.setEncoder(1, 5.0)
-    assert encoders.getEncoder(1) == (True, 5.0)
-    assert encoders.getEncoder(10)[0] is False
+    assert encoders.getEncoder(1) == (5.0, True)
+    assert encoders.getEncoder(10) == (None, False)
 
     assert simulation.setEncodersTimed([1.0, 2.0, 3.0], [0.1, 0.2, 0.3])
-    assert encoders.getEncodersTimed() == (True, [1.0, 2.0, 3.0], [0.1, 0.2, 0.3])
+    assert encoders.getEncodersTimed() == ([1.0, 2.0, 3.0], [0.1, 0.2, 0.3], True)
     assert simulation.setEncoderTimed(0, 4.0, 0.5)
-    assert encoders.getEncoderTimed(0) == (True, 4.0, 0.5)
+    assert encoders.getEncoderTimed(0) == (4.0, 0.5, True)
 
     assert simulation.setEncoderSpeeds([1.0, 1.5, 2.0])
-    assert encoders.getEncoderSpeeds() == (True, [1.0, 1.5, 2.0])
+    assert encoders.getEncoderSpeeds() == ([1.0, 1.5, 2.0], True)
     assert simulation.setEncoderSpeed(2, 3.0)
-    assert encoders.getEncoderSpeed(2) == (True, 3.0)
+    assert encoders.getEncoderSpeed(2) == (3.0, True)
 
     assert simulation.setEncoderAccelerations([4.0, 5.0, 6.0])
-    assert encoders.getEncoderAccelerations() == (True, [4.0, 5.0, 6.0])
+    assert encoders.getEncoderAccelerations() == ([4.0, 5.0, 6.0], True)
     assert simulation.setEncoderAcceleration(0, 7.0)
-    assert encoders.getEncoderAcceleration(0) == (True, 7.0)
+    assert encoders.getEncoderAcceleration(0) == (7.0, True)
 
     # The vector size is checked by the device.
     assert not simulation.setEncoders([1.0])
@@ -104,19 +105,19 @@ def test_motor(controlboard):
     motor = controlboard.view(dinrail.IMotor)
     simulation = controlboard.view(dinrail.IMotorSimulation)
 
-    assert motor.getNumberOfMotors() == (True, 3)
+    assert motor.getNumberOfMotors() == (3, True)
 
     assert simulation.setTemperatures([20.0, 30.0, 40.0])
-    assert motor.getTemperatures() == (True, [20.0, 30.0, 40.0])
+    assert motor.getTemperatures() == ([20.0, 30.0, 40.0], True)
     assert simulation.setTemperature(1, 35.0)
-    assert motor.getTemperature(1) == (True, 35.0)
+    assert motor.getTemperature(1) == (35.0, True)
 
-    assert motor.getTemperatureLimit(0) == (True, 100.0)
+    assert motor.getTemperatureLimit(0) == (100.0, True)
     assert motor.setTemperatureLimit(0, 80.0)
-    assert motor.getTemperatureLimit(0) == (True, 80.0)
+    assert motor.getTemperatureLimit(0) == (80.0, True)
 
     assert motor.setGearboxRatio(2, 50.0)
-    assert motor.getGearboxRatio(2) == (True, 50.0)
+    assert motor.getGearboxRatio(2) == (50.0, True)
 
 
 @requires_controlboard
@@ -124,28 +125,28 @@ def test_motor_encoders(controlboard):
     encoders = controlboard.view(dinrail.IMotorEncoders)
     simulation = controlboard.view(dinrail.IMotorEncodersSimulation)
 
-    assert encoders.getNumberOfMotorEncoders() == (True, 3)
-    assert encoders.getMotorEncoderCountsPerRevolution(0)[0] is True
+    assert encoders.getNumberOfMotorEncoders() == (3, True)
+    assert encoders.getMotorEncoderCountsPerRevolution(0)[1] is True
 
     assert simulation.setMotorEncoders([1.0, 2.0, 3.0])
-    assert encoders.getMotorEncoders() == (True, [1.0, 2.0, 3.0])
+    assert encoders.getMotorEncoders() == ([1.0, 2.0, 3.0], True)
     assert simulation.setMotorEncoder(1, 9.0)
-    assert encoders.getMotorEncoder(1) == (True, 9.0)
+    assert encoders.getMotorEncoder(1) == (9.0, True)
 
     assert simulation.setMotorEncodersTimed([1.0, 2.0, 3.0], [0.1, 0.2, 0.3])
-    assert encoders.getMotorEncodersTimed() == (True, [1.0, 2.0, 3.0], [0.1, 0.2, 0.3])
+    assert encoders.getMotorEncodersTimed() == ([1.0, 2.0, 3.0], [0.1, 0.2, 0.3], True)
     assert simulation.setMotorEncoderTimed(0, 4.0, 0.5)
-    assert encoders.getMotorEncoderTimed(0) == (True, 4.0, 0.5)
+    assert encoders.getMotorEncoderTimed(0) == (4.0, 0.5, True)
 
     assert simulation.setMotorEncoderSpeeds([1.0, 2.0, 3.0])
-    assert encoders.getMotorEncoderSpeeds() == (True, [1.0, 2.0, 3.0])
+    assert encoders.getMotorEncoderSpeeds() == ([1.0, 2.0, 3.0], True)
     assert simulation.setMotorEncoderSpeed(0, 8.0)
-    assert encoders.getMotorEncoderSpeed(0) == (True, 8.0)
+    assert encoders.getMotorEncoderSpeed(0) == (8.0, True)
 
     assert simulation.setMotorEncoderAccelerations([1.0, 2.0, 3.0])
-    assert encoders.getMotorEncoderAccelerations() == (True, [1.0, 2.0, 3.0])
+    assert encoders.getMotorEncoderAccelerations() == ([1.0, 2.0, 3.0], True)
     assert simulation.setMotorEncoderAcceleration(0, 8.0)
-    assert encoders.getMotorEncoderAcceleration(0) == (True, 8.0)
+    assert encoders.getMotorEncoderAcceleration(0) == (8.0, True)
 
 
 @requires_controlboard
@@ -154,8 +155,9 @@ def test_joint_fault(controlboard):
     simulation = controlboard.view(dinrail.IJointFaultSimulation)
 
     assert simulation.setLastJointFault(1, 5, "overheated")
-    assert fault.getLastJointFault(1) == (True, 5, "overheated")
-    assert fault.getLastJointFault(0) == (True, 0, "")
+    assert fault.getLastJointFault(1) == (5, "overheated", True)
+    assert fault.getLastJointFault(0) == (0, "", True)
+    assert fault.getLastJointFault(10) == (None, None, False)
 
 
 @requires_controlboard
@@ -163,29 +165,30 @@ def test_impedance_all_set_points(controlboard):
     control = controlboard.view(dinrail.IImpedanceAllSetPointsControl)
 
     assert control.setSetPoint(0, 1.0, 2.0, 3.0, 4.0, 5.0)
-    assert control.getSetPoint(0) == (True, 1.0, 2.0, 3.0, 4.0, 5.0)
+    assert control.getSetPoint(0) == (1.0, 2.0, 3.0, 4.0, 5.0, True)
 
     assert control.setSetPoints([1, 2], [1.0, 2.0], [0.1, 0.2], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0])
     assert control.getSetPoints([2, 1]) == (
-        True,
         [2.0, 1.0],
         [0.2, 0.1],
         [4.0, 3.0],
         [6.0, 5.0],
         [8.0, 7.0],
+        True,
     )
 
     assert control.setSetPoints([1.0] * 3, [2.0] * 3, [3.0] * 3, [4.0] * 3, [5.0] * 3)
     assert control.getSetPoints(3) == (
-        True,
         [1.0] * 3,
         [2.0] * 3,
         [3.0] * 3,
         [4.0] * 3,
         [5.0] * 3,
+        True,
     )
 
-    assert control.getSetPoints([7])[0] is False
+    assert control.getSetPoints([7]) == (None, None, None, None, None, False)
+    assert control.getSetPoints(5) == (None, None, None, None, None, False)
 
 
 @requires_controlboard
@@ -206,16 +209,16 @@ def test_three_axis_vector_sensors(sensors):
     simulation = sensors.view(dinrail.IThreeAxisGyroscopesSimulation)
 
     assert gyroscopes.getNrOfThreeAxisGyroscopes() == 2
-    assert gyroscopes.getThreeAxisGyroscopeName(1) == (True, "torso_imu")
-    assert gyroscopes.getThreeAxisGyroscopeFrameName(0)[0] is True
+    assert gyroscopes.getThreeAxisGyroscopeName(1) == ("torso_imu", True)
+    assert gyroscopes.getThreeAxisGyroscopeFrameName(0)[1] is True
     assert gyroscopes.getThreeAxisGyroscopeStatus(0) == dinrail.MAS_status.MAS_OK
 
     assert simulation.setThreeAxisGyroscopeMeasure(0, [1.0, 2.0, 3.0], 1.5)
-    assert gyroscopes.getThreeAxisGyroscopeMeasure(0) == (True, [1.0, 2.0, 3.0], 1.5)
+    assert gyroscopes.getThreeAxisGyroscopeMeasure(0) == ([1.0, 2.0, 3.0], 1.5, True)
     assert simulation.setThreeAxisGyroscopeStatus(0, dinrail.MAS_status.MAS_ERROR)
     assert gyroscopes.getThreeAxisGyroscopeStatus(0) == dinrail.MAS_status.MAS_ERROR
 
-    assert not gyroscopes.getThreeAxisGyroscopeMeasure(5)[0]
+    assert gyroscopes.getThreeAxisGyroscopeMeasure(5) == (None, None, False)
 
 
 @requires_sensors
@@ -239,12 +242,12 @@ def test_sensors_with_vector_measure(sensors, interface, simulation_interface, s
 
     plural_suffix = {"SkinPatch": "SkinPatches"}.get(suffix, suffix + "s")
     assert getattr(sensor, f"getNrOf{plural_suffix}")() == 2
-    assert getattr(sensor, f"get{suffix}Name")(0)[0] is True
+    assert getattr(sensor, f"get{suffix}Name")(0)[1] is True
     assert getattr(sensor, f"get{suffix}Status")(0) == dinrail.MAS_status.MAS_OK
 
     measure = [float(i) for i in range(size)]
     assert getattr(simulation, f"set{suffix}Measure")(1, measure, 2.5)
-    assert getattr(sensor, f"get{suffix}Measure")(1) == (True, measure, 2.5)
+    assert getattr(sensor, f"get{suffix}Measure")(1) == (measure, 2.5, True)
     assert getattr(simulation, f"set{suffix}Status")(1, dinrail.MAS_status.MAS_OVF)
     assert getattr(sensor, f"get{suffix}Status")(1) == dinrail.MAS_status.MAS_OVF
 
@@ -258,15 +261,15 @@ def test_orientation_sensors(sensors):
     simulation = sensors.view(dinrail.IOrientationSensorsSimulation)
 
     assert orientations.getNrOfOrientationSensors() == 2
-    assert orientations.getOrientationSensorName(0)[0] is True
-    assert orientations.getOrientationSensorFrameName(0)[0] is True
+    assert orientations.getOrientationSensorName(0)[1] is True
+    assert orientations.getOrientationSensorFrameName(0)[1] is True
     assert orientations.getOrientationSensorStatus(0) == dinrail.MAS_status.MAS_OK
 
     assert simulation.setOrientationSensorMeasureAsRollPitchYaw(0, [10.0, 20.0, 30.0], 1.0)
     assert orientations.getOrientationSensorMeasureAsRollPitchYaw(0) == (
-        True,
         [10.0, 20.0, 30.0],
         1.0,
+        True,
     )
     assert simulation.setOrientationSensorStatus(0, dinrail.MAS_status.MAS_TIMEOUT)
     assert orientations.getOrientationSensorStatus(0) == dinrail.MAS_status.MAS_TIMEOUT
@@ -278,13 +281,13 @@ def test_temperature_sensors(sensors):
     simulation = sensors.view(dinrail.ITemperatureSensorsSimulation)
 
     assert temperatures.getNrOfTemperatureSensors() == 2
-    assert temperatures.getTemperatureSensorName(0)[0] is True
-    assert temperatures.getTemperatureSensorFrameName(0)[0] is True
+    assert temperatures.getTemperatureSensorName(0)[1] is True
+    assert temperatures.getTemperatureSensorFrameName(0)[1] is True
     assert temperatures.getTemperatureSensorStatus(0) == dinrail.MAS_status.MAS_OK
 
     assert simulation.setTemperatureSensorMeasure(0, 36.5, 2.0)
-    assert temperatures.getTemperatureSensorMeasure(0) == (True, 36.5, 2.0)
-    assert temperatures.getTemperatureSensorMeasureAsVector(0) == (True, [36.5], 2.0)
+    assert temperatures.getTemperatureSensorMeasure(0) == (36.5, 2.0, True)
+    assert temperatures.getTemperatureSensorMeasureAsVector(0) == ([36.5], 2.0, True)
     assert simulation.setTemperatureSensorStatus(0, dinrail.MAS_status.MAS_UNKNOWN)
     assert temperatures.getTemperatureSensorStatus(0) == dinrail.MAS_status.MAS_UNKNOWN
 

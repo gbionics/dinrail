@@ -52,15 +52,15 @@ def test_battery_interfaces():
     assert simulation.setBatteryInfo("Test battery").ok()
     assert simulation.setBatteryCharge(101.0).code() == dinrail.StatusCode.OutOfRange
 
-    status, voltage = battery.getBatteryVoltage()
+    voltage, status = battery.getBatteryVoltage()
     assert status.ok()
     assert voltage == 48.0
 
-    status, battery_status = battery.getBatteryStatus()
+    battery_status, status = battery.getBatteryStatus()
     assert status.ok()
     assert battery_status == dinrail.BatteryStatus.OkInUse
 
-    status, info = battery.getBatteryInfo()
+    info, status = battery.getBatteryInfo()
     assert status.ok()
     assert info == "Test battery"
 
