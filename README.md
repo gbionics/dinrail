@@ -52,6 +52,54 @@ axisInfo->getAxisName(0, name); // name == "shoulder"
 device.close();
 ~~~
 
+### Python bindings
+
+Enabled with `-DDINRAIL_COMPILE_PYTHON_BINDINGS=ON`. Interface classes are passed to `Device.view()`; third-party plugins can register their own interfaces with `dinrail::bindings::core::registerInterface()`.
+
+~~~python
+import dinrail
+
+device = dinrail.Device()
+device.open({"device": "dr_controlboard_fake", "number_of_joints": 3})
+
+encoders = device.view(dinrail.IEncoders)  # None if not implemented
+positions, ok = encoders.getEncoders()  # ([0.0, 0.0, 0.0], True)
+~~~
+
+Output convention: C++ output parameters are returned first, followed by the success flag (`bool` or `Status`). Outputs are `None` if the call failed.
+
+#### Adding interfaces
+
+Interfaces of a plugin are bound in a separate Python module, without modifying dinrail. Use `wrapMethod()` to bind methods following the output convention above, and `registerInterface()` to make the class available to `Device.view()`:
+
+~~~cpp
+#include <dinrail/bindings/core/InterfaceRegistry.h>
+#include <dinrail/bindings/core/MethodWrapper.h>
+
+using namespace dinrail::bindings::core;
+
+PYBIND11_MODULE(my_plugin_bindings, m)
+{
+    pybind11::class_<IMyInterface> iface(m, "IMyInterface");
+    // bool getValue(int index, double* value) -> getValue(index) -> (value, ok)
+    iface.def("getValue", wrapMethod(&IMyInterface::getValue));
+    registerInterface(iface);
+}
+~~~
+
+~~~python
+import dinrail
+import my_plugin_bindings  # registers IMyInterface
+
+iface = device.view(my_plugin_bindings.IMyInterface)
+~~~
+
+Notes:
+* `Device.view()` raises `TypeError` if the interface was never registered (module not imported), and returns `None` if the device does not implement it.
+* Input vectors are Python lists. Methods with output vectors (`VectorProxy<double>::Ref`) need a size function as second argument of `wrapMethod()`, e.g. `constantOutputSize(3)`.
+* A returned interface keeps its `Device` alive, but it is invalidated by `Device.close()`.
+* The module must link `dinrail::dinrail` and be built with the same pybind11 ABI as the dinrail bindings.
+
 ### Basic CLI
 
 To know which devices are available in your install, just run:
