@@ -25,5 +25,9 @@ if(DINRAIL_USES_YARP AND NOT DINRAIL_ENABLE_INTEROP_PLUGINS)
   message(FATAL_ERROR "The DINRAIL_USES_YARP cmake option required the DINRAIL_ENABLE_INTEROP_PLUGINS to be set to ON.")
 endif()
 
+# Optional Python bindings
+option(DINRAIL_COMPILE_PYTHON_BINDINGS "Flag that enables building the Python bindings" OFF)
 
 add_subdirectory(src)
+
+add_subdirectory(bindings)
