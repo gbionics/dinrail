@@ -47,7 +47,7 @@ void CreateDevice(pybind11::module_& module)
                                const py::type& interfaceType) -> py::object {
                 if (!interfaceViewers.contains(interfaceType))
                 {
-                    throw py::type_error(py::str(interfaceType).cast<std::string>()
+                    throw py::type_error(py::str(py::handle(interfaceType)).cast<std::string>()
                                          + " is not a registered dinrail interface. Make sure "
                                            "that the module binding it has been imported.");
                 }
