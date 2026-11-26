@@ -31,8 +31,11 @@ target_sources(dinrail
     ${CMAKE_CURRENT_BINARY_DIR}/include/dinrail/Config.h
     dinrail/Device.cpp
     dinrail/Device.h
+    dinrail/CameraTypes.cpp
+    dinrail/CameraTypes.h
     dinrail/IAxisInfo.h
     dinrail/IBattery.h
+    dinrail/ICameraControls.h
     dinrail/IEncoders.h
     dinrail/IJointFault.h
     dinrail/IMotor.h
@@ -45,6 +48,7 @@ target_sources(dinrail
     dinrail/IInterfaceView.h
     dinrail/IInteropPlugin.h
     dinrail/IPreciselyTimed.h
+    dinrail/IRGBDSensor.h
     dinrail/MultipleAnalogSensorsInterfaces.h
     dinrail/Parameters.cpp
     dinrail/PluginUtils.cpp
