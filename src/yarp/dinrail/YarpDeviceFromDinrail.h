@@ -5,6 +5,7 @@
 #define DINRAIL_YARPDEVICEFROMDINRAIL_H
 
 #include <dinrail/Device.h>
+#include <dinrail/IWrappedDinrailDevice.h>
 #include <dinrail/YarpPropertyConverter.h>
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/os/Property.h>
@@ -44,7 +45,9 @@ constexpr std::size_t targetProviderCount
  * configuration.
  */
 template <class... Adapters>
-class YarpDeviceFromDinrail : public yarp::dev::DeviceDriver, public Adapters...
+class YarpDeviceFromDinrail : public yarp::dev::DeviceDriver,
+                              public IWrappedDinrailDevice,
+                              public Adapters...
 {
     static_assert((!std::is_abstract_v<Adapters> && ...),
                   "YarpDeviceFromDinrail: selected adapter is abstract");
@@ -63,6 +66,10 @@ public:
         return m_device;
     }
     const dinrail::Device& device() const
+    {
+        return m_device;
+    }
+    dinrail::Device& wrappedDinrailDevice() override
     {
         return m_device;
     }

@@ -10,6 +10,7 @@
 #include <dinrail/YarpMultipleAnalogSensorsAdapters.h>
 #include <dinrail/YarpPreciselyTimedAdapters.h>
 #include <dinrail/YarpPropertyConverter.h>
+#include <dinrail/YarpRGBDSensorAdapters.h>
 
 #include <sharedlibpp/SharedLibraryClassApi.h>
 
@@ -258,6 +259,15 @@ void YarpInteropPlugin::registerInterfaceAdapters(InterfaceAdapterRegistry& regi
     registry.add<yarp::dev::IBattery,
                  dinrail::IBattery,
                  InterfaceAdapter<yarp::dev::IBattery, dinrail::IBattery>>();
+    registry.add<dinrail::IRGBDSensor,
+                 yarp::dev::IRGBDSensor,
+                 InterfaceAdapter<dinrail::IRGBDSensor, yarp::dev::IRGBDSensor>>();
+    registry.add<yarp::dev::IRGBDSensor,
+                 dinrail::IRGBDSensor,
+                 InterfaceAdapter<yarp::dev::IRGBDSensor, dinrail::IRGBDSensor>>();
+    registry.add<yarp::dev::IFrameGrabberControls,
+                 dinrail::ICameraControls,
+                 InterfaceAdapter<yarp::dev::IFrameGrabberControls, dinrail::ICameraControls>>();
 }
 
 std::vector<DeviceInfo> YarpInteropPlugin::listDevices() const

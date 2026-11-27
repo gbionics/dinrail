@@ -27,8 +27,12 @@ add_library(dinrail-yarp-conversions
     dinrail/YarpJoypadAdapters.cpp
     dinrail/YarpJoypadAdapters.h
     dinrail/YarpDeviceFromDinrail.h
+    dinrail/IWrappedDinrailDevice.cpp
+    dinrail/IWrappedDinrailDevice.h
     dinrail/YarpPreciselyTimedAdapters.cpp
     dinrail/YarpPreciselyTimedAdapters.h
+    dinrail/YarpRGBDSensorAdapters.cpp
+    dinrail/YarpRGBDSensorAdapters.h
     dinrail/YarpPropertyConverter.cpp
     dinrail/YarpPropertyConverter.h
     dinrail/YarpStampConverter.cpp
@@ -84,6 +88,7 @@ install(TARGETS dinrail-interop-yarp)
 
 # Install the public headers (the plugin headers are intentionally not installed)
 install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/IWrappedDinrailDevice.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpBatteryAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpControlBoardAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpMultipleAnalogSensorsAdapters.h
@@ -91,6 +96,7 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpDeviceFromDinrail.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPreciselyTimedAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpPropertyConverter.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpRGBDSensorAdapters.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStampConverter.h
     ${CMAKE_CURRENT_SOURCE_DIR}/dinrail/YarpStatusConverter.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dinrail)

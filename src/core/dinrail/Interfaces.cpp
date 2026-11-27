@@ -3,6 +3,7 @@
 
 #include <dinrail/IAxisInfo.h>
 #include <dinrail/IBattery.h>
+#include <dinrail/ICameraControls.h>
 #include <dinrail/IDevice.h>
 #include <dinrail/IEncoders.h>
 #include <dinrail/IImpedanceAllSetPointsControl.h>
@@ -14,6 +15,7 @@
 #include <dinrail/IMotor.h>
 #include <dinrail/IMotorEncoders.h>
 #include <dinrail/IPreciselyTimed.h>
+#include <dinrail/IRGBDSensor.h>
 #include <dinrail/MultipleAnalogSensorsInterfaces.h>
 
 namespace dinrail
@@ -56,6 +58,17 @@ IJoypadControl::~IJoypadControl() = default;
 IPreciselyTimed::~IPreciselyTimed() = default;
 
 IPreciselyTimedSimulation::~IPreciselyTimedSimulation() = default;
+
+IRGBDSensor::~IRGBDSensor() = default;
+
+Status IRGBDSensor::getImagesStamp(Stamp& /*stamp*/)
+{
+    return Status(StatusCode::Unimplemented);
+}
+
+IRGBDSensorSimulation::~IRGBDSensorSimulation() = default;
+
+ICameraControls::~ICameraControls() = default;
 
 IThreeAxisGyroscopes::~IThreeAxisGyroscopes() = default;
 IThreeAxisGyroscopesSimulation::~IThreeAxisGyroscopesSimulation() = default;
