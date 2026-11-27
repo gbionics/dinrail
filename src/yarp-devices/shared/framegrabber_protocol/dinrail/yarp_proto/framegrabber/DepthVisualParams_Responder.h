@@ -13,10 +13,10 @@
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IDepthVisualParams.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
-class DepthVisualParams_Responder :
-        public yarp::dev::DeviceResponder
+class DepthVisualParams_Responder : public yarp::dev::DeviceResponder
 {
 private:
     yarp::dev::IDepthVisualParams* iDepthVisual;

@@ -13,10 +13,10 @@
 #include <yarp/dev/IRgbVisualParams.h>
 #include <yarp/os/Port.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
-class RgbVisualParams_Forwarder :
-        public yarp::dev::IRgbVisualParams
+class RgbVisualParams_Forwarder : public yarp::dev::IRgbVisualParams
 {
 protected:
     yarp::os::Port& m_port;
@@ -27,7 +27,8 @@ public:
 
     int getRgbHeight() override;
     int getRgbWidth() override;
-    bool getRgbSupportedConfigurations(yarp::sig::VectorOf<yarp::dev::CameraConfig>& configurations) override;
+    bool getRgbSupportedConfigurations(
+        yarp::sig::VectorOf<yarp::dev::CameraConfig>& configurations) override;
     bool getRgbResolution(int& width, int& height) override;
     bool setRgbResolution(int width, int height) override;
     bool getRgbFOV(double& horizontalFov, double& verticalFov) override;

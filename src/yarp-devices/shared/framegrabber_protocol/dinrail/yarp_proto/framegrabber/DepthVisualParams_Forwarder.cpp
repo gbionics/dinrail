@@ -12,10 +12,8 @@
 
 using dinrail::yarp_proto::framegrabber::DepthVisualParams_Forwarder;
 
-DepthVisualParams_Forwarder::DepthVisualParams_Forwarder(yarp::os::Port& port) :
-        m_port(port)
-{
-};
+DepthVisualParams_Forwarder::DepthVisualParams_Forwarder(yarp::os::Port& port)
+    : m_port(port) {};
 
 int DepthVisualParams_Forwarder::getDepthHeight()
 {
@@ -62,7 +60,8 @@ bool DepthVisualParams_Forwarder::getDepthFOV(double& horizontalFov, double& ver
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         horizontalFov = 0;
         verticalFov = 0;
         return false;
@@ -118,7 +117,8 @@ bool DepthVisualParams_Forwarder::getDepthClipPlanes(double& nearPlane, double& 
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         nearPlane = 0;
         farPlane = 0;
         return false;
@@ -151,7 +151,8 @@ bool DepthVisualParams_Forwarder::getDepthIntrinsicParam(yarp::os::Property& int
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         intrinsic.clear();
         return false;
     }
@@ -168,7 +169,8 @@ bool DepthVisualParams_Forwarder::getDepthMirroring(bool& mirror)
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(VOCAB_MIRROR);
     m_port.write(cmd, response);
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         return false;
     }
     mirror = response.get(3).asBool();

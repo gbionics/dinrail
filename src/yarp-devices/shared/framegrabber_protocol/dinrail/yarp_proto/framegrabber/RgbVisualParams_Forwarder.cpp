@@ -12,10 +12,8 @@
 
 using dinrail::yarp_proto::framegrabber::RgbVisualParams_Forwarder;
 
-RgbVisualParams_Forwarder::RgbVisualParams_Forwarder(yarp::os::Port& port) :
-        m_port(port)
-{
-};
+RgbVisualParams_Forwarder::RgbVisualParams_Forwarder(yarp::os::Port& port)
+    : m_port(port) {};
 
 int RgbVisualParams_Forwarder::getRgbHeight()
 {
@@ -38,7 +36,8 @@ int RgbVisualParams_Forwarder::getRgbWidth()
     m_port.write(cmd, response);
     return response.get(3).asInt32();
 }
-bool RgbVisualParams_Forwarder::getRgbSupportedConfigurations(yarp::sig::VectorOf<yarp::dev::CameraConfig>& configurations)
+bool RgbVisualParams_Forwarder::getRgbSupportedConfigurations(
+    yarp::sig::VectorOf<yarp::dev::CameraConfig>& configurations)
 {
     yarp::os::Bottle cmd;
     yarp::os::Bottle response;
@@ -47,16 +46,19 @@ bool RgbVisualParams_Forwarder::getRgbSupportedConfigurations(yarp::sig::VectorO
     cmd.addVocab32(VOCAB_SUPPORTED_CONF);
     m_port.write(cmd, response);
 
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         configurations.clear();
         return false;
     }
     configurations.resize(response.get(3).asInt32());
-    for (int i = 0; i < response.get(3).asInt32(); i++) {
+    for (int i = 0; i < response.get(3).asInt32(); i++)
+    {
         configurations[i].width = response.get(4 + i * 4).asInt32();
         configurations[i].height = response.get(4 + i * 4 + 1).asInt32();
         configurations[i].framerate = response.get(4 + i * 4 + 2).asFloat64();
-        configurations[i].pixelCoding = static_cast<YarpVocabPixelTypesEnum>(response.get(4 + i * 4 + 3).asVocab32());
+        configurations[i].pixelCoding
+            = static_cast<YarpVocabPixelTypesEnum>(response.get(4 + i * 4 + 3).asVocab32());
     }
     return true;
 }
@@ -70,7 +72,8 @@ bool RgbVisualParams_Forwarder::getRgbResolution(int& width, int& height)
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         width = 0;
         height = 0;
         return false;
@@ -103,7 +106,8 @@ bool RgbVisualParams_Forwarder::getRgbFOV(double& horizontalFov, double& vertica
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         horizontalFov = 0;
         verticalFov = 0;
         return false;
@@ -136,13 +140,15 @@ bool RgbVisualParams_Forwarder::getRgbIntrinsicParam(yarp::os::Property& intrins
     m_port.write(cmd, response);
 
     // Minimal check on response, we suppose the response is always correctly formatted
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         intrinsic.clear();
         return false;
     }
     bool ret;
     ret = yarp::os::Property::copyPortable(response.get(3), intrinsic);
-    if (!response.get(4).isNull()) {
+    if (!response.get(4).isNull())
+    {
         yarp::os::Property& p = intrinsic.addGroup("right");
         ret &= yarp::os::Property::copyPortable(response.get(4), p);
         return ret;
@@ -158,7 +164,8 @@ bool RgbVisualParams_Forwarder::getRgbMirroring(bool& mirror)
     cmd.addVocab32(VOCAB_GET);
     cmd.addVocab32(VOCAB_MIRROR);
     m_port.write(cmd, response);
-    if ((response.get(0).asVocab32()) == VOCAB_FAILED) {
+    if ((response.get(0).asVocab32()) == VOCAB_FAILED)
+    {
         return false;
     }
     mirror = response.get(3).asBool();

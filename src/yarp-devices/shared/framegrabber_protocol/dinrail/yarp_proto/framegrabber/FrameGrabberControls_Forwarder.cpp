@@ -15,11 +15,8 @@
 
 using dinrail::yarp_proto::framegrabber::FrameGrabberControls_Forwarder;
 
-FrameGrabberControls_Forwarder::FrameGrabberControls_Forwarder(yarp::os::Port& m_port) :
-        m_port(m_port)
-{
-};
-
+FrameGrabberControls_Forwarder::FrameGrabberControls_Forwarder(yarp::os::Port& m_port)
+    : m_port(m_port) {};
 
 bool FrameGrabberControls_Forwarder::getCameraDescription(CameraDescriptor* camera)
 {

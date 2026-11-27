@@ -13,10 +13,10 @@
 #include <yarp/dev/IDepthVisualParams.h>
 #include <yarp/os/Port.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
-class DepthVisualParams_Forwarder :
-        public yarp::dev::IDepthVisualParams
+class DepthVisualParams_Forwarder : public yarp::dev::IDepthVisualParams
 {
 private:
     yarp::os::Port& m_port;

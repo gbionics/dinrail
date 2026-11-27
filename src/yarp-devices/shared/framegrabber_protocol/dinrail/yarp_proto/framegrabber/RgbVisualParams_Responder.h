@@ -13,13 +13,13 @@
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IRgbVisualParams.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
-class RgbVisualParams_Responder :
-        public yarp::dev::DeviceResponder
+class RgbVisualParams_Responder : public yarp::dev::DeviceResponder
 {
 private:
-    yarp::dev::IRgbVisualParams* iRgbVisual {nullptr};
+    yarp::dev::IRgbVisualParams* iRgbVisual{nullptr};
 
 public:
     RgbVisualParams_Responder() = default;

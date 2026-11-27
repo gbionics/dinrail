@@ -13,14 +13,14 @@
 #include <yarp/dev/IFrameGrabberControls.h>
 #include <yarp/os/Port.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
 /**
  * This classes implement a sender / parser for IFrameGrabberControls
  * interface messages
  */
-class FrameGrabberControls_Forwarder :
-        public yarp::dev::IFrameGrabberControls
+class FrameGrabberControls_Forwarder : public yarp::dev::IFrameGrabberControls
 {
 private:
     yarp::os::Port& m_port;
@@ -49,8 +49,7 @@ private:
     bool setCommand(int code, double v);
     bool setCommand(int code, double b, double r);
     double getCommand(int code) const;
-    bool getCommand(int code, double &b, double &r) const;
-
+    bool getCommand(int code, double& b, double& r) const;
 };
 
 } // namespace dinrail::yarp_proto::framegrabber

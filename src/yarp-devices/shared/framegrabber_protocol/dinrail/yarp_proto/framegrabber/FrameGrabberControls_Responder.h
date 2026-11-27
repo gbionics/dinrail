@@ -13,10 +13,10 @@
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IFrameGrabberControls.h>
 
-namespace dinrail::yarp_proto::framegrabber {
+namespace dinrail::yarp_proto::framegrabber
+{
 
-class FrameGrabberControls_Responder :
-        public yarp::dev::DeviceResponder
+class FrameGrabberControls_Responder : public yarp::dev::DeviceResponder
 {
 private:
     yarp::dev::IFrameGrabberControls* fgCtrl;
