@@ -18,10 +18,9 @@ add_dependencies(harness_device_rgbd_nws_nwc_yarp
 )
 add_test(NAME harness_device_rgbd_nws_nwc_yarp COMMAND harness_device_rgbd_nws_nwc_yarp)
 
-# The dinrail YARP devices are found in the build tree, the YARP ones (fakeDepthCamera,
-# RGBDSensorClient) in the YARP installation.
-get_filename_component(_yarp_prefix "${YARP_DIR}/../../.." ABSOLUTE)
+# As the other tests of the YARP devices, the plugins are found in the installation prefix, where
+# also YARP is installed. The dinrail devices are found next to the dinrail library.
 set_tests_properties(harness_device_rgbd_nws_nwc_yarp
   PROPERTIES
-    ENVIRONMENT "YARP_DATA_DIRS=${CMAKE_BINARY_DIR}/share/yarp:${_yarp_prefix}/share/yarp;DINRAIL_PLUGIN_PATH=$<TARGET_FILE_DIR:dinrail-device-dr_rgbd_fake>"
+    ENVIRONMENT "YARP_DATA_DIRS=${CMAKE_INSTALL_PREFIX}/share/yarp"
 )
