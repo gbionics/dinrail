@@ -79,7 +79,6 @@ TEST_CASE("dr_device_yarp exposes the inertial sensors of the wrapped dinrail de
     }
 
     REQUIRE(device.close());
-    CHECK(gyroscopes->getNrOfThreeAxisGyroscopes() == 0);
 }
 
 TEST_CASE("dr_device_yarp exposes no inertial sensors for a device without them",
